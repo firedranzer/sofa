@@ -12,6 +12,13 @@ if( CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR )
   link_directories(${LLVM_PATH}/lib)
   include_directories(${LLVM_PATH}/include)
 
+  link_directories(${LLVM_PATH}/../src/tools/clang/lib)
+  include_directories(${LLVM_PATH}/../src/tools/clang/include)
+
+  link_directories(${LLVM_PATH}/../src/lib)
+  include_directories(${LLVM_PATH}/../src/include)
+
+
   add_definitions(
     -D__STDC_LIMIT_MACROS
     -D__STDC_CONSTANT_MACROS
@@ -47,7 +54,7 @@ endif()
 
 # Clang dependencies.
 target_link_libraries(stylecheck.exe
-  clangTooling 
+  clangTooling
   clangFrontend
   clangSerialization
   clangDriver
@@ -58,7 +65,7 @@ target_link_libraries(stylecheck.exe
   clangBasic
   clangEdit
   clangLex
-  clangASTMatchers 
+  clangASTMatchers
   clang
 )
 

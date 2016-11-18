@@ -1,7 +1,7 @@
 #ifndef UTILSLLVM_HPP__
 #define UTILSLLVM_HPP__
 
-#include "clang/Frontend/FrontendActions.h"
+/*#include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 #include "llvm/Support/CommandLine.h"
@@ -18,7 +18,7 @@
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/ASTUnit.h"
 #include "clang/Parse/ParseAST.h"
-
+*/
 
 bool exclude(const clang::SourceManager& srcMgr, const clang::Decl *decl);
 bool exclude(const clang::SourceManager& srcMgr, const clang::Stmt *stmt);

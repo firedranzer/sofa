@@ -1,5 +1,3 @@
-
-#include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 #include "clang/AST/ASTContext.h"
@@ -65,8 +63,7 @@ cl::opt<QualityLevel> qualityLevel(cl::desc("Choose the level of conformance sty
   cl::values(
     clEnumVal(Q0, "Emits warnings about style violation from the mandatory guidelines."),
     clEnumVal(Q1, "Emits warnings about style violation from the recommanded guidelines."),
-    clEnumVal(Q2, "Emits warnings about style quality and advices."),
-   clEnumValEnd),
+    clEnumVal(Q2, "Emits warnings about style quality and advices.")),
    cl::init(Q0), cl::cat(MyToolCategory));
 
 bool isAnExecParam(const string& path)
@@ -159,7 +156,7 @@ void printErrorV1(const string& filename, const int line, const int col, const s
     cerr << " In addition, if they're initialized after having been declared, there is a risk that someone later inadvertently deletes " << endl ;
     cerr << " or moves the line where they're given a value. " << endl ;
     cerr << " Finally when instantiating a class or structure, you pay the cost of a constructor call, whether it is the default one or user-provided. " << endl ;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl  << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl  << endl ;
 }
 
 
@@ -168,7 +165,7 @@ void printErrorN1(const string& filename, const int line, const int col, const s
         return ;
     cerr << filename << ":" << line << ":" << col <<  ": warning: namespace [" << nsname << "] is violating the sofa coding style rules N1. " << endl ;
     cerr << " By convention, all namespaces must be in lowercase.' " << endl;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl  << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl  << endl ;
 }
 
 
@@ -177,7 +174,7 @@ void printErrorC1(const string& filename, const int line, const int col, const s
         return ;
     cerr << filename << ":" << line << ":" << col <<  ": warning: function member [" << classname << ":" << name << "] is violating the sofa coding style rule C1. " << endl ;
     cerr << " To keep compilation time between acceptable limits it is adviced that headers contains only declaration (i.e.: no body)" <<  endl ;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl ;
     cerr << " Suggested replacements to remove this warning: " << endl ;
     cerr << "     - if the function's body can be rewritten in a single line of source code, then do it " << endl;
     cerr << "     - otherwise move the body of the function "<< name << " into a a .cpp file" << endl << endl ;
@@ -188,7 +185,7 @@ void printErrorC2(const string& filename, const int line, const int col, const s
         return ;
     cerr << filename << ":" << line << ":" << col <<  ": warning: function member [" << classname << ":" << name << "] is violating the sofa coding style rule C2. " << endl ;
     cerr << " By convention, all functions names should use lowerCamlCase without underscore '_' " << endl ;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl << endl ;
 }
 
 void printErrorM1(const string& filename, const int line, const int col, const string& classname, const string& name){
@@ -196,7 +193,7 @@ void printErrorM1(const string& filename, const int line, const int col, const s
         return ;
     cerr << filename << ":" << line << ":" << col <<  ": warning: member [" << classname << ":" << name << "] is violating the sofa coding style rule M1. " << endl ;
     cerr << " Data fields are importants concept in Sofa, to emphasize this fact that they are not simple membre variable they should all be prefixed with d_" << endl;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl ;
     cerr << " Suggested replacement: d_" << name << endl << endl ;
 }
 
@@ -205,7 +202,7 @@ void printErrorM2(const string& filename, const int line, const int col, const s
         return ;
     cerr << filename << ":" << line << ":" << col <<  ": warning: member [" << classname << ":" << name << "] is violating the sofa coding style rule M2. " << endl ;
     cerr << " DataLink are importants concept in Sofa, to emphasize this fact that they are not simple membre variable they should all be prefixed with l_" << endl;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl << endl  ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl << endl  ;
     cerr << " Suggested replacement: s_" << name << endl << endl ;
 }
 
@@ -214,7 +211,7 @@ void printErrorM3(const string& filename, const int line, const int col, const s
         return ;
     cerr << filename << ":" << line << ":" << col <<  ": warning: member [" << classname << ":" << name << "] is violating the sofa coding style rule M3. " << endl ;
     cerr << " To emphasize attributes membership of a class they should all be prefixed with m_" << endl;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl  ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl  ;
     cerr << " Suggested replacement: m_" << name << endl << endl ;
 }
 
@@ -223,7 +220,7 @@ void printErrorM4(const string& filename, const int line, const int col, const s
         return ;
     cerr << filename << ":" << line << ":" << col <<  ": warning: class [" << classname << "] is violating the sofa coding style rules M4. " << endl ;
     cerr << " By convention, all classes name must be in UpperCamlCase without any underscores '_'.' " << endl;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl  << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl  << endl ;
 }
 
 void printErrorM5(const string& filename, const int line, const int col, const string& classname, const string& name){
@@ -231,7 +228,7 @@ void printErrorM5(const string& filename, const int line, const int col, const s
         return ;
     cerr << filename << ":" << line << ":" << col <<  ": warning: member [" << classname << ": " << name << "] is violating the sofa coding style rules M5. " << endl ;
     cerr << " To avoid confusion with other coding-style a member's name cannot by terminated by an underscore '_'. " << endl;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl  << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl  << endl ;
 }
 
 void printErrorW1(const string& filename, const int line, const int col){
@@ -242,7 +239,7 @@ void printErrorW1(const string& filename, const int line, const int col){
     cerr << " Recommendation: use a break statement or a continue statement as much as possible." << endl ;
     cerr << " If the goto is used to exit mutliple nested loop and if using a non-goto version leads to a large " << endl ;
     cerr << " increase of code complexity/number of line then it can be kept this way. " << endl ;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl  << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl  << endl ;
 }
 
 void printErrorW2(const string& filename, const int line, const int col, const std::string& oldfct, const std::string& newfct){
@@ -252,7 +249,7 @@ void printErrorW2(const string& filename, const int line, const int col, const s
     cerr << " Sofa is a C++ project and thus the C++ standard library should be used. Nevertheless not being strictly forbidden " << endl ;
     cerr << " mixing C and C++ libraries or coding style is considered a poor practice so please avoid it." << endl ;
     cerr << " Suggestion: instead of ["<< oldfct <<"] you should use [" << newfct << "]" << endl ;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl  << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl  << endl ;
 }
 
 void printErrorW3(const string& filename, const int line, const int col, const std::string& nsname){
@@ -263,7 +260,7 @@ void printErrorW3(const string& filename, const int line, const int col, const s
     cerr << " Suggestion to remove this warning: remove the line 'using namespace " << nsname << ";'' and fix all subsequent problems by compiling sofa." << endl ;
     cerr << " If namespaces are long and impact readability please consider using typedef to create type alias on the one type that have a too long name. " << endl ;
     cerr << " eg: .typedef super::long::and::ugly::namespace::MyType MyType ;" << endl ;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl  << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl  << endl ;
 }
 
 void printErrorW4(const string& filename, const int line, const int col, const std::string& type, const std::string& nsname){
@@ -272,7 +269,7 @@ void printErrorW4(const string& filename, const int line, const int col, const s
     cerr << filename << ":" << line << ":" << col <<  ": warning: parameter ["<< type << " " << nsname << "] is violating the sofa coding style W4. " << endl ;
     cerr << " To avoid problems when implementing visitors, it has been decieded that ExecParams and MechanicalParams cannot have a default value. " << endl ;
     cerr << " Suggestion: remove the default value for the parameter ["<< type << " " << nsname << "] ;" << endl ;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl  << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl  << endl ;
 }
 
 void printErrorW5(const string& filename, const int line, const int col, const std::string& type, const std::string& nsname){
@@ -281,7 +278,7 @@ void printErrorW5(const string& filename, const int line, const int col, const s
     cerr << filename << ":" << line << ":" << col <<  ": warning: the parameter ["<< type << " " << nsname << "] is violating the sofa coding style W5 " << endl ;
     cerr << " To avoid problems when implementing visitors, it has been decieded that ExecParams and MechanicalParams must be the first parameter of methods. " << endl ;
     cerr << " Suggestion: move the parameter [" << type << " " << nsname << "] to make it the first parameter;" << endl ;
-    cerr << " You can found the complete Sofa coding guidelines at: http://www.sofa-framework.com/codingstyle/coding-guide.html" << endl  << endl ;
+    cerr << " You can found the complete Sofa coding guidelines at: https://github.com/sofa-framework/sofa/blob/master/GUIDELINES.md" << endl  << endl ;
 }
 
 
