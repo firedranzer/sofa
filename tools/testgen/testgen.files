@@ -3,6 +3,7 @@ fileutils.h
 myclass.h
 testgen.cpp
 test1.cpp
+test1.h
 utilsllvm.cpp
 utilsllvm.h
 Makefile

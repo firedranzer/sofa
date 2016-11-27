@@ -58,15 +58,15 @@ cl::opt<bool> verbose("v", cl::desc("Set verbose mode"), cl::init(false), cl::ca
 cl::opt<int> numberofincludes("n", cl::desc("Number of include files before a warning is emited [default is 40]"), cl::init(40), cl::cat(MyToolCategory));
 
 enum QualityLevel {
-  Q0, Q1, Q2
+    Q0, Q1, Q2
 };
 
 cl::opt<QualityLevel> qualityLevel(cl::desc("Choose the level of conformance stylecheck will use (default is Q0):"),
-  cl::values(
-    clEnumVal(Q0, "Emits warnings about style violation from the mandatory guidelines."),
-    clEnumVal(Q1, "Emits warnings about style violation from the recommanded guidelines."),
-    clEnumVal(Q2, "Emits warnings about style quality and advices.")),
-   cl::init(Q0), cl::cat(MyToolCategory));
+                                   cl::values(
+                                       clEnumVal(Q0, "Emits warnings about style violation from the mandatory guidelines."),
+                                       clEnumVal(Q1, "Emits warnings about style violation from the recommanded guidelines."),
+                                       clEnumVal(Q2, "Emits warnings about style quality and advices.")),
+                                   cl::init(Q0), cl::cat(MyToolCategory));
 
 bool isAnExecParam(const string& path)
 {
@@ -302,12 +302,37 @@ public:
         Context=ctx;
     }
 
+//    bool TraverseStmt(Stmt* s){
+//        std::cout << "================Traverse STMT " << std::endl;
+//        s->dump();
+//        return true;
+//    }
+
+    bool VisitCallExpr(CallExpr *CallE) {
+        if(CallE==nullptr)
+            return true;
+        Decl *D = CallE->getCalleeDecl();
+
+        FunctionDecl *FD = CallE->getDirectCallee();
+        if(FD==nullptr)
+            return true;
+        std::string fname = FD->getNameInfo().getAsString();
+        std::cout << "VISIING A CALLEEXPR: " << fname <<std::endl;
+
+        if(fname == "func") {
+
+        }
+        return true;
+    }
+
     bool VisitStmt(Stmt* stmt){
         if(Context == NULL )
             return true ;
 
         if( stmt == NULL )
             return true ;
+
+
 
         FullSourceLoc FullLocation = Context->getFullLoc(stmt->getLocStart()) ;
         if ( !FullLocation.isValid() || exclude(FullLocation.getManager() , stmt) )
@@ -363,6 +388,10 @@ public:
             FunctionDecl* fctdecl=callexpr->getDirectCallee() ;
             if(fctdecl){
                 const string& fctname = fctdecl->getNameAsString() ;
+                if(fctname=="initData"){
+                    std::cout << "Got IT" << std::endl ;
+                }
+                std::cout << "YOLO: " << fctname << std::endl ;
                 for(auto p : oldccode)
                 {
                     if(fctname == p.first){
@@ -382,6 +411,7 @@ public:
                     }
                 }
             }
+        }else{
         }
 
         return true ;
@@ -429,22 +459,22 @@ public:
 
         UsingDirectiveDecl* udecl = dyn_cast<UsingDirectiveDecl>(decl) ;
         if(udecl){
-             auto& smanager = Context->getSourceManager() ;
-             SourceRange sr=decl->getSourceRange() ;
-             SourceLocation sl=sr.getBegin();
-             auto fileinfo=smanager.getFileEntryForID(smanager.getFileID(sl)) ;
-             string nsname = udecl->getNominatedNamespaceAsWritten()->getName() ;
+            auto& smanager = Context->getSourceManager() ;
+            SourceRange sr=decl->getSourceRange() ;
+            SourceLocation sl=sr.getBegin();
+            auto fileinfo=smanager.getFileEntryForID(smanager.getFileID(sl)) ;
+            string nsname = udecl->getNominatedNamespaceAsWritten()->getName() ;
 
-             if(fileinfo==NULL || isInExcludedPath(fileinfo->getName(), excludedPathPatterns))
-                 return true ;
+            if(fileinfo==NULL || isInExcludedPath(fileinfo->getName(), excludedPathPatterns))
+                return true ;
 
-             if(isInHeader(fileinfo->getName()) ){
+            if(isInHeader(fileinfo->getName()) ){
                 printErrorW3(fileinfo->getName(),
                              smanager.getPresumedLineNumber(sl),
                              smanager.getPresumedColumnNumber(sl),
                              nsname);
-             }
-             return true ;
+            }
+            return true ;
 
         }
 
@@ -474,7 +504,7 @@ public:
             // Check the class name.
             // it should be in writtent in UpperCamlCase
             string classname=record->getNameAsString();
-
+            std::cout << "NOW PROCESSING CLASS: " << classname << std::endl ;
             if(!isUpperCamlCase(classname)){
                 SourceRange declsr=record->getMostRecentDecl()->getSourceRange() ;
                 SourceLocation sl=declsr.getBegin();
@@ -501,31 +531,53 @@ public:
 
                     if(fileinfo!=NULL && !isInExcludedPath(fileinfo->getName(), excludedPathPatterns))
                     {
+
+                        Stmt* body=(*f)->getBody();
+
                         // Rules C1: check that a function definition is not in a body.
                         if((*f)->hasBody())
                         {
-                            Stmt* body=(*f)->getBody();
 
                             SourceRange bodysr=body->getSourceRange() ;
                             SourceLocation bodysl=bodysr.getBegin();
                             SourceLocation bodyend=bodysr.getEnd();
                             auto fileinfobody = smanager.getFileEntryForID(smanager.getFileID(bodysl)) ;
 
+                            if(CXXConstructorDecl::classof(*f)){
+                                std::cout << " Processing: " << f->getNameAsString() << std::endl ;
+
+                                f->dumpColor();
+                                CXXConstructorDecl* ctordecl=dyn_cast<CXXConstructorDecl>(*f);
+
+                                for(auto init=ctordecl->init_begin(); init!=ctordecl->init_end(); ++init){
+                                    std::cout << "INIT: " <<  std::endl ;
+                                }
+
+                                CompoundStmt* compstmt=dyn_cast<CompoundStmt>(body) ;
+                                for(auto cs=compstmt->body_begin(); cs!=compstmt->body_end();++cs) {
+                                    Stmt* stc = *cs;
+                                    stc->dump();
+                                    std::cout << "CHILDREN..." << std::endl ;
+                                }
+                                std::cout << " end of processing" << std::endl ;
+                            }
+
+
                             if(fileinfobody
                                     && isInHeader(fileinfobody->getName())
                                     && smanager.getPresumedLineNumber(bodyend)- smanager.getPresumedLineNumber(bodysl) > 1 ){
-                               printErrorC1(fileinfo->getName(), smanager.getPresumedLineNumber(sl), smanager.getPresumedColumnNumber(sl),
-                                           record->getNameAsString(), f->getNameAsString());
+                                printErrorC1(fileinfo->getName(), smanager.getPresumedLineNumber(sl), smanager.getPresumedColumnNumber(sl),
+                                             record->getNameAsString(), f->getNameAsString());
                             }
                         }
 
                         // Rules C2: check that a method name is following a LowerCamlCase mode
                         if(!isLowerCamlCase(f->getNameAsString())
-                           && !f->isCopyAssignmentOperator()
-                           && !f->isMoveAssignmentOperator()
-                           && !CXXConstructorDecl::classof(*f)
-                           && !CXXDestructorDecl::classof(*f)
-                           && !f->isOverloadedOperator())
+                                && !f->isCopyAssignmentOperator()
+                                && !f->isMoveAssignmentOperator()
+                                && !CXXConstructorDecl::classof(*f)
+                                && !CXXDestructorDecl::classof(*f)
+                                && !f->isOverloadedOperator())
                         {
                             printErrorC2(fileinfo->getName(), smanager.getPresumedLineNumber(sl), smanager.getPresumedColumnNumber(sl),
                                          record->getNameAsString(), f->getNameAsString());
@@ -537,7 +589,7 @@ public:
                             string fullname=(*p)->getOriginalType().getCanonicalType().getAsString() ;
                             if(isAnExecParam(fullname)){
                                 if( (*p)->hasUnparsedDefaultArg() ||
-                                    (*p)->hasDefaultArg() ){
+                                        (*p)->hasDefaultArg() ){
                                     printErrorW4(fileinfo->getName(), smanager.getPresumedLineNumber(sl), smanager.getPresumedColumnNumber(sl),
                                                  fullname, (*p)->getName());
                                 }
@@ -555,6 +607,7 @@ public:
             // Now check the attributes...
             RecordDecl::field_iterator it=record->field_begin() ;
             for(;it!=record->field_end();it++){
+                std::cout << "ICICI" << std::endl;
                 clang::FieldDecl* ff=*it;
 
                 SourceRange declsr=ff->getMostRecentDecl()->getSourceRange() ;
@@ -587,14 +640,16 @@ public:
 
                 /// THESES TWO RULES ARE NOW DEPRECATED BUT I KEEP THEM FOR HISTORY REASON
                 // THE FOLLOWING RULES ARE ONLY CHECK ON PRIVATE & PROTECTED FIELDS
-                if(ff->getAccess()==AS_public){
-                    continue ;
-                }
+                //if(ff->getAccess()==AS_public){
+                //    continue ;
+                //}
 
                 CXXRecordDecl* rd=ff->getType()->getAsCXXRecordDecl() ;
                 if(rd){
                     std::string type=rd->getNameAsString() ;
+                    std::cout << "MINCE" << std::endl ;
                     if(type.find("Data")!=std::string::npos){
+                        std::cout << "THIS CLASS IS A SOFA COMPONENT " << std::endl ;
                         if(name.find("d_")==0){
                         }else{
                             printErrorM1(filename, line, col,

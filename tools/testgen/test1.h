@@ -1,12 +1,13 @@
 #ifndef MYCLASS_H__
 #define MYCLASS_H__
+class BaseData
+{};
 
 template<class T>
-class Data
+class Data : public BaseData
 {
 private:
-    T* t;
-
+    T* m_t;
 } ;
 
 template<class T>
@@ -33,72 +34,27 @@ private:
 
 } ;
 
-namespace sofa{
-	namespace core{
-		class ExecParams {} ;
-		class MechanicalParams {} ;		
-	}
-}
 
-namespace validnamespaceWithoutUsing {
-	namespace InvalidNamespace{
-	}
-}
-
-using namespace std ; // Interdit
-using namespace validnamespaceWithoutUsing ; 
 
 namespace sofa{
-class MyClass
+class BaseObject
 {
-	public:
-		MyClass(){}
 
-		int functionInvalid(){ return 0; }
+};
 
-		int FunctionINVALID() ;
-		int functionVALID() ; 
+class MyClass : public BaseObject
+{
+    public:
+        MyClass()
+        {
+            initData(&d_position, "position");
+        }
 
-        int publicposition ;
+        void initData(BaseData* b, const std::string& s){}
 
-        Data<int> 			d_DatafieldVALID ;
-        SingleLink<int> 		d_SinglelinkVALID ;
-
-        DualLink<int> 			d_DuallinkVALID ;
-        OtherType<int> 			m_OthertypeVALID ;
-
-	void* 				m_voidpointerVALID ;
-	int* 				m_intpointerVALID ;
-
-        int 				privatepositionINVALID ;
-        int 				m_privatepositionVALID ;
-        Data<int> 			private_datafieldINVALID ;
-        SingleLink<int> 		private_singlelinkINVALID ;
-        DualLink<int> 			private_duallinkINVALID ;
-        OtherType<int> 			private_othertypeINVALID ;
-
-	void* 				private_voidpointerINVALID;
-	int* 				private_intpointerINVALID;
-
-	bool 				invalidBooleanINVALID;
-	bool 				m_isAValidBooleanVALID;
-
-	void addDForce(core::ExecParams* param) ;
-	void addDForce(sofa::core::MechanicalParams* param) ;
-	void addDForceInvalid(core::ExecParams* param=NULL) ;
-	void addDForceInvalid(sofa::core::MechanicalParams* param=NULL) ;
-	void addDForceInvalid(int x, core::ExecParams* param) ;
+        Data<int> 			d_position ;
 };
 }
-
-class myInvalidClass
-{
-};
-
-class MyInvalid_Class
-{
-};
-
 
 
 #endif // MCLASS_H__

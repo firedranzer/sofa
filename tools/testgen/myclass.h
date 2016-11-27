@@ -1,8 +1,11 @@
 #ifndef MYCLASS_H__
 #define MYCLASS_H__
 
+class BaseData
+{};
+
 template<class T>
-class Data
+class Data : public BaseData
 {
 private:
     T* t;
@@ -36,34 +39,18 @@ private:
 using namespace std;
 class MyClass
 {
-	public:
-		MyClass(){}
-		int use(){return 0; }
-        int publicposition ;
+    public:
+        MyClass(){
+            initData(&public_datafieldVALID, "name");
+        }
 
-        Data<int> public_datafieldVALID ;
-        SingleLink<int> public_singlelinkVALID ;
+        template<class T>
+        void initData(BaseData* bd, const std::string& name) ;
+        int use(){return 0; }
 
-        DualLink<int> public_duallinkVALID ;
-        OtherType<int> public_othertypeVALID ;
+        Data<int> d_test ;
 
-	void* public_voidpointerVALID ;
-	int* public_intpointerVALID ;
-
-	int othercodingstyleINVALID_;
     private:
-        int privatepositionINVALID ;
-        int m_privatepositionVALID ;
-        Data<int> private_datafieldINVALID ;
-        SingleLink<int> private_singlelinkINVALID ;
-        DualLink<int> private_duallinkINVALID ;
-        OtherType<int> private_othertypeINVALID ;
-
-	void* private_voidpointerINVALID;
-	int* private_intpointerINVALID;
-
-	bool invalidBooleanINVALID;
-	bool bValidBooleanVALID;
 };
 
 
