@@ -1,6 +1,6 @@
 /******************************************************************************
 *       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2016 INRIA, USTL, UJF, CNRS, MGH                    *
+*                (c) 2006-20ll6 INRIA, USTL, UJF, CNRS, MGH                    *
 *                                                                             *
 * This library is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -18,68 +18,73 @@
 *******************************************************************************
 *                               SOFA :: Modules                               *
 *                                                                             *
-* Authors: The SOFA Team and external contributors (see Authors.txt)          *
+* This component is open-source                                               *
+*                                                                             *
+* Contributors:                                                               *
+*       - damien.marchal@univ-lille1.fr                                       *
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_OGLGRID_H
-#define SOFA_OGLGRID_H
-#include "config.h"
-
-#include <sofa/core/visual/VisualModel.h>
+/*****************************************************************************
+* User of this library should read the documentation
+* in the messaging.h file.
+******************************************************************************/
+#include <sofa/helper/logging/RoutingMessageHandler.h>
 
 namespace sofa
 {
-
-namespace component
+namespace helper
+{
+namespace logging
+{
+namespace routingmessagehandler
 {
 
-namespace visualmodel
+void RoutingMessageHandler::process(Message& m)
 {
+    for(auto& f : m_filters)
+    {
+        if(f.first(m))
+        {
+            f.second->process(m) ;
+        }
+    }
+}
 
-class OglGrid : public core::visual::VisualModel
+RoutingMessageHandler::RoutingMessageHandler()
 {
-public:
-    SOFA_CLASS(OglGrid, VisualModel);
+}
 
-    typedef sofa::defaulttype::Vector3 Vector3;
+void RoutingMessageHandler::setAFilter(FilterFunction f, MessageHandler* handler)
+{
+    m_filters.push_back(std::make_pair(f, handler));
+}
 
-    enum PLANE {PLANE_X, PLANE_Y, PLANE_Z};
+void RoutingMessageHandler::removeAllFilters()
+{
+    m_filters.clear();
+}
 
-    Data<std::string> plane;
-    PLANE internalPlane;
+RoutingMessageHandler& MainRoutingMessageHandler::getInstance()
+{
+    static RoutingMessageHandler s_instance;
+    return s_instance;
+}
 
-    Data<float> size;
-    Data<int> nbSubdiv;
+void MainRoutingMessageHandler::setAFilter(FilterFunction filter,
+                                           MessageHandler* handler)
+{
+    getInstance().setAFilter(filter, handler);
+}
 
-    Data<sofa::defaulttype::Vec<4, float> > color;
-    Data<float> thickness;
-    Data<bool> draw;
+void MainRoutingMessageHandler::removeAllFilters()
+{
+    getInstance().removeAllFilters() ;
+}
 
-    OglGrid():
-        plane(initData(&plane, std::string("z"),  "plane", "Plane of the grid")),
-        size(initData(&size, 10.0f,  "size", "Size of the squared grid")),
-        nbSubdiv(initData(&nbSubdiv, 16,  "nbSubdiv", "Number of subdivisions")),
-        //TODO FIXME because of: https://github.com/sofa-framework/sofa/issues/64
-        //This field should support the color="red" api.
-        color(initData(&color, sofa::defaulttype::Vec<4, float>(0.34117647058f,0.34117647058f,0.34117647058f,1.0f),  "color", "Color of the lines in the grid")),
-        thickness(initData(&thickness, 1.0f,  "thickness", "Thickness of the lines in the grid")),
-        draw(initData(&draw, true,  "draw", "Display the grid or not"))
-    {}
 
-    virtual void init();
-    virtual void reinit();
-    virtual void drawVisual(const core::visual::VisualParams*);
-    virtual void updateVisual();
+} // loggingmessagehandler
+} // logging
+} // helper
+} // sofa
 
-protected:
-
-};
-
-} // namespace visualmodel
-
-} // namespace component
-
-} // namespace sofa
-
-#endif //SOFA_OGLGRID_H
