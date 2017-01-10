@@ -1,6 +1,1 @@
 This is a dummy file to artificially push commits and test ci...
-
-This time with a webhook ?
-
-ok. one more with linux slave 1... and slave 2
-Ok, build works. Now testing ccache... ubuntu test
