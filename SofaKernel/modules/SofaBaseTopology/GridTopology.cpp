@@ -55,6 +55,7 @@ void GridTopology::GridUpdate::update()
 {
     updateEdges();
     updateQuads();
+    updateTriangles();
     updateHexas();
 }
 
@@ -82,6 +83,23 @@ void GridTopology::GridUpdate::updateEdges()
             for (int x=0; x<n[0]; x++)
                 edges.push_back(Edge(topology->point(x,y,z),topology->point(x,y,z+1)));
     topology->seqEdges.endEdit();
+}
+
+void GridTopology::GridUpdate::updateTriangles()
+{
+    // base on quads
+    const SeqQuads& quads = topology->seqQuads.getValue();
+    SeqTriangles& triangles = *topology->seqTriangles.beginEdit();
+    triangles.clear();
+    triangles.reserve(quads.size()*2);
+
+    for (unsigned int i=0; i<quads.size(); ++i)
+    {
+        triangles.push_back(Triangle(quads[i][0], quads[i][1], quads[i][2]));
+        triangles.push_back(Triangle(quads[i][0], quads[i][2], quads[i][3]));
+    }
+
+    topology->seqTriangles.endEdit();
 }
 
 void GridTopology::GridUpdate::updateQuads()
@@ -148,6 +166,7 @@ GridTopology::GridTopology()
     , d_computeEdgeList(initData(&d_computeEdgeList, true, "computeEdgeList", "put true if the list of Lines is needed during init"))
     , d_computePointList(initData(&d_computePointList, true, "computePointList", "put true if the list of Points is needed during init"))
     , d_createTexCoords(initData(&d_createTexCoords, (bool)false, "createTexCoords", "If set to true, virtual texture coordinates will be generated using 3D interpolation."))
+    , m_gridDim(GRID_3D)
 {
     setNbGridPoints();
     GridUpdate::SPtr gridUpdate = sofa::core::objectmodel::New<GridUpdate>(this);
@@ -161,11 +180,11 @@ GridTopology::GridTopology(int _nx, int _ny, int _nz)
     , d_computeEdgeList(initData(&d_computeEdgeList, true, "computeEdgeList", "put true if the list of Lines is needed during init"))
     , d_computePointList(initData(&d_computePointList, true, "computePointList", "put true if the list of Points is needed during init"))
     , d_createTexCoords(initData(&d_createTexCoords, (bool)false, "createTexCoords", "If set to true, virtual texture coordinates will be generated using 3D interpolation."))
+    , m_gridDim(GRID_NULL)
 {
-    nbPoints = _nx*_ny*_nz;
-    this->d_n.setValue(Vec3i(_nx,_ny,_nz));
-
     checkGridResolution();
+    GridUpdate::SPtr gridUpdate = sofa::core::objectmodel::New<GridUpdate>(this);
+    this->addSlave(gridUpdate);
 }
 
 GridTopology::GridTopology( Vec3i np )
@@ -175,17 +194,20 @@ GridTopology::GridTopology( Vec3i np )
     , d_computeEdgeList(initData(&d_computeEdgeList, true, "computeEdgeList", "put true if the list of Lines is needed during init"))
     , d_computePointList(initData(&d_computePointList, true, "computePointList", "put true if the list of Points is needed during init"))
     , d_createTexCoords(initData(&d_createTexCoords, (bool)false, "createTexCoords", "If set to true, virtual texture coordinates will be generated using 3D interpolation."))
+    , m_gridDim(GRID_NULL)
 {
-    nbPoints = np[0]*np[1]*np[2];
-    this->d_n.setValue(np);
-
     checkGridResolution();
+    GridUpdate::SPtr gridUpdate = sofa::core::objectmodel::New<GridUpdate>(this);
+    this->addSlave(gridUpdate);
 }
 
 void GridTopology::init()
 {
     // first check resolution
     checkGridResolution();
+
+    if (d_computePointList.getValue())
+        this->computePointList();
 
     if (d_createTexCoords.getValue())
         this->createTexCoords();
@@ -198,9 +220,6 @@ void GridTopology::init()
 
     if (d_computeEdgeList.getValue())
         this->computeEdgeList();
-
-    if (d_computePointList.getValue())
-        this->computePointList();
 
     Inherit1::init();
 }
@@ -223,16 +242,34 @@ void GridTopology::setSize(int nx, int ny, int nz)
 void GridTopology::checkGridResolution()
 {
     const Vec3i& _n = d_n.getValue();
-    if (_n[0] < 2 || _n[1] < 2 || _n[2] < 2)
+
+    int dim = 0;
+    bool badDim = false; // In case one of the dimension is null.
+
+    for (int i=0; i<3; i++)
     {
-        msg_warning(this) << "The grid resolution: ["<< _n[0] << " ; " << _n[1] << " ; " << _n[2] <<
-                             "] is outside the validity range. At least a resolution of 2 is needed in each 3D direction."
-                             " Continuing with default value=[2; 2; 2]."
-                             " Set a valid grid resolution to remove this warning message.";
-        this->d_n.setValue(Vec3i(2,2,2));
-        setNbGridPoints();
-        computePointList();
+        if (_n[i] < 1){
+            badDim = true;
+            break;
+        }
+        else if(_n[i] > 2)
+            dim++;
     }
+
+    m_gridDim = (Grid_dimension)dim;
+
+    if (badDim)
+    {
+        msg_warning() << "The grid resolution: ["<< _n[0] << " ; " << _n[1] << " ; " << _n[2] <<
+                         "] is outside the validity range. At least a resolution of 1 is needed in each 3D direction."
+                         " Continuing with default value=[2; 2; 2]."
+                         " Set a valid grid resolution to remove this warning message.";
+
+        this->d_n.setValue(Vec3i(2,2,2));
+        changeGridResolutionPostProcess();
+    }
+
+    setNbGridPoints();
 }
 
 void GridTopology::setSize(Vec3i n)

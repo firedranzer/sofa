@@ -52,6 +52,15 @@ using MeshTopology::getHexahedron;
     typedef sofa::defaulttype::Vector3 Vector3;
     typedef sofa::defaulttype::ResizableExtVector<Vector2> TextCoords2D;
     friend class GridUpdate;
+
+    typedef enum{
+        GRID_NULL = 0,
+        GRID_1D,
+        GRID_2D,
+        GRID_3D
+    } Grid_dimension;
+
+
 private:
     class GridUpdate : public sofa::core::DataEngine
     {
@@ -65,6 +74,7 @@ private:
     protected:
         void updateEdges();
         void updateQuads();
+        void updateTriangles();
         void updateHexas();
     private:
         GridTopology* topology;
@@ -94,6 +104,9 @@ protected:
 
     /// Method that will check current grid resolution, if invalide, will set default value: [2; 2; 2]
     void checkGridResolution();
+
+    /// Internal Method called by \sa checkGridResolution if resolution need to be changed. Should be overwritten by children.
+    virtual void changeGridResolutionPostProcess(){}
 
 public:
     /// BaseObject method should be overwritten by children
@@ -195,6 +208,9 @@ public:
     Data<bool> d_computeHexaList, d_computeQuadList, d_computeEdgeList, d_computePointList;
     /// Data bool to set option to compute texcoords
     Data<bool> d_createTexCoords;
+
+    /// Enum storing the actual dimension of this grid
+    Grid_dimension m_gridDim;
 };
 
 } // namespace topology
