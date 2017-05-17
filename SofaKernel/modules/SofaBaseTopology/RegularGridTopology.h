@@ -49,12 +49,17 @@ public:
     typedef sofa::defaulttype::BoundingBox BoundingBox;
     SOFA_CLASS(RegularGridTopology,GridTopology);
 protected:
+    /// Delegated constructor.
+    RegularGridTopology(const Vec3i& numVertices ) ;
+
     /// Default constructor
     RegularGridTopology();
-    /// Constructor for regular grid defined using number of vertices
+
+    /// Constructors for regular grid defined using number of vertices
     RegularGridTopology(int nx, int ny, int nz);
+
     /// Constructor for regular grid defined using number of vertices and size
-    RegularGridTopology( Vec3i numVertices, BoundingBox box );
+    RegularGridTopology(const Vec3i& numVertices, BoundingBox box );
 
     virtual void changeGridResolutionPostProcess();
 public:

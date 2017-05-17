@@ -72,35 +72,31 @@ int RegularGridTopologyClass = core::RegisterObject("Regular grid in 3D")
         .add< RegularGridTopology >()
         ;
 
-RegularGridTopology::RegularGridTopology()
-    : GridTopology()
-    , d_min(initData(&d_min,Vector3(0.0f,0.0f,0.0f),"min", "Min end of the diagonal"))
-    , d_max(initData(&d_max,Vector3(1.0f,1.0f,1.0f),"max", "Max end of the diagonal"))
-    , d_p0(initData(&d_p0,Vector3(0.0f,0.0f,0.0f),"p0", "Offset all the grid points"))
-    , d_cellWidth(initData(&d_cellWidth, (SReal)0.0, "cellWidth","if > 0 : dimension of each cell in the created grid. Otherwise, the cell size is computed based on min, max, and resolution n."))
+RegularGridTopology::RegularGridTopology(const Vec3i& numVertices) :
+  GridTopology(numVertices)
+, d_min(initData(&d_min,Vector3(0.0f,0.0f,0.0f),"min", "Min end of the diagonal"))
+, d_max(initData(&d_max,Vector3(1.0f,1.0f,1.0f),"max", "Max end of the diagonal"))
+, d_p0(initData(&d_p0,Vector3(0.0f,0.0f,0.0f),"p0", "Offset all the grid points"))
+, d_cellWidth(initData(&d_cellWidth, (SReal)0.0, "cellWidth","if > 0 : dimension of each cell in the created grid. Otherwise, the cell size is computed based on min, max, and resolution n."))
 {
 }
 
-RegularGridTopology::RegularGridTopology(Vec3i n, BoundingBox b)
-    : GridTopology(n)
-    , d_min(initData(&d_min,Vector3(0.0f,0.0f,0.0f),"min", "Min"))
-    , d_max(initData(&d_max,Vector3(1.0f,1.0f,1.0f),"max", "Max"))
-    , d_p0(initData(&d_p0,Vector3(0.0f,0.0f,0.0f),"p0", "p0"))
-    , d_cellWidth(initData(&d_cellWidth, (SReal)0.0, "cellWidth","if > 0 : dimension of each cell in the created grid"))
+RegularGridTopology::RegularGridTopology()
+    : RegularGridTopology(Vec3i(2,2,2))
+{
+}
 
+RegularGridTopology::RegularGridTopology(int nx, int ny, int nz)
+    : RegularGridTopology(Vec3i(nx,ny,nz))
+{
+}
+
+RegularGridTopology::RegularGridTopology(const Vec3i &n, BoundingBox b)
+    : RegularGridTopology(n)
 {
     setPos(b);
 }
 
-RegularGridTopology::RegularGridTopology(int nx, int ny, int nz)
-    : GridTopology(nx, ny, nz)
-    , d_min(initData(&d_min,Vector3(0.0f,0.0f,0.0f),"min", "Min"))
-    , d_max(initData(&d_max,Vector3(1.0f,1.0f,1.0f),"max", "Max"))
-    , d_p0(initData(&d_p0,Vector3(0.0f,0.0f,0.0f),"p0", "p0"))
-    , d_cellWidth(initData(&d_cellWidth, (SReal)0.0, "cellWidth","if > 0 : dimension of each cell in the created grid"))
-
-{
-}
 
 void RegularGridTopology::init()
 {

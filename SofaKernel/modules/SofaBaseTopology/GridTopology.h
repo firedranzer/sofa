@@ -34,7 +34,7 @@ namespace component
 namespace topology
 {
 
- 
+
 /** \brief
  * Define a regular grid topology, with no spatial information.
   */
@@ -83,10 +83,12 @@ private:
 protected:
     /// Default constructor
     GridTopology();
+
     /// Constructor with grid size by int
     GridTopology(int nx, int ny, int nz);
+
     /// Constructor with grid size by Vec3
-    GridTopology(Vec3i nXnYnZ );
+    GridTopology(const Vec3i& dims );
 
     /// Internal method to set the number of point using grid resolution. Will call \sa MeshTopology::setNbPoints
     virtual void setNbGridPoints();
