@@ -19,8 +19,12 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#define SOFA_CORE_BEHAVIOR_FORCEFIELD_CPP
-#include <sofa/core/behavior/ForceField.inl>
+
+#include "PythonEnvironment.h"
+#include "PythonScriptForceField.h"
+#include <sofa/core/objectmodel/DataFileName.h>
+#include <sofa/core/ObjectFactory.h>
+
 
 namespace sofa
 {
@@ -31,25 +35,48 @@ namespace core
 namespace behavior
 {
 
-using namespace sofa::defaulttype;
+int PythonScriptForceFieldClass = sofa::core::RegisterObject("Python Forcefield")
 #ifdef SOFA_WITH_DOUBLE
-template class SOFA_CORE_API ForceField<Vec3dTypes>;
-template class SOFA_CORE_API ForceField<Vec2dTypes>;
-template class SOFA_CORE_API ForceField<Vec1dTypes>;
-template class SOFA_CORE_API ForceField<Vec6dTypes>;
-template class SOFA_CORE_API ForceField<Rigid3dTypes>;
-template class SOFA_CORE_API ForceField<Rigid2dTypes>;
+        .add< PythonScriptForceField<Vec1dTypes> >()
+//        .add< PythonScriptForceField<Vec2dTypes> >()
+//        .add< PythonScriptForceField<Vec3dTypes> >()
+//        .add< PythonScriptForceField<Vec6dTypes> >()
+//        .add< PythonScriptForceField<Rigid3dTypes> >()
+//        .add< PythonScriptForceField<Rigid2dTypes> >()
 #endif
 #ifdef SOFA_WITH_FLOAT
-template class SOFA_CORE_API ForceField<Vec3fTypes>;
-template class SOFA_CORE_API ForceField<Vec2fTypes>;
-template class SOFA_CORE_API ForceField<Vec1fTypes>;
-template class SOFA_CORE_API ForceField<Vec6fTypes>;
-template class SOFA_CORE_API ForceField<Rigid3fTypes>;
-template class SOFA_CORE_API ForceField<Rigid2fTypes>;
+//        .add< PythonScriptForceField<Vec1fTypes> >()
+//        .add< PythonScriptForceField<Vec2fTypes> >()
+//        .add< PythonScriptForceField<Vec3fTypes> >()
+//        .add< PythonScriptForceField<Vec6fTypes> >()
+//        .add< PythonScriptForceField<Rigid3fTypes> >()
+//        .add< PythonScriptForceField<Rigid2fTypes> >()
 #endif
+        ;
+
+
+using namespace sofa::defaulttype;
+#ifdef SOFA_WITH_DOUBLE
+template class SOFA_CORE_API PythonScriptForceField<Vec1dTypes>;
+//template class SOFA_CORE_API PythonScriptForceField<Vec2dTypes>;
+//template class SOFA_CORE_API PythonScriptForceField<Vec3dTypes>;
+//template class SOFA_CORE_API PythonScriptForceField<Vec6dTypes>;
+//template class SOFA_CORE_API PythonScriptForceField<Rigid3dTypes>;
+//template class SOFA_CORE_API PythonScriptForceField<Rigid2dTypes>;
+#endif
+#ifdef SOFA_WITH_FLOAT
+//template class SOFA_CORE_API PythonScriptForceField<Vec3fTypes>;
+//template class SOFA_CORE_API PythonScriptForceField<Vec2fTypes>;
+//template class SOFA_CORE_API PythonScriptForceField<Vec1fTypes>;
+//template class SOFA_CORE_API PythonScriptForceField<Vec6fTypes>;
+//template class SOFA_CORE_API PythonScriptForceField<Rigid3fTypes>;
+//template class SOFA_CORE_API PythonScriptForceField<Rigid2fTypes>;
+#endif
+
+
 } // namespace behavior
 
 } // namespace core
 
 } // namespace sofa
+

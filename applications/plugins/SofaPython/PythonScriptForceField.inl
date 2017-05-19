@@ -19,37 +19,29 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#define SOFA_CORE_BEHAVIOR_FORCEFIELD_CPP
-#include <sofa/core/behavior/ForceField.inl>
+#ifndef PYTHONFORCEFIELD_H
+#define PYTHONCONTROLLER_H
+
+#include "PythonEnvironment.h"
+#include "PythonScriptForceField.h"
+#include <sofa/core/objectmodel/DataFileName.h>
+
 
 namespace sofa
 {
 
-namespace core
+namespace component
 {
 
-namespace behavior
+namespace forcefield
 {
 
-using namespace sofa::defaulttype;
-#ifdef SOFA_WITH_DOUBLE
-template class SOFA_CORE_API ForceField<Vec3dTypes>;
-template class SOFA_CORE_API ForceField<Vec2dTypes>;
-template class SOFA_CORE_API ForceField<Vec1dTypes>;
-template class SOFA_CORE_API ForceField<Vec6dTypes>;
-template class SOFA_CORE_API ForceField<Rigid3dTypes>;
-template class SOFA_CORE_API ForceField<Rigid2dTypes>;
-#endif
-#ifdef SOFA_WITH_FLOAT
-template class SOFA_CORE_API ForceField<Vec3fTypes>;
-template class SOFA_CORE_API ForceField<Vec2fTypes>;
-template class SOFA_CORE_API ForceField<Vec1fTypes>;
-template class SOFA_CORE_API ForceField<Vec6fTypes>;
-template class SOFA_CORE_API ForceField<Rigid3fTypes>;
-template class SOFA_CORE_API ForceField<Rigid2fTypes>;
-#endif
-} // namespace behavior
 
-} // namespace core
+
+} // namespace controller
+
+} // namespace component
 
 } // namespace sofa
+
+#endif // PYTHONCONTROLLER_H

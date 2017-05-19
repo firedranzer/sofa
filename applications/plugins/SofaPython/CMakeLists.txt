@@ -43,6 +43,7 @@ set(HEADER_FILES
     Binding_Node.h
     Binding_OBJExporter.h
     Binding_PythonScriptController.h
+    Binding_PythonScriptForceField.h
     Binding_RegularGridTopology.h
     Binding_RigidMapping.h
     Binding_SofaModule.h
@@ -63,8 +64,12 @@ set(HEADER_FILES
     PythonVisitor.h
     SceneLoaderPY.h
     ScriptController.h
+    ScriptForceField.h
+    ScriptForceField.inl
     ScriptEvent.h
     ScriptFunction.h
+    PythonScriptForceField.h
+    PythonScriptForceField.inl
 )
 
 set(SOURCE_FILES
@@ -99,6 +104,7 @@ set(SOURCE_FILES
     Binding_Node.cpp
     Binding_OBJExporter.cpp
     Binding_PythonScriptController.cpp
+    Binding_PythonScriptForcefield.cpp
     Binding_RegularGridTopology.cpp
     Binding_RigidMapping.cpp
     Binding_SofaModule.cpp
@@ -116,8 +122,10 @@ set(SOURCE_FILES
     PythonScriptEvent.cpp
     PythonScriptFunction.cpp
     PythonVisitor.cpp
+    PythonScriptForceField.cpp
     SceneLoaderPY.cpp
     ScriptController.cpp
+    ScriptForceField.cpp
     ScriptEvent.cpp
     ScriptFunction.cpp
     initSofaPython.cpp
