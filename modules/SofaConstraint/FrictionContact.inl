@@ -40,21 +40,30 @@ namespace component
 namespace collision
 {
 
+using core::CollisionModel;
+using sofa::core::collision::DetectionOutput;
+using core::objectmodel::BaseContext;
+using sofa::core::objectmodel::TagSet;
+using std::vector;
+using sofa::core::objectmodel::New;
+
+
 template < class TCollisionModel1, class TCollisionModel2, class ResponseDataTypes  >
 FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::FrictionContact(CollisionModel1* model1, CollisionModel2* model2, Intersection* intersectionMethod)
-    : model1(model1)
-    , model2(model2)
-    , intersectionMethod(intersectionMethod)
+    : d_mu (initData(&d_mu, 0.8, "mu", "friction coefficient (0 for frictionless contacts)"))
+    , d_tol (initData(&d_tol, 0.0, "tol", "tolerance for the constraints resolution (0 for default tolerance)"))
+    , m_model1(model1)
+    , m_model2(model2)
+    , m_intersectionMethod(intersectionMethod)
     , m_constraint(NULL)
-    , parent(NULL)
-    , mu (initData(&mu, 0.8, "mu", "friction coefficient (0 for frictionless contacts)"))
-    , tol (initData(&tol, 0.0, "tol", "tolerance for the constraints resolution (0 for default tolerance)"))
+    , m_parent(NULL)
+
 {
-    selfCollision = ((core::CollisionModel*)model1 == (core::CollisionModel*)model2);
-    mapper1.setCollisionModel(model1);
-    if (!selfCollision) mapper2.setCollisionModel(model2);
-    contacts.clear();
-    mappedContacts.clear();
+    m_selfCollision = ((CollisionModel*)model1 == (CollisionModel*)model2);
+    m_mapper1.setCollisionModel(model1);
+    if (!m_selfCollision) m_mapper2.setCollisionModel(model2);
+    m_contacts.clear();
+    m_mappedContacts.clear();
 
 }
 
@@ -70,21 +79,20 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::clean
     {
         m_constraint->cleanup();
 
-        if (parent != NULL)
-            parent->removeObject(m_constraint);
+        if (m_parent != NULL)
+            m_parent->removeObject(m_constraint);
 
-        parent = NULL;
-        //delete m_constraint;
+        m_parent = NULL;
         m_constraint.reset();
 
-        mapper1.cleanup();
+        m_mapper1.cleanup();
 
-        if (!selfCollision)
-            mapper2.cleanup();
+        if (!m_selfCollision)
+            m_mapper2.cleanup();
     }
 
-    contacts.clear();
-    mappedContacts.clear();
+    m_contacts.clear();
+    m_mappedContacts.clear();
 }
 
 
@@ -95,37 +103,36 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::setDe
     // We need to remove duplicate contacts
     const double minDist2 = 0.00000001f;
 
-    contacts.clear();
+    m_contacts.clear();
 
-    if (model1->getContactStiffness(0) == 0 || model2->getContactStiffness(0) == 0)
+    if (m_model1->getContactStiffness(0) == 0 || m_model2->getContactStiffness(0) == 0)
     {
-        serr << "Disabled FrictionContact with " << (outputs.size()) << " collision points." << sendl;
+        msg_error() << "Disabled FrictionContact with " << (outputs.size()) << " collision points.";
         return;
     }
 
-    contacts.reserve(outputs.size());
+    m_contacts.reserve(outputs.size());
 
     int SIZE = outputs.size();
 
-    // the following procedure cancels the duplicated detection outputs
+    // The following procedure cancels the duplicated detection outputs
     for (int cpt=0; cpt<SIZE; cpt++)
     {
-        sofa::core::collision::DetectionOutput* o = &outputs[cpt];
+        DetectionOutput* o = &outputs[cpt];
 
         bool found = false;
-        for (unsigned int i=0; i<contacts.size() && !found; i++)
+        for (unsigned int i=0; i<m_contacts.size() && !found; i++)
         {
-            sofa::core::collision::DetectionOutput* p = contacts[i];
+            DetectionOutput* p = m_contacts[i];
             if ((o->point[0]-p->point[0]).norm2()+(o->point[1]-p->point[1]).norm2() < minDist2)
                 found = true;
         }
 
         if (!found)
-            contacts.push_back(o);
+            m_contacts.push_back(o);
     }
 
-    // DUPLICATED CONTACTS FOUND
-    msg_info_when(contacts.size()<outputs.size()) << "Removed " << (outputs.size()-contacts.size()) <<" / " << outputs.size() << " collision points." << msgendl;
+    msg_info_when(m_contacts.size()<outputs.size()) << "Duplicated contacts found. Removed " << (outputs.size()-m_contacts.size()) <<" / " << outputs.size() << " collision points." << msgendl;
 }
 
 
@@ -135,54 +142,49 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::activ
     if (!m_constraint)
     {
         // Get the mechanical model from mapper1 to fill the constraint vector
-        MechanicalState1* mmodel1 = mapper1.createMapping(GenerateStirngID::generate().c_str());
+        MechanicalState1* mmodel1 = m_mapper1.createMapping(GenerateStirngID::generate().c_str());
         // Get the mechanical model from mapper2 to fill the constraints vector
-        MechanicalState2* mmodel2 = selfCollision ? mmodel1 : mapper2.createMapping(GenerateStirngID::generate().c_str());
-        m_constraint = sofa::core::objectmodel::New<constraintset::UnilateralInteractionConstraint<defaulttype::Vec3Types> >(mmodel1, mmodel2);
+        MechanicalState2* mmodel2 = m_selfCollision ? mmodel1 : m_mapper2.createMapping(GenerateStirngID::generate().c_str());
+        m_constraint = New<constraintset::UnilateralInteractionConstraint<Vec3Types> >(mmodel1, mmodel2);
         m_constraint->setName( getName() );
         setInteractionTags(mmodel1, mmodel2);
-        m_constraint->setCustomTolerance( tol.getValue() );
+        m_constraint->setCustomTolerance( d_tol.getValue() );
     }
 
-    int size = contacts.size();
+    int size = m_contacts.size();
     m_constraint->clear(size);
-    if (selfCollision)
-        mapper1.resize(2*size);
+    if (m_selfCollision)
+        m_mapper1.resize(2*size);
     else
     {
-        mapper1.resize(size);
-        mapper2.resize(size);
+        m_mapper1.resize(size);
+        m_mapper2.resize(size);
     }
     int i = 0;
-    const double d0 = intersectionMethod->getContactDistance() + model1->getProximity() + model2->getProximity(); // - 0.001;
+    const double d0 = m_intersectionMethod->getContactDistance() + m_model1->getProximity() + m_model2->getProximity();
 
-    //std::cout<<" d0 = "<<d0<<std::endl;
-
-    mappedContacts.resize(contacts.size());
-    for (std::vector<sofa::core::collision::DetectionOutput*>::const_iterator it = contacts.begin(); it!=contacts.end(); it++, i++)
+    m_mappedContacts.resize(m_contacts.size());
+    for (vector<DetectionOutput*>::const_iterator it = m_contacts.begin(); it!=m_contacts.end(); it++, i++)
     {
-        sofa::core::collision::DetectionOutput* o = *it;
-        //std::cout<<" collisionElements :"<<o->elem.first<<" - "<<o->elem.second<<std::endl;
+        DetectionOutput* o = *it;
         CollisionElement1 elem1(o->elem.first);
         CollisionElement2 elem2(o->elem.second);
         int index1 = elem1.getIndex();
         int index2 = elem2.getIndex();
-        //std::cout<<" indices :"<<index1<<" - "<<index2<<std::endl;
 
         typename DataTypes1::Real r1 = 0.;
         typename DataTypes2::Real r2 = 0.;
-        //double constraintValue = ((o->point[1] - o->point[0]) * o->normal) - intersectionMethod->getContactDistance();
 
         // Create mapping for first point
-        index1 = mapper1.addPointB(o->point[0], index1, r1
+        index1 = m_mapper1.addPointB(o->point[0], index1, r1
 #ifdef DETECTIONOUTPUT_BARYCENTRICINFO
                 , o->baryCoords[0]
 #endif
                                   );
         // Create mapping for second point
-        if (selfCollision)
+        if (m_selfCollision)
         {
-            index2 = mapper1.addPointB(o->point[1], index2, r2
+            index2 = m_mapper1.addPointB(o->point[1], index2, r2
 #ifdef DETECTIONOUTPUT_BARYCENTRICINFO
                     , o->baryCoords[1]
 #endif
@@ -190,7 +192,7 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::activ
         }
         else
         {
-            index2 = mapper2.addPointB(o->point[1], index2, r2
+            index2 = m_mapper2.addPointB(o->point[1], index2, r2
 #ifdef DETECTIONOUTPUT_BARYCENTRICINFO
                     , o->baryCoords[1]
 #endif
@@ -198,61 +200,56 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::activ
         }
         double distance = d0 + r1 + r2;
 
-        mappedContacts[i].first.first = index1;
-        mappedContacts[i].first.second = index2;
-        mappedContacts[i].second = distance;
+        m_mappedContacts[i].first.first = index1;
+        m_mappedContacts[i].first.second = index2;
+        m_mappedContacts[i].second = distance;
     }
 
     // Update mappings
-    mapper1.update();
-    mapper1.updateXfree();
-    if (!selfCollision) mapper2.update();
-    if (!selfCollision) mapper2.updateXfree();
-
-
-    //msg_info()<<" end activateMappers call"<<std::endl;
-
+    m_mapper1.update();
+    m_mapper1.updateXfree();
+    if (!m_selfCollision) m_mapper2.update();
+    if (!m_selfCollision) m_mapper2.updateXfree();
 }
 
 template < class TCollisionModel1, class TCollisionModel2, class ResponseDataTypes  >
-void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::createResponse(core::objectmodel::BaseContext* group)
+void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::createResponse(BaseContext* group)
 {
 
     activateMappers();
-    const double mu_ = this->mu.getValue();
+    const double mu_ = this->d_mu.getValue();
     // Checks if friction is considered
-    if ( mu_ < 0.0 )
-        serr << sendl << "Error: mu has to take positive values" << sendl;
+    if (mu_ < 0.0)
+        msg_error() << "mu has to take positive value.";
 
     int i=0;
     if (m_constraint)
     {
-        for (std::vector<sofa::core::collision::DetectionOutput*>::const_iterator it = contacts.begin(); it!=contacts.end(); it++, i++)
+        for (vector<DetectionOutput*>::const_iterator it = m_contacts.begin(); it!=m_contacts.end(); it++, i++)
         {
-            sofa::core::collision::DetectionOutput* o = *it;
-            int index1 = mappedContacts[i].first.first;
-            int index2 = mappedContacts[i].first.second;
-            double distance = mappedContacts[i].second;
+            DetectionOutput* o = *it;
+            int index1 = m_mappedContacts[i].first.first;
+            int index2 = m_mappedContacts[i].first.second;
+            double distance = m_mappedContacts[i].second;
 
             // Polynome de Cantor de NxN sur N bijectif f(x,y)=((x+y)^2+3x+y)/2
-            long index = cantorPolynomia(o->id /*cantorPolynomia(index1, index2)*/,id);
+            long index = cantorPolynomia(o->id,m_id);
 
             // Add contact in unilateral constraint
             m_constraint->addContact(mu_, o->normal, distance, index1, index2, index, o->id);
         }
 
-        if (parent!=NULL)
+        if (m_parent!=NULL)
         {
-            parent->removeObject(this);
-            parent->removeObject(m_constraint);
+            m_parent->removeObject(this);
+            m_parent->removeObject(m_constraint);
         }
 
-        parent = group;
-        if (parent!=NULL)
+        m_parent = group;
+        if (m_parent!=NULL)
         {
-            //sout << "Attaching contact response to "<<parent->getName()<<sendl;
-            parent->addObject(this);
-            parent->addObject(m_constraint);
+            m_parent->addObject(this);
+            m_parent->addObject(m_constraint);
         }
     }
 }
@@ -262,24 +259,23 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::remov
 {
     if (m_constraint)
     {
-        mapper1.resize(0);
-        mapper2.resize(0);
-        if (parent!=NULL)
+        m_mapper1.resize(0);
+        m_mapper2.resize(0);
+        if (m_parent!=NULL)
         {
-            //sout << "Removing contact response from "<<parent->getName()<<sendl;
-            parent->removeObject(this);
-            parent->removeObject(m_constraint);
+            m_parent->removeObject(this);
+            m_parent->removeObject(m_constraint);
         }
-        parent = NULL;
+        m_parent = NULL;
     }
 }
 
 template < class TCollisionModel1, class TCollisionModel2, class ResponseDataTypes  >
 void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::setInteractionTags(MechanicalState1* mstate1, MechanicalState2* mstate2)
 {
-    sofa::core::objectmodel::TagSet tagsm1 = mstate1->getTags();
-    sofa::core::objectmodel::TagSet tagsm2 = mstate2->getTags();
-    sofa::core::objectmodel::TagSet::iterator it;
+    TagSet tagsm1 = mstate1->getTags();
+    TagSet tagsm2 = mstate2->getTags();
+    TagSet::iterator it;
     for(it=tagsm1.begin(); it != tagsm1.end(); it++)
         m_constraint->addTag(*it);
     for(it=tagsm2.begin(); it!=tagsm2.end(); it++)
