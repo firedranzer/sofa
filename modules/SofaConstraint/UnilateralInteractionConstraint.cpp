@@ -60,32 +60,32 @@ template class SOFA_CONSTRAINT_API UnilateralInteractionConstraint<Vec3fTypes>;
 
 void UnilateralConstraintResolutionWithFriction::init(int line, double** w, double* force)
 {
-    _W[0]=w[line  ][line  ];
-    _W[1]=w[line  ][line+1];
-    _W[2]=w[line  ][line+2];
-    _W[3]=w[line+1][line+1];
-    _W[4]=w[line+1][line+2];
-    _W[5]=w[line+2][line+2];
-
-//	return;
+    m_W[0]=w[line  ][line  ];
+    m_W[1]=w[line  ][line+1];
+    m_W[2]=w[line  ][line+2];
+    m_W[3]=w[line+1][line+1];
+    m_W[4]=w[line+1][line+2];
+    m_W[5]=w[line+2][line+2];
 
     ////////////////// christian : the following does not work ! /////////
-    if(_prev)
+    if(m_prev)
     {
-        force[line] = _prev->popForce();
-        force[line+1] = _prev->popForce();
-        force[line+2] = _prev->popForce();
+        force[line] = m_prev->popForce();
+        force[line+1] = m_prev->popForce();
+        force[line+2] = m_prev->popForce();
     }
-
 }
 
-void UnilateralConstraintResolutionWithFriction::resolution(int line, double** /*w*/, double* d, double* force, double * /*dfree*/)
+void UnilateralConstraintResolutionWithFriction::resolution(int line, double** w, double* d, double* force, double * dfree)
 {
+    SOFA_UNUSED(w);
+    SOFA_UNUSED(dfree);
+
     double f[2];
     double normFt;
 
     f[0] = force[line]; f[1] = force[line+1];
-    force[line] -= d[line] / _W[0];
+    force[line] -= d[line] / m_W[0];
 
     if(force[line] < 0)
     {
@@ -93,14 +93,14 @@ void UnilateralConstraintResolutionWithFriction::resolution(int line, double** /
         return;
     }
 
-    d[line+1] += _W[1] * (force[line]-f[0]);
-    d[line+2] += _W[2] * (force[line]-f[0]);
-    force[line+1] -= 2*d[line+1] / (_W[3] +_W[5]) ;
-    force[line+2] -= 2*d[line+2] / (_W[3] +_W[5]) ;
+    d[line+1] += m_W[1] * (force[line]-f[0]);
+    d[line+2] += m_W[2] * (force[line]-f[0]);
+    force[line+1] -= 2*d[line+1] / (m_W[3] +m_W[5]) ;
+    force[line+2] -= 2*d[line+2] / (m_W[3] +m_W[5]) ;
 
     normFt = sqrt(force[line+1]*force[line+1] + force[line+2]*force[line+2]);
 
-    double fN = _mu*force[line];
+    double fN = m_mu*force[line];
     if(normFt > fN)
     {
         double factor = fN / normFt;
@@ -109,19 +109,21 @@ void UnilateralConstraintResolutionWithFriction::resolution(int line, double** /
     }
 }
 
-void UnilateralConstraintResolutionWithFriction::store(int line, double* force, bool /*convergence*/)
+void UnilateralConstraintResolutionWithFriction::store(int line, double* force, bool convergence)
 {
-    if(_prev)
+    SOFA_UNUSED(convergence);
+
+    if(m_prev)
     {
-        _prev->pushForce(force[line]);
-        _prev->pushForce(force[line+1]);
-        _prev->pushForce(force[line+2]);
+        m_prev->pushForce(force[line]);
+        m_prev->pushForce(force[line+1]);
+        m_prev->pushForce(force[line+2]);
     }
 
-    if(_active)
+    if(m_active)
     {
-        *_active = (force[line] != 0);
-        _active = NULL; // Won't be used in the haptic thread
+        *m_active = (force[line] != 0);
+        m_active = NULL; // Won't be used in the haptic thread
     }
 }
 

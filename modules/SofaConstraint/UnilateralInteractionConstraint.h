@@ -39,78 +39,84 @@ namespace component
 
 namespace constraintset
 {
+
 class UnilateralConstraintResolution : public core::behavior::ConstraintResolution
 {
 public:
     virtual void resolution(int line, double** w, double* d, double* force, double *dfree)
     {
         SOFA_UNUSED(dfree);
-//		std::cout<< "UnilateralConstraintResolution (without friction): verify resolution ! "<<std::endl;
         force[line] -= d[line] / w[line][line];
         if(force[line] < 0)
             force[line] = 0.0;
     }
 };
 
+
 // A little experiment on how to best save the forces for the hot start.
 //  TODO : save as a map (index of the contact <-> force)
 class PreviousForcesContainer
 {
 public:
-    PreviousForcesContainer() : resetFlag(true) {}
+    PreviousForcesContainer() : m_resetFlag(true) {}
     double popForce()
     {
-        resetFlag = true;
-        if(forces.empty()) return 0;
-        double f = forces.front();
-        forces.pop_front();
+        m_resetFlag = true;
+        if(m_forces.empty()) return 0;
+        double f = m_forces.front();
+        m_forces.pop_front();
         return f;
     }
 
     void pushForce(double f)
     {
-        if(resetFlag)
+        if(m_resetFlag)
         {
-            forces.clear();
-            resetFlag = false;
+            m_forces.clear();
+            m_resetFlag = false;
         }
-
-        forces.push_back(f);
+        m_forces.push_back(f);
     }
 
 protected:
-    std::deque<double> forces;
-    bool resetFlag; // We delete all forces that were not read
+    std::deque<double> m_forces;
+    bool m_resetFlag; // We delete all forces that were not read
 };
+
+
 
 class SOFA_CONSTRAINT_API UnilateralConstraintResolutionWithFriction : public core::behavior::ConstraintResolution
 {
 public:
     UnilateralConstraintResolutionWithFriction(double mu, PreviousForcesContainer* prev=NULL, bool* active = NULL)
-        : _mu(mu)
-        , _prev(prev)
-        , _active(active)
+        : m_mu(mu)
+        , m_prev(prev)
+        , m_active(active)
     {
-        this->nbLines=3;
+        nbLines=3;
     }
 
     virtual void init(int line, double** w, double* force);
     virtual void resolution(int line, double** w, double* d, double* force, double *dFree);
-    virtual void store(int line, double* force, bool /*convergence*/);
+    virtual void store(int line, double* force, bool convergence);
 
 protected:
-    double _mu;
-    double _W[6];
-    PreviousForcesContainer* _prev;
-    bool* _active; // Will set this after the resolution
+    double m_mu;
+    double m_W[6];
+    PreviousForcesContainer* m_prev;
+    bool* m_active; // Will set this after the resolution
 };
 
 
+namespace _unilateralinteractionconstraint_ {
+
+using core::behavior::PairInteractionConstraint;
+
 template<class DataTypes>
-class UnilateralInteractionConstraint : public core::behavior::PairInteractionConstraint<DataTypes>
+class UnilateralInteractionConstraint : public PairInteractionConstraint<DataTypes>
 {
 public:
-    SOFA_CLASS(SOFA_TEMPLATE(UnilateralInteractionConstraint,DataTypes), SOFA_TEMPLATE(core::behavior::PairInteractionConstraint,DataTypes));
+    SOFA_CLASS(SOFA_TEMPLATE(UnilateralInteractionConstraint,DataTypes), SOFA_TEMPLATE(PairInteractionConstraint,DataTypes));
 
     typedef typename DataTypes::VecCoord VecCoord;
     typedef typename DataTypes::VecDeriv VecDeriv;
@@ -155,21 +161,19 @@ protected:
         unsigned int id;
         long contactId;
         PersistentID localId;
-        double mu;		///< angle for friction
+        double mu;		///< friction coefficient
 
         Coord P, Q;
 
         mutable Real dfree;
     };
 
-    sofa::helper::vector<Contact> contacts;
-    Real epsilon;
-    bool yetIntegrated;
-    double customTolerance;
+    sofa::helper::vector<Contact> m_contacts;
+    Real m_epsilon;
+    bool m_yetIntegrated;
+    double m_customTolerance;
 
-    PreviousForcesContainer prevForces;
-    bool* contactsStatus;
-//	sofa::helper::vector<bool> contactsStatus;
+    bool* m_contactsStatus;
 
     /// Computes constraint violation in position and stores it into resolution global vector
     ///
@@ -183,68 +187,56 @@ protected:
 
 public:
 
-    unsigned int constraintId;
+    unsigned int m_constraintId;
+
 protected:
+
     UnilateralInteractionConstraint(MechanicalState* object1=NULL, MechanicalState* object2=NULL)
         : Inherit(object1, object2)
-        , epsilon(Real(0.001))
-        , yetIntegrated(false)
-        , customTolerance(0.0)
-        , contactsStatus(NULL)
+        , m_epsilon(Real(0.001))
+        , m_yetIntegrated(false)
+        , m_customTolerance(0.0)
+        , m_contactsStatus(NULL)
     {
     }
 
     virtual ~UnilateralInteractionConstraint()
     {
-        if(contactsStatus)
-            delete[] contactsStatus;
+        if(m_contactsStatus)
+            delete[] m_contactsStatus;
     }
-public:
-    void setCustomTolerance(double tol) { customTolerance = tol; }
 
-    void clear(int reserve = 0)
-    {
-        contacts.clear();
-        if (reserve)
-            contacts.reserve(reserve);
-    }
+public:
+
+    void setCustomTolerance(double tol);
+
+    void clear(int reserve = 0);
 
     virtual void addContact(double mu, Deriv norm, Coord P, Coord Q, Real contactDistance, int m1, int m2, Coord Pfree, Coord Qfree, long id=0, PersistentID localid=0);
+    void addContact(double mu, Deriv norm, Coord P, Coord Q, Real contactDistance, int m1, int m2, long id=0, PersistentID localid=0);
+    void addContact(double mu, Deriv norm, Real contactDistance, int m1, int m2, long id=0, PersistentID localid=0);
 
-    void addContact(double mu, Deriv norm, Coord P, Coord Q, Real contactDistance, int m1, int m2, long id=0, PersistentID localid=0)
-    {
-        addContact(mu, norm, P, Q, contactDistance, m1, m2,
-                this->getMState2()->read(core::ConstVecCoordId::freePosition())->getValue()[m2],
-                this->getMState1()->read(core::ConstVecCoordId::freePosition())->getValue()[m1],
-                id, localid);
-    }
+    ////////////////////////// Inherited from BaseConstraint ////////////////////
+    virtual void buildConstraintMatrix(const core::ConstraintParams* cParams, DataMatrixDeriv &c1, DataMatrixDeriv &c2, unsigned int &cIndex,
+                                       const DataVecCoord &x1, const DataVecCoord &x2) override;
 
-    void addContact(double mu, Deriv norm, Real contactDistance, int m1, int m2, long id=0, PersistentID localid=0)
-    {
-        addContact(mu, norm,
-                this->getMState2()->read(core::ConstVecCoordId::position())->getValue()[m2],
-                this->getMState1()->read(core::ConstVecCoordId::position())->getValue()[m1],
-                contactDistance, m1, m2,
-                this->getMState2()->read(core::ConstVecCoordId::freePosition())->getValue()[m2],
-                this->getMState1()->read(core::ConstVecCoordId::freePosition())->getValue()[m1],
-                id, localid);
-    }
+    virtual void getConstraintViolation(const core::ConstraintParams* cParams, defaulttype::BaseVector *v, const DataVecCoord &x1, const DataVecCoord &x2,
+                                        const DataVecDeriv &v1, const DataVecDeriv &v2) override;
 
-    void buildConstraintMatrix(const core::ConstraintParams* cParams, DataMatrixDeriv &c1, DataMatrixDeriv &c2, unsigned int &cIndex
-            , const DataVecCoord &x1, const DataVecCoord &x2);
+    virtual void getConstraintInfo(const core::ConstraintParams* cParams, VecConstraintBlockInfo& blocks, VecPersistentID& ids, VecConstCoord& positions, VecConstDeriv& directions, VecConstArea& areas)override;
 
-    void getConstraintViolation(const core::ConstraintParams* cParams, defaulttype::BaseVector *v, const DataVecCoord &x1, const DataVecCoord &x2
-            , const DataVecDeriv &v1, const DataVecDeriv &v2);
+    virtual void getConstraintResolution(const core::ConstraintParams *,std::vector<core::behavior::ConstraintResolution*>& resTab, unsigned int& offset) override;
+    /////////////////////////////////////////////////////////////////////////
 
-
-    virtual void getConstraintInfo(const core::ConstraintParams* cParams, VecConstraintBlockInfo& blocks, VecPersistentID& ids, VecConstCoord& positions, VecConstDeriv& directions, VecConstArea& areas);
-
-    virtual void getConstraintResolution(const core::ConstraintParams *,std::vector<core::behavior::ConstraintResolution*>& resTab, unsigned int& offset);
     bool isActive() const;
 
-    void draw(const core::visual::VisualParams* vparams);
+    ////////////////////////// Inherited from BaseObject ////////////////////
+    virtual void draw(const core::visual::VisualParams* vparams) override;
+    /////////////////////////////////////////////////////////////////////////
 };
+}
 
+using _unilateralinteractionconstraint_::UnilateralInteractionConstraint;
 
 #if defined(SOFA_EXTERN_TEMPLATE) && !defined(SOFA_COMPONENT_CONSTRAINTSET_UNILATERALINTERACTIONCONSTRAINT_CPP)
 #ifndef SOFA_FLOAT

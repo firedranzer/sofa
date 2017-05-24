@@ -36,10 +36,46 @@ namespace constraintset
 {
 
 template<class DataTypes>
+void UnilateralInteractionConstraint<DataTypes>::setCustomTolerance(double tol)
+{
+    m_customTolerance = tol;
+}
+
+template<class DataTypes>
+void UnilateralInteractionConstraint<DataTypes>::clear(int reserve)
+{
+    m_contacts.clear();
+    if (reserve)
+        m_contacts.reserve(reserve);
+}
+
+
+template<class DataTypes>
+void UnilateralInteractionConstraint<DataTypes>::addContact(double mu, Deriv norm, Coord P, Coord Q, Real contactDistance, int m1, int m2, long id, PersistentID localid)
+{
+    addContact(mu, norm, P, Q, contactDistance, m1, m2,
+               this->getMState2()->read(core::ConstVecCoordId::freePosition())->getValue()[m2],
+               this->getMState1()->read(core::ConstVecCoordId::freePosition())->getValue()[m1],
+               id, localid);
+}
+
+template<class DataTypes>
+void UnilateralInteractionConstraint<DataTypes>::addContact(double mu, Deriv norm, Real contactDistance, int m1, int m2, long id, PersistentID localid)
+{
+    addContact(mu, norm,
+               this->getMState2()->read(core::ConstVecCoordId::position())->getValue()[m2],
+               this->getMState1()->read(core::ConstVecCoordId::position())->getValue()[m1],
+               contactDistance, m1, m2,
+               this->getMState2()->read(core::ConstVecCoordId::freePosition())->getValue()[m2],
+               this->getMState1()->read(core::ConstVecCoordId::freePosition())->getValue()[m1],
+               id, localid);
+}
+
+template<class DataTypes>
 void UnilateralInteractionConstraint<DataTypes>::addContact(double mu, Deriv norm, Coord P, Coord Q, Real contactDistance, int m1, int m2, Coord /*Pfree*/, Coord /*Qfree*/, long id, PersistentID localid)
 {
-    contacts.resize(contacts.size() + 1);
-    Contact &c = contacts.back();
+    m_contacts.resize(m_contacts.size() + 1);
+    Contact &c = m_contacts.back();
 
     c.P			= P;
     c.Q			= Q;
@@ -68,9 +104,9 @@ void UnilateralInteractionConstraint<DataTypes>::buildConstraintMatrix(const cor
     {
         MatrixDeriv& c1 = *c1_d.beginEdit();
 
-        for (unsigned int i = 0; i < contacts.size(); i++)
+        for (unsigned int i = 0; i < m_contacts.size(); i++)
         {
-            Contact& c = contacts[i];
+            Contact& c = m_contacts[i];
 
             c.id = contactId++;
 
@@ -100,9 +136,9 @@ void UnilateralInteractionConstraint<DataTypes>::buildConstraintMatrix(const cor
         MatrixDeriv& c1 = *c1_d.beginEdit();
         MatrixDeriv& c2 = *c2_d.beginEdit();
 
-        for (unsigned int i = 0; i < contacts.size(); i++)
+        for (unsigned int i = 0; i < m_contacts.size(); i++)
         {
-            Contact& c = contacts[i];
+            Contact& c = m_contacts[i];
 
             c.id = contactId++;
 
@@ -148,11 +184,11 @@ void UnilateralInteractionConstraint<DataTypes>::getPositionViolation(defaulttyp
     Real dfree_t = (Real)0.0;
     Real dfree_s = (Real)0.0;
 
-    const unsigned int cSize = contacts.size();
+    const unsigned int cSize = m_contacts.size();
 
     for (unsigned int i = 0; i < cSize; i++)
     {
-        const Contact& c = contacts[i];
+        const Contact& c = m_contacts[i];
 
         // Compute dfree, dfree_t and d_free_s
 
@@ -174,12 +210,12 @@ void UnilateralInteractionConstraint<DataTypes>::getPositionViolation(defaulttyp
         }
         else if (helper::rabs(delta - dfree) > 0.001 * delta)
         {
-            const Real dt = delta / (delta - dfree);
+            const Real a = delta / (delta - dfree);
 
-            if (dt > 0.0 && dt < 1.0)
+            if (a > 0.0 && a < 1.0)
             {
-                const Coord Pt		= c.P * (1 - dt) + Pfree * dt;
-                const Coord Qt		= c.Q * (1 - dt) + Qfree * dt;
+                const Coord Pt		= c.P * (1 - a) + Pfree * a;
+                const Coord Qt		= c.Q * (1 - a) + Qfree * a;
                 const Coord PtPfree = Pfree - Pt;
                 const Coord QtQfree = Qfree - Qt;
 
@@ -224,11 +260,11 @@ void UnilateralInteractionConstraint<DataTypes>::getVelocityViolation(defaulttyp
     const VecDeriv &PvfreeVec = this->getMState2()->read(core::ConstVecDerivId::freeVelocity())->getValue();
     const VecDeriv &QvfreeVec = this->getMState1()->read(core::ConstVecDerivId::freeVelocity())->getValue();
 
-    const unsigned int cSize = contacts.size();
+    const unsigned int cSize = m_contacts.size();
 
     for (unsigned int i = 0; i < cSize; i++)
     {
-        const Contact& c = contacts[i];
+        const Contact& c = m_contacts[i];
 
         const Deriv QP_vfree = PvfreeVec[c.m2] - QvfreeVec[c.m1];
 
@@ -260,7 +296,7 @@ void UnilateralInteractionConstraint<DataTypes>::getConstraintViolation(const co
         break;
 
     default :
-        serr << "UnilateralInteractionConstraint doesn't implement " << cparams->getName() << " constraint violation\n";
+        msg_warning() << "UnilateralInteractionConstraint doesn't implement " << cparams->getName() << " constraint violation";
         break;
     }
 }
@@ -269,22 +305,22 @@ void UnilateralInteractionConstraint<DataTypes>::getConstraintViolation(const co
 template<class DataTypes>
 void UnilateralInteractionConstraint<DataTypes>::getConstraintInfo(const core::ConstraintParams*, VecConstraintBlockInfo& blocks, VecPersistentID& ids, VecConstCoord& /*positions*/, VecConstDeriv& directions, VecConstArea& /*areas*/)
 {
-    if (contacts.empty()) return;
-    const bool friction = (contacts[0].mu > 0.0); /// @todo: can there be both friction-less and friction contacts in the same UnilateralInteractionConstraint ???
+    if (m_contacts.empty()) return;
+    const bool friction = (m_contacts[0].mu > 0.0); /// @todo: can there be both friction-less and friction contacts in the same UnilateralInteractionConstraint ???
     ConstraintBlockInfo info;
     info.parent = this;
-    info.const0 = contacts[0].id;
+    info.const0 = m_contacts[0].id;
     info.nbLines = friction ? 3 : 1;
     info.hasId = true;
     info.offsetId = ids.size();
     info.hasDirection = true;
     info.offsetDirection = directions.size();
-    info.nbGroups = contacts.size();
+    info.nbGroups = m_contacts.size();
 
-    for (unsigned int i=0; i<contacts.size(); i++)
+    for (unsigned int i=0; i<m_contacts.size(); i++)
     {
-        Contact& c = contacts[i];
-        ids.push_back( yetIntegrated ? c.contactId : -c.contactId);
+        Contact& c = m_contacts[i];
+        ids.push_back( m_yetIntegrated ? c.contactId : -c.contactId);
         directions.push_back( c.norm );
         if (friction)
         {
@@ -293,7 +329,7 @@ void UnilateralInteractionConstraint<DataTypes>::getConstraintInfo(const core::C
         }
     }
 
-    yetIntegrated = true;
+    m_yetIntegrated = true;
 
     blocks.push_back(info);
 }
@@ -301,30 +337,29 @@ void UnilateralInteractionConstraint<DataTypes>::getConstraintInfo(const core::C
 template<class DataTypes>
 void UnilateralInteractionConstraint<DataTypes>::getConstraintResolution(const core::ConstraintParams *, std::vector<core::behavior::ConstraintResolution*>& resTab, unsigned int& offset)
 {
-    if(contactsStatus)
+    if(m_contactsStatus)
     {
-        delete[] contactsStatus;
-        contactsStatus = NULL;
+        delete[] m_contactsStatus;
+        m_contactsStatus = NULL;
     }
 
-    if (contacts.size() > 0)
+    if (m_contacts.size() > 0)
     {
-        contactsStatus = new bool[contacts.size()];
-        memset(contactsStatus, 0, sizeof(bool)*contacts.size());
+        m_contactsStatus = new bool[m_contacts.size()];
+        memset(m_contactsStatus, 0, sizeof(bool)*m_contacts.size());
     }
 
-    for(unsigned int i=0; i<contacts.size(); i++)
+    for(unsigned int i=0; i<m_contacts.size(); i++)
     {
-        Contact& c = contacts[i];
+        Contact& c = m_contacts[i];
         if(c.mu > 0.0)
         {
-//			bool& temp = contactsStatus.at(i);
-            UnilateralConstraintResolutionWithFriction* ucrwf = new UnilateralConstraintResolutionWithFriction(c.mu, NULL, &contactsStatus[i]);
-            ucrwf->tolerance = customTolerance;
+            UnilateralConstraintResolutionWithFriction* ucrwf = new UnilateralConstraintResolutionWithFriction(c.mu, NULL, &m_contactsStatus[i]);
+            ucrwf->tolerance = m_customTolerance;
             resTab[offset] = ucrwf;
 
             // TODO : cette méthode de stockage des forces peu mal fonctionner avec 2 threads quand on utilise l'haptique
-//			resTab[offset] = new UnilateralConstraintResolutionWithFriction(c.mu, &prevForces, &contactsStatus[i]);
+            //resTab[offset] = new UnilateralConstraintResolutionWithFriction(c.mu, &prevForces, &contactsStatus[i]);
             offset += 3;
         }
         else
@@ -335,8 +370,8 @@ void UnilateralInteractionConstraint<DataTypes>::getConstraintResolution(const c
 template<class DataTypes>
 bool UnilateralInteractionConstraint<DataTypes>::isActive() const
 {
-    for(unsigned int i = 0; i < contacts.size(); i++)
-        if(contacts[i].dfree < 0)
+    for(unsigned int i = 0; i < m_contacts.size(); i++)
+        if(m_contacts[i].dfree < 0)
             return true;
 
     return false;
@@ -346,19 +381,14 @@ template<class DataTypes>
 void UnilateralInteractionConstraint<DataTypes>::draw(const core::visual::VisualParams* vparams)
 {
 #ifndef SOFA_NO_OPENGL
-//	return; // TEMP
     if (!vparams->displayFlags().getShowInteractionForceFields()) return;
     if (!vparams->isSupported(sofa::core::visual::API_OpenGL)) return;
 
     glDisable(GL_LIGHTING);
 
-    for (unsigned int i=0; i<contacts.size(); i++)
+    for (unsigned int i=0; i<m_contacts.size(); i++)
     {
-        const Contact& c = contacts[i];
-
-//		if(contactsStatus && contactsStatus[i]) glColor4f(1,0,0,1); else
-//		if(c.dfree < 0) glColor4f(1,0,1,1); else
-//		glColor4f(1,0.5,0,1);
+        const Contact& c = m_contacts[i];
 
         glLineWidth(5);
         glBegin(GL_LINES);
@@ -372,10 +402,6 @@ void UnilateralInteractionConstraint<DataTypes>::draw(const core::visual::Visual
         glLineWidth(3);
         glBegin(GL_LINES);
 
-        /*glColor4f(0,0,1,1);
-        helper::gl::glVertexT(c.Pfree);
-        helper::gl::glVertexT(c.Qfree);*/
-
         glColor4f(1,1,1,1);
         helper::gl::glVertexT(c.P);
         glColor4f(0,0.5,0.5,1);
@@ -387,15 +413,6 @@ void UnilateralInteractionConstraint<DataTypes>::draw(const core::visual::Visual
         helper::gl::glVertexT(c.Q - c.norm);
 
         glEnd();
-        /*
-        if (c.dfree < 0)
-        {
-            glLineWidth(5);
-            glColor4f(0,1,0,1);
-            helper::gl::glVertexT(c.Pfree);
-            helper::gl::glVertexT(c.Qfree);
-        }
-        */
 
         glLineWidth(1);
     }
