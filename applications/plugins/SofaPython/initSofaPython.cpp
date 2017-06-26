@@ -68,7 +68,7 @@ SOFA_SOFAPYTHON_API const char* getModuleComponentList()
 
 /// Use the SOFA_LINK_CLASS macro for each class, to enable linking on all platforms
 SOFA_LINK_CLASS(PythonScriptController)
-SOFA_LINK_CLASS(PythonScriptForceField<Vec1dTypes>)
+SOFA_LINK_CLASS(PythonScriptForceField)
 
 
 // register the loader in the factory

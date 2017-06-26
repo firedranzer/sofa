@@ -54,6 +54,8 @@ int PythonScriptForceFieldClass = sofa::core::RegisterObject("A Sofa forcefield 
 #endif
         ;
 
+SOFA_DECL_CLASS(PythonScriptForceField)
+
 
 using namespace sofa::defaulttype;
 #ifdef SOFA_WITH_DOUBLE
