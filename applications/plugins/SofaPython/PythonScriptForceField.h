@@ -23,7 +23,7 @@
 #define PYTHONFORCEFIELD_H
 
 #include "PythonEnvironment.h"
-#include "ScriptForceField.h"
+#include "ScriptForceField.inl"
 #include <sofa/core/objectmodel/DataFileName.h>
 
 /// Forward declarations
@@ -80,7 +80,7 @@ protected:
     // appelle en python : df += addDForce(kFactor, bFactor, dx);
     virtual SReal script_getPotentialEnergy(const MechanicalParams* mparams, const DataVecCoord& x) const;
     // appelle en python : e = getPotentialEnergy(x);
-    virtual void addKToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix );
+    virtual void script_addKToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix );
     // appelle en python : dMatrix = addKToMatrix(kFactor);
     // avec dMatrix= { {i,j,valueToAdd},{....}.....} la liste des valeurs à ajouter à matrix
 
@@ -109,16 +109,18 @@ protected:
 
 using namespace sofa::defaulttype;
 
-#ifdef SOFA_WITH_DOUBLE
-typedef PythonScriptForceField<Vec1dTypes> PythonScriptForceField1d;
-#endif
-#ifdef SOFA_WITH_FLOAT
-#endif
 
 } // namespace behavior
 
 } // namespace core
 
 } // namespace sofa
+
+#ifdef SOFA_WITH_DOUBLE
+typedef sofa::core::behavior::PythonScriptForceField<sofa::defaulttype::Vec1dTypes> PythonScriptForceField1d;
+#endif
+#ifdef SOFA_WITH_FLOAT
+#endif
+
 
 #endif // PYTHONFORCEFIELD_H

@@ -21,7 +21,7 @@
 ******************************************************************************/
 
 #include "PythonEnvironment.h"
-#include "PythonScriptForceField.h"
+#include "PythonScriptForceField.inl"
 #include <sofa/core/objectmodel/DataFileName.h>
 #include <sofa/core/ObjectFactory.h>
 
@@ -35,7 +35,7 @@ namespace core
 namespace behavior
 {
 
-int PythonScriptForceFieldClass = sofa::core::RegisterObject("Python Forcefield")
+int PythonScriptForceFieldClass = sofa::core::RegisterObject("A Sofa forcefield scripted in python")
 #ifdef SOFA_WITH_DOUBLE
         .add< PythonScriptForceField<Vec1dTypes> >()
 //        .add< PythonScriptForceField<Vec2dTypes> >()
@@ -57,20 +57,20 @@ int PythonScriptForceFieldClass = sofa::core::RegisterObject("Python Forcefield"
 
 using namespace sofa::defaulttype;
 #ifdef SOFA_WITH_DOUBLE
-template class SOFA_CORE_API PythonScriptForceField<Vec1dTypes>;
-//template class SOFA_CORE_API PythonScriptForceField<Vec2dTypes>;
-//template class SOFA_CORE_API PythonScriptForceField<Vec3dTypes>;
-//template class SOFA_CORE_API PythonScriptForceField<Vec6dTypes>;
-//template class SOFA_CORE_API PythonScriptForceField<Rigid3dTypes>;
-//template class SOFA_CORE_API PythonScriptForceField<Rigid2dTypes>;
+template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec1dTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec2dTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec3dTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec6dTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Rigid3dTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Rigid2dTypes>;
 #endif
 #ifdef SOFA_WITH_FLOAT
-//template class SOFA_CORE_API PythonScriptForceField<Vec3fTypes>;
-//template class SOFA_CORE_API PythonScriptForceField<Vec2fTypes>;
-//template class SOFA_CORE_API PythonScriptForceField<Vec1fTypes>;
-//template class SOFA_CORE_API PythonScriptForceField<Vec6fTypes>;
-//template class SOFA_CORE_API PythonScriptForceField<Rigid3fTypes>;
-//template class SOFA_CORE_API PythonScriptForceField<Rigid2fTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec3fTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec2fTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec1fTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec6fTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Rigid3fTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Rigid2fTypes>;
 #endif
 
 

@@ -19,29 +19,77 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef PYTHONFORCEFIELD_H
-#define PYTHONCONTROLLER_H
+#ifndef PYTHONFORCEFIELD_INL
+#define PYTHONFORCEFIELD_INL
 
 #include "PythonEnvironment.h"
 #include "PythonScriptForceField.h"
-#include <sofa/core/objectmodel/DataFileName.h>
+//#include <sofa/core/objectmodel/DataFileName.h>
 
 
 namespace sofa
 {
 
-namespace component
+namespace core
 {
 
-namespace forcefield
+namespace behavior
 {
 
+template <class DataTypes>
+PythonScriptForceField<DataTypes>::PythonScriptForceField()
+{
+
+}
+
+template <class DataTypes>
+PythonScriptForceField<DataTypes>::~PythonScriptForceField()
+{
+
+}
 
 
-} // namespace controller
 
-} // namespace component
+template <class DataTypes>
+void PythonScriptForceField<DataTypes>::loadScript()
+{
+
+}
+
+template <class DataTypes>
+void PythonScriptForceField<DataTypes>::script_addForce(const MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v)
+// appel en python : f += addForce(x,v);
+{
+
+}
+
+template <class DataTypes>
+void PythonScriptForceField<DataTypes>::script_addDForce(const MechanicalParams* mparams, DataVecDeriv& df, const DataVecDeriv& dx )
+// appel en python : df += addDForce(kFactor, bFactor, dx);
+{
+
+}
+
+template <class DataTypes>
+SReal PythonScriptForceField<DataTypes>::script_getPotentialEnergy(const MechanicalParams* mparams, const DataVecCoord& x) const
+// appel en python : e = getPotentialEnergy(x);
+{
+    return 0.f;
+}
+
+template <class DataTypes>
+void PythonScriptForceField<DataTypes>::script_addKToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix )
+// appel en python : dMatrix = addKToMatrix(kFactor);
+// avec dMatrix= { {i,j,valueToAdd},{....}.....} la liste des valeurs à ajouter à matrix
+{
+
+}
+
+
+} // namespace behavior
+
+} // namespace core
 
 } // namespace sofa
 
-#endif // PYTHONCONTROLLER_H
+#endif // PYTHONFORCEFIELD_INL

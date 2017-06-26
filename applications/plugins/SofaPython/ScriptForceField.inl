@@ -19,6 +19,10 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#ifndef SCRIPTFORCEFIELD_INL
+#define SCRIPTFORCEFIELD_INL
+
+
 #include "PythonMacros.h"
 #include "PythonEnvironment.h"
 #include "ScriptForceField.h"
@@ -80,7 +84,7 @@ void ScriptForceField<DataTypes>::addDForce(const MechanicalParams* mparams, Dat
 }
 
 template <class DataTypes>
-SReal ScriptForceField<DataTypes>::getPotentialEnergy(const MechanicalParams* mparams, const DataVecCoord& x)
+SReal ScriptForceField<DataTypes>::getPotentialEnergy(const MechanicalParams* mparams, const DataVecCoord& x) const
 {
     return script_getPotentialEnergy(mparams,x);
 }
@@ -99,6 +103,7 @@ void ScriptForceField<DataTypes>::addKToMatrix(const MechanicalParams* mparams, 
 
 } // namespace sofa
 
+#endif //SCRIPTFORCEFIELD_INL
 
 
 

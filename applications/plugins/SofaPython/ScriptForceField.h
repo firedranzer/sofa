@@ -69,7 +69,7 @@ public:
     // appelle en python : f += addForce(x,v);
     virtual void addDForce(const MechanicalParams* mparams, DataVecDeriv& df, const DataVecDeriv& dx );
     // appelle en python : df += addDForce(kFactor, bFactor, dx);
-    virtual SReal getPotentialEnergy(const MechanicalParams* mparams, const DataVecCoord& x);
+    virtual SReal getPotentialEnergy(const MechanicalParams* mparams, const DataVecCoord& x) const;
     // appelle en python : e = getPotentialEnergy(x);
 
     /// @}

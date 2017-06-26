@@ -22,7 +22,7 @@
 #include "SceneLoaderPY.h"
 #include <SofaPython/config.h>
 #include "PythonEnvironment.h"
-#include "PythonScriptForceField.h"
+#include "PythonScriptForceField.inl"
 
 
 extern "C" {
@@ -60,7 +60,7 @@ SOFA_SOFAPYTHON_API const char* getModuleDescription()
 SOFA_SOFAPYTHON_API const char* getModuleComponentList()
 {
     /// string containing the names of the classes provided by the plugin
-    return "PythonScriptController";
+    return "PythonScriptController PythonScriptForceField";
 }
 
 }
@@ -68,7 +68,7 @@ SOFA_SOFAPYTHON_API const char* getModuleComponentList()
 
 /// Use the SOFA_LINK_CLASS macro for each class, to enable linking on all platforms
 SOFA_LINK_CLASS(PythonScriptController)
-SOFA_LINK_CLASS(PythonScriptForceField1d)
+SOFA_LINK_CLASS(PythonScriptForceField<Vec1dTypes>)
 
 
 // register the loader in the factory
