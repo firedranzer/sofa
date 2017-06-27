@@ -95,7 +95,7 @@ protected:
 
 public:
 
-    virtual void init()
+    virtual void init() override
     {
         _alreadyInit=true;
 
@@ -126,9 +126,14 @@ public:
         _planes[3]->setDrawColor( defaulttype::RGBAColor( 0.5f,0.5f,0.4f,1.0f ) );
         _planes[4]->setDrawColor( defaulttype::RGBAColor( 0.5f,0.4f,0.5f,1.0f ) );
         _planes[5]->setDrawColor( defaulttype::RGBAColor( 0.4f,0.5f,0.5f,1.0f ) );
+
+        for(int i=0; i<6; ++i)
+        {
+            _planes[i]->init();
+        }
     }
 
-    virtual void reinit()
+    virtual void reinit() override
     {
         Inherit::reinit();
 
@@ -156,16 +161,21 @@ public:
         _planes[4]->setDrawColor( defaulttype::RGBAColor( 0.5f,0.4f,0.5f,1.0f ) );
         _planes[5]->setDrawColor( defaulttype::RGBAColor( 0.4f,0.5f,0.5f,1.0f ) );
 
+        for(int i=0; i<6; ++i)
+        {
+            _planes[i]->reinit();
+        }
+
     }
 
-    virtual void addForce(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v);
-    virtual void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& df, const DataVecDeriv& dx);
-    virtual SReal getPotentialEnergy(const core::MechanicalParams* /*mparams*/, const DataVecCoord&  /* x */) const
+    virtual void addForce(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
+    virtual void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& df, const DataVecDeriv& dx) override;
+    virtual SReal getPotentialEnergy(const core::MechanicalParams* /*mparams*/, const DataVecCoord&  /* x */) const override
     {
         serr << "Get potentialEnergy not implemented" << sendl;
         return 0.0;
     }
-    void draw(const core::visual::VisualParams* vparams);
+    void draw(const core::visual::VisualParams* vparams) override;
     bool addBBox(SReal* minBBox, SReal* maxBBox);
 
 
