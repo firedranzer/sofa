@@ -43,54 +43,50 @@ using namespace sofa::core::objectmodel;
 
 #define LOG_UNIMPLEMENTED_METHODS   // prints a message each time a non-implemented (in the script) method is called
 
-extern "C" PyObject * PythonScriptForceField1d_addForce(PyObject * self, PyObject * args)
+extern "C" PyObject * PythonScriptForceField3d_addForce(PyObject * self, PyObject * args)
 {
     SOFA_UNUSED(args) ;
 #ifdef LOG_UNIMPLEMENTED_METHODS
-    PythonScriptForceField1d* obj=dynamic_cast<PythonScriptForceField1d*>(((PySPtr<Base>*)self)->object.get());
-     msg_error("PythonScriptForceField1") << obj->m_classname.getValueString() << ".addForce not implemented in " << obj->name.getValueString();
+    msg_error("PythonScriptForceField .addForce not implemented");
 #endif
     Py_RETURN_NONE;
 }
 
-extern "C" PyObject * PythonScriptForceField1d_addDForce(PyObject * self, PyObject * args)
+extern "C" PyObject * PythonScriptForceField3d_addDForce(PyObject * self, PyObject * args)
 {
     SOFA_UNUSED(args) ;
 #ifdef LOG_UNIMPLEMENTED_METHODS
-    PythonScriptForceField1d* obj=dynamic_cast<PythonScriptForceField1d*>(((PySPtr<Base>*)self)->object.get());
-     msg_error("PythonScriptForceField1d") << obj->m_classname.getValueString() << ".addDForce not implemented in " << obj->name.getValueString();
+    msg_error("PythonScriptForceField .addDForce not implemented");
 #endif
     Py_RETURN_NONE;
 }
 
-extern "C" PyObject * PythonScriptForceField1d_getPotentialEnergy(PyObject * self, PyObject * args)
+extern "C" PyObject * PythonScriptForceField3d_getPotentialEnergy(PyObject * self, PyObject * args)
 {
     SOFA_UNUSED(args) ;
 #ifdef LOG_UNIMPLEMENTED_METHODS
-    PythonScriptForceField1d* obj=dynamic_cast<PythonScriptForceField1d*>(((PySPtr<Base>*)self)->object.get());
-     msg_error("PythonScriptForceField1d") << obj->m_classname.getValueString() << ".getPotentialEnergy not implemented in " << obj->name.getValueString();
+    msg_error("PythonScriptForceField .getPotentialEnergy not implemented");
 #endif
     Py_RETURN_NONE;
 }
 
-extern "C" PyObject * PythonScriptForceField1d_addKToMatrix(PyObject * self, PyObject * args)
+extern "C" PyObject * PythonScriptForceField3d_addKToMatrix(PyObject * self, PyObject * args)
 {
     SOFA_UNUSED(args) ;
 #ifdef LOG_UNIMPLEMENTED_METHODS
-    PythonScriptForceField1d* obj=dynamic_cast<PythonScriptForceField1d*>(((PySPtr<Base>*)self)->object.get());
-     msg_error("PythonScriptForceField1d") << obj->m_classname.getValueString() << ".addKToMatrix not implemented in " << obj->name.getValueString();
+    msg_error("PythonScriptForceField .addKToMatrix not implemented");
 #endif
     Py_RETURN_NONE;
 }
 
 
 
-SP_CLASS_METHODS_BEGIN(PythonScriptForceField1d)
-SP_CLASS_METHOD(PythonScriptForceField1d,addForce)
-SP_CLASS_METHOD(PythonScriptForceField1d,addDForce)
-SP_CLASS_METHOD(PythonScriptForceField1d,getPotentialEnergy)
-SP_CLASS_METHOD(PythonScriptForceField1d,addKToMatrix)
+SP_CLASS_METHODS_BEGIN(PythonScriptForceField3d)
+SP_CLASS_METHOD(PythonScriptForceField3d,addForce)
+SP_CLASS_METHOD(PythonScriptForceField3d,addDForce)
+SP_CLASS_METHOD(PythonScriptForceField3d,getPotentialEnergy)
+SP_CLASS_METHOD(PythonScriptForceField3d,addKToMatrix)
 SP_CLASS_METHODS_END
 
 
-SP_CLASS_TYPE_SPTR(PythonScriptForceField1d,PythonScriptForceField1d,Base)
+SP_CLASS_TYPE_SPTR(PythonScriptForceField3d,PythonScriptForceField3d,Base)

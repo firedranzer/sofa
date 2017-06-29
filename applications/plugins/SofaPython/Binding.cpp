@@ -49,6 +49,7 @@
 #include "Binding_BaseMechanicalState.h"
 #include "Binding_MechanicalObject.h"
 #include "Binding_PythonScriptController.h"
+#include "Binding_PythonScriptForceField.h"
 #include "Binding_LinearSpring.h"
 #include "Binding_BaseTopologyObject.h"
 #include "Binding_TriangleSetTopologyModifier.h"
@@ -125,6 +126,7 @@ void bindSofaPythonModule()
     //SP_ADD_CLASS_IN_FACTORY(Controller)
     //SP_ADD_CLASS_IN_FACTORY(ScriptController)
     SP_ADD_CLASS_IN_FACTORY(PythonScriptController,sofa::component::controller::PythonScriptController)
+    SP_ADD_CLASS_IN_FACTORY(PythonScriptForceField3d,PythonScriptForceField3d)
     SP_ADD_CLASS_IN_FACTORY(PointSetTopologyModifier,sofa::component::topology::PointSetTopologyModifier)
     SP_ADD_CLASS_IN_FACTORY(TriangleSetTopologyModifier,sofa::component::topology::TriangleSetTopologyModifier)
 }

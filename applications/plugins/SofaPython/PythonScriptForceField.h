@@ -66,7 +66,11 @@ protected:
     PythonScriptForceField();
     virtual ~PythonScriptForceField();
 
+public:
+    /// Parse the given description to assign values to this object's fields and potentially other parameters
+    virtual void parse ( sofa::core::objectmodel::BaseObjectDescription* arg );
 
+protected:
     /// @name Script interface
     ///   Function that need to be implemented for each script language
     /// Typically, all "script_*" functions call the corresponding "*" function of the script, if it exists
@@ -117,7 +121,7 @@ using namespace sofa::defaulttype;
 } // namespace sofa
 
 #ifdef SOFA_WITH_DOUBLE
-typedef sofa::core::behavior::PythonScriptForceField<sofa::defaulttype::Vec1dTypes> PythonScriptForceField1d;
+typedef sofa::core::behavior::PythonScriptForceField<sofa::defaulttype::Vec3dTypes> PythonScriptForceField3d;
 #endif
 #ifdef SOFA_WITH_FLOAT
 #endif

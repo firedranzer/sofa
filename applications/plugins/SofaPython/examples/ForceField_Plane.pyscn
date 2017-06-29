@@ -1,0 +1,57 @@
+import Sofa
+
+
+# scene creation method
+def createScene(rootNode):
+
+	# scene global stuff
+	rootNode.createObject('VisualStyle', displayFlags='showBehaviorModels showForceFields')
+	rootNode.createObject('CollisionPipeline', verbose=0, depth=6, draw=0)
+	rootNode.createObject('BruteForceDetection', name='N2')
+	rootNode.createObject('NewProximityIntersection', name="Proximity", alarmDistance="0.3", contactDistance="0.2")
+	rootNode.createObject('CollisionResponse', name="Response", response="default")
+
+	M1Node = rootNode.createChild('M1')
+	M1Node.createObject('EulerImplicit', name="cg_odesolver", printLog="false")
+	M1Node.createObject('CGLinearSolver', iterations=25, name="linear solver", tolerance="1.0e-9", threshold="1.0e-9")
+	M1Node.createObject('MechanicalObject')
+	M1Node.createObject('UniformMass', totalmass=10)
+	M1Node.createObject('RegularGrid', nx=2, ny=2, nz=2, xmin="-3.5", xmax="3.5", ymin="-3.5", ymax="3.5", zmin="-3.5", zmax="3.5")
+	M1Node.createObject('RegularGridSpringForceField', name="Springs", stiffness="1000")
+
+	# this is where the nagic is done !
+#	M1Node.createObject('PlaneForceField', normal="0 1 0", d="-10", stiffness="100000")
+	M1Node.createObject('PythonScriptForceField', name='PyPlane', filename='ForceField_Plane.py', classname='PlaneFF')
+
+	VisuNode = M1Node.createChild('Visu')
+	VisuNode.createObject('OglModel', name="Visual", fileMesh="mesh/smCube125.obj", color="blue")
+	VisuNode.createObject('BarycentricMapping', input="@..", output="@Visual")
+
+	CollisNode = M1Node.createChild('Collis')
+	CollisNode.createObject('MeshObjLoader', name="loader", filename="mesh/smCube125.obj")
+	CollisNode.createObject('Mesh', src="@loader")
+	CollisNode.createObject('MechanicalObject', src="@loader")
+	CollisNode.createObject('Triangle')
+	CollisNode.createObject('BarycentricMapping', input="@..", output="@Collis")
+
+	return rootNode
+
+class PlaneFF(Sofa.PythonScriptForceField3d):
+	def addForce(self,x,v):
+		# f += addForce(x,v)
+		return {0,0,0}
+
+	def addDForce(self,kFactor, bFactor, dx):
+		# df += addDForce(kFactor, bFactor, dx)
+		return {0,0,0}
+
+	def getPotentialEnergy(self,x):
+		# e = getPotentialEnergy(x)
+		return 0
+
+	def addKToMatrix(self,kFactor):
+		#dMatrix = addKToMatrix(kFactor)	
+		return {}
+
+
+

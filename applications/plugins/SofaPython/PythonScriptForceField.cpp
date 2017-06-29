@@ -37,9 +37,9 @@ namespace behavior
 
 int PythonScriptForceFieldClass = sofa::core::RegisterObject("A Sofa forcefield scripted in python")
 #ifdef SOFA_WITH_DOUBLE
-        .add< PythonScriptForceField<Vec1dTypes> >()
+//        .add< PythonScriptForceField<Vec1dTypes> >()
 //        .add< PythonScriptForceField<Vec2dTypes> >()
-//        .add< PythonScriptForceField<Vec3dTypes> >()
+        .add< PythonScriptForceField<Vec3dTypes> >()
 //        .add< PythonScriptForceField<Vec6dTypes> >()
 //        .add< PythonScriptForceField<Rigid3dTypes> >()
 //        .add< PythonScriptForceField<Rigid2dTypes> >()
@@ -59,9 +59,9 @@ SOFA_DECL_CLASS(PythonScriptForceField)
 
 using namespace sofa::defaulttype;
 #ifdef SOFA_WITH_DOUBLE
-template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec1dTypes>;
+//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec1dTypes>;
 //template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec2dTypes>;
-//template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec3dTypes>;
+template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec3dTypes>;
 //template class SOFA_SOFAPYTHON_API PythonScriptForceField<Vec6dTypes>;
 //template class SOFA_SOFAPYTHON_API PythonScriptForceField<Rigid3dTypes>;
 //template class SOFA_SOFAPYTHON_API PythonScriptForceField<Rigid2dTypes>;

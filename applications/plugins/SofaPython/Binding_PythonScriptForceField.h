@@ -25,6 +25,6 @@
 #include "PythonMacros.h"
 #include "PythonScriptForceField.h"
 
-SP_DECLARE_CLASS_TYPE(PythonScriptForceField)
+SP_DECLARE_CLASS_TYPE(PythonScriptForceField3d)
 
 #endif // BINDING_PYTHONSCRIPTFORCEFIELD_H
