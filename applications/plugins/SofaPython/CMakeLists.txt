@@ -104,7 +104,7 @@ set(SOURCE_FILES
     Binding_Node.cpp
     Binding_OBJExporter.cpp
     Binding_PythonScriptController.cpp
-    Binding_PythonScriptForcefield.cpp
+    Binding_PythonScriptForceField.cpp
     Binding_RegularGridTopology.cpp
     Binding_RigidMapping.cpp
     Binding_SofaModule.cpp
