@@ -375,19 +375,19 @@ void printPythonExceptions();
 // @warning getting the function pointer from a PythonScriptController
 // @todo Is it really generic enough to be here?
 // =============================================================================
-#define BIND_OBJECT_METHOD(funcName) \
+#define BIND_OBJECT_METHOD(objectInstance,methodObject,className,classObject,funcName) \
     { \
-    if( PyObject_HasAttrString((PyObject*)&SP_SOFAPYTYPEOBJECT(PythonScriptController),#funcName ) && \
-        PyObject_RichCompareBool( PyObject_GetAttrString(m_ScriptControllerClass, #funcName),\
-                                   PyObject_GetAttrString((PyObject*)&SP_SOFAPYTYPEOBJECT(PythonScriptController), #funcName),Py_NE ) && \
-        PyObject_HasAttrString(m_ScriptControllerInstance,#funcName ) ) { \
-            m_Func_##funcName = PyObject_GetAttrString(m_ScriptControllerInstance,#funcName); \
-            if (!PyCallable_Check(m_Func_##funcName)) \
-                {m_Func_##funcName=0; sout<<#funcName<<" not callable"<<sendl;} \
+    if( PyObject_HasAttrString((PyObject*)&SP_SOFAPYTYPEOBJECT(className),#funcName ) && \
+        PyObject_RichCompareBool( PyObject_GetAttrString(classObject, #funcName),\
+                                   PyObject_GetAttrString((PyObject*)&SP_SOFAPYTYPEOBJECT(className), #funcName),Py_NE ) && \
+        PyObject_HasAttrString(objectInstance,#funcName ) ) { \
+            methodObject = PyObject_GetAttrString(objectInstance,#funcName); \
+            if (!PyCallable_Check(methodObject)) \
+                {methodObject=0; sout<<#funcName<<" not callable"<<sendl;} \
             else \
                 {sout<<#funcName<<" found"<<sendl;} \
     }else{ \
-        m_Func_##funcName=0; sout<<#funcName<<" not found"<<sendl; } \
+        methodObject=0; sout<<#funcName<<" not found"<<sendl; } \
     }
 
 // =============================================================================

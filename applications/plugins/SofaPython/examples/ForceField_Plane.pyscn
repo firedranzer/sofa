@@ -37,21 +37,26 @@ def createScene(rootNode):
 	return rootNode
 
 class PlaneFF(Sofa.PythonScriptForceField3d):
-	def addForce(self,x,v):
-		# f += addForce(x,v)
-		return {0,0,0}
 
-	def addDForce(self,kFactor, bFactor, dx):
-		# df += addDForce(kFactor, bFactor, dx)
-		return {0,0,0}
-
-	def getPotentialEnergy(self,x):
-		# e = getPotentialEnergy(x)
+	def TODO(self):
 		return 0
 
-	def addKToMatrix(self,kFactor):
-		#dMatrix = addKToMatrix(kFactor)	
-		return {}
+#	def addForce(self,x,v):
+#		# f += addForce(x,v)
+#		print ("PLaneFF::addForce(x="+str(x)+",y="+str(y)+")")
+#		return {0,0,0}
+#
+#	def addDForce(self,kFactor, bFactor, dx):
+#		# df += addDForce(kFactor, bFactor, dx)
+#		return {0,0,0}
+#
+#	def getPotentialEnergy(self,x):
+#		# e = getPotentialEnergy(x)
+#		return 0
+#
+#	def addKToMatrix(self,kFactor):
+#		#dMatrix = addKToMatrix(kFactor)	
+#		return {}
 
 
 

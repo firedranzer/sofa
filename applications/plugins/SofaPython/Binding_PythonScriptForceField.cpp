@@ -22,7 +22,7 @@
 #include "PythonMacros.h"
 
 #include "Binding_PythonScriptForceField.h"
-#include "Binding_Base.h"
+#include "Binding_BaseObject.h"
 
 using namespace sofa::core::behavior;
 
@@ -45,7 +45,7 @@ using namespace sofa::core::objectmodel;
 
 extern "C" PyObject * PythonScriptForceField3d_addForce(PyObject * self, PyObject * args)
 {
-    SOFA_UNUSED(args) ;
+    (void) args; (void) self;
 #ifdef LOG_UNIMPLEMENTED_METHODS
     msg_error("PythonScriptForceField .addForce not implemented");
 #endif
@@ -54,7 +54,7 @@ extern "C" PyObject * PythonScriptForceField3d_addForce(PyObject * self, PyObjec
 
 extern "C" PyObject * PythonScriptForceField3d_addDForce(PyObject * self, PyObject * args)
 {
-    SOFA_UNUSED(args) ;
+    (void) args; (void) self;
 #ifdef LOG_UNIMPLEMENTED_METHODS
     msg_error("PythonScriptForceField .addDForce not implemented");
 #endif
@@ -63,7 +63,7 @@ extern "C" PyObject * PythonScriptForceField3d_addDForce(PyObject * self, PyObje
 
 extern "C" PyObject * PythonScriptForceField3d_getPotentialEnergy(PyObject * self, PyObject * args)
 {
-    SOFA_UNUSED(args) ;
+    (void) args; (void) self;
 #ifdef LOG_UNIMPLEMENTED_METHODS
     msg_error("PythonScriptForceField .getPotentialEnergy not implemented");
 #endif
@@ -72,7 +72,7 @@ extern "C" PyObject * PythonScriptForceField3d_getPotentialEnergy(PyObject * sel
 
 extern "C" PyObject * PythonScriptForceField3d_addKToMatrix(PyObject * self, PyObject * args)
 {
-    SOFA_UNUSED(args) ;
+    (void) args; (void) self;
 #ifdef LOG_UNIMPLEMENTED_METHODS
     msg_error("PythonScriptForceField .addKToMatrix not implemented");
 #endif
@@ -89,4 +89,4 @@ SP_CLASS_METHOD(PythonScriptForceField3d,addKToMatrix)
 SP_CLASS_METHODS_END
 
 
-SP_CLASS_TYPE_SPTR(PythonScriptForceField3d,PythonScriptForceField3d,Base)
+SP_CLASS_TYPE_SPTR(PythonScriptForceField3d,PythonScriptForceField3d,BaseObject)

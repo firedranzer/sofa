@@ -23,7 +23,9 @@
 #define PYTHONFORCEFIELD_INL
 
 #include "PythonEnvironment.h"
+#include "PythonMacros.h"
 #include "PythonScriptForceField.h"
+#include "Binding_PythonScriptForceField.h"
 //#include <sofa/core/objectmodel/DataFileName.h>
 #include <sofa/helper/logging/Messaging.h>
 
@@ -117,12 +119,12 @@ void PythonScriptForceField<DataTypes>::loadScript()
     {
         FileMonitor::addFile(m_filename.getFullPath(), m_filelistener) ;
     }
-/*
-    // if the filename is empty, the controller is supposed to be in an already loaded file
-    // otherwise load the controller's file
+
+    // if the filename is empty, the forcefield is supposed to be in an already loaded file
+    // otherwise load the ff's file
     if( m_filename.isSet() && !m_filename.getRelativePath().empty() && !PythonEnvironment::runFile(m_filename.getFullPath().c_str()) )
     {
-        SP_MESSAGE_ERROR( getName() << " object - "<<m_filename.getFullPath().c_str()<<" script load error." )
+        SP_MESSAGE_ERROR( Base::getName() << " object - "<<m_filename.getFullPath().c_str()<<" script load error." )
                 return;
     }
 
@@ -131,7 +133,7 @@ void PythonScriptForceField<DataTypes>::loadScript()
     m_ScriptForceFieldClass = PyDict_GetItemString(pDict,m_classname.getValueString().c_str());
     if (!m_ScriptForceFieldClass)
     {
-        SP_MESSAGE_ERROR( getName() << " load error (class \""<<m_classname.getValueString()<<"\" not found)." )
+        SP_MESSAGE_ERROR( Base::getName() << " load error (class \""<<m_classname.getValueString()<<"\" not found)." )
                 return;
     }
 
@@ -139,7 +141,7 @@ void PythonScriptForceField<DataTypes>::loadScript()
     if (1!=PyObject_IsSubclass(m_ScriptForceFieldClass,(PyObject*)&SP_SOFAPYTYPEOBJECT(PythonScriptForceField3d)))
     {
         // LOAD ERROR
-        SP_MESSAGE_ERROR( getName() << " load error (class \""<<m_classname.getValueString()<<"\" does not inherit from \"Sofa.PythonScriptForceField\")." )
+        SP_MESSAGE_ERROR( Base::getName() << " load error (class \""<<m_classname.getValueString()<<"\" does not inherit from \"Sofa.PythonScriptForceField\")." )
                 return;
     }
 
@@ -148,12 +150,12 @@ void PythonScriptForceField<DataTypes>::loadScript()
 
     if (!m_ScriptForceFieldInstance)
     {
-        SP_MESSAGE_ERROR( getName() << " load error (class \""<<m_classname.getValueString()<<"\" instanciation error)." )
+        SP_MESSAGE_ERROR( Base::getName() << " load error (class \""<<m_classname.getValueString()<<"\" instanciation error)." )
                 return;
     }
 
     refreshBinding();
-*/
+
 }
 
 template <class DataTypes>
@@ -162,31 +164,15 @@ void PythonScriptForceField<DataTypes>::doLoadScript()
     loadScript() ;
 }
 
+#define BIND_FORCEFIELD_METHOD(funcName) BIND_OBJECT_METHOD(m_ScriptForceFieldInstance,m_Func_##funcName,PythonScriptForceField3d,m_ScriptForceFieldClass,#funcName)
+
 template <class DataTypes>
 void PythonScriptForceField<DataTypes>::refreshBinding()
 {
-    /*
-    TODO
-    BIND_OBJECT_METHOD(onLoaded)
-    BIND_OBJECT_METHOD(createGraph)
-    BIND_OBJECT_METHOD(initGraph)
-    BIND_OBJECT_METHOD(bwdInitGraph)
-    BIND_OBJECT_METHOD(onKeyPressed)
-    BIND_OBJECT_METHOD(onKeyReleased)
-    BIND_OBJECT_METHOD(onMouseButtonLeft)
-    BIND_OBJECT_METHOD(onMouseButtonRight)
-    BIND_OBJECT_METHOD(onMouseButtonMiddle)
-    BIND_OBJECT_METHOD(onMouseWheel)
-    BIND_OBJECT_METHOD(onBeginAnimationStep)
-    BIND_OBJECT_METHOD(onEndAnimationStep)
-    BIND_OBJECT_METHOD(storeResetState)
-    BIND_OBJECT_METHOD(reset)
-    BIND_OBJECT_METHOD(cleanup)
-    BIND_OBJECT_METHOD(onGUIEvent)
-    BIND_OBJECT_METHOD(onScriptEvent)
-    BIND_OBJECT_METHOD(draw)
-    BIND_OBJECT_METHOD(onIdle)
-    */
+    BIND_FORCEFIELD_METHOD(addForce)
+    BIND_FORCEFIELD_METHOD(addDForce)
+    BIND_FORCEFIELD_METHOD(getPotentialEnergy)
+    BIND_FORCEFIELD_METHOD(addKToMatrix)
 }
 
 template <class DataTypes>
