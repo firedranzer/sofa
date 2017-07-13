@@ -136,8 +136,7 @@ static int SetDataValuePythonList(BaseData* data, PyObject* args,
     // check list emptyness
     if (PyList_Size(args)==0)
     {
-        if (!data->read(""))
-            SP_MESSAGE_WARNING("SetDataValue FAILED, data at: " + data->getLinkPath() + " empty input string");
+        data->read("");
         return 0;
     }
 
@@ -377,8 +376,7 @@ int SetDataValuePython(BaseData* data, PyObject* args)
         }
         else
         {
-            if (!data->read(str))
-                SP_MESSAGE_WARNING("SetDataValue FAILED, data: " + data->getName() + " " + data->getOwnerClass() + " input string: " + str);
+            data->read(str);
         }
         return 0;
     }
@@ -399,8 +397,7 @@ int SetDataValuePython(BaseData* data, PyObject* args)
         }
         else
         {
-            if (!data->read(str))
-                SP_MESSAGE_WARNING("SetDataValue FAILED, data at: " + data->getLinkPath() + " input unicode: " + str);
+            data->read(str);
         }
         return 0;
     }
@@ -461,8 +458,7 @@ int SetDataValuePython(BaseData* data, PyObject* args)
     {
         // TODO improve data to data copy
         SP_MESSAGE_WARNING( "Data to Data copy is using string serialization for now" );
-        if (!data->read( targetData->getValueString() ))
-            SP_MESSAGE_WARNING("SetDataValue FAILED, data at: " + data->getLinkPath() + " default input serialization: " + targetData->getValueString());
+        data->read( targetData->getValueString() );
         return 0;
     }
 
@@ -634,8 +630,7 @@ static PyObject * Data_read(PyObject *self, PyObject * args)
 
     if (PyString_Check(value))
     {
-        if (!data->read(PyString_AsString(value)))
-            SP_MESSAGE_WARNING("Data.read FAILED, data at: " + data->getName() + " " + data->getOwnerClass() + " input string: " + PyString_AsString(value));
+        data->read(PyString_AsString(value));
     }
     else
     {
