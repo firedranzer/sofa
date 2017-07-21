@@ -1,0 +1,12 @@
+<Node name="root" gravity="3">
+    <Node name="tata">
+		<MechanicalObject name="mstate" position="1 2 3"/>
+        <OglModel name="titi" filename="meshes/pslx.obj"/>
+    </Node>
+	<Node name="test">
+	<Python>
+for i in range(0,10):
+	self.createChild("cc"+str(i))	
+	</Python>
+	</Node>
+</Node>

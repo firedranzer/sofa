@@ -45,7 +45,7 @@ bool SceneLoaderPSL::canLoadFileExtension(const char *extension)
 {
     std::string ext = extension;
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    return (ext=="pyson" || ext=="psl");
+    return (ext=="psl" || ext=="pslx");
 }
 
 bool SceneLoaderPSL::canWriteFileExtension(const char *extension)
@@ -63,8 +63,8 @@ std::string SceneLoaderPSL::getFileTypeDesc()
 void SceneLoaderPSL::getExtensionList(ExtensionList* list)
 {
     list->clear();
-    list->push_back("pyson");
     list->push_back("psl");
+    list->push_back("pyson");
 }
 
 void SceneLoaderPSL::write(sofa::simulation::Node* n, const char *filename)

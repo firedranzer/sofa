@@ -34,7 +34,34 @@ import xml.etree.ElementTree as ET
 def totext(rootNode):
         print("PSL XML SAVE: "+str(rootNode))
 
+def dprint(p,spaces):
+    for n,v in p:
+        print(spaces+str(n)+" : "),
+        if isinstance(v, str):
+            print(v)
+        else:
+            print(spaces+"{")
+            dprint(v, spaces+"    ")
+            print(spaces+"}")
+
+def toAst(xmlnode):
+    childList = []
+    for k in xmlnode.attrib:
+        childList.append( (k, xmlnode.attrib[k] ) )
+
+    for child in xmlnode:
+        for j in toAst(child):
+            childList.append( j )
+
+    if not len(childList) == 0:
+        return [(xmlnode.tag, childList)]
+    return [(xmlnode.tag, xmlnode.text)]
+
+
 def parse(xmlcontent):
-    tree = ET.fromstring(xmlcontent)
-    xmlroot = tree.getroot()
-    return xmlroot
+    xmlroot = ET.fromstring(xmlcontent)
+    try:
+        dprint(toAst(xmlroot),"")
+    except:
+        print("STR: "+str(toAst(xmlroot)))
+    return toAst(xmlroot)

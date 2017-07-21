@@ -345,7 +345,6 @@ def instanciateTemplate(parent, key, kv, stack, frame):
 
 def processNode(parent, key, kv, stack, frame, doCreate=True):
         global templates, aliases
-        #print("PN:"+ parent.name + " : " + key )
         stack.append(frame)
         populateFrame(key, frame, stack)
         if doCreate:
@@ -393,7 +392,6 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
         return tself
 
 def processTreePSL1(parent, key, kv):
-    print("???")
     try:
         stack = []
         frame = {}
@@ -417,6 +415,6 @@ def processTreePSL1(parent, key, kv):
 
 def processTree(parent, key, kv, directives):
         if directives["version"] == "1.0":
-            return processTreePSL1(parent, key, kv)
+            return processNode(parent, key, kv, [], globals(), False)
         # Add here the future version of the language
 

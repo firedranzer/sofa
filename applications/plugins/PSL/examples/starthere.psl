@@ -1,0 +1,9 @@
+Template : {
+	name : "MyTemplate"
+	Node : {}
+}
+
+Node : {
+	name : toto
+	MyTemplate : {}
+}

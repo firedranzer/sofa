@@ -30,7 +30,9 @@ set(PYTHON_FILES
 
 set(EXTRA_FILES
     examples/starthere.psl
+    examples/starthere.pslx
     examples/caduceus.psl
+    examples/caduceus.pslx
     pep/pep0_pythoncontroller.psl
     pep/pep1_cythoncontroller.psl
     pep/pep2_pythoninstanciate.psl
