@@ -30,6 +30,18 @@ set(PYTHON_FILES
 
 set(EXTRA_FILES
     examples/starthere.psl
+    examples/caduceus.psl
+    pep/pep0_pythoncontroller.psl
+    pep/pep1_cythoncontroller.psl
+    pep/pep2_pythoninstanciate.psl
+    pep/pep3_pythoncomponent.psl
+    pep/pep4_properties.psl
+    pep/pep5_importdirectory.psl
+    pep/pep6_functional.psl
+    pep/pep7_reactiveprogramming.psl
+    pep/pep8_templateexample.psl
+    README.md
+    TODO.md
 )
 
 # Config files and install rules for pythons scripts
