@@ -138,16 +138,16 @@ for i in range(0,10):
 The equivalent scene PSL(HJSON) is the following 
 ```hjson
 Node : {
-	name : "root"
-	Node : {
-		name : "child1"
-		MechanicalObject: { name : "mstate" }
-		OglModel : { filename : "anObj.obj" }
-		Python : '''
-			for i in range(0, 10):
-				child1.createNode("child_"+str(i))
-		'''
-	}
+        name : "root"
+        Node : {
+                name : "child1"
+                MechanicalObject: { name : "mstate" }
+                OglModel : { filename : "anObj.obj" }
+                Python : '''
+                         for i in range(0, 10):
+                                child1.createChild("child_"+str(i))
+                         '''
+        }
 }
 ```
 
@@ -177,40 +177,42 @@ in the graph.
 
 ```hjson
 Node : {
-	name : "root"
-	Template : {
-		name : "MyTemplate"
-		properties : { name : "undefined"
-			       numpoints : 3 
-		}
-		Node : {
-			name : p"aName" 
-			MechanicalObject: { position=p"range(0, numparts*3)" }
-			UniformMass : {}
-			Node : {
-				name : "visual"
-				BarycentricMapping : {}
-				OglModel : { filename = "myOBJ.obj"}
-			}
-		}
-	}
+    name : "root"
+    Template : {
+        name : "MyTemplate"
+        properties : {
+            aName : "undefined"
+            numpoints : 3
+        }
+        Node : {
+            name : p"aName"
+            MechanicalObject: {
+                position : p"srange(0, numpoints* 3)"
+            }
+            UniformMass : {}
+            Node : {
+                name : "visual"
+                OglModel : { filename : "myOBJ.obj"}
+            }
+        }
+    }
 
-	/// The template can then be instantiated using its name as in:
-	MyTemplate : {
-		name : "defined1"
-		numpoints : 100 
-	}
-	
-	MyTemplate : {
-		name : "defined2"
-		numpoints : 10 
-	}
-	
-	/// Or using Python 
-	Python : '''
-		for i in range(0,10):
-			instantiate(root, "MyTemplate", {name:"defined"+str(i), numpoints : i})
-		'''
+    /// The template can then be instantiated using its name as in:
+    MyTemplate : {
+        aName : "defined1"
+        numpoints : 10
+    }
+
+    MyTemplate : {
+        aName : "defined2"
+        numpoints : 100
+    }
+
+    /// Or using Python
+    Python : '''
+             for i in range(0,10):
+                instantiate(root, "MyTemplate", {name:"defined"+str(i), numpoints : i})
+             '''
 }
 ```
 
