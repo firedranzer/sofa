@@ -34,6 +34,8 @@ import os
 
 # TODO(dmarchal 2017-06-17) Get rid of these ugly globals.
 templates = {}
+aliases = {}
+sofaAliases = []
 sofaComponents = []
 SofaStackFrame = []
 sofaRoot = None
@@ -42,8 +44,11 @@ imports = {}
 def refreshComponentListFromFactory():
     global sofaComponents
     sofaComponents = []
+    sofaAliases = {}
     for (name, desc) in Sofa.getAvailableComponents():
             sofaComponents.append(name)
+            for alias in Sofa.getAliasesFor(name):
+                sofaAliases[alias] = name
 
 def srange(b, e):
         s=""
@@ -79,18 +84,17 @@ def populateFrame(cname, frame, stack):
         fself = getFromStack("self", stack)
         if fself == None:
                 return
-        #for datafield in fself.getDataFields():
-        #	frame[datafield] = lambda tname : sys.out.write("T NAME")
-
 
 def processPython(parent, key, kv, stack, frame):
         """Process a python fragment of code with context provided by the content of the stack."""
-        r = flattenStackFrame(stack)
-        l = {}
-        exec(kv, r, l)
-        ## Apply the local change in the global context
-        for k in l:
-                stack[-1][k] = l[k]
+        context = flattenStackFrame(stack)
+        local = {}
+        exec(kv, context, local)
+
+        ## Transfer the local entries to the previously defined context
+        ## This allow import in one line and use the imported in the following ones.
+        for k in local:
+                stack[-1][k] = local[k]
 
 def evalPython(key, kv, stack, frame):
         """Process a python fragment of code with context provided by the content of the stack."""
@@ -100,7 +104,7 @@ def evalPython(key, kv, stack, frame):
 
 def processParameter(parent, name, value, stack, frame):
         if isinstance(value, list):
-                matches = difflib.get_close_matches(name, sofaComponents+templates.keys(), n=4)
+                matches = difflib.get_close_matches(name, sofaComponents+templates.keys()+sofaAliases.keys(), n=4)
                 c=parent.createChild("[XX"+name+"XX]")
                 Sofa.msg_error(c, "Unknow parameter or Component [" + name + "] suggestions -> "+str(matches))
         else:
@@ -235,7 +239,6 @@ def processTemplate(parent, key, kv, stack, frame):
         templates[str(name)] = o
         return o
 
-aliases = {}
 def processAlias(parent, key, kv, stack, frame):
         global aliases
         oldName, newName = kv.split('-')
@@ -355,6 +358,10 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
                 for key,value in kv:
                         if isinstance(key, unicode):
                                 key = str(key)
+
+                        if key in sofaAliases:
+                                print("THIS IS AN HARD-CODED ALIAS to "+sofaAlias[key]+"!!! PLEASE REMOVE IT")
+                                aliases[key] = sofaAlias[key]
 
                         if key in aliases:
                                 #print("Alias resolution to: "+aliases[key])
