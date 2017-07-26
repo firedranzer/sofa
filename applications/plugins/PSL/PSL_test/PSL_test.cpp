@@ -124,10 +124,10 @@ public:
     }
 };
 
-
 std::vector<std::vector<std::string>> testvalues = {
     {"test_emptyfile.psl", "Fail", "Error"},
     {"test_node.psl", "Success", "NoError"},
+    {"test_node.pslx", "Success", "NoError"},
     {"test_node_fail.psl", "Fail", "NoError"},
     {"test_node_fail2.psl", "Fail", "NoError"},
     {"test_object.psl", "Success", "NoError"},

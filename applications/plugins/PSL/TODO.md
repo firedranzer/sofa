@@ -9,10 +9,12 @@ PSL is in heavy development phase. It is the good moment to have an impact on th
 - add PSL/AliasComponent, PSL/ImportComponent
 - unify PSL::templates and imported templates.
 - add saving
-- add XML syntax
 - add reactive programming
 - restore the sofa implicit links & template deduction mechanisme.
 - ADD TESTS !!! to validate both the execution engine & the loaders.
+
+#### DONE
+- add XML syntax
 
 
 
