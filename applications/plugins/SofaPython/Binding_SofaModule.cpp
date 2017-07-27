@@ -587,13 +587,13 @@ static PyObject * Sofa_getAliasesFor(PyObject * /*self*/, PyObject * args)
         return NULL;
     }
 
-
     const ObjectFactory::ClassEntry& entry = ObjectFactory::getInstance()->getEntry(componentname) ;
 
     PyObject *pyList = PyList_New(entry.aliases.size());
-    for (size_t i=0; i<entry.aliases.size(); i++){
-        PyObject *tuple = PyList_New(2);
-        PyList_SetItem(pyList, (Py_ssize_t)i, Py_BuildValue("s", entry.aliases[i]));
+    unsigned int i=0;
+    for (auto& alias : entry.aliases){
+        PyList_SetItem(pyList, (Py_ssize_t)i, Py_BuildValue("s", alias.c_str()));
+        i++;
     }
 
     return pyList;
