@@ -35,14 +35,14 @@ import os
 # TODO(dmarchal 2017-06-17) Get rid of these ugly globals.
 templates = {}
 aliases = {}
-sofaAliases = []
+sofaAliases = {}
 sofaComponents = []
 SofaStackFrame = []
 sofaRoot = None
 imports = {}
 
 def refreshComponentListFromFactory():
-    global sofaComponents
+    global sofaComponents, sofaAliases
     sofaComponents = []
     sofaAliases = {}
     for (name, desc) in Sofa.getAvailableComponents():
@@ -360,8 +360,8 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
                                 key = str(key)
 
                         if key in sofaAliases:
-                                print("THIS IS AN HARD-CODED ALIAS to "+sofaAlias[key]+"!!! PLEASE REMOVE IT")
-                                aliases[key] = sofaAlias[key]
+                                Sofa.msg_warning(parent, "'"+key+" is an hard coded alias to the component '"+str(sofaAliases[key])+"'"+".  \nusing hard coded name should be avoided and replaced by scene specific alias."+"  \nplease fix your scene.")
+                                aliases[key] = sofaAliases[key]
 
                         if key in aliases:
                                 #print("Alias resolution to: "+aliases[key])
@@ -421,6 +421,8 @@ def processTreePSL1(parent, key, kv):
         Sofa.msg_error(parent, str(e))
 
 def processTree(parent, key, kv, directives):
+        refreshComponentListFromFactory()
+        print("ALIASESddddddddddddddddd:" + str(sofaAliases))
         if directives["version"] == "1.0":
             return processNode(parent, key, kv, [], globals(), False)
         # Add here the future version of the language
