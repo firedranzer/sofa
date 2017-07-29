@@ -45,6 +45,7 @@ def dprint(p,spaces):
             print(spaces+"}")
 
 def toAst(xmlnode):
+    '''Takes an XMLNode and convert it into the AST structured used by PSL Engine.'''
     childList = []
     for k in xmlnode.attrib:
         childList.append( (k, xmlnode.attrib[k] ) )
@@ -59,9 +60,6 @@ def toAst(xmlnode):
 
 
 def parse(xmlcontent):
+    '''Takes a string containing an XML scene and convert it into the AST structured used by PSL Engine.'''
     xmlroot = ET.fromstring(xmlcontent)
-    try:
-        dprint(toAst(xmlroot),"")
-    except:
-        print("STR: "+str(toAst(xmlroot)))
     return toAst(xmlroot)

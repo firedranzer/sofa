@@ -25,9 +25,11 @@
 #include <SofaSimulationCommon/xml/NodeElement.h>
 #include <SofaSimulationCommon/FindByTypeVisitor.h>
 
+#include <SofaPython/Binding_Node.h>
 #include <SofaPython/PythonFactory.h>
 #include <SofaPython/PythonMacros.h>
 #include <SofaPython/PythonEnvironment.h>
+#include <SofaPython/PythonToSofa.inl>
 #include "SceneLoaderPSL.h"
 
 using namespace sofa::core::objectmodel;
@@ -97,29 +99,50 @@ void SceneLoaderPSL::write(sofa::simulation::Node* n, const char *filename)
 
 sofa::simulation::Node::SPtr SceneLoaderPSL::load(const char *filename)
 {
-    std::stringstream s;
+    std::stringstream s ;
     s << "from pslloader import load as pslload" ;
 
-    PyObject* pDict = PyModule_GetDict(PyImport_AddModule("__main__"));
+    PyObject* pDict = PyModule_GetDict(PyImport_AddModule("__main__")) ;
 
-    PyObject* result = PyRun_String(s.str().c_str(), Py_file_input, pDict, pDict);
+    PyObject* result = PyRun_String(s.str().c_str(), Py_file_input, pDict, pDict) ;
     if (result==nullptr){
-         PyErr_Print();
-         return nullptr;
+         PyErr_Print() ;
+         return nullptr ;
     }
 
     msg_info("SceneLoaderPSL") << "Loading file: " << filename ;
-    PyRun_String("print(dir())", Py_file_input, pDict, pDict);
 
-    PyObject *pFunc = PyDict_GetItemString(pDict, "pslload");
+    PyObject *pFunc = PyDict_GetItemString(pDict, "pslload") ;
     if (PyCallable_Check(pFunc))
     {
-        Node::SPtr rootNode = Node::create("root");
-        SP_CALL_MODULEFUNC(pFunc, "(Os)", sofa::PythonFactory::toPython(rootNode.get()), filename)
-        return rootNode;
+        PyObject *res = PyObject_CallObject(pFunc,Py_BuildValue("(s)", filename));
+
+        /// Check if an exception happens. This is indicated by the return pointer to be equal
+        /// to nullptr. If this happens, we check if this is an exit signal or a normal exception.
+        /// If it is a "normal" exception we print the stack using the currently installed handler.
+        /// In Sofa this handler is sending an error message with the python stack.
+        if (!res) {
+            if(PyErr_ExceptionMatches(PyExc_SystemExit))  {
+                PyErr_Clear();
+                throw sofa::simulation::PythonEnvironment::system_exit();
+            }
+            PyErr_Print();
+            return nullptr ;
+        }
+
+        /// We check if the returned object is of type Node (which is the only valid case. If this
+        /// happens then we get the Sofa pointer to this Node and return it.
+        if(PyObject_IsInstance(res, reinterpret_cast<PyObject*>(&SP_SOFAPYTYPEOBJECT(Node)))){
+            Node::SPtr rootNode = sofa::py::unwrap<Node>(res) ;
+            Py_DECREF(res);
+            return rootNode ;
+        }
+
+        msg_error("SceneLoaderPSL") << "The pslload function must return a Node object. It doesn't" ;
+        Py_DECREF(res);
+        return nullptr ;
     }
 
-    assert(PyCallable_Check(pFunc));
     return nullptr ;
 }
 

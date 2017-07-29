@@ -350,17 +350,19 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
         global templates, aliases
         stack.append(frame)
         populateFrame(key, frame, stack)
+
         if doCreate:
                 tself = frame["self"] = parent.createChild("undefined")
         else:
                 tself = frame["self"] = parent
+
         if isinstance(kv, list):
                 for key,value in kv:
                         if isinstance(key, unicode):
                                 key = str(key)
 
                         if key in sofaAliases:
-                                Sofa.msg_warning(parent, "'"+key+" is an hard coded alias to the component '"+str(sofaAliases[key])+"'"+".  \nusing hard coded name should be avoided and replaced by scene specific alias."+"  \nplease fix your scene.")
+                                Sofa.msg_warning(tself, "'"+key+" is an hard coded alias to the component '"+str(sofaAliases[key])+"'"+".  \nusing hard coded name should be avoided and replaced by scene specific alias."+"  \nplease fix your scene.")
                                 aliases[key] = sofaAliases[key]
 
                         if key in aliases:
@@ -398,32 +400,35 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
         stack.pop(-1)
         return tself
 
-def processTreePSL1(parent, key, kv):
-    try:
-        stack = []
-        frame = {}
+def processRootNode(key, kv, stack, frame):
+        global templates, aliases
+        stack.append(frame)
+        populateFrame(key, frame, stack)
+
+        tself = frame["self"] = Sofa.createNode("undefined")
+        print("PROCESS ROOT NOT")
         if isinstance(kv, list):
                 for key,value in kv:
-                        if key == "Import":
-                                print("Importing: "+value+".pyjson")
-                        elif key == "Node":
-                            processNode(parent, key, value, stack, globals())
-                        elif key == "Python":
-                            processPython(parent, key, value, stack, globals())
-                        elif key in sofaComponents:
-                             processObject(parent, key, value, stack, globals())
-                        else:
-                             processParameter(parent, key, value, stack, frame)
-        else:
-            print("LEAF: "+kv)
-    except Exception,e:
-        print("HANDLING ERROR")
-        Sofa.msg_error(parent, str(e))
+                        if isinstance(key, unicode):
+                                key = str(key)
 
-def processTree(parent, key, kv, directives):
+                        if key == "Node":
+                                print("IT IS A NOT")
+                                n = processNode(tself, key, value, stack, {})
+                                return n
+                        else:
+                                Sofa.msg_error(tself, "Unable to find a root Node in this file")
+                                return None
+
+        Sofa.msg_error(tself, "Unable to find a root Node in this file")
+        return None
+
+## Root function that process an abstract tree.
+def processTree(key, kv, directives):
         refreshComponentListFromFactory()
-        print("ALIASESddddddddddddddddd:" + str(sofaAliases))
         if directives["version"] == "1.0":
-            return processNode(parent, key, kv, [], globals(), False)
-        # Add here the future version of the language
+            print("ZOB")
+            return processRootNode(key, kv, [], globals())
+
+        ## Add here the future version of the language
 

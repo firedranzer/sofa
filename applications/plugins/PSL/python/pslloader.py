@@ -84,13 +84,10 @@ def SetPath(newpath):
     finally: os.chdir(curdir)
 
 
-def load(rootNode, filename):
-        global sofaRoot
-
-        sofaRoot = rootNode
+def load(filename):
         filename = os.path.abspath(filename)
         dirname = os.path.dirname(filename)
-
+        print("COCUOUCOU")
         with SetPath(dirname):
             os.chdir(dirname)
             f = open(filename).read()
@@ -100,15 +97,17 @@ def load(rootNode, filename):
                 ast = pslparserxml.parse(f)
 
             if len(ast) == 0:
-                Sofa.msg_error(rootNode, "The file '"+filename+"' does not contains PSL content")
+                rootNode = Sofa.createNode("root")
+                Sofa.msg_error(rootNode, "The file '"+filename+"' does not contains PSL(X) content")
                 return rootNode
 
             directives = preProcess(ast[0][1])
 
             if not directives["version"] in ["1.0"]:
+                rootNode = Sofa.createNode("root")
                 Sofa.msg_error(rootNode, "Unsupported PSLVersion"+str(directives["version"]))
-                r=rootNode
-            else:
-                r = pslengine.processTree(sofaRoot, "", ast, directives)
+                return rootNode
 
-        return r
+            return pslengine.processTree("", ast, directives)
+
+        return None
