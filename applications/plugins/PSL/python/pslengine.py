@@ -122,7 +122,6 @@ def processParameter(parent, name, value, stack, frame):
                         frame["name"] = value
 
 def createObject(parentNode, name, stack , frame, kv):
-        #print("CREATE OBJECT {"+name+"} WITH: "+str(kv)+ "in "+parentNode.name+" stack is:"+str(stack))
         if name in sofaComponents:
                 n=None
                 if "name" in frame:
@@ -214,11 +213,9 @@ def processImport(parent, key, kv, stack, frame):
         f = open(filename).read()
         loadedcontent = hjson.loads(f, object_pairs_hook=MyObjectHook())
         imports[filename] = importTemplates(loadedcontent)
-        #print("IMPORTED TEMPLATE: " + str(imports[filename].keys()))
 
         for tname in imports[filename].keys():
                 templates[kv+"."+tname] = imports[filename][tname]
-        #print("TEMPLATES: "+str(templates))
 
 def processTemplate(parent, key, kv, stack, frame):
         global templates
@@ -253,10 +250,7 @@ def reinstanciateTemplate(templateInstance):
         frame["self"]=templateInstance
         nframe = {}
         instanceProperties = eval(templateInstance.src)
-        #print("RE-Instanciate template: "+ templateInstance.name )
-        #print("             properties: "+ str(instanceProperties) )
 
-        #print("TODO: "+str(dir(templateInstance)))
         for c in templateInstance.getChildren():
                 templateInstance.removeChild(c)
 
@@ -267,7 +261,6 @@ def reinstanciateTemplate(templateInstance):
         # Is there a template with this name, if this is the case
         # Retrieve the associated templates .
         if isinstance(templates[key], Sofa.Template):
-                #print("SOFA TEMPLATE")
                 n = templates[key].getTemplate()
                 for k,v in n:
                         if k == 'name':
@@ -283,20 +276,16 @@ def reinstanciateTemplate(templateInstance):
                 for k,v in templates[key]["properties"]:
                         if not k in frame:
                                 nframe[k] = str(v)
-        #print("Template: "+str(source))
-        #print("Instance properties: "+str(instanceProperties))
 
         for k,v in instanceProperties:
                 nframe[k] = templateInstance.findData(str(k)).getValue(0)
 
         stack = [globals(), frame]
         n = processNode(templateInstance, "Node", source, stack, nframe, doCreate=False)
-        #n.name = key
 
 
 def instanciateTemplate(parent, key, kv, stack, frame):
         global templates
-        print("Instanciate template: "+key + "-> "+str(kv))
         stack.append(frame)
         nframe={}
         source = None
@@ -316,20 +305,14 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                 for k,v in templates[key]["properties"]:
                         if not k in frame:
                                 nframe[k] = str(v)
-        #print("Template: "+str(source))
-
-
         for k,v in kv:
                 nframe[k] = v
-        #print("STACK FRAME IS : " +str(nframe))
         n = processNode(parent, "Node", source, stack, nframe, doCreate=True)
         n.name = key
 
         if isinstance(templates[key], Sofa.Template):
-
                 for k,v in kv:
                         if not hasattr(n, k):
-                                print("ADDING NEW ATTRIBUTE "+str(k)+" -> "+str(v))
                                 if isinstance(v, int):
                                         n.addData(k, key+".Properties", "Help", "d", v)
                                 elif isinstance(v, str) or isinstance(v,unicode):
@@ -406,14 +389,12 @@ def processRootNode(key, kv, stack, frame):
         populateFrame(key, frame, stack)
 
         tself = frame["self"] = Sofa.createNode("undefined")
-        print("PROCESS ROOT NOT")
         if isinstance(kv, list):
                 for key,value in kv:
                         if isinstance(key, unicode):
                                 key = str(key)
 
                         if key == "Node":
-                                print("IT IS A NOT")
                                 n = processNode(tself, key, value, stack, {})
                                 return n
                         else:
@@ -427,7 +408,6 @@ def processRootNode(key, kv, stack, frame):
 def processTree(key, kv, directives):
         refreshComponentListFromFactory()
         if directives["version"] == "1.0":
-            print("ZOB")
             return processRootNode(key, kv, [], globals())
 
         ## Add here the future version of the language

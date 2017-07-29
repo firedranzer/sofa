@@ -87,7 +87,6 @@ def SetPath(newpath):
 def load(filename):
         filename = os.path.abspath(filename)
         dirname = os.path.dirname(filename)
-        print("COCUOUCOU")
         with SetPath(dirname):
             os.chdir(dirname)
             f = open(filename).read()
