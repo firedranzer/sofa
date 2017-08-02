@@ -26,6 +26,8 @@ set(PSL_FILES
         pslfiles/test_pythonexcept.psl
         pslfiles/test_pythonobject.psl
         pslfiles/test_python.psl
+        pslfiles/test_objects_lightmanager.psl
+        pslfiles/test_objects_lightmanager.pslx
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${PSL_FILES})

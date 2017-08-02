@@ -114,6 +114,8 @@ def processParameter(parent, name, value, stack, frame):
 
                 try:
                         frame["self"].findData(name).setValueString(str(value))
+                        frame["self"].findData(name).setPersistant(True)
+
                 except Exception,e:
                         Sofa.msg_error(parent, "Unable to get the argument " + name)
 
@@ -122,6 +124,7 @@ def processParameter(parent, name, value, stack, frame):
                         frame["name"] = value
 
 def createObject(parentNode, name, stack , frame, kv):
+        print("===================> CREATING: "+name+" stack: "+str(kv))
         if name in sofaComponents:
                 n=None
                 if "name" in frame:
@@ -161,6 +164,19 @@ def processObject(parent, key, kv, stack, frame):
 
         stack.append(frame)
         frame["self"] = obj = createObject(parent, key, stack, frame, kwargs)
+
+        ### Force all the data field into a non-persistant state.
+        for i in obj.getDataFields():
+            obj.findData(i).setPersistant(False)
+
+        ### Then revert only the ones that have been touched
+        for dataname in kwargs:
+            try:
+                print("PSLSET: "+obj.name+"."+dataname+".setPersistant(true)")
+                obj.findData(dataname).setPersistant(True)
+            except Exception,e:
+                Sofa.msg_warning(obj, "PSL: This does not seems to be a valid attribute: "+str(dataname))
+
         if not "name" in kwargs:
             obj.findData("name").unset()
 
@@ -170,9 +186,9 @@ def processObject(parent, key, kv, stack, frame):
                 refreshComponentListFromFactory()
 
         return obj
-    except Exception:
+    except Exception, e:
         c=parent.createChild("[XX"+key+"XX]")
-        Sofa.msg_error(c, "Problem in creating the Object")
+        Sofa.msg_error(c, "PSL: Unable to create an object because: "+str(e.message))
         return None
 
 # TODO add a warning to indicate that a template is loaded twice.
@@ -336,17 +352,22 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
 
         if doCreate:
                 tself = frame["self"] = parent.createChild("undefined")
+                ### Force all the data field into a non-persistant state.
+                for i in tself.getDataFields():
+                    tself.findData(i).setPersistant(False)
         else:
                 tself = frame["self"] = parent
 
+
         if isinstance(kv, list):
                 for key,value in kv:
+                        sofaAliasInitialName = None
                         if isinstance(key, unicode):
                                 key = str(key)
 
                         if key in sofaAliases:
-                                Sofa.msg_warning(tself, "'"+key+" is an hard coded alias to the component '"+str(sofaAliases[key])+"'"+".  \nusing hard coded name should be avoided and replaced by scene specific alias."+"  \nplease fix your scene.")
-                                aliases[key] = sofaAliases[key]
+                                sofaAliasInitialName = key
+                                key = sofaAliases[key]
 
                         if key in aliases:
                                 #print("Alias resolution to: "+aliases[key])
@@ -365,6 +386,8 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
                         elif key in sofaComponents:
                                 o = processObject(tself, key, value, stack, {})
                                 if o != None:
+                                        if isinstance(sofaAliasInitialName, str):
+                                            Sofa.msg_warning(o, "'"+key+" was created using the hard coded alias '"+str(sofaAliasInitialName)+"'"+".  \nUsing hard coded aliases is a confusing practice and we advise you to use scene specific alias with the Alias keyword.")
                                         tself.addObject(o)
                         elif key in templates:
                                 instanciateTemplate(tself, key,value, stack, frame)
@@ -389,6 +412,9 @@ def processRootNode(key, kv, stack, frame):
         populateFrame(key, frame, stack)
 
         tself = frame["self"] = Sofa.createNode("undefined")
+        for i in tself.getDataFields():
+            tself.findData(i).setPersistant(False)
+
         if isinstance(kv, list):
                 for key,value in kv:
                         if isinstance(key, unicode):

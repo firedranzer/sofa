@@ -26,6 +26,7 @@ set(PYTHON_FILES
     python/pslloader.py
     python/pslengine.py
     python/pslparserxml.py
+    python/pslparserhjson.py
 )
 
 set(EXTRA_FILES

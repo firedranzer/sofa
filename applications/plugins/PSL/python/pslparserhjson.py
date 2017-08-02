@@ -28,43 +28,43 @@
 #*                                                                             *
 #******************************************************************************/
 import os
-import xml
-import xml.etree.ElementTree as ET
+
+def objectToString(object, nspace):
+    res = ""
+    res += nspace+object.getClassName() + " : { "+"\n"
+    res += nspace+"    name : "+str(object.name)+"\n"
+
+    for data in object.getDataFields():
+        datafield = object.findData(data)
+        if datafield.isPersistant():
+            res += nspace + "    " + data + " : " + str(datafield.getValueString()) + "\n"
+
+    res += nspace+" } "+"\n"
+    return res
+
+
+def treeToString(rootNode, space):
+        res = space+"Node : {"+"\n"
+        nspace=space+"    "
+
+        for data in rootNode.getDataFields():
+            datafield = rootNode.findData(data)
+            if datafield.isPersistant():
+                res += nspace + data + " : " + str(datafield.getValueString()) + "\n"
+
+        for object in rootNode.getObjects():
+            res += objectToString(object, space)
+
+        for child in rootNode.getChildren():
+            res += treeToString(child, nspace)
+
+        res+=space+"}"+"\n"
+        return res
 
 def toText(rootNode):
-        print("PSL XML SAVE: "+str(rootNode))
-        dprint(rootNode, "")
+        print("PSL DUMP")
+        return treeToString(rootNode, "")
 
-def dprint(p,spaces):
-    for n,v in p:
-        print(spaces+str(n)+" : "),
-        if isinstance(v, str):
-            print(v)
-        else:
-            print(spaces+"{")
-            dprint(v, spaces+"    ")
-            print(spaces+"}")
-
-def toAst(xmlnode):
-    '''Takes an XMLNode and convert it into the AST structured used by PSL Engine.'''
-    childList = []
-    for k in xmlnode.attrib:
-        childList.append( (k, xmlnode.attrib[k] ) )
-
-    for child in xmlnode:
-        for j in toAst(child):
-            childList.append( j )
-
-    if len(childList) == 0:
-        if xmlnode.text == None:
-            return [(xmlnode.tag, [])]
-        else:
-            return [(xmlnode.tag, xmlnode.text)]
-
-    return [(xmlnode.tag, childList)]
-
-
-def parse(xmlcontent):
-    '''Takes a string containing an XML scene and convert it into the AST structured used by PSL Engine.'''
-    xmlroot = ET.fromstring(xmlcontent)
-    return toAst(xmlroot)
+def parse(hjsoncontent):
+    '''Takes a string containing a scene using HJSON syntax and convert it into the AST structured used by PSL Engine.'''
+    return None

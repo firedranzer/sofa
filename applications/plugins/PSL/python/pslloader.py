@@ -34,6 +34,7 @@ import hjson
 import Sofa
 import os
 import pslparserxml
+import pslparserhjson
 import pslengine
 
 
@@ -41,22 +42,26 @@ class MyObjectHook(object):
         def __call__(self, s):
                 return s
 
-def saveTree(rootNode, space):
-        print(space+"Node : {")
-        nspace=space+"    "
-        for child in rootNode.getChildren():
-                saveTree(child, nspace)
+@contextlib.contextmanager
+def SetPath(newpath):
+    curdir= os.getcwd()
+    try: yield
+    finally: os.chdir(curdir)
 
-        for obj in rootNode.getObjects():
-                print(nspace+obj.getClassName() + " : { " )
-                print(nspace+"    name : "+str(obj.name))
-                print(nspace+" } ")
-
-        print(space+"}")
 
 def save(rootNode, filename):
-        print("PYSCIN SAVE: "+str(filename))
-        saveTree(rootNode,"")
+        print("SAVE: "+str(filename))
+
+        filename = os.path.abspath(filename)
+        dirname = os.path.dirname(filename)
+
+        with SetPath(dirname):
+            os.chdir(dirname)
+            file = open(filename, "w")
+            if filename.endswith(".psl") or filename.endswith(".pyson"):
+                print(pslparserhjson.toText(rootNode))
+            elif filename.endswith(".pslx"):
+                print(pslparserxml.toText(rootNode))
 
 def preProcess(ast):
     version = None
@@ -77,11 +82,6 @@ def preProcess(ast):
     return {"version": version}
 
 
-@contextlib.contextmanager
-def SetPath(newpath):
-    curdir= os.getcwd()
-    try: yield
-    finally: os.chdir(curdir)
 
 
 def load(filename):
