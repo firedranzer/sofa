@@ -368,6 +368,8 @@ static PyObject * BaseContext_getObjects(PyObject * self, PyObject * args)
     sofa::helper::vector< boost::intrusive_ptr<BaseObject> > list;
     context->get<BaseObject>(&list,search_direction_enum);
 
+    std::cout << context->getName() << " have NUMBER OF ELEMENTS:  " << list.size() << std::endl;
+
     PyObject *pyList = PyList_New(0);
     for (size_t i=0; i<list.size(); i++)
     {

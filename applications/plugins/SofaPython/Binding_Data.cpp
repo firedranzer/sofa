@@ -706,6 +706,33 @@ static PyObject * Data_setParent(PyObject *self, PyObject * args)
     Py_RETURN_NONE;
 }
 
+/// This function is actually returning the content of getLinkPath
+//TODO(dmarchal 2017-08-02): This is awfull to have mismatch in behavior between python & C++ code.
+static PyObject * Data_getParentPath(PyObject *self, PyObject * args)
+{
+    const size_t argSize = PyTuple_Size(args);
+    if( argSize != 0 ) {
+        PyErr_SetString(PyExc_RuntimeError, "This function does not accept any argument.") ;
+        return NULL;
+    }
+
+    BaseData* data = get_basedata( self );
+    return PyString_FromString(data->getLinkPath().c_str());
+}
+
+static PyObject * Data_hasParent(PyObject *self, PyObject * args)
+{
+    const size_t argSize = PyTuple_Size(args);
+    if( argSize != 0 ) {
+        PyErr_SetString(PyExc_RuntimeError, "This function does not accept any argument.") ;
+        return NULL;
+    }
+
+    BaseData* data = get_basedata( self );
+
+    return PyBool_FromLong( !data->getLinkPath().empty() ) ;
+}
+
 
 /// returns the complete link path name (i.e. following the shape "@/path/to/my/object.dataname")
 static PyObject * Data_getLinkPath(PyObject * self, PyObject * /*args*/)
@@ -832,6 +859,8 @@ SP_CLASS_METHOD(Data,setPersistant)
 SP_CLASS_METHOD(Data,updateIfDirty)
 SP_CLASS_METHOD(Data,read)
 SP_CLASS_METHOD(Data,setParent)
+SP_CLASS_METHOD(Data,getParentPath)
+SP_CLASS_METHOD(Data,hasParent)
 SP_CLASS_METHOD(Data,getLinkPath)
 SP_CLASS_METHOD(Data,getValueVoidPtr)
 SP_CLASS_METHOD(Data,getCounter)

@@ -308,6 +308,25 @@ static PyObject * Base_getDataFields(PyObject *self, PyObject * /*args*/) {
 }
 
 
+/// This function is name this way because someone give the getDataFields to the one
+/// that returns a dictionary of (name, value) which is not coherente with the c++
+/// name of the function.
+/// If you are a brave hacker, courageous enough to break backward compatibility you can
+/// probably fix all this mess.
+static PyObject * Base_getListOfDataFields(PyObject *self, PyObject * /*args*/) {
+    Base * component = get_base(self);
+
+    const sofa::helper::vector<BaseData*> dataFields = component->getDataFields();
+
+    PyObject * pyList = PyList_New(dataFields.size());
+    for (unsigned int i = 0; i < dataFields.size(); ++i) {
+        PyList_SetItem(pyList, i, SP_BUILD_PYPTR(Data,BaseData,dataFields[i],false)) ;
+    }
+
+    return pyList;
+}
+
+
 /// down cast to the lowest type known by the factory
 /// there is maybe a more pythonish way to do so? :)
 static PyObject * Base_downCast(PyObject *self, PyObject * /*args*/) {
@@ -323,6 +342,7 @@ SP_CLASS_METHOD(Base,getClassName)
 SP_CLASS_METHOD(Base,getTemplateName)
 SP_CLASS_METHOD(Base,getName)
 SP_CLASS_METHOD(Base,getDataFields)
+SP_CLASS_METHOD(Base,getListOfDataFields)
 SP_CLASS_METHOD(Base,downCast)
 SP_CLASS_METHODS_END;
 
