@@ -379,7 +379,7 @@ int SetDataValuePython(BaseData* data, PyObject* args)
         return 0;
     }
     /// Get the info about the data value through the introspection mechanism.
-    const AbstractTypeInfo *typeinfo = data->getValueTypeInfo(); 
+    const AbstractTypeInfo *typeinfo = data->getValueTypeInfo();
     const bool valid = (typeinfo && typeinfo->ValidInfo());
 
     const int rowWidth = valid ? typeinfo->size() : 1;
@@ -521,15 +521,27 @@ static PyObject * Data_setValue(PyObject *self, PyObject * args)
 }
 
 
-static PyObject * Data_getValueTypeString(PyObject *self, PyObject * /*args*/)
+static PyObject * Data_getValueTypeString(PyObject *self, PyObject* args)
 {
+    const size_t argSize = PyTuple_Size(args);
+    if( argSize != 0 ) {
+        PyErr_SetString(PyExc_RuntimeError, "This function does not accept any argument.") ;
+        return NULL;
+    }
+
     BaseData* data = get_basedata( self );
     return PyString_FromString(data->getValueTypeString().c_str());
 }
 
 
-static PyObject * Data_getValueString(PyObject *self, PyObject * /*args*/)
+static PyObject * Data_getValueString(PyObject *self, PyObject* args)
 {
+    const size_t argSize = PyTuple_Size(args);
+    if( argSize != 0 ) {
+        PyErr_SetString(PyExc_RuntimeError, "This function does not accept any argument.") ;
+        return NULL;
+    }
+
     BaseData* data = get_basedata( self );
     return PyString_FromString(data->getValueString().c_str());
 }
@@ -537,8 +549,14 @@ static PyObject * Data_getValueString(PyObject *self, PyObject * /*args*/)
 
 
 //TODO(PR:304) a description of what this function is supposed to do?
-static PyObject * Data_getSize(PyObject *self, PyObject * /*args*/)
+static PyObject * Data_getSize(PyObject *self, PyObject * args)
 {
+    const size_t argSize = PyTuple_Size(args);
+    if( argSize != 0 ) {
+        PyErr_SetString(PyExc_RuntimeError, "This function does not accept any argument.") ;
+        return NULL;
+    }
+
     BaseData* data = get_basedata( self );
 
     const AbstractTypeInfo *typeinfo = data->getValueTypeInfo();
@@ -566,6 +584,48 @@ static PyObject * Data_setSize(PyObject *self, PyObject * args)
 }
 
 
+static PyObject * Data_isSet(PyObject *self, PyObject* args)
+{
+    BaseData* data = get_basedata( self );
+
+    const size_t argSize = PyTuple_Size(args);
+    if( argSize != 0 ) {
+        PyErr_SetString(PyExc_RuntimeError, "This function does not accept any argument.") ;
+        return NULL;
+    }
+
+    return PyBool_FromLong(data->isSet());
+}
+
+static PyObject * Data_isPersistant(PyObject *self, PyObject * args)
+{
+    BaseData* data = get_basedata( self );
+
+    const size_t argSize = PyTuple_Size(args);
+    if( argSize != 0 ) {
+        PyErr_SetString(PyExc_RuntimeError, "This function does not accept any argument.") ;
+        return NULL;
+    }
+
+    return PyBool_FromLong(data->isPersistent());
+}
+
+static PyObject * Data_setPersistant(PyObject* self, PyObject* args)
+{
+    BaseData* data = get_basedata( self );
+
+    PyObject* state = nullptr ;
+    if (!PyArg_ParseTuple(args, "O", &state))
+    {
+        return NULL;
+    }
+
+    data->setPersistent(PyObject_IsTrue(state));
+
+    Py_RETURN_NONE ;
+}
+
+
 static PyObject * Data_unset(PyObject *self, PyObject * /*args*/)
 {
     BaseData* data = get_basedata( self );
@@ -576,8 +636,14 @@ static PyObject * Data_unset(PyObject *self, PyObject * /*args*/)
 }
 
 
-static PyObject * Data_updateIfDirty(PyObject *self, PyObject * /*args*/)
+static PyObject * Data_updateIfDirty(PyObject *self, PyObject * args)
 {
+    const size_t argSize = PyTuple_Size(args);
+    if( argSize != 0 ) {
+        PyErr_SetString(PyExc_RuntimeError, "This function does not accept any argument.") ;
+        return NULL;
+    }
+
     BaseData* data = get_basedata( self );
 
     data->updateIfDirty();
@@ -705,15 +771,27 @@ static PyObject * Data_getValueVoidPtr(PyObject * self, PyObject * /*args*/)
 
 
 /// returns the number of times the Data was modified
-static PyObject * Data_getCounter(PyObject * self, PyObject * /*args*/)
+static PyObject * Data_getCounter(PyObject * self, PyObject * args)
 {
+    const size_t argSize = PyTuple_Size(args);
+    if( argSize != 0 ) {
+        PyErr_SetString(PyExc_RuntimeError, "This function does not accept any argument.") ;
+        return NULL;
+    }
+
     BaseData* data = get_basedata( self );
     return PyInt_FromLong( data->getCounter() );
 }
 
 
-static PyObject * Data_isDirty(PyObject * self, PyObject * /*args*/)
+static PyObject * Data_isDirty(PyObject * self, PyObject * args)
 {
+    const size_t argSize = PyTuple_Size(args);
+    if( argSize != 0 ) {
+        PyErr_SetString(PyExc_RuntimeError, "This function does not accept any argument.") ;
+        return NULL;
+    }
+
     BaseData* data = get_basedata( self );
     return PyBool_FromLong( data->isDirty() );
 }
@@ -748,6 +826,9 @@ SP_CLASS_METHOD(Data,getValue)
 SP_CLASS_METHOD(Data,getSize)
 SP_CLASS_METHOD(Data,setSize)
 SP_CLASS_METHOD(Data,unset)
+SP_CLASS_METHOD(Data,isSet)
+SP_CLASS_METHOD(Data,isPersistant)
+SP_CLASS_METHOD(Data,setPersistant)
 SP_CLASS_METHOD(Data,updateIfDirty)
 SP_CLASS_METHOD(Data,read)
 SP_CLASS_METHOD(Data,setParent)
