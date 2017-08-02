@@ -124,14 +124,9 @@ def processParameter(parent, name, value, stack, frame):
                         frame["name"] = value
 
 def createObject(parentNode, name, stack , frame, kv):
-        print("===================> CREATING: "+name+" stack: "+str(kv))
+        print("===================> CREATING OBJECT: "+name+" stack: "+str(kv))
         if name in sofaComponents:
-                n=None
-                if "name" in frame:
-                        n = parentNode.createObject(name, **kv)
-                else:
-                        n = parentNode.createObject(name, **kv)
-                return n
+                return parentNode.createObject(name, **kv)
 
         failureObject = parentNode.createObject("Undefined", **kv)
         Sofa.msg_error(failureObject, "Unable to create object "+str(key))
@@ -166,13 +161,12 @@ def processObject(parent, key, kv, stack, frame):
         frame["self"] = obj = createObject(parent, key, stack, frame, kwargs)
 
         ### Force all the data field into a non-persistant state.
-        for i in obj.getDataFields():
-            obj.findData(i).setPersistant(False)
+        for datafield in obj.getListOfDataFields():
+            datafield.setPersistant(False)
 
         ### Then revert only the ones that have been touched
         for dataname in kwargs:
             try:
-                print("PSLSET: "+obj.name+"."+dataname+".setPersistant(true)")
                 obj.findData(dataname).setPersistant(True)
             except Exception,e:
                 Sofa.msg_warning(obj, "PSL: This does not seems to be a valid attribute: "+str(dataname))
@@ -337,10 +331,6 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                                         n.addData(k, key+".Properties", "Help", "f", v)
                                 elif isinstance(v, unicode):
                                         n.addData(k, key+".Properties", "Help", "f", str(v))
-                                #else:
-                                #	n.addData(k, key+".Properties", "Help", "s", str(v))
-                                #data = n.findData(k)
-                                #templates[key].trackData(data)
 
                 n.addData("src", key+".Properties", "No help", "s", repr(kv))
         stack.pop(-1)
@@ -353,8 +343,8 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
         if doCreate:
                 tself = frame["self"] = parent.createChild("undefined")
                 ### Force all the data field into a non-persistant state.
-                for i in tself.getDataFields():
-                    tself.findData(i).setPersistant(False)
+                for datafield in tself.getListOfDataFields():
+                    datafield.setPersistant(False)
         else:
                 tself = frame["self"] = parent
 
@@ -370,7 +360,6 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
                                 key = sofaAliases[key]
 
                         if key in aliases:
-                                #print("Alias resolution to: "+aliases[key])
                                 key = aliases[key]
 
                         if key == "Import":
@@ -412,8 +401,8 @@ def processRootNode(key, kv, stack, frame):
         populateFrame(key, frame, stack)
 
         tself = frame["self"] = Sofa.createNode("undefined")
-        for i in tself.getDataFields():
-            tself.findData(i).setPersistant(False)
+        for datafield in tself.getListOfDataFields():
+            datafield.setPersistant(False)
 
         if isinstance(kv, list):
                 for key,value in kv:

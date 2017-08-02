@@ -27,67 +27,11 @@
 #*    - damien.marchal@univ-lille1.fr Copyright (C) CNRS                       *
 #*                                                                             *
 #******************************************************************************/
-import os
-
-class MyObjectHook(object):
-        def __call__(self, s):
-                return s
-
-def objectToString(object, nspace):
-    res = ""
-
-    for datafield in object.getListOfDataFields():
-        if datafield.isPersistant():
-            if datafield.hasParent():
-                res += "\n" + nspace + '    ' + datafield.name + ' : "' + datafield.getParentPath() + '"'
-            else:
-                res += "\n" + nspace + "    " + datafield.name + " : \"" + datafield.getValueString() + "\""
-
-    ores = ""
-    ores += nspace+object.getClassName() + " : { "
-    ores += res
-    if res == "":
-        ores += "}"+"\n"
-    else:
-        ores += "\n" + nspace+"} "+"\n"
-    return ores
-
-
-def treeToString(node, space):
-        nspace=space+"    "
-        res = ""
-        res += space+"Node : { "
-
-        ores = ""
-        for datafield in node.getListOfDataFields():
-            if datafield.isPersistant():
-                if datafield.hasParent():
-                    ores += "\n" + nspace + datafield.name + ' : "' + datafield.getParentPath() + '"'
-                else:
-                    ores += "\n" + nspace + datafield.name + " : \"" + datafield.getValueString() + "\""
-
-        if ores != "":
-            ores += "\n"
-
-        dres = ""
-        for object in node.getObjects():
-            dres += objectToString(object, space+"    ")
-
-        cres = ""
-        for child in node.getChildren():
-            cres += treeToString(child, space+"    ")
-        ores = ores + dres + cres
-        res += ores
-        if ores == "":
-            res += "}"+"\n"
-        else:
-            res += space+"} "+"\n"
-        return res
+import cPickled
 
 def toText(rootNode):
-        return treeToString(rootNode, "")
+        return cPickled.dumps(rootNode)
 
-def parse(hjsoncontent):
-    '''Takes a string containing a scene using HJSON syntax and convert it into the AST structured used by PSL Engine.'''
-    return hjson.loads(f, object_pairs_hook=MyObjectHook())
-
+def parse(pickledContent):
+    '''Takes a string containing a pickled scene and load it into the AST structured used by PSL Engine.'''
+    return cPickled.loads(pickledContent)

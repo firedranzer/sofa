@@ -38,9 +38,6 @@ import pslparserhjson
 import pslengine
 
 
-class MyObjectHook(object):
-        def __call__(self, s):
-                return s
 
 @contextlib.contextmanager
 def SetPath(newpath):
@@ -48,10 +45,7 @@ def SetPath(newpath):
     try: yield
     finally: os.chdir(curdir)
 
-
 def save(rootNode, filename):
-        print("SAVE: "+str(filename))
-
         filename = os.path.abspath(filename)
         dirname = os.path.dirname(filename)
 
@@ -65,7 +59,8 @@ def save(rootNode, filename):
 
 def preProcess(ast):
     version = None
-    # Check in the ast for specific directives.
+
+    ## Check in the ast for specific directives.
     for cmd, value in ast:
         if cmd == "PSLVersion":
             if version == None:
@@ -81,9 +76,6 @@ def preProcess(ast):
 
     return {"version": version}
 
-
-
-
 def load(filename):
         filename = os.path.abspath(filename)
         dirname = os.path.dirname(filename)
@@ -91,7 +83,7 @@ def load(filename):
             os.chdir(dirname)
             f = open(filename).read()
             if filename.endswith(".psl") or filename.endswith(".pyson"):
-                ast = hjson.loads(f, object_pairs_hook=MyObjectHook())
+                ast = pslparserhjson.parse(f)
             elif filename.endswith(".pslx"):
                 ast = pslparserxml.parse(f)
 
@@ -107,6 +99,8 @@ def load(filename):
                 Sofa.msg_error(rootNode, "Unsupported PSLVersion"+str(directives["version"]))
                 return rootNode
 
-            return pslengine.processTree("", ast, directives)
+            ret = pslengine.processTree("", ast, directives)
+            print(pslparserhjson.toText(ret))
+            return ret
 
         return None

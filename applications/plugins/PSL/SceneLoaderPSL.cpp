@@ -74,7 +74,7 @@ void SceneLoaderPSL::write(sofa::simulation::Node* n, const char *filename)
     std::stringstream s;
     s << "from pslloader import save as pslsave" ;
 
-    msg_info("SceneLoaderPSL") << "Trying saving file: " << filename ;
+    msg_info("SceneLoaderPSL") << "Saving file: " << filename ;
 
     PyObject* pDict = PyModule_GetDict(PyImport_AddModule("__main__"));
 

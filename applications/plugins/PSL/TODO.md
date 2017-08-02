@@ -11,7 +11,9 @@ by contributing.
 - add reactive programming
 - restore the sofa implicit links & template deduction mechanisme.
 - ADD TESTS !!! to validate both the execution engine & the loaders.
-
+- when saving large chunk of data...use a dedicated opcode like 'extern('datafile')' to indicate we
+  save them in a separated file (possible format are: json, xml, sofa string, python picked)
+- it should be possible to save a file in a python pickled version so that it can be loaded faster.
 
 #### DONE
 - add a test framework.
@@ -22,3 +24,4 @@ by contributing.
 
 #### Crazy **possibly unreleated things**
 - add a component cache to reload the scene more quickly when live coding (ie mesh, texture, object)
+- add a kind of previewer & editor(text field) to visualize template instance (with a template instance example)

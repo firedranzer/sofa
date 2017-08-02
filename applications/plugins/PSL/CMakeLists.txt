@@ -27,6 +27,7 @@ set(PYTHON_FILES
     python/pslengine.py
     python/pslparserxml.py
     python/pslparserhjson.py
+    python/pslparserpickled.py
 )
 
 set(EXTRA_FILES
@@ -43,6 +44,7 @@ set(EXTRA_FILES
     pep/pep6_functional.psl
     pep/pep7_reactiveprogramming.psl
     pep/pep8_templateexample.psl
+    pep/pep9_pythoncontroller.psl
     README.md
     TODO.md
 )
