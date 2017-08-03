@@ -25,6 +25,7 @@ find_package(SofaPython REQUIRED)
 set(PYTHON_FILES
     python/pslloader.py
     python/pslengine.py
+    python/pslast.py
     python/pslparserxml.py
     python/pslparserhjson.py
     python/pslparserpickled.py
