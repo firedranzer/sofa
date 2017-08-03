@@ -27,11 +27,12 @@
 #*    - damien.marchal@univ-lille1.fr Copyright (C) CNRS                       *
 #*                                                                             *
 #******************************************************************************/
-import cPickled
+import cPickle
+import pslast
 
 def toText(rootNode):
-        return cPickled.dumps(rootNode)
+        return cPickle.dumps(pslast.sceneToAst(rootNode))
 
 def parse(pickledContent):
     '''Takes a string containing a pickled scene and load it into the AST structured used by PSL Engine.'''
-    return cPickled.loads(pickledContent)
+    return cPickle.loads(pickledContent)

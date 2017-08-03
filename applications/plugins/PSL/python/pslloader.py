@@ -33,9 +33,11 @@ import contextlib
 import hjson
 import Sofa
 import os
+import pslast
+import pslengine
 import pslparserxml
 import pslparserhjson
-import pslengine
+import pslparserpickled
 
 
 
@@ -52,10 +54,13 @@ def save(rootNode, filename):
         with SetPath(dirname):
             os.chdir(dirname)
             file = open(filename, "w")
-            if filename.endswith(".psl") or filename.endswith(".pyson"):
-                print(pslparserhjson.toText(rootNode))
+            if filename.endswith(".psl"):
+                file.write(pslparserhjson.toText(rootNode))
             elif filename.endswith(".pslx"):
-                print(pslparserxml.toText(rootNode))
+                file.write(pslparserxml.toText(rootNode))
+            elif filename.endswith(".pslp"):
+                file.write(pslparserpickled.toText(rootNode))
+            file.close()
 
 def preProcess(ast):
     version = None
@@ -82,10 +87,12 @@ def load(filename):
         with SetPath(dirname):
             os.chdir(dirname)
             f = open(filename).read()
-            if filename.endswith(".psl") or filename.endswith(".pyson"):
+            if filename.endswith(".psl"):
                 ast = pslparserhjson.parse(f)
             elif filename.endswith(".pslx"):
                 ast = pslparserxml.parse(f)
+            elif filename.endswith(".pslp"):
+                ast = pslparserpickled.parse(f)
 
             if len(ast) == 0:
                 rootNode = Sofa.createNode("root")
@@ -101,6 +108,7 @@ def load(filename):
 
             ret = pslengine.processTree("", ast, directives)
             print(pslparserhjson.toText(ret))
+            print(pslast.sceneToAst(ret))
             return ret
 
         return None
