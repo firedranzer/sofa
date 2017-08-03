@@ -28,6 +28,7 @@
 #*                                                                             *
 #******************************************************************************/
 import os
+import hjson
 
 class MyObjectHook(object):
         def __call__(self, s):
@@ -89,5 +90,5 @@ def toText(rootNode):
 
 def parse(hjsoncontent):
     '''Takes a string containing a scene using HJSON syntax and convert it into the AST structured used by PSL Engine.'''
-    return hjson.loads(f, object_pairs_hook=MyObjectHook())
+    return hjson.loads(hjsoncontent, object_pairs_hook=MyObjectHook())
 

@@ -1,9 +1,5 @@
-Template : {
-	name : "MyTemplate"
-	Node : {}
-}
-
 Node : {
 	name : toto
+	OglModel : { name : "Damien" }
 	MyTemplate : {}
 }
