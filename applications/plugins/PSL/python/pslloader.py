@@ -107,8 +107,6 @@ def load(filename):
                 return rootNode
 
             ret = pslengine.processTree("", ast, directives)
-            print(pslparserhjson.toText(ret))
-            print(pslast.sceneToAst(ret))
             return ret
 
         return None

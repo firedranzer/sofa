@@ -124,12 +124,14 @@ def processParameter(parent, name, value, stack, frame):
                         frame["name"] = value
 
 def createObject(parentNode, name, stack , frame, kv):
-        print("===================> CREATING OBJECT: "+name+" stack: "+str(kv))
+        #print("===================> CREATING OBJECT: "+name+" stack: "+str(kv))
         if name in sofaComponents:
                 return parentNode.createObject(name, **kv)
 
+        kv["name"] = name
         failureObject = parentNode.createObject("Undefined", **kv)
-        Sofa.msg_error(failureObject, "Unable to create object "+str(key))
+
+        Sofa.msg_error(failureObject, "Unable to create object "+str(name))
         return failureObject
 
 def processObjectDict(obj, dic, stack, frame):
@@ -149,7 +151,8 @@ def processObject(parent, key, kv, stack, frame):
                 kv = [("name" , kv)]
 
         for k,v in kv:
-                if v[0] == 'p' and v[1] == '"':
+
+                if len(v) != 0 and v[0] == 'p' and v[1] == '"':
                         v = evalPython(None, v[2:-1], stack, frame)
 
                 if k == "name":
@@ -171,8 +174,8 @@ def processObject(parent, key, kv, stack, frame):
             except Exception,e:
                 Sofa.msg_warning(obj, "PSL: This does not seems to be a valid attribute: "+str(dataname))
 
-        if not "name" in kwargs:
-            obj.findData("name").unset()
+        #if not "name" in kwargs:
+        #    obj.findData("name").unset()
 
         stack.pop(-1)
 
@@ -183,7 +186,6 @@ def processObject(parent, key, kv, stack, frame):
     except Exception, e:
         c=parent.createChild("[XX"+key+"XX]")
         Sofa.msg_error(c, "PSL: Unable to create an object because: "+str(e.message))
-        return None
 
 # TODO add a warning to indicate that a template is loaded twice.
 def importTemplates(content):
@@ -212,7 +214,7 @@ def processImport(parent, key, kv, stack, frame):
         if not (isinstance(kv, str) or isinstance(kv, unicode)):
                 print("Expecting a single 'string' entry....in procesImport " + str(type(kv)))
                 return
-        filename = kv+".pyson"
+        filename = kv+".psl"
         if not os.path.exists(filename):
                 dircontent = os.listdir(os.getcwd())
                 matches = difflib.get_close_matches(filename, dircontent, n=4)
@@ -268,8 +270,8 @@ def reinstanciateTemplate(templateInstance):
         for o in c:
                 templateInstance.removeObject(o)
 
-        # Is there a template with this name, if this is the case
-        # Retrieve the associated templates .
+        ## Is there a template with this name, if this is the case
+        ## Retrieve the associated templates .
         if isinstance(templates[key], Sofa.Template):
                 n = templates[key].getTemplate()
                 for k,v in n:
@@ -377,7 +379,6 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
                                 if o != None:
                                         if isinstance(sofaAliasInitialName, str):
                                             Sofa.msg_warning(o, "'"+key+" was created using the hard coded alias '"+str(sofaAliasInitialName)+"'"+".  \nUsing hard coded aliases is a confusing practice and we advise you to use scene specific alias with the Alias keyword.")
-                                        tself.addObject(o)
                         elif key in templates:
                                 instanciateTemplate(tself, key,value, stack, frame)
                         else:
@@ -423,7 +424,7 @@ def processRootNode(key, kv, stack, frame):
 def processTree(key, kv, directives):
         refreshComponentListFromFactory()
         if directives["version"] == "1.0":
-            return processRootNode(key, kv, [], globals())
-
+            r = processRootNode(key, kv, [], globals())
+            return r
         ## Add here the future version of the language
 
