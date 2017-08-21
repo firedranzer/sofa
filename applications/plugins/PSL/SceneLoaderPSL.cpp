@@ -65,7 +65,7 @@ std::string SceneLoaderPSL::getFileTypeDesc()
 void SceneLoaderPSL::getExtensionList(ExtensionList* list)
 {
     list->clear();
-    list->push_back("psl");  /// H-JSON version
+    list->push_back("psl");  /// Human-JSON version
     list->push_back("pslx"); /// XML version
     list->push_back("pslp"); /// Python Pickled verson
 }

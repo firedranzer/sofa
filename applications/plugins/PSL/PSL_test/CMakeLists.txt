@@ -22,6 +22,7 @@ set(PSL_FILES
         pslfiles/test_template.psl
         pslfiles/test_node_fail.psl
         pslfiles/test_object.psl
+        pslfiles/test_object_datafield.psl
         pslfiles/test_pslversion_invalid.psl
         pslfiles/test_pythonexcept.psl
         pslfiles/test_pythonobject.psl

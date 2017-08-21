@@ -38,6 +38,7 @@ aliases = {}
 sofaAliases = {}
 sofaComponents = []
 SofaStackFrame = []
+datafieldQuirks = ["src", "input", "output"]
 sofaRoot = None
 imports = {}
 
@@ -107,12 +108,13 @@ def processParameter(parent, name, value, stack, frame):
                 matches = difflib.get_close_matches(name, sofaComponents+templates.keys()+sofaAliases.keys(), n=4)
                 c=parent.createChild("[XX"+name+"XX]")
                 Sofa.msg_error(c, "Unknow parameter or Component [" + name + "] suggestions -> "+str(matches))
-        else:
+        elif not name in datafieldQuirks:
                 ## Python Hook to build an eval function.
                 if value[0] == 'p' and value[1] == '"':
                         value = evalPython(None, value[2:-1], stack, frame)
 
                 try:
+                        print("SETTING ATTRIBUTE '"+name+"' -> " + str(value)+ " to "+ parent.name)
                         frame["self"].findData(name).setValueString(str(value))
                         frame["self"].findData(name).setPersistant(True)
 
@@ -124,7 +126,7 @@ def processParameter(parent, name, value, stack, frame):
                         frame["name"] = value
 
 def createObject(parentNode, name, stack , frame, kv):
-        #print("===================> CREATING OBJECT: "+name+" stack: "+str(kv))
+        print("===================> CREATING OBJECT: "+name+" parameters: "+str(kv))
         if name in sofaComponents:
                 return parentNode.createObject(name, **kv)
 
@@ -170,12 +172,13 @@ def processObject(parent, key, kv, stack, frame):
         ### Then revert only the ones that have been touched
         for dataname in kwargs:
             try:
-                obj.findData(dataname).setPersistant(True)
+                if dataname not in datafieldQuirks:
+                    obj.findData(dataname).setPersistant(True)
             except Exception,e:
                 Sofa.msg_warning(obj, "PSL: This does not seems to be a valid attribute: "+str(dataname))
 
-        #if not "name" in kwargs:
-        #    obj.findData("name").unset()
+        if not "name" in kwargs:
+            obj.findData("name").unset()
 
         stack.pop(-1)
 
@@ -295,6 +298,34 @@ def reinstanciateTemplate(templateInstance):
         stack = [globals(), frame]
         n = processNode(templateInstance, "Node", source, stack, nframe, doCreate=False)
 
+def processProperties(self, key, kv, stack, frame):
+    if not isinstance(kv, list):
+        print("UNABLE TO PROCESS NON LIST")
+
+    msg = ""
+    for k,v in kv:
+        ## Check if the property named by "k" already exists.
+        if hasattr(self, k):
+            msg += " - cannot add a property named '"+k+"' as it already exists"
+            continue
+
+        if isinstance(v, unicode):
+            v=str(v)
+
+        if isinstance(v, int):
+            self.addData(k, "Properties", "", "d", v)
+        elif isinstance(v, str) or isinstance(v,unicode):
+            self.addData(k, "Properties", "", "s", str(v))
+        elif isinstance(v, float):
+            self.addData(k, "Properties", "", "f", v)
+
+        if hasattr(self, k):
+            msg += " - adding: '"+str(k)+"' = "+str(v)
+        else:
+            msg += " - unable to create a property from the value '"+str(v)+"'"
+
+    Sofa.msg_info(self, "Adding user specified properties...\n"+msg)
+
 
 def instanciateTemplate(parent, key, kv, stack, frame):
         global templates
@@ -344,8 +375,12 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
 
         if doCreate:
                 tself = frame["self"] = parent.createChild("undefined")
+                parent.dt=0.5
+                parent.gravity=[0,1,2]
+
                 ### Force all the data field into a non-persistant state.
                 for datafield in tself.getListOfDataFields():
+                    print("SETTING DF TO: "+str(datafield.name))
                     datafield.setPersistant(False)
         else:
                 tself = frame["self"] = parent
@@ -370,6 +405,8 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
                                 n = processNode(tself, key, value, stack, {})
                         elif key == "Python":
                                 processPython(tself, key, value, stack, {})
+                        elif key == "properties":
+                                processProperties(tself, key, value, stack, {})
                         elif key == "Template":
                                 tself.addObject( processTemplate(tself, key, value, stack, {}) )
                         elif key == "Using":

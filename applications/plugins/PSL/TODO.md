@@ -14,6 +14,10 @@ by contributing.
 - when saving large chunk of data...use a dedicated opcode like 'extern('datafile')' to indicate we
   save them in a separated file (possible format are: json, xml, sofa string, python picked)
 - it should be possible to save a file in a python pickled version so that it can be loaded faster.
+- support "bizarre" feature of XML
+    - _ or NO to ignore a parameter
+    - include (superseeded by Import)
+    - objects (superseeded by Import)
 
 #### DONE
 - add a test framework.

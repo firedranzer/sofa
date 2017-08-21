@@ -46,6 +46,7 @@ set(EXTRA_FILES
     pep/pep7_reactiveprogramming.psl
     pep/pep8_templateexample.psl
     pep/pep9_pythoncontroller.psl
+    pep/pep10_hotreload.psl
     README.md
     TODO.md
 )

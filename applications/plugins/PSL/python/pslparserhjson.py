@@ -45,7 +45,7 @@ def objectToString(object, nspace):
                 res += "\n" + nspace + "    " + datafield.name + " : \"" + datafield.getValueString() + "\""
 
     ores = ""
-    ores += nspace+object.getClassName() + " : { "
+    ores += nspace+object.getClassName() + " : {"
     ores += res
     if res == "":
         ores += "}"+"\n"
@@ -57,7 +57,7 @@ def objectToString(object, nspace):
 def treeToString(node, space):
         nspace=space+"    "
         res = ""
-        res += space+"Node : { "
+        res += space+"Node : {"
 
         ores = ""
         for datafield in node.getListOfDataFields():
@@ -80,9 +80,9 @@ def treeToString(node, space):
         ores = ores + dres + cres
         res += ores
         if ores == "":
-            res += "}"+"\n"
+            res += "}\n"
         else:
-            res += space+"} "+"\n"
+            res += space+"}\n"
         return res
 
 def toText(rootNode):
