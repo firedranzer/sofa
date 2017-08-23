@@ -22,6 +22,7 @@
 #ifndef SOFA_COMPONENT_LINEARSOLVER_CGLINEARSOLVER_INL
 #define SOFA_COMPONENT_LINEARSOLVER_CGLINEARSOLVER_INL
 
+#include <sofa/simulation/Node.h>
 #include <SofaBaseLinearSolver/CGLinearSolver.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <SofaBaseLinearSolver/FullMatrix.h>

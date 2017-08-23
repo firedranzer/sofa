@@ -20,6 +20,7 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 #include <SofaExporter/BlenderExporter.h>
+#include <sofa/defaulttype/BaseVector.h>
 #include <iomanip>
 #include <iostream>
 
@@ -53,7 +54,7 @@ namespace sofa
                 if(mmodel == NULL)
                     serr<<"Initialization failed!"<<sendl;
                 Inherit::init();
-                // if hair type simulation, create an additional information frame 
+                // if hair type simulation, create an additional information frame
                 if(simulationType.getValue()==Hair)
                 {
                     ostringstream iss;
@@ -167,8 +168,8 @@ namespace sofa
 
                                     x0 = x0+x1;
 
-                                    pos0[0] = (float)x0[0]; 
-                                    pos0[1] = (float)x0[1]; 
+                                    pos0[0] = (float)x0[0];
+                                    pos0[1] = (float)x0[1];
                                     pos0[2] = (float)x0[2];
 
                                     file.write((char*)pos0,12);
@@ -178,16 +179,16 @@ namespace sofa
 
                                 //Coord x0=restData[i];
                                 Coord x=posData[i];
-                                pos[0] = (float)x[0]; 
-                                pos[1] = (float)x[1]; 
+                                pos[0] = (float)x[0];
+                                pos[1] = (float)x[1];
                                 pos[2] = (float)x[2];
 
                                 Deriv v;
                                 if((mmodel->read(core::ConstVecDerivId::velocity())) && ( (defaulttype::BaseVector::Index)mmodel->readVelocities().size()>i))
                                 {
                                     v =mmodel->readVelocities()[i];
-                                    vel[0] = (float)v[0]; 
-                                    vel[1] = (float)v[1]; 
+                                    vel[0] = (float)v[0];
+                                    vel[1] = (float)v[1];
                                     vel[2] = (float)v[2];
                                 }
 
@@ -195,8 +196,8 @@ namespace sofa
                                 if((mmodel->read(core::ConstVecCoordId::restPosition())) && ( (defaulttype::BaseVector::Index)mmodel->readRestPositions().size()>i))
                                 {
                                     x0 =mmodel->readRestPositions()[i];
-                                    rest[0] = (float)x0[0]; 
-                                    rest[1] = (float)x0[1]; 
+                                    rest[0] = (float)x0[0];
+                                    rest[1] = (float)x0[1];
                                     rest[2] = (float)x0[2];
                                 }
 

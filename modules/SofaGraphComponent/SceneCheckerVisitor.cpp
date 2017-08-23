@@ -21,8 +21,9 @@
 ******************************************************************************/
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/helper/system/PluginManager.h>
+#include <sofa/helper/system/FileRepository.h>
 #include <sofa/version.h>
-
+#include <sofa/simulation/Node.h>
 #include "SceneCheckerVisitor.h"
 #include "RequiredPlugin.h"
 

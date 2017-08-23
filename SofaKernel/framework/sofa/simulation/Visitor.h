@@ -23,19 +23,26 @@
 #define SOFA_SIMULATION_VISITOR_H
 
 #include <sofa/simulation/simulationcore.h>
-#include <sofa/simulation/Node.h>
 #include <sofa/simulation/LocalStorage.h>
 
-#include <sofa/core/behavior/BaseMechanicalState.h>
 #include <sofa/core/ExecParams.h>
-
 #include <sofa/helper/set.h>
 #include <iostream>
 
-#ifdef SOFA_DUMP_VISITOR_INFO
 #include <sofa/helper/system/thread/CTime.h>
+
+#ifdef SOFA_DUMP_VISITOR_INFO
+#include <sofa/core/behavior/BaseMechanicalState.h>
 #endif
 
+///////////////////// Forward declaration ////////////////////////////////////
+namespace sofa {
+namespace simulation {
+    class Node;
+}
+}
+
+///////////////////// Object declaration /////////////////////////////////////
 namespace sofa
 {
 
@@ -156,17 +163,6 @@ public:
         return false;
     }
 
-
-    //template < class Visit, class Container, class Object >
-    //void for_each(Visit* visitor, const Container& list, void (Visit::*fn)(Object))
-    //{
-    //	for (typename Container::iterator it=list.begin(); it != list.end(); ++it)
-    //	{
-    //		(visitor->*fn)(*it);
-    //	}
-    //}
-
-
     /// Alias for context->executeVisitor(this)
     virtual void execute(core::objectmodel::BaseContext* node, bool precomputedOrder=false);
 
@@ -202,8 +198,8 @@ public:
     Visitor& addTag(Tag t) { subsetsToManage.insert(t); return *this; }
     Visitor& removeTag(Tag t) { subsetsToManage.erase(t); return *this; }
 
-	/// Can the visitor access sleeping nodes?
-	bool canAccessSleepingNode;
+    /// Can the visitor access sleeping nodes?
+    bool canAccessSleepingNode;
 
 protected:
     const core::ExecParams* params;

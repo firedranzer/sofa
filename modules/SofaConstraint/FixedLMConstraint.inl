@@ -111,13 +111,11 @@ void FixedLMConstraint<DataTypes>::init()
     f_indices.createTopologicalEngine(topology, pointHandler);
     f_indices.registerTopologicalData();
 
-
     X[0]=1; X[1]=0; X[2]=0;
     Y[0]=0; Y[1]=1; Y[2]=0;
     Z[0]=0; Z[1]=0; Z[2]=1;
 
     initFixedPosition();
-
 }
 
 
@@ -212,13 +210,11 @@ void FixedLMConstraint<DataTypes>::draw(const core::visual::VisualParams* vparam
 {
     if (!vparams->displayFlags().getShowBehaviorModels()) return;
     const VecCoord& x =this->constrainedObject1->read(core::ConstVecCoordId::position())->getValue();
-    //serr<<"FixedLMConstraint<DataTypes>::draw(), x.size() = "<<x.size()<<sendl;
 
     const SetIndexArray & indices = f_indices.getValue();
 
     std::vector< defaulttype::Vector3 > points;
     defaulttype::Vector3 point;
-    //serr<<"FixedLMConstraint<DataTypes>::draw(), indices = "<<indices<<sendl;
     for (SetIndexArray::const_iterator it = indices.begin();
             it != indices.end();
             ++it)

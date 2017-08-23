@@ -78,7 +78,6 @@ int TetrahedronDiscreteIntersection::computeIntersection(Tetrahedron& e1, Point&
 
     // Find the point on the surface of the tetrahedron in the direction of -n
     Vector3 bdir = e1.getDBary(-n);
-    //sout << "b0 = "<<b0<<" \tbdir = "<<bdir<<sendl;
     double l1 = 1.0e10;
     for (int c=0; c<3; ++c)
     {
@@ -159,10 +158,6 @@ int TetrahedronDiscreteIntersection::computeIntersection(Ray& e1, Tetrahedron& e
     if (l0 > l1) return 0; // empty intersection
     double l = l0; //(l0+l1)/2;
     Vector3 X = P+PQ*l;
-
-    //sout << "tetra "<<e2.getIndex()<<": b0 = "<<b0<<" \tbdir = "<<bdir<<sendl;
-    //sout << "l0 = "<<l0<<" \tl1 = "<<l1<<" \tX = "<<X<<" \tbX = "<<e2.getBary(X)<<" \t?=? "<<(b0+bdir*l)<<sendl;
-    //sout << "b1 = "<<e2.getBary(e2.p1())<<" \nb2 = "<<e2.getBary(e2.p2())<<" \nb3 = "<<e2.getBary(e2.p3())<<" \nb4 = "<<e2.getBary(e2.p4())<<sendl;
 
     contacts->resize(contacts->size()+1);
     DetectionOutput *detection = &*(contacts->end()-1);

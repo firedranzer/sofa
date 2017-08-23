@@ -53,9 +53,7 @@ Visitor::Result UpdateBoundingBoxVisitor::processNodeTopDown(Node* node)
         // if some objects does not participate to the bounding box where they should,
         // you should overload their computeBBox function to correct that
         (*object)->computeBBox(params, true);
-//        cerr<<"UpdateBoundingBoxVisitor::processNodeTopDown object " << (*object)->getName() << " = "<< (*object)->f_bbox.getValue(params) << endl;
         nodeBBox->include((*object)->f_bbox.getValue(params));
-//        cerr << "   new bbox = " << *nodeBBox << endl;
     }
     node->f_bbox.endEdit(params);
     return RESULT_CONTINUE;
@@ -67,7 +65,6 @@ void UpdateBoundingBoxVisitor::processNodeBottomUp(simulation::Node* node)
     Node::ChildIterator childNode;
     for( childNode = node->child.begin(); childNode!=node->child.end(); ++childNode)
     {
-//        cerr<<"   UpdateBoundingBoxVisitor::processNodeBottomUpDown object " << (*childNode)->getName() << endl;
         nodeBBox->include((*childNode)->f_bbox.getValue(params));
     }
     node->f_bbox.endEdit(params);

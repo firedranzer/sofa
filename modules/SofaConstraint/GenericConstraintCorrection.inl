@@ -200,25 +200,9 @@ void GenericConstraintCorrection::getComplianceMatrix(defaulttype::BaseMatrix* M
 }
 
 void GenericConstraintCorrection::applyPredictiveConstraintForce(const core::ConstraintParams * /*cparams*/, core::MultiVecDerivId /*f*/, const defaulttype::BaseVector * /*lambda*/) {
-//    printf("GenericConstraintCorrection::applyPredictiveConstraintForce not implemented\n");
-//    if (mstate)
-//    {
-//        Data< VecDeriv > *f_d = f[mstate].write();
-
-//        if (f_d)
-//        {
-//            applyPredictiveConstraintForce(cparams, *f_d, lambda);
-//        }
-//    }
 }
 
 void GenericConstraintCorrection::resetContactForce() {
-//    printf("GenericConstraintCorrection::resetContactForce not implemented\n");
-//    Data<VecDeriv>& forceData = *this->mstate->write(core::VecDerivId::force());
-//    VecDeriv& force = *forceData.beginEdit();
-//    for( unsigned i=0; i<force.size(); ++i )
-//        force[i] = Deriv();
-//    forceData.endEdit();
 }
 
 } // namespace constraintset

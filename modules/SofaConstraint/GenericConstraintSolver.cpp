@@ -166,11 +166,9 @@ bool GenericConstraintSolver::buildSystem(const core::ConstraintParams *cParams,
     unsigned int numConstraints = 0;
 
     sofa::helper::AdvancedTimer::stepBegin("Accumulate Constraint");
-    // mechanical action executed from root node to propagate the constraints
     simulation::MechanicalResetConstraintVisitor(cParams).execute(context);
-    // calling buildConstraintMatrix
-    //simulation::MechanicalAccumulateConstraint(&cparams, core::MatrixDerivId::holonomicC(), numConstraints).execute(context);
 
+    // calling buildConstraintMatrix
     MechanicalSetConstraint(cParams, core::MatrixDerivId::holonomicC(), numConstraints).execute(context);
     MechanicalAccumulateConstraint2(cParams, core::MatrixDerivId::holonomicC(), reverseAccumulateOrder.getValue()).execute(context);
 
@@ -575,23 +573,6 @@ void GenericConstraintProblem::gaussSeidel(double timeout, GenericConstraintSolv
         tabErrors.resize(dimension);
     }
 
- /*   if(schemeCorrection)
-    {
-        std::cout<<"shemeCorrection => LCP before step 1"<<std::endl;
-        helper::afficheLCP(dfree, w, force,  dim);
-         ///////// scheme correction : step 1 => modification of dfree
-        for(j=0; j<dim; j++)
-        {
-            for(k=0; k<dim; k++)
-                dfree[j] -= w[j][k] * force[k];
-        }
-
-        ///////// scheme correction : step 2 => storage of force value
-        for(j=0; j<dim; j++)
-            df[j] = -force[j];
-    }
-*/
-
     for(i=0; i<maxIterations; i++)
     {
         bool constraintsAreVerified = true;
@@ -727,16 +708,6 @@ void GenericConstraintProblem::gaussSeidel(double timeout, GenericConstraintSolv
     }
 
     sofa::helper::AdvancedTimer::valSet("GS iterations", i+1);
-
-/*
-    if(schemeCorrection)
-    {
-        ///////// scheme correction : step 3 => the corrective motion is only based on the diff of the force value: compute this diff
-        for(j=0; j<dim; j++)
-        {
-            df[j] += force[j];
-        }
-    }	*/
 
     if(showGraphs)
     {

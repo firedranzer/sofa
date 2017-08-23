@@ -231,7 +231,6 @@ void DistanceLMContactConstraint<DataTypes>::LagrangeMultiplierEvaluation(const 
             contact.state=VANISHING;
             group->setActive(false);
             out.contactForce=Deriv();
-            //                            msg_info()<<"DistanceLMContactConstraint<DataTypes>::LagrangeMultiplierEvaluation, deactivate attractive force"<<std::endl;
             return;
         }
 
@@ -277,15 +276,10 @@ void DistanceLMContactConstraint<DataTypes>::LagrangeMultiplierEvaluation(const 
             Lambda[0]=out.contactForce*out.n;
             Lambda[1]=out.contactForce*out.t1;
             Lambda[2]=out.contactForce*out.t2;
-
-            //                                msg_info()<<"DistanceLMContactConstraint<DataTypes>::LagrangeMultiplierEvaluation, , friction = "<<contactFriction.getValue()<<std::endl<<", cut excessive friction force, bounded Lambda = "<<std::endl<<Lambda<<std::endl;
-
         }
         else contact.state=STICKING;
 
         out.contactForce = out.n*Lambda[0]+out.t1*Lambda[1]+out.t2*Lambda[2];
-
-
         break;
     }
     case core::ConstraintParams::POS :
@@ -323,8 +317,6 @@ bool DistanceLMContactConstraint<DataTypes>::isCorrectionComputedWithSimulatedDO
 template <class DataTypes>
 void DistanceLMContactConstraint<DataTypes>::draw(const core::visual::VisualParams* vparams)
 {
-    //if (this->l0.size() != pointPairs.getValue().size()) updateRestLength();
-
     if (vparams->displayFlags().getShowBehaviorModels())
     {
         const VecCoord &x1= this->constrainedObject1->read(core::ConstVecCoordId::position())->getValue();
@@ -366,8 +358,6 @@ void DistanceLMContactConstraint<DataTypes>::draw(const core::visual::VisualPara
         vparams->drawTool()->drawLines(points[SLIDING], 1, colorsContactState[SLIDING]);
 
         vparams->drawTool()->drawLines(slidingConstraints, 1, colorsContactState.back());
-
-
     }
 }
 

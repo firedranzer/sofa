@@ -19,6 +19,8 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#include <sofa/core/behavior/BaseMechanicalState.h>
+#include <sofa/simulation/Node.h>
 #include <SofaSimulationCommon/TransformationVisitor.h>
 
 namespace sofa

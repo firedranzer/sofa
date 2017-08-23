@@ -32,6 +32,8 @@
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/helper/AdvancedTimer.h>
 
+#include <sofa/simulation/Node.h>
+
 #include <Eigen/LU>
 #include <Eigen/QR>
 
@@ -425,7 +427,6 @@ bool LMConstraintSolver::applyCorrection(const core::ConstraintParams* cparams, 
 
 //----------------------------------------------------------------------------------------------//
 // Specific method to build the matrices
-
 void LMConstraintSolver::buildLeftMatrix(const DofToMatrix& invMassMatrix, DofToMatrix& LMatrix, SparseMatrixEigen &LeftMatrix, DofToMatrix &invMass_Ltrans) const
 {
     for (SetDof::const_iterator itDofs=setDofs.begin(); itDofs!=setDofs.end(); ++itDofs)

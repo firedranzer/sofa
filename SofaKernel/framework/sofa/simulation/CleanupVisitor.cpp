@@ -19,6 +19,8 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#include <sofa/helper/system/thread/CTime.h>
+
 #include <sofa/simulation/CleanupVisitor.h>
 #include <sofa/simulation/Node.h>
 

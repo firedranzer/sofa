@@ -23,19 +23,30 @@
 #define SOFA_COMPONENT_LINEARSOLVER_MATRIXLINEARSOLVER_H
 #include "config.h"
 
-#include <sofa/simulation/MechanicalVisitor.h>
-#include <sofa/simulation/MechanicalMatrixVisitor.h>
 #include <sofa/simulation/MechanicalOperations.h>
 #include <sofa/simulation/VectorOperations.h>
-#include <sofa/core/behavior/LinearSolver.h>
+
 #include <SofaBaseLinearSolver/DefaultMultiMatrixAccessor.h>
 #include <SofaBaseLinearSolver/GraphScatteredTypes.h>
 #include <SofaBaseLinearSolver/FullMatrix.h>
 #include <SofaBaseLinearSolver/SparseMatrix.h>
 #include <SofaBaseLinearSolver/CompressedRowSparseMatrix.h>
 #include <SofaBaseLinearSolver/DiagonalMatrix.h>
-#include <sofa/core/behavior/RotationMatrix.h>
 
+#include <sofa/core/behavior/RotationMatrix.h>
+#include <sofa/core/behavior/LinearSolver.h>
+
+#include <sofa/simulation/Node.h>
+
+/////////////////////// Forward declaration ////////////////////////////////////////////////////////
+namespace sofa {
+namespace simulation {
+    class Node ;
+    class MechanicalVistor ;
+}
+}
+
+/////////////////////// Declarations ///////////////////////////////////////////////////////////////
 namespace sofa
 {
 
@@ -314,7 +325,6 @@ public :
 
     void setGroup(int i)
     {
-        //serr << "setGroup("<<i<<")" << sendl;
         if (isMultiGroup() && (unsigned)i < this->groups.size())
         {
             currentNode = groups[i];

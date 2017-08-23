@@ -28,6 +28,8 @@
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
 #include <sofa/simulation/CollisionEndEvent.h>
+#include <sofa/simulation/Node.h>
+
 
 namespace sofa
 {
@@ -233,23 +235,6 @@ void SleepController::wakeUpNodes()
     wakeupPairs.resize(m_statesThatCanSleep.size());
 
     collectWakeupPairs(wakeupPairs);
-
-    //TODO(dmarchal) remove it or uncomment it !
-    // Debug of the pairs
-    /*	if (notMuted())
-    {
-        for (unsigned int i = 0, nbWakeupPairs = wakeupPairs.size(); i < nbWakeupPairs; ++i)
-        {
-            const BaseContexts& wakeupPairRef = wakeupPairs[i];
-            if (!wakeupPairRef.empty())
-            {
-                std::stringstream tmp
-                for (unsigned int j = 0, nbLinks = wakeupPairRef.size(); j < nbLinks; ++j)
-                    tmp << m_contextsThatCanSleep[i]->getName() << " --> " << wakeupPairRef[j]->getName() << msgendl;
-                msg_info() << tmp ;
-            }
-        }
-    } */
 
     // We use an iterative process to wake up nodes until we don't change any state
     bool changed = false;

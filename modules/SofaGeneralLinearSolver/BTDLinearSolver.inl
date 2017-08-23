@@ -124,7 +124,6 @@ void BTDLinearSolver<Matrix,Vector>::invert(Matrix& M)
     const Index bsize = Matrix::getSubMatrixDim(f_blockSize.getValue());
     const Index nb = M.rowSize() / bsize;
     if (nb == 0) return;
-    //alpha.resize(nb);
     alpha_inv.resize(nb);
     lambda.resize(nb-1);
     B.resize(nb);
@@ -139,10 +138,7 @@ void BTDLinearSolver<Matrix,Vector>::invert(Matrix& M)
     SubMatrix A, C;
     //Index ndiag = 0;
     M.getAlignedSubMatrix(0,0,bsize,bsize,A);
-    //if (verbose) sout << "A[0] = " << A << sendl;
     M.getAlignedSubMatrix(0,1,bsize,bsize,C);
-    //if (verbose) sout << "C[0] = " << C << sendl;
-    //alpha[0] = A;
     invert(alpha_inv[0],A);
     msg_info_when(this->f_verbose.getValue()) << "alpha_inv[0] = " << alpha_inv[0] ;
     lambda[0] = alpha_inv[0]*C;
@@ -151,24 +147,11 @@ void BTDLinearSolver<Matrix,Vector>::invert(Matrix& M)
     for (Index i=1; i<nb; ++i)
     {
         M.getAlignedSubMatrix((i  ),(i  ),bsize,bsize,A);
-        //if (verbose) sout << "A["<<i<<"] = " << A << sendl;
         M.getAlignedSubMatrix((i  ),(i-1),bsize,bsize,B[i]);
-        //if (verbose) sout << "B["<<i<<"] = " << B[i] << sendl;
-        //alpha[i] = (A - B[i]*lambda[i-1]);
-
 
         BlocType Temp1= B[i]*lambda[i-1];
         BlocType Temp2= A - Temp1;
         invert(alpha_inv[i], Temp2);
-
-
-        //if(subpartSolve.getValue() ) {
-        //	helper::vector<SubMatrix> nHn_1; // bizarre: pb compilation avec SubMatrix nHn_1 = B[i] *alpha_inv[i];
-        //	nHn_1.resize(1);
-        //	nHn_1[0] = B[i] *alpha_inv[i-1];
-        //	H.insert(make_pair(IndexPair(i,i-1),nHn_1[0])); //IndexPair(i+1,i) ??
-        //	serr<<" Add pair ("<<i<<","<<i-1<<")"<<sendl;
-        //}
 
         msg_info_when(this->f_verbose.getValue()) << "alpha_inv["<<i<<"] = " << alpha_inv[i] ;
         if (i<nb-1)
@@ -187,8 +170,6 @@ void BTDLinearSolver<Matrix,Vector>::invert(Matrix& M)
     Minv.resize(nb*bsize,nb*bsize);
     Minv.setAlignedSubMatrix((nb-1),(nb-1),bsize,bsize,alpha_inv[nb-1]);
 
-    //std::cout<<"Minv.setSubMatrix call for block number"<<(nb-1)<<std::endl;
-
     nBlockComputedMinv[nb-1] = 1;
 
     if(subpartSolve.getValue() )
@@ -201,8 +182,6 @@ void BTDLinearSolver<Matrix,Vector>::invert(Matrix& M)
         // TODO : ajouter un compteur "first_block" qui évite de descendre les déplacements jusqu'au block 0 dans partial_solve si ce block n'a pas été appelé
         computeMinvBlock(0, 0);
     }
-
-    //sout << "BTDLinearSolver: "<<ndiag<<"/"<<nb<<"diagonal blocs."<<sendl;
 }
 
 
@@ -213,12 +192,9 @@ void BTDLinearSolver<Matrix,Vector>::invert(Matrix& M)
 ///                    [  (Minv21)(-l0t)   (Minv22)(-l1t)  inva2-l2(Minv32) Minv32t ]
 ///                    [  (Minv31)(-l0t)   (Minv32)(-l1t)   (Minv33)(-l2t)   inva3  ]
 ///
-
 template<class Matrix, class Vector>
 void BTDLinearSolver<Matrix,Vector>::computeMinvBlock(Index i, Index j)
 {
-    //serr<<"computeMinvBlock("<<i<<","<<j<<")"<<sendl;
-
     if (i < j)
     {
         // i < j correspond to the upper diagonal
@@ -292,8 +268,6 @@ void BTDLinearSolver<Matrix,Vector>::computeMinvBlock(Index i, Index j)
 
 
         H_it = H.find( IndexPair(i0,j0+1) );
-        //serr<<" find pair ("<<i<<","<<j0+1<<")"<<sendl;
-
         if (H_it == H.end())
         {
             my_identity(iHj, bsize);
@@ -350,21 +324,14 @@ void BTDLinearSolver<Matrix,Vector>::solve (Matrix& /*M*/, Vector& x, Vector& b)
     const Index nb = b.size() / bsize;
     if (nb == 0) return;
 
-    //if (verbose) sout << "D["<<0<<"] = " << b.asub(0,bsize) << sendl;
     x.asub(0,bsize) = alpha_inv[0] * b.asub(0,bsize);
-    //if (verbose) sout << "Y["<<0<<"] = " << x.asub(0,bsize) << sendl;
     for (Index i=1; i<nb; ++i)
     {
-        //if (verbose) sout << "D["<<i<<"] = " << b.asub(i,bsize) << sendl;
         x.asub(i,bsize) = alpha_inv[i]*(b.asub(i,bsize) - B[i]*x.asub((i-1),bsize));
-        //if (verbose) sout << "Y["<<i<<"] = " << x.asub(i,bsize) << sendl;
     }
-    //x.asub((nb-1),bsize) = Y.asub((nb-1),bsize);
-    //if (verbose) sout << "x["<<nb-1<<"] = " << x.asub((nb-1),bsize) << sendl;
     for (Index i=nb-2; i>=0; --i)
     {
         x.asub(i,bsize) /* = Y.asub(i,bsize)- */ -= lambda[i]*x.asub((i+1),bsize);
-        //if (verbose) sout << "x["<<i<<"] = " << x.asub(i,bsize) << sendl;
     }
 
     // x is the solution of the system
@@ -503,8 +470,6 @@ void BTDLinearSolver<Matrix,Vector>::bwdAccumulateRHinBloc(Index indMaxBloc)
 
         if (problem.getValue())
             std::cout<<"bwdLH["<<b<<"] = H["<<b<<"]["<<b+1<<"] * ( Minv["<<b+1<<"]["<<b+1<<"] * RH["<<b+1<< "] +bwdLH["<<b+1<<"])"<<std::endl;
-
-
 
         // store the contribution as bwdContributionOnLH
         bwdContributionOnLH.asub(b,bsize) = _acc_lh_bloc;
@@ -651,27 +616,10 @@ void BTDLinearSolver<Matrix,Vector>::partial_solve(ListIndex&  Iout, ListIndex& 
     Index MinIdBloc_OUT = Iout.front();
     Index MaxIdBloc_OUT = Iout.back();
 
-
-    //std::cout<<"partial_solve: need update on position for bloc between dofs "<< MinIdBloc_OUT<< "  and "<<MaxIdBloc_OUT<<std::endl;
-    if (verification.getValue())
-    {
-//        const Index bsize = Matrix::getSubMatrixDim(f_blockSize.getValue());
-//        std::cout<<" input Force= ";
-//        for (Index i=MinIdBloc_OUT; i<=MaxIdBloc_OUT; i++)
-//        {
-//            std::cout<<"     ["<<i<<"] "<<this->currentGroup->systemRHVector->asub(i,bsize);
-//        }
-//        std::cout<<" "<<std::endl;
-    }
-
-
     if( NewIn)
     {
-
         Index MinIdBloc_IN = Iin.front(); //  Iin needs to be sorted
         Index MaxIdBloc_IN = Iin.back();  //
-
-
 
         //debug
         if (problem.getValue())
@@ -685,11 +633,7 @@ void BTDLinearSolver<Matrix,Vector>::partial_solve(ListIndex&  Iout, ListIndex& 
 
         // now the fwdLH begins to be wrong when > to the indice of MinIdBloc_IN (need to be updated in step 3 or 4)
         this->_indMaxFwdLHComputed = MinIdBloc_IN;
-
-
-
     }
-
 
     if (current_bloc > MinIdBloc_OUT)
     {
@@ -736,13 +680,6 @@ void BTDLinearSolver<Matrix,Vector>::partial_solve(ListIndex&  Iout, ListIndex& 
             std::cout<<"  new _indMaxFwdLHComputed = "<<_indMaxFwdLHComputed<<std::endl;
     }
 
-
-
-
-
-
-
-
     // debug: test
     if (verification.getValue())
     {
@@ -770,8 +707,6 @@ void BTDLinearSolver<Matrix,Vector>::partial_solve(ListIndex&  Iout, ListIndex& 
 
         if (normDR > ((1.0e-7)*normR + 1.0e-20) )
         {
-
-
             std::cout<<"++++++++++++++++ WARNING +++++++++++\n \n Found solution for bloc OUT :";
             for (Index i=MinIdBloc_OUT; i<=MaxIdBloc_OUT; i++)
             {
@@ -797,20 +732,13 @@ void BTDLinearSolver<Matrix,Vector>::partial_solve(ListIndex&  Iout, ListIndex& 
 
         return;
     }
-
-
-
 }
-
-
-
 
 
 template<class Matrix, class Vector>
 template<class RMatrix, class JMatrix>
 bool BTDLinearSolver<Matrix,Vector>::addJMInvJt(RMatrix& result, JMatrix& J, double fact)
 {
-    //const Index Jrows = J.rowSize();
     const Index Jcols = J.colSize();
     if (Jcols != Minv.rowSize())
     {
@@ -821,7 +749,7 @@ bool BTDLinearSolver<Matrix,Vector>::addJMInvJt(RMatrix& result, JMatrix& J, dou
 
     if (f_verbose.getValue())
     {
-// debug christian: print of the inverse matrix:
+        // debug christian: print of the inverse matrix:
         sout<< "C = ["<<sendl;
         for  (Index mr=0; mr<Minv.rowSize(); mr++)
         {
@@ -833,7 +761,7 @@ bool BTDLinearSolver<Matrix,Vector>::addJMInvJt(RMatrix& result, JMatrix& J, dou
         }
         sout<< "];"<<sendl;
 
-// debug christian: print of matrix J:
+        // debug christian: print of matrix J:
         sout<< "J = ["<<sendl;
         for  (Index jr=0; jr<J.rowSize(); jr++)
         {

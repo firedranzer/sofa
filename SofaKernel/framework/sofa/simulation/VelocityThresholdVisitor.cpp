@@ -19,9 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-
-
-
+#include <sofa/simulation/Node.h>
 #include <sofa/simulation/VelocityThresholdVisitor.h>
 #include <sofa/core/behavior/BaseMechanicalState.h>
 #include <iostream>

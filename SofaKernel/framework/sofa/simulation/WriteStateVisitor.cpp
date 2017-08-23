@@ -30,6 +30,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+#include <sofa/simulation/Node.h>
 #include <sofa/simulation/WriteStateVisitor.h>
 #include <sofa/defaulttype/Vec.h>
 

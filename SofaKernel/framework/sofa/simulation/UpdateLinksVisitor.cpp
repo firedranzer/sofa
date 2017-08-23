@@ -42,8 +42,6 @@ Visitor::Result UpdateLinksVisitor::processNodeTopDown(simulation::Node* node)
         this->processObject(it->get());
     }
 
-    //TODO(dmarchal): why do we clear the messsage logs when we update the links ?
-    //node->clearWarnings(); node->clearOutputs();
     return RESULT_CONTINUE;
 }
 

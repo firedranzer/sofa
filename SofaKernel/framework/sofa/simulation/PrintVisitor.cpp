@@ -84,7 +84,6 @@ Visitor::Result PrintVisitor::processNodeTopDown(simulation::Node* node)
 void PrintVisitor::processNodeBottomUp(simulation::Node* /*node*/)
 {
     --level;
-//    std::cout<<"PrintVisitor::processNodeBottomUp "<< node->getName() << std::endl;
 }
 
 } // namespace simulation

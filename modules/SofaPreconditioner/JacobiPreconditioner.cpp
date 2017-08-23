@@ -37,14 +37,7 @@ namespace linearsolver
 SOFA_DECL_CLASS(JacobiPreconditioner)
 
 int JacobiPreconditionerClass = core::RegisterObject("Linear solver based on a diagonal matrix (i.e. Jacobi preconditioner)")
-//.add< JacobiPreconditioner<GraphScatteredMatrix,GraphScatteredVector> >(true)
         .add< JacobiPreconditioner<DiagonalMatrix<double>, FullVector<double> > >(true)
-//.add< JacobiPreconditioner<SparseMatrix<double>, FullVector<double> > >()
-// .add< JacobiPreconditioner<NewMatBandMatrix,NewMatVector> >()
-// .add< JacobiPreconditioner<NewMatMatrix,NewMatVector> >()
-// .add< JacobiPreconditioner<NewMatSymmetricMatrix,NewMatVector> >()
-// .add< JacobiPreconditioner<NewMatSymmetricBandMatrix,NewMatVector> >()
-//.add< JacobiPreconditioner<FullMatrix<double>, FullVector<double> > >()
         .addAlias("JacobiLinearSolver")
         .addAlias("JacobiSolver")
         ;

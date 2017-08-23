@@ -74,7 +74,6 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::clean
             parent->removeObject(m_constraint);
 
         parent = NULL;
-        //delete m_constraint;
         m_constraint.reset();
 
         mapper1.cleanup();
@@ -156,22 +155,17 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::activ
     int i = 0;
     const double d0 = intersectionMethod->getContactDistance() + model1->getProximity() + model2->getProximity(); // - 0.001;
 
-    //std::cout<<" d0 = "<<d0<<std::endl;
-
     mappedContacts.resize(contacts.size());
     for (std::vector<sofa::core::collision::DetectionOutput*>::const_iterator it = contacts.begin(); it!=contacts.end(); it++, i++)
     {
         sofa::core::collision::DetectionOutput* o = *it;
-        //std::cout<<" collisionElements :"<<o->elem.first<<" - "<<o->elem.second<<std::endl;
         CollisionElement1 elem1(o->elem.first);
         CollisionElement2 elem2(o->elem.second);
         int index1 = elem1.getIndex();
         int index2 = elem2.getIndex();
-        //std::cout<<" indices :"<<index1<<" - "<<index2<<std::endl;
 
         typename DataTypes1::Real r1 = 0.;
         typename DataTypes2::Real r2 = 0.;
-        //double constraintValue = ((o->point[1] - o->point[0]) * o->normal) - intersectionMethod->getContactDistance();
 
         // Create mapping for first point
         index1 = mapper1.addPointB(o->point[0], index1, r1
@@ -186,7 +180,7 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::activ
 #ifdef DETECTIONOUTPUT_BARYCENTRICINFO
                     , o->baryCoords[1]
 #endif
-                                      );
+        );
         }
         else
         {
@@ -194,7 +188,7 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::activ
 #ifdef DETECTIONOUTPUT_BARYCENTRICINFO
                     , o->baryCoords[1]
 #endif
-                                      );
+        );
         }
         double distance = d0 + r1 + r2;
 
@@ -208,10 +202,6 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::activ
     mapper1.updateXfree();
     if (!selfCollision) mapper2.update();
     if (!selfCollision) mapper2.updateXfree();
-
-
-    //msg_info()<<" end activateMappers call"<<std::endl;
-
 }
 
 template < class TCollisionModel1, class TCollisionModel2, class ResponseDataTypes  >
@@ -250,7 +240,6 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::creat
         parent = group;
         if (parent!=NULL)
         {
-            //sout << "Attaching contact response to "<<parent->getName()<<sendl;
             parent->addObject(this);
             parent->addObject(m_constraint);
         }
@@ -266,7 +255,6 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::remov
         mapper2.resize(0);
         if (parent!=NULL)
         {
-            //sout << "Removing contact response from "<<parent->getName()<<sendl;
             parent->removeObject(this);
             parent->removeObject(m_constraint);
         }

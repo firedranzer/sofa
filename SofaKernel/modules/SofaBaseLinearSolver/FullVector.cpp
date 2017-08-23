@@ -31,12 +31,7 @@ namespace component
 
 namespace linearsolver
 {
-/*
-template<> FullVector<bool>::FullVector()
-: data(NULL), cursize(0), allocsize(0)
-{
-}
-*/
+
 template<> void FullVector<bool>::set(Index i, SReal v)
 {
     data[i] = (v!=0);

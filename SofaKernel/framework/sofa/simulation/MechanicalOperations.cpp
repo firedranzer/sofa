@@ -19,6 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#include <sofa/core/behavior/ConstraintSolver.h>
 #include <sofa/simulation/MechanicalOperations.h>
 #include <sofa/simulation/MechanicalVisitor.h>
 #include <sofa/simulation/MechanicalMatrixVisitor.h>
@@ -170,11 +171,11 @@ void MechanicalOperations::projectPosition(core::MultiVecCoordId x, SReal time)
 void MechanicalOperations::computeEnergy(SReal &kineticEnergy, SReal &potentialEnergy)
 {
     kineticEnergy=0;
-	potentialEnergy=0;
-	sofa::simulation::MechanicalComputeEnergyVisitor *energyVisitor = new sofa::simulation::MechanicalComputeEnergyVisitor(&mparams);
+    potentialEnergy=0;
+    sofa::simulation::MechanicalComputeEnergyVisitor *energyVisitor = new sofa::simulation::MechanicalComputeEnergyVisitor(&mparams);
     executeVisitor(energyVisitor);
-	kineticEnergy=energyVisitor->getKineticEnergy();
-	potentialEnergy=energyVisitor->getPotentialEnergy();
+    kineticEnergy=energyVisitor->getKineticEnergy();
+    potentialEnergy=energyVisitor->getPotentialEnergy();
 }
 /// Apply projective constraints to the given velocity vector
 void MechanicalOperations::projectVelocity(core::MultiVecDerivId v, SReal time)

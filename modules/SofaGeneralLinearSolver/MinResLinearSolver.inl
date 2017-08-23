@@ -30,7 +30,7 @@
 #include <sofa/simulation/MechanicalVisitor.h>
 #include <sofa/helper/system/thread/CTime.h>
 #include <sofa/helper/AdvancedTimer.h>
-
+#include <sofa/simulation/Node.h>
 #include <sofa/core/ObjectFactory.h>
 #include <iostream>
 
@@ -52,10 +52,9 @@ MinResLinearSolver<TMatrix,TVector>::MinResLinearSolver()
     , f_graph( initData(&f_graph,"graph","Graph of residuals at each iteration") )
 {
     f_graph.setWidget("graph");
-//    f_graph.setReadOnly(true);
 
-	f_maxIter.setRequired(true);
-	f_tolerance.setRequired(true);
+    f_maxIter.setRequired(true);
+    f_tolerance.setRequired(true);
 }
 
 template<class TMatrix, class TVector>

@@ -29,8 +29,10 @@
 #include <SofaBaseLinearSolver/SparseMatrix.h>
 #include <SofaBaseLinearSolver/FullMatrix.h>
 #include <sofa/helper/map.h>
-#include <math.h>
 #include <SofaBaseLinearSolver/CompressedRowSparseMatrix.h>
+
+#include <math.h>
+#include <fstream>
 
 namespace sofa
 {
