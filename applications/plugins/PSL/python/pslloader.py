@@ -105,8 +105,9 @@ def load(filename):
                 rootNode = Sofa.createNode("root")
                 Sofa.msg_error(rootNode, "Unsupported PSLVersion"+str(directives["version"]))
                 return rootNode
-
-            ret = pslengine.processTree("", ast, directives)
+            g=globals()
+            g["__file__"]=filename
+            ret = pslengine.processTree("", ast, directives, g)
             return ret
 
         return None

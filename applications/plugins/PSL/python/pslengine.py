@@ -458,10 +458,10 @@ def processRootNode(key, kv, stack, frame):
         return None
 
 ## Root function that process an abstract tree.
-def processTree(key, kv, directives):
+def processTree(key, kv, directives, globalenv):
         refreshComponentListFromFactory()
         if directives["version"] == "1.0":
-            r = processRootNode(key, kv, [], globals())
+            r = processRootNode(key, kv, [], globalenv)
             return r
         ## Add here the future version of the language
 
