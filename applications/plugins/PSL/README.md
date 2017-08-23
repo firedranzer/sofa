@@ -1,84 +1,86 @@
-The Python Scene Language for Sofa 
+Python Scene Language for Sofa
 ===========
-The Python Scene Language (PSL) mixes the advantages of *XML* and *pyscn* in an unified and powerfull framework. It is also a language defined through an Abstract Semantics and it can then have multiple Concrete Semantics (JSON, H-JSON, XML, ...)
+The Python Scene Language (PSL) is an attempt to mixe the advantages of *scn* and *pyscn* in an unified
+framework. The language has been specifically designed to make sofa scenes in an elegant and powerful
+way.
 
-#### A small Introduction
 PSL features:
-- descriptive scenes (as XML)
-- programable fragments (with embeded Python)
-- scene templates (customisable dynamic element that can instantiated)
-- libraries (for scene elements reuse and sharing)
+- scene description (as we have in .scn)
+- scene programmability (with embeded Python)
+- scene templates (dynamic element that can be reuse and instantiated)
+- scene libraries (to store scene templates for reuse and sharing)
 - explicit aliasing (to simplify scene writing).
-- preserve scene structure when it is loaded & saved.
+- scene loading & saving.
+- multiple alternative syntax (xml, hjson, python-pickled)
+- ... more to come ...
 
-To give you a taste of the language in its H-JSON flavor here is a small scene composed of two *psl* files. One os called SoftRobotActuator.psl and is a library of reusable component Template (as the PneuNet actuator). The other is the scene loaded in Sofa. Once imported, the template from the library can be instanciated in the scene. 
-```css
-/// The library file named SoftRobotActuators.psl
-Template : {
-	name : "PneuNets"
-	properties : {
-		numSection : 10
-	}
-	Node : {
-		MechanicalObject : {
-			name : "mstate"
-			position : p"srange(0, numSection*3)"
-		}
-	}
-}
+Compared to classical *.scn*, PSL offer scene dynamicity,
+Comparet to *.pyscn*, PSL offer savability, templates and a more compact declarative syntax
 
+#### First examples
+The PSL language itself is defined with an abstract syntax semantics. Doing so allow us to very quickly implement concrete syntaxes
+depending on the developpers preferences. We currently have implemented an XML base concrete syntax (that is 99% compatible with
+existing .scn file) and an H-JSON one (that look a lot like QML's one). But the important aspect to keep in mind is that whetever
+the syntax you like...this is mostly "cosmetic" as the underlying computational model is shared between the different syntaxes.
 
-/// The real scene.psl
-Node : {
-	name : "myNameIsRoot"
-
-	Import : SoftRobotActuators
-	Using : SoftRobotActuators.PneuNets-PneuNets
-
-	Node : {
-		Python : ''''
-			Sofa.msg_info(myNameIsRoot, "PSL offer scene direct scene element access to python code with scoping !!!")
-			for i in range(0,10):
-				self.addChild("one")
-				myNameIsRoot.addChild("three")
-		'''
-	}
-
-	PneuNets : { 
-		name:"myPneuNet" 
-		numSections : 10
-	}
-}
-```
-
-The same scene can also be described using the XML flavor thus look like the following. 
+Let's start with a simple scene example in XML that is only containing classical Sofa components.
 ```xml
-<Node name : "myNameIsRoot">
-	<Import library="SoftRobotActuators"/>
-	<Using alias="SoftRobotActuators.PneuNets-PneuNets"/>
-
-	<Node>
-		<Python>
-			Sofa.msg_info(myNameIsRoot, "PSL offer scene direct scene element access to python code with scoping !!!")
-			for i in range(0,10):
-				self.addChild("one")
-				myNameIsRoot.addChild("three")
-		</Python>
-	</Node>
-
-	<PneuNets name:"myPneuNet" numSections : "10"/>
-</node>
+<Node name="root">
+        <Node name="child1">
+                <MechanicalObject name="mstate"/>
+                <OglModel filename="anObj.obj"/>
+        </Node>
+</Node>
 ```
-The XML flavor is fully compatible with our classical XML scenes. 
+
+With PSL you can add dynamicity in your scene using the *Python* component as in:
+```xml
+<Node name="myNameisRoot">
+        <Node name="child1">
+                <MechanicalObject name="mstate"/>
+                <OglModel filename="anObj.obj"/>
+        </Node>
+        <Python>
+                Sofa.msg_info(myNameIsRoot, "Hello world")
+                for i in range(0,10):
+                        myNameIsRoot.addChild("three")
+        </Python>
+</Node>
+```
+
+This *Python* component is very important and several aspect have to be noticed:
+- it is a component so it can be saved.
+- the code in the Python component have direct access to the scene graph object with the right name scoping.
+
+Now if like me you are not fan of XML syntax... you can implement exactely the same scene using
+our H-JSON syntax (very close to the QML syntax).
+
+This would look like:
+```css
+Node : {
+        name : "root"
+        Node : {
+                name : "child1"
+                MechanicalObject: { name : "mstate" }
+                OglModel : { filename : "anObj.obj" }
+        }
+
+        Python : ''''
+                  Sofa.msg_info(myNameIsRoot, "PSL offer scene direct scene element access to python code with scoping !!!")
+                  for i in range(0,10):
+                        myNameIsRoot.addChild("three")
+                  '''
+}
+```
+
+We hope this example gave you some envy to learn more about PSL and its other cool features.
 
 
-We hope this example gave you some envy to learn more about it. Let's start with a big longer description. 
+#### Installation & requirement.
+The language is under heavy developement so don't trust the code, the examples or the documentation.
+It I want it to be finished join the developement effort.
 
-#### Installation & requirement. 
-The language is under heavy developement so don't trust the code, the examples or the documentation. 
-It I want it to be finished join the developement effort. 
-
-The language is defined as a sofa Plugin named PSL which is currently it is only available in the PSL development branch. 
+The language is defined as a sofa Plugin named PSL which is currently it is only available in the PSL development branch.
 
 It makes use of the H-JSON parser available at: http://hjson.org/
 
@@ -89,54 +91,25 @@ cd hjson-py
 sudo python setup.py install
 ```
 
-#### How to run examples
-
-Running examples require to launch sofa from the PSL directory.
-
-```shell
-cd sofa/applications/plugins/PSL
-yourBuildDirBin/runSofa examples/press_step1.pyson
-```
+#### Introduction.
+For the simplicity of the following we will employ the H-JSON syntax as it provides both readbility,
+compactness and clarity.
 
 
-#### Introduction. 
-The language itself is defined either in term of abstract syntax or through a given concrete syntax. For the simplicity of the following we will employ the H-JSON concrete syntax as it provides both readbility, compactness and clarity. This H-JSON flavor of the language is currently implemented in Sofa but keep in mind that other alternatives are possible based on XML or YAML instead of H-JSON. 
-
-Let's start with a simple scene example in XML
-```xml
-<Node name="root">
-	<Node name="child1">
-		<MechanicalObject name="mstate"/> 
-		<OglModel filename="anObj.obj"/> 
-	</Node>
-</Node>
-```
-
-The equivalent scene PSL(HJSON) is the following 
-```hjson
-Node : {
-	name : "root"
-	Node : {
-		name : "child1"
-		MechanicalObject: { name : "mstate" }
-		OglModel : { filename : "anObj.obj" }
-	}
-}
-```
-
-The drawback SCN files is that everything is static. This is why more and more people are using python 
-to describe scene as it allows to write: 
+As we said before the drawback of *.scn* files is that everything is static.
+This is why more and more people are using python
+to describe scene as it allows to write:
 ```python
 root = Sofa.createNode("root")
 child1 = root.createNode("child1")
 child1.createObject("MechanicalObject", name="mstate")
-child1.createObject("OglModel", name="anObj.obj") 
+child1.createObject("OglModel", name="anObj.obj")
 for i in range(0,10):
-	child1.createNode("child_"+str(i))
+        child1.createNode("child_"+str(i))
 ```
 
-The equivalent scene PSL(HJSON) is the following 
-```hjson
+The equivalent scene with PSL would be
+```css
 Node : {
         name : "root"
         Node : {
@@ -151,12 +124,17 @@ Node : {
 }
 ```
 
-At first sight the PSL version look a bit more complex. But it solve a deep problem of the python version. It can  preserve the scene structure when it is loaded & saved. This is because in python scenes the script is executed (consumed) at loading time and is not part of the scene. The consequence is that the only possible saving is to store the *result* of the execution of the script, totally loosing the advantages of python as visible in the previous scene saved in python: 
+At first sight the PSL version look a bit more complex. But it solve a deep problem of the python version.
+It can  preserve the scene structure when it is loaded & saved.
+This is because in *.pyscn* the python code is executed (consumed) at loading time and thus is not
+part of the scene once loaded. The consequence is that saving the scene is in fact storing the *result* of
+the execution of the script and thus we are totally loosing the advantages of python as this would give the
+following scene:
 ```python
 root = Sofa.createNode("root")
 child1 = root.createNode("child1")
 child1.createObject("MechanicalObject", name="mstate")
-child1.createObject("OglModel", name="anObj.obj") 
+child1.createObject("OglModel", name="anObj.obj")
 child1.createNode("child_0")
 child1.createNode("child_1")
 child1.createNode("child_2")
@@ -169,13 +147,14 @@ child1.createNode("child_8")
 child1.createNode("child_9")
 ```
 
-With PSL, this is not a problem because the dynamic fragment are stored *un-executed* in the scene graph. They can thus be easily modifie, re-run and saved. 
+With PSL, this is not a problem because the dynamic fragment are stored *un-executed* in the scene graph.
+They can thus be easily modifie, re-run and saved. Storing the python fragment in the scene graph also
+permit to implement powerful feature as *templates*.
 
 #### Templates
-A Template is a component that stores a sub-graph in its textual, or parsed, form. The Template then can be instantiated 
-in the graph.
-
-```hjson
+In PSL a Template is a component that stores a sub-graph in its textual, or parsed, form. A template
+can be instantiated multiple time in the scene graph.
+```css
 Node : {
     name : "root"
     Template : {
@@ -216,40 +195,40 @@ Node : {
 }
 ```
 
-#### Import 
-To allow template re-usability it is possible to store them in file or directories that can be imported with the Import directive. 
-In a file named mylibrary.pyjson" define  a template 
+#### Import
+To allow template re-usability it is possible to store them in file or directories that can be imported with the Import directive.
+In a file named mylibrary.pyjson" define  a template
 ```hjson
-	Template : { name : "MotorA" ... }
-	Template : { name : "MotorB" ... }
-	Template : { name : "MotorC" .... }
+        Template : { name : "MotorA" ... }
+        Template : { name : "MotorB" ... }
+        Template : { name : "MotorC" .... }
 ```
 
 Then in your scene file you load and use the template in the following way:
 ```hjson
 Node : {
-	Import : mylibrary 
-	
-	mylibrary.MotorA : {}
-	mylibrary.MotorB : {}
-	... 
+        Import : mylibrary
+
+        mylibrary.MotorA : {}
+        mylibrary.MotorB : {}
+        ...
 }
 ```
 
 ##### Aliasing
-In Sofa the aliasing system is implicit and the alias are defined in the sofa code source. This is really trouble some as users need to *discover* that in a scene "Mesh" is in fact an alias to a "MeshTopology" object. Without proper tools the solution is often to search in the source code which was an alias. 
+In Sofa the aliasing system is implicit and the alias are defined in the sofa code source. This is really trouble some as users need to *discover* that in a scene "Mesh" is in fact an alias to a "MeshTopology" object. Without proper tools the solution is often to search in the source code which was an alias.
 
-In PSL we are preserving the use of Alias but we make them explicit. So each scene can defined its own set of alias and anyone reading the scene knows what are the alias and what are the real underlying objects. 
-```hjson 
-	Import : mylibrary 
+In PSL we are preserving the use of Alias but we make them explicit. So each scene can defined its own set of alias and anyone reading the scene knows what are the alias and what are the real underlying objects.
+```hjson
+        Import : mylibrary
 
-	Alias : TSPhereModel-CollisionSphere
-	Alias : mylibrary.MotorA-MotorA
-	Alias : mylibrary.MotorB-MotorB
-	
-	/// Now we can use either
-	TSPhereModel : {}
-	
-	/// or
-	CollisionSphere : {}
+        Alias : TSPhereModel-CollisionSphere
+        Alias : mylibrary.MotorA-MotorA
+        Alias : mylibrary.MotorB-MotorB
+
+        /// Now we can use either
+        TSPhereModel : {}
+
+        /// or
+        CollisionSphere : {}
 ```
