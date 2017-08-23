@@ -53,7 +53,6 @@ RuleBasedContactManager::~RuleBasedContactManager()
     for(std::map<std::string,Data<std::string>*>::iterator it = variablesData.begin(),
         itend = variablesData.end(); it != itend; ++it)
     {
-        //this->removeData(it->second);
         delete it->second;
     }
 }
