@@ -18,12 +18,14 @@ Compared to classical *.scn*, PSL offer scene dynamicity,
 Comparet to *.pyscn*, PSL offer savability, templates and a more compact declarative syntax
 
 #### First examples
-The PSL language itself is defined with an abstract syntax semantics. Doing so allow us to very quickly implement concrete syntaxes
-depending on the developpers preferences. We currently have implemented an XML base concrete syntax (that is 99% compatible with
-existing .scn file) and an H-JSON one (that look a lot like QML's one). But the important aspect to keep in mind is that whetever
-the syntax you like...this is mostly "cosmetic" as the underlying computational model is shared between the different syntaxes.
+The PSL language itself is defined with an abstract syntax semantics. This allow us to very quickly implement concrete syntaxes
+depending on the developpers preferences. We currently have implemented an XML base concrete syntax, this syntax is compatible with
+most of the existing .scn files. We also have implemented an H-JSON concrete syntax. This one look a lot like QML's or JSON.
+The important aspect to keep in mind while reading this document is that whetever the syntax you like...
+this is mostly a "cosmetic" aspect of PSL and that it is same underlying computational model is shared between
+the different syntaxes.
 
-Let's start with a simple scene example in XML that is only containing classical Sofa components.
+Let's start with a simple scene example in XML.
 ```xml
 <Node name="root">
         <Node name="child1">
@@ -32,8 +34,8 @@ Let's start with a simple scene example in XML that is only containing classical
         </Node>
 </Node>
 ```
-
-With PSL you can add dynamicity in your scene using the *Python* component as in:
+At this point, this is a classical *.scn* file. With PSL this scene can be made dynamic with the help of the
+*Python* component as in:
 ```xml
 <Node name="myNameisRoot">
         <Node name="child1">
@@ -48,14 +50,8 @@ With PSL you can add dynamicity in your scene using the *Python* component as in
 </Node>
 ```
 
-This *Python* component is very important and several aspect have to be noticed:
-- it is a component so it can be saved.
-- the code in the Python component have direct access to the scene graph object with the right name scoping.
-
-Now if like me you are not fan of XML syntax... you can implement exactely the same scene using
-our H-JSON syntax (very close to the QML syntax).
-
-This would look like:
+If, like me, you prefer curly-braces instead of an XML syntax you can implement exactely the same
+scene using the H-JSON syntax. Resulting in the following scene:
 ```css
 Node : {
         name : "root"
@@ -66,14 +62,15 @@ Node : {
         }
 
         Python : ''''
-                  Sofa.msg_info(myNameIsRoot, "PSL offer scene direct scene element access to python code with scoping !!!")
+                  Sofa.msg_info(myNameIsRoot, "Hello world")
                   for i in range(0,10):
                         myNameIsRoot.addChild("three")
                   '''
 }
 ```
 
-We hope this example gave you some envy to learn more about PSL and its other cool features.
+Now you have reached this point we hope this example gave you some envy to learn more about PSL
+and its other cool features.
 
 
 #### Installation & requirement.
@@ -82,8 +79,7 @@ It I want it to be finished join the developement effort.
 
 The language is defined as a sofa Plugin named PSL which is currently it is only available in the PSL development branch.
 
-It makes use of the H-JSON parser available at: http://hjson.org/
-
+In order to use the H-JSON syntax you need to install H-JSON parser available at: http://hjson.org/
 Hjson installation :
 ```shell
 git clone https://github.com/hjson/hjson-py.git
@@ -95,10 +91,8 @@ sudo python setup.py install
 For the simplicity of the following we will employ the H-JSON syntax as it provides both readbility,
 compactness and clarity.
 
-
-As we said before the drawback of *.scn* files is that everything is static.
-This is why more and more people are using python
-to describe scene as it allows to write:
+As pointed previously, in *.scn* files everything is static. For this reason more and more people are using
+python to describe scene because it allows to write:
 ```python
 root = Sofa.createNode("root")
 child1 = root.createNode("child1")
@@ -107,29 +101,8 @@ child1.createObject("OglModel", name="anObj.obj")
 for i in range(0,10):
         child1.createNode("child_"+str(i))
 ```
-
-The equivalent scene with PSL would be
-```css
-Node : {
-        name : "root"
-        Node : {
-                name : "child1"
-                MechanicalObject: { name : "mstate" }
-                OglModel : { filename : "anObj.obj" }
-                Python : '''
-                         for i in range(0, 10):
-                                child1.createChild("child_"+str(i))
-                         '''
-        }
-}
-```
-
-At first sight the PSL version look a bit more complex. But it solve a deep problem of the python version.
-It can  preserve the scene structure when it is loaded & saved.
-This is because in *.pyscn* the python code is executed (consumed) at loading time and thus is not
-part of the scene once loaded. The consequence is that saving the scene is in fact storing the *result* of
-the execution of the script and thus we are totally loosing the advantages of python as this would give the
-following scene:
+The drawback of doing this, in addition to the poor visual emphasizing of the Sofa component lost in
+the middle of python code is that once saved, this good looking python scene is now more like:
 ```python
 root = Sofa.createNode("root")
 child1 = root.createNode("child1")
@@ -147,9 +120,47 @@ child1.createNode("child_8")
 child1.createNode("child_9")
 ```
 
-With PSL, this is not a problem because the dynamic fragment are stored *un-executed* in the scene graph.
-They can thus be easily modifie, re-run and saved. Storing the python fragment in the scene graph also
-permit to implement powerful feature as *templates*.
+This is because in *.pyscn* the python code is executed (consumed) at loading time and thus is not
+part of the scene once loaded. The consequence is that saving the scene is in fact storing the *result* of
+the execution of the script and thus we are totally loosing the advantages of python. In PSL we solved this
+issue by storing in the scene graph the un-executed python fragments.
+
+#### Python fragments
+In PSL it is possible to add python code to your scene using the *Python* component as in:
+```css
+Node : {
+        name : "root"
+        Node : {
+                name : "child1"
+                MechanicalObject: { name : "mstate" }
+                OglModel : { filename : "anObj.obj" }
+                Python : '''
+                         for i in range(0, 10):
+                                child1.createChild("child_"+str(i))
+                         '''
+        }
+}
+```
+
+To simplify scene writing the scenes elements ("root, child1", ...) within the scene graph "scope"
+are exposed in the Python component so that you can write thing like:
+```python
+   child1.createChild("...")
+   self.createChild("...")
+```
+
+It is also possible to write python expression attached to given component by using the prefix
+'p' in front of the data value as in:
+```css
+Node : {
+        name : p"str(random.random())"
+}
+```
+
+All the python code is executed at load time but stored *un-executed* in the scene graph. Thus it can
+be easily modified, re-run and saved. Storing the python fragment in the scene graph also permit to
+implement powerful feature as *templates*.
+
 
 #### Templates
 In PSL a Template is a component that stores a sub-graph in its textual, or parsed, form. A template
