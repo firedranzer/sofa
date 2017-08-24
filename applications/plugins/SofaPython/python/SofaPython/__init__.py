@@ -69,6 +69,11 @@ def getPythonCallingPoint():
     tmp=(ss[1], ss[2])
     return tmp
 
+def sendMessageFromException(e):
+    exc_type, exc_value, exc_tb = sys.exc_info()
+    sofaExceptHandler(exc_type, exc_value, exc_tb)
+
+
 def sofaExceptHandler(type, value, tb):
     global oldexcepthook
     """This exception handler, convert python exceptions & traceback into more classical sofa error messages of the form:

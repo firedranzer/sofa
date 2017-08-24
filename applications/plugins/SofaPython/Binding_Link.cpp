@@ -114,7 +114,6 @@ static PyObject * Link_setValueString(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "s", &str))
         return nullptr ;
 
-    std::cout << "LINK SET: " << link->getName() << " to '" << str << "'" <<  std::endl ;
     link->read(str);
     Py_RETURN_NONE;
 }
@@ -149,8 +148,7 @@ static PyObject * Link_setPersistant(PyObject* self, PyObject* args)
         return NULL;
     }
 
-   // link->setPersistent(PyObject_IsTrue(state));
-
+    link->setPersistent(PyObject_IsTrue(state));
     Py_RETURN_NONE ;
 }
 
