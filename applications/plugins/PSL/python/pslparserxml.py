@@ -50,6 +50,7 @@ def toAst(xmlnode):
     childList = []
     for k in xmlnode.attrib:
         childList.append( (k, xmlnode.attrib[k] ) )
+    childList.reverse()
 
     for child in xmlnode:
         for j in toAst(child):

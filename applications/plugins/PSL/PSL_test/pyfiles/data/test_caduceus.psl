@@ -12,7 +12,7 @@ Node : {
         tolerance : "0.001"
         maxIt : "1000"
         mu : "0.2"
-    } 
+    }  
     FreeMotionAnimationLoop : {}
     DefaultPipeline : {
         verbose : "0"
@@ -26,7 +26,8 @@ Node : {
         name : "Proximity"
         alarmDistance : "1.5"
         contactDistance : "1"
-    } 
+    }
+    
     LightManager : {}
     SpotLight : {
         name : "light1"
@@ -44,6 +45,7 @@ Node : {
         cutoff : "30"
         exponent : "1"
     } 
+    
     DefaultContactManager : {
         name : "Response"
         response : "FrictionContact"
@@ -104,8 +106,6 @@ Node : {
             name : "dofs"
             tags : "NoPicking"
             position : "@grid.position"
-            dy : "2"
-            scale : "1"
         } 
         UniformMass : {
             totalmass : "1"
@@ -125,12 +125,9 @@ Node : {
                 name : "loader"
                 filename : "mesh/meca_snake_900tri.obj"
             } 
-            MeshTopology : {
-                src : "@loader"
-            } 
+            MeshTopology : {}
             MechanicalObject : {
                 name : "CollisModel"
-                src : "@loader"
             } 
             TTriangleModel : {
                 selfCollision : "0"
@@ -191,12 +188,9 @@ Node : {
                 name : "loader"
                 filename : "mesh/collision_batons.obj"
             } 
-            MeshTopology : {
-                src : "@loader"
-            } 
+            MeshTopology : {}
             MechanicalObject : {
                 name : "CollisModel"
-                src : "@loader"
             } 
             TLineModel : {
                 moving : "0"
@@ -213,12 +207,9 @@ Node : {
                 name : "loader"
                 filename : "mesh/collision_boules_V3.obj"
             } 
-            MeshTopology : {
-                src : "@loader"
-            } 
+            MeshTopology : {}
             MechanicalObject : {
                 name : "CollisModel"
-                src : "@loader"
             } 
             TTriangleModel : {
                 moving : "0"
@@ -239,12 +230,9 @@ Node : {
                 name : "loader"
                 filename : "mesh/collision_pied.obj"
             } 
-            MeshTopology : {
-                src : "@loader"
-            } 
+            MeshTopology : {}
             MechanicalObject : {
                 name : "CollisModel"
-                src : "@loader"
             } 
             TTriangleModel : {
                 moving : "0"

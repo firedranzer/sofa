@@ -27,6 +27,9 @@
 #include <SofaTest/Sofa_test.h>
 using sofa::Sofa_test ;
 
+#include <SofaTest/Python_test.h>
+using sofa::Python_test ;
+
 #include <SofaTest/TestMessageHandler.h>
 
 #include <SofaSimulationGraph/DAGSimulation.h>
@@ -57,6 +60,9 @@ using sofa::core::RegisterObject ;
 
 #include <PSL/components/TestResult.h>
 using sofa::component::TestResult ;
+
+#include <SofaPython/PythonEnvironment.h>
+using sofa::simulation::PythonEnvironment ;
 
 
 using std::vector;

@@ -44,6 +44,7 @@ import pslparserpickled
 @contextlib.contextmanager
 def SetPath(newpath):
     curdir= os.getcwd()
+    os.chdir(newpath)
     try: yield
     finally: os.chdir(curdir)
 
@@ -81,12 +82,31 @@ def preProcess(ast):
 
     return {"version": version}
 
+def loadAst(filename):
+    ast=[]
+    filename = os.path.abspath(filename)
+    dirname = os.path.dirname(filename)
+    with SetPath(dirname):
+        os.chdir(dirname)
+        if not os.path.exists(filename):
+            Sofa.msg_error("PSL", "Unable to open file '"+filename+"'")
+            return ast
+
+        f = open(filename).read()
+        if filename.endswith(".psl"):
+            ast = pslparserhjson.parse(f)
+        elif filename.endswith(".pslx"):
+            ast = pslparserxml.parse(f)
+        elif filename.endswith(".pslp"):
+            ast = pslparserpickled.parse(f)
+    return ast
+
 def load(filename):
         filename = os.path.abspath(filename)
         dirname = os.path.dirname(filename)
         with SetPath(dirname):
-            os.chdir(dirname)
             f = open(filename).read()
+            ast=[]
             if filename.endswith(".psl"):
                 ast = pslparserhjson.parse(f)
             elif filename.endswith(".pslx"):
@@ -96,7 +116,7 @@ def load(filename):
 
             if len(ast) == 0:
                 rootNode = Sofa.createNode("root")
-                Sofa.msg_error(rootNode, "The file '"+filename+"' does not contains PSL(X) content")
+                Sofa.msg_error(rootNode, "The file '"+filename+"' does not contains valid PSL content.")
                 return rootNode
 
             directives = preProcess(ast[0][1])
@@ -105,9 +125,10 @@ def load(filename):
                 rootNode = Sofa.createNode("root")
                 Sofa.msg_error(rootNode, "Unsupported PSLVersion"+str(directives["version"]))
                 return rootNode
+
             g=globals()
             g["__file__"]=filename
-            ret = pslengine.processTree("", ast, directives, g)
+            ret = pslengine.processTree(ast, directives, g)
             return ret
 
         return None

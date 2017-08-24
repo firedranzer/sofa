@@ -38,7 +38,7 @@ aliases = {}
 sofaAliases = {}
 sofaComponents = []
 SofaStackFrame = []
-datafieldQuirks = ["src", "input", "output"]
+datafieldQuirks = []
 sofaRoot = None
 imports = {}
 
@@ -103,32 +103,56 @@ def evalPython(key, kv, stack, frame):
         retval = eval(kv, r)
         return retval
 
+def getField(object, name):
+    d = object.getLink(name)
+    if d != None:
+        return d
+
+    d = object.getData(name)
+    if d != None:
+        return d
+
+    return None
+
 def processParameter(parent, name, value, stack, frame):
-        if isinstance(value, list):
-                matches = difflib.get_close_matches(name, sofaComponents+templates.keys()+sofaAliases.keys(), n=4)
-                c=parent.createChild("[XX"+name+"XX]")
-                Sofa.msg_error(c, "Unknow parameter or Component [" + name + "] suggestions -> "+str(matches))
-        elif not name in datafieldQuirks:
-                ## Python Hook to build an eval function.
-                if value[0] == 'p' and value[1] == '"':
-                        value = evalPython(None, value[2:-1], stack, frame)
+        try:
+            if isinstance(value, list):
+                    matches = difflib.get_close_matches(name, sofaComponents+templates.keys()+sofaAliases.keys(), n=4)
+                    c=parent.createChild("[XX"+name+"XX]")
+                    Sofa.msg_error(c, "Unknow parameter or Component [" + name + "] suggestions -> "+str(matches))
+            elif not name in datafieldQuirks:
+                    ## Python Hook to build an eval function.
+                    if len(value) > 2 and value[0] == 'p' and value[1] == '"':
+                            value = evalPython(None, value[2:-1], stack, frame)
 
-                try:
-                        print("SETTING ATTRIBUTE '"+name+"' -> " + str(value)+ " to "+ parent.name)
-                        frame["self"].findData(name).setValueString(str(value))
-                        frame["self"].findData(name).setPersistant(True)
+                    try:
+                            field = getField(frame["self"], name)
+                            if field != None:
+                                field.setValueString(str(value))
+                                field.setPersistant(True)
+                            else:
+                                Sofa.msg_error(parent, "Unable to get the field '" +name+"'")
 
-                except Exception,e:
-                        Sofa.msg_error(parent, "Unable to get the argument " + name)
+                    except Exception,e:
+                            Sofa.msg_error(parent, "Exception while parsing field '" +name+"' because "+str(e))
 
-                if name == "name":
-                        frame[value] = frame["self"]
-                        frame["name"] = value
+                    if name == "name":
+                            frame[value] = frame["self"]
+                            frame["name"] = value
+
+        except Exception, e:
+            Sofa.msg_error(parent, "Unable to parse parameter "+str(name)+ " : " + str(value))
 
 def createObject(parentNode, name, stack , frame, kv):
-        print("===================> CREATING OBJECT: "+name+" parameters: "+str(kv))
+        #print("===================> CREATING OBJECT: "+name+" parameters: "+str(kv))
         if name in sofaComponents:
-                return parentNode.createObject(name, **kv)
+                obj = parentNode.createObject(name, **kv)
+                for k in kv:
+                    if getField(obj, k) == None:
+                        print("Attribute '"+str(k)+"' is a parsing hook. Let's add Data field to fix it. To remove this warning stop using parsing hook. ")
+                        d = obj.addData(k, "PSL", "", "s", str(kv[k]))
+                        obj.findData(k).setPersistant(True)
+                return obj
 
         kv["name"] = name
         failureObject = parentNode.createObject("Undefined", **kv)
@@ -153,7 +177,6 @@ def processObject(parent, key, kv, stack, frame):
                 kv = [("name" , kv)]
 
         for k,v in kv:
-
                 if len(v) != 0 and v[0] == 'p' and v[1] == '"':
                         v = evalPython(None, v[2:-1], stack, frame)
 
@@ -169,11 +192,19 @@ def processObject(parent, key, kv, stack, frame):
         for datafield in obj.getListOfDataFields():
             datafield.setPersistant(False)
 
+        for link in obj.getListOfLinks():
+            link.setPersistant(False)
+
         ### Then revert only the ones that have been touched
         for dataname in kwargs:
             try:
-                if dataname not in datafieldQuirks:
-                    obj.findData(dataname).setPersistant(True)
+                if dataname in datafieldQuirks:
+                    continue
+
+                field = getField(obj, dataname)
+                if field != None:
+                    field.setPersistant(True)
+
             except Exception,e:
                 Sofa.msg_warning(obj, "PSL: This does not seems to be a valid attribute: "+str(dataname))
 
@@ -374,14 +405,19 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
         populateFrame(key, frame, stack)
 
         if doCreate:
-                tself = frame["self"] = parent.createChild("undefined")
-                parent.dt=0.5
-                parent.gravity=[0,1,2]
+                if parent == None:
+                    tself = Sofa.createNode("undefined")
+                else:
+                    tself = parent.createChild("undefined")
+
+                frame["self"] = tself
 
                 ### Force all the data field into a non-persistant state.
                 for datafield in tself.getListOfDataFields():
-                    print("SETTING DF TO: "+str(datafield.name))
                     datafield.setPersistant(False)
+
+                for link in tself.getListOfLinks():
+                    link.setPersistant(False)
         else:
                 tself = frame["self"] = parent
 
@@ -433,14 +469,10 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
         stack.pop(-1)
         return tself
 
-def processRootNode(key, kv, stack, frame):
+def processRootNode(kv, stack, frame):
         global templates, aliases
         stack.append(frame)
-        populateFrame(key, frame, stack)
-
-        tself = frame["self"] = Sofa.createNode("undefined")
-        for datafield in tself.getListOfDataFields():
-            datafield.setPersistant(False)
+        populateFrame("", frame, stack)
 
         if isinstance(kv, list):
                 for key,value in kv:
@@ -448,7 +480,7 @@ def processRootNode(key, kv, stack, frame):
                                 key = str(key)
 
                         if key == "Node":
-                                n = processNode(tself, key, value, stack, {})
+                                n = processNode(None, key, value, stack, {})
                                 return n
                         else:
                                 Sofa.msg_error(tself, "Unable to find a root Node in this file")
@@ -458,10 +490,12 @@ def processRootNode(key, kv, stack, frame):
         return None
 
 ## Root function that process an abstract tree.
-def processTree(key, kv, directives, globalenv):
+def processTree(ast, directives, globalenv):
         refreshComponentListFromFactory()
+
         if directives["version"] == "1.0":
-            r = processRootNode(key, kv, [], globalenv)
+            r = processRootNode(ast, [], globalenv)
             return r
+
         ## Add here the future version of the language
 

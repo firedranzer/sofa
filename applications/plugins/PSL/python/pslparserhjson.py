@@ -44,6 +44,10 @@ def objectToString(object, nspace):
             else:
                 res += "\n" + nspace + "    " + datafield.name + " : \"" + datafield.getValueString() + "\""
 
+    for link in object.getListOfLinks():
+        if link.isPersistant():
+            res += "\n" + nspace + "    " + link.name + " : \"" + link.getValueString() + "\""
+
     ores = ""
     ores += nspace+object.getClassName() + " : {"
     ores += res
@@ -66,6 +70,10 @@ def treeToString(node, space):
                     ores += "\n" + nspace + datafield.name + ' : "' + datafield.getParentPath() + '"'
                 else:
                     ores += "\n" + nspace + datafield.name + " : \"" + datafield.getValueString() + "\""
+
+        for link in node.getListOfLinks():
+            if link.isPersistant():
+                ores += "\n" + nspace + link.name + " : \"" + link.getValueString() + "\""
 
         if ores != "":
             ores += "\n"
