@@ -128,7 +128,6 @@ objectmodel::BaseObject::SPtr ObjectFactory::createObject(objectmodel::BaseConte
         CreatorMap::iterator it2 = entry->creatorMap.find(templatename);
         if (it2 != entry->creatorMap.end())
         {
-            std::cout << "WE HAVE A TEMPLATE " << templatename << std::endl;
             Creator::SPtr c = it2->second;
             if (c->canCreate(context, arg))
                 creators.push_back(*it2);
@@ -145,7 +144,6 @@ objectmodel::BaseObject::SPtr ObjectFactory::createObject(objectmodel::BaseConte
                 Creator::SPtr c = it3->second;
                 if (c->canCreate(context, arg)){
                     creators.push_back(*it3);
-                    std::cout << "BUT WE FOUND  SOME " << std::endl ;
                 }
             }
         }

@@ -266,7 +266,6 @@ void Base::processStream(std::ostream& out)
 
 void Base::addMessage(const Message &m) const
 {
-    std::cout << getName() << ": ADD MESSAGE TO BACKLOG: " << m_messageslog.size() << std::endl ;
     if(m_messageslog.size() >= ERROR_LOG_SIZE ){
         m_messageslog.pop_front();
     }
