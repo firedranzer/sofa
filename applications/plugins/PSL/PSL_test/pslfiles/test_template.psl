@@ -4,7 +4,7 @@ Node : {
     Template : {
         name : "MyTemplate"
         Node : {
-            name : "something"
+            name : "MyTemplate"
             MechanicalObject : {
                 name : "mstate"
                 position : "1 2 3 4"

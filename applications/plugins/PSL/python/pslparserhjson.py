@@ -35,8 +35,18 @@ class MyObjectHook(object):
                 return s
 
 def objectToString(object, nspace):
-    res = ""
+    instanceof = object.getData("psl_instanceof")
+    if instanceof != None:
+        instanceof = instanceof.getValue()
+        if instanceof == "Template":
+            source = object.psl_source
+            ores = ""
+            ores += nspace+instanceof+ " : {"
+            ores += nspace+"    "+source
+            ores += "}"+"\n"
+            return ores
 
+    res = ""
     for datafield in object.getListOfDataFields():
         if datafield.isPersistant():
             if datafield.hasParent():
@@ -61,6 +71,14 @@ def objectToString(object, nspace):
 def treeToString(node, space):
         nspace=space+"    "
         res = ""
+        instanceof = node.getData("psl_instanceof")
+        if instanceof != None:
+            res += space+str(node.psl_instanceof)+" : {"+ "\n"
+            for k,v in eval(node.psl_properties):
+                res += space+"    "+k+" : "+str(v)+ "\n"
+            res += space+"}"+ "\n"
+            return res
+
         res += space+"Node : {"
 
         ores = ""

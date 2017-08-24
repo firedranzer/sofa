@@ -29,6 +29,7 @@
 #******************************************************************************/
 
 import Sofa
+import SofaPython
 import difflib
 import os
 
@@ -114,12 +115,23 @@ def getField(object, name):
 
     return None
 
+pslprefix = "PSL::engine"
+
+def processString(object, name, value, stack, frame):
+    ## Python Hook to build an eval function.
+    if len(value) > 2 and value[0] == 'p' and value[1] == '"':
+            d = object.addData("psl_"+name, "PSL", "This hold a python expression.", "s", str(value))
+            object.findData("psl_"+name).setPersistant(True)
+            return evalPython(None, value[2:-1], stack, frame)
+
+    return value
+
 def processParameter(parent, name, value, stack, frame):
         try:
             if isinstance(value, list):
                     matches = difflib.get_close_matches(name, sofaComponents+templates.keys()+sofaAliases.keys(), n=4)
                     c=parent.createChild("[XX"+name+"XX]")
-                    Sofa.msg_error(c, "Unknow parameter or Component [" + name + "] suggestions -> "+str(matches))
+                    Sofa.msg_error(c, pslprefix+" unknow parameter or component [" + name + "] suggestions -> "+str(matches))
             elif not name in datafieldQuirks:
                     ## Python Hook to build an eval function.
                     if len(value) > 2 and value[0] == 'p' and value[1] == '"':
@@ -131,25 +143,25 @@ def processParameter(parent, name, value, stack, frame):
                                 field.setValueString(str(value))
                                 field.setPersistant(True)
                             else:
-                                Sofa.msg_error(parent, "Unable to get the field '" +name+"'")
+                                Sofa.msg_error(parent, pslprefix+" unable to get the field '" +name+"'")
 
                     except Exception,e:
-                            Sofa.msg_error(parent, "Exception while parsing field '" +name+"' because "+str(e))
+                            Sofa.msg_error(parent, pslprefix+" exception while parsing field '" +name+"' because "+str(e))
 
                     if name == "name":
                             frame[value] = frame["self"]
-                            frame["name"] = value
+                            #frame["name"] = value
 
         except Exception, e:
-            Sofa.msg_error(parent, "Unable to parse parameter "+str(name)+ " : " + str(value))
+            SofaPython.sendMessageFromException(e)
+            Sofa.msg_error(parent, pslprefix+" unable to parse parameter '"+str(name)+ "=" + str(value)+"'")
 
 def createObject(parentNode, name, stack , frame, kv):
-        #print("===================> CREATING OBJECT: "+name+" parameters: "+str(kv))
         if name in sofaComponents:
                 obj = parentNode.createObject(name, **kv)
                 for k in kv:
                     if getField(obj, k) == None:
-                        print("Attribute '"+str(k)+"' is a parsing hook. Let's add Data field to fix it. To remove this warning stop using parsing hook. ")
+                        Sofa.msg_info(obj, pslprefix+" attribute '"+str(k)+"' is a parsing hook. Let's add Data field to fix it. To remove this warning stop using parsing hook.")
                         d = obj.addData(k, "PSL", "", "s", str(kv[k]))
                         obj.findData(k).setPersistant(True)
                 return obj
@@ -157,7 +169,7 @@ def createObject(parentNode, name, stack , frame, kv):
         kv["name"] = name
         failureObject = parentNode.createObject("Undefined", **kv)
 
-        Sofa.msg_error(failureObject, "Unable to create object "+str(name))
+        Sofa.msg_error(failureObject, pslprefix+" unable to create the object '"+str(name)+"'")
         return failureObject
 
 def processObjectDict(obj, dic, stack, frame):
@@ -180,8 +192,8 @@ def processObject(parent, key, kv, stack, frame):
                 if len(v) != 0 and v[0] == 'p' and v[1] == '"':
                         v = evalPython(None, v[2:-1], stack, frame)
 
-                if k == "name":
-                        frame["name"] = v
+                #if k == "name":
+                #        frame["name"] = v
 
                 kwargs[k] = str(v)
 
@@ -206,7 +218,7 @@ def processObject(parent, key, kv, stack, frame):
                     field.setPersistant(True)
 
             except Exception,e:
-                Sofa.msg_warning(obj, "PSL: This does not seems to be a valid attribute: "+str(dataname))
+                Sofa.msg_warning(obj, pslprefix+" this does not seems to be a valid field '"+str(dataname)+"'")
 
         if not "name" in kwargs:
             obj.findData("name").unset()
@@ -219,7 +231,7 @@ def processObject(parent, key, kv, stack, frame):
         return obj
     except Exception, e:
         c=parent.createChild("[XX"+key+"XX]")
-        Sofa.msg_error(c, "PSL: Unable to create an object because: "+str(e.message))
+        Sofa.msg_error(c, pslprefix+" unable to create an object because: "+str(e.message))
 
 # TODO add a warning to indicate that a template is loaded twice.
 def importTemplates(content):
@@ -238,7 +250,7 @@ def importTemplates(content):
                                         rvalue.append((k, v))
                         templates[name] = {"properties":properties, "content" : rvalue}
                 else:
-                        Sofa.msg_warning("SceneLoaderPYSON", "An imported file contains something that is not a Template.")
+                        Sofa.msg_warning(pslprefix, " an imported file contains something that is not a Template.")
 
         return templates
 
@@ -246,15 +258,15 @@ def importTemplates(content):
 def processImport(parent, key, kv, stack, frame):
         global imports, templates
         if not (isinstance(kv, str) or isinstance(kv, unicode)):
-                print("Expecting a single 'string' entry....in procesImport " + str(type(kv)))
+                Sofa.msg_error(parent, pslprefix+" expecting a single 'string' entry....in procesImport " + str(type(kv)))
                 return
         filename = kv+".psl"
         if not os.path.exists(filename):
                 dircontent = os.listdir(os.getcwd())
                 matches = difflib.get_close_matches(filename, dircontent, n=4)
-                Sofa.msg_error(parent, "The file '" + filename + "' does not exists. Do you mean: "+str(matches))
+                Sofa.msg_error(parent, pslprefix+" the file '" + filename + "' does not exists. Do you mean: "+str(matches))
                 return
-        Sofa.msg_info(parent, "Importing "+ os.getcwd() + "/"+filename)
+        Sofa.msg_info(parent, "importing "+ os.getcwd() + "/"+filename)
 
         f = open(filename).read()
         loadedcontent = hjson.loads(f, object_pairs_hook=MyObjectHook())
@@ -278,6 +290,8 @@ def processTemplate(parent, key, kv, stack, frame):
         o = parent.createObject("Template", name=str(name))
         o.listening = True
         o.setTemplate(kv)
+        o.trackData(o.findData("psl_source"))
+        o.addData("psl_instanceof", "PSL", "", "s", "Template")
         frame[str(name)] = o
         templates[str(name)] = o
         return o
@@ -287,6 +301,93 @@ def processAlias(parent, key, kv, stack, frame):
         oldName, newName = kv.split('-')
         aliases[newName]=oldName
 
+def reinstanciateTemplateOnSourceChange(templateSource):
+    global templates
+
+    key = templateSource.name
+    frame = {}
+    frame["parent"]=templateSource
+    frame["self"]=templateSource
+    nframe = {}
+    instanceProperties = eval(templateInstance.psl_source)
+
+    for c in templateInstance.getChildren():
+            templateInstance.removeChild(c)
+
+    c = templateInstance.getObjects()
+    for o in c:
+            templateInstance.removeObject(o)
+
+    ## Is there a template with this name, if this is the case
+    ## Retrieve the associated templates .
+    if isinstance(templates[key], Sofa.Template):
+            n = templates[key].getTemplate()
+            for k,v in n:
+                    if k == 'name':
+                            None
+                    elif k == 'properties':
+                            for kk,vv in v:
+                                    if not kk in frame:
+                                            nframe[kk] = vv
+                    else:
+                            source = v
+    else:
+            source = templates[key]["content"]
+            for k,v in templates[key]["properties"]:
+                    if not k in frame:
+                            nframe[k] = str(v)
+
+    for k,v in instanceProperties:
+            nframe[k] = templateInstance.findData(str(k)).getValue(0)
+
+    stack = [globals(), frame]
+    n = processNode(templateInstance, "Node", source, stack, nframe, doCreate=False)
+
+def gatherInstances(templatename, node):
+    r = []
+    for child in node.getChildren():
+        instanceof = child.getData("psl_instanceof")
+        if instanceof != None and str(instanceof) == templatename:
+            r.append(child)
+        else:
+            r = r + gatherInstances(templatename, child)
+    return r
+
+def reinstanciateAllTemplates(template):
+    Sofa.msg_info(template, "Re-instanciating instance of: "+template.name)
+    root = template.getContext().getRoot()
+    g = gatherInstances(template.name, root)
+
+    for node in g:
+        frame = {}
+        frame["parent"]=node.getParents()
+        frame["self"]=node
+        instanceProperties = eval(node.psl_properties)
+
+        for c in node.getChildren():
+            node.removeChild(c)
+
+        for o in node.getObjects():
+            node.removeObject(o)
+
+        src = eval(template.psl_source)
+        res = []
+        for k,v in src:
+            if k == "properties":
+                for kk, vv in v:
+                    frame[kk] = vv
+            elif k == "name":
+                None
+            elif k == "Node":
+                res = v
+        src=res
+        for k,v in instanceProperties:
+            frame[k] = v
+
+        print("PROCESSING CODE: "+str(src)+ " WITH FRAME: "+str(frame))
+        n = processNode(node, "Node", src, [frame], frame, doCreate=False)
+
+
 def reinstanciateTemplate(templateInstance):
         global templates
 
@@ -295,7 +396,7 @@ def reinstanciateTemplate(templateInstance):
         frame["parent"]=templateInstance
         frame["self"]=templateInstance
         nframe = {}
-        instanceProperties = eval(templateInstance.src)
+        instanceProperties = eval(templateInstance.psl_source)
 
         for c in templateInstance.getChildren():
                 templateInstance.removeChild(c)
@@ -331,7 +432,7 @@ def reinstanciateTemplate(templateInstance):
 
 def processProperties(self, key, kv, stack, frame):
     if not isinstance(kv, list):
-        print("UNABLE TO PROCESS NON LIST")
+        raise Exception("This shouldn't happen, exepecting only list")
 
     msg = ""
     for k,v in kv:
@@ -342,6 +443,9 @@ def processProperties(self, key, kv, stack, frame):
 
         if isinstance(v, unicode):
             v=str(v)
+
+        if isinstance(v, str):
+            v=processString(self, k, v, stack, frame)
 
         if isinstance(v, int):
             self.addData(k, "Properties", "", "d", v)
@@ -355,7 +459,7 @@ def processProperties(self, key, kv, stack, frame):
         else:
             msg += " - unable to create a property from the value '"+str(v)+"'"
 
-    Sofa.msg_info(self, "Adding user specified properties...\n"+msg)
+    Sofa.msg_info(self, pslprefix+"Adding a user properties: \n"+msg)
 
 
 def instanciateTemplate(parent, key, kv, stack, frame):
@@ -367,7 +471,7 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                 n = templates[key].getTemplate()
                 for k,v in n:
                         if k == 'name':
-                                None
+                            None
                         elif k == 'properties':
                                 for kk,vv in v:
                                         if not kk in frame:
@@ -379,10 +483,11 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                 for k,v in templates[key]["properties"]:
                         if not k in frame:
                                 nframe[k] = str(v)
+
         for k,v in kv:
                 nframe[k] = v
+
         n = processNode(parent, "Node", source, stack, nframe, doCreate=True)
-        n.name = key
 
         if isinstance(templates[key], Sofa.Template):
                 for k,v in kv:
@@ -396,7 +501,8 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                                 elif isinstance(v, unicode):
                                         n.addData(k, key+".Properties", "Help", "f", str(v))
 
-                n.addData("src", key+".Properties", "No help", "s", repr(kv))
+                n.addData("psl_properties", "PSL", "Captured variables for template re-instantiation", "s", repr(kv))
+                n.addData("psl_instanceof", "PSL", "Type of the object", "s", key)
         stack.pop(-1)
 
 def processNode(parent, key, kv, stack, frame, doCreate=True):
@@ -421,9 +527,12 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
         else:
                 tself = frame["self"] = parent
 
+        print("HERE... "+str(kv))
 
         if isinstance(kv, list):
                 for key,value in kv:
+                        print("PROCESS: "+key)
+
                         sofaAliasInitialName = None
                         if isinstance(key, unicode):
                                 key = str(key)
@@ -451,21 +560,20 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
                                 o = processObject(tself, key, value, stack, {})
                                 if o != None:
                                         if isinstance(sofaAliasInitialName, str):
-                                            Sofa.msg_warning(o, "'"+key+" was created using the hard coded alias '"+str(sofaAliasInitialName)+"'"+".  \nUsing hard coded aliases is a confusing practice and we advise you to use scene specific alias with the Alias keyword.")
+                                            Sofa.msg_warning(o, pslprefix+"'"+key+" was created using the hard coded alias '"+str(sofaAliasInitialName)+"'"+".  \nUsing hard coded aliases is a confusing practice and we advise you to use scene specific alias with the Alias keyword.")
                         elif key in templates:
                                 instanciateTemplate(tself, key,value, stack, frame)
                         else:
-                                # we are on a cache hit...so we refresh the list.
+                                ## we are on a cache hit...so we refresh the list.
                                 refreshComponentListFromFactory()
 
                                 if key in sofaComponents:
                                         o = processObject(tself, key, value, stack, {})
                                         if o != None:
                                                 tself.addObject(o)
-
                                 processParameter(tself, key, value, stack, frame)
         else:
-                print("LEAF: "+kv)
+                raise Exception("This shouldn't happen, expecting only list")
         stack.pop(-1)
         return tself
 
@@ -483,10 +591,10 @@ def processRootNode(kv, stack, frame):
                                 n = processNode(None, key, value, stack, {})
                                 return n
                         else:
-                                Sofa.msg_error(tself, "Unable to find a root Node in this file")
+                                Sofa.msg_error(tself, pslprefix+"Unable to find a root Node in this file")
                                 return None
 
-        Sofa.msg_error(tself, "Unable to find a root Node in this file")
+        Sofa.msg_error(tself, pslprefix+"Unable to find a root Node in this file")
         return None
 
 ## Root function that process an abstract tree.

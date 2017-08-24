@@ -57,9 +57,9 @@ using sofa::core::objectmodel::BaseNode ;
 using sofa::simulation::Node ;
 
 Template::Template() : BaseObject(),
-    m_template(initData(&m_template, std::string(""), "template", "Current template source" , true, false))
+    m_template(initData(&m_template, std::string(""), "psl_source", "Current template source" , true, false))
 {
-    m_template.setGroup("Template.properties");
+    m_template.setGroup("PSL");
 }
 
 Template::~Template(){}
@@ -91,11 +91,14 @@ void Template::checkAndDoUpdates()
             //}
 
             /// Re-instantiate it.
-            PyObject* pDict = PyModule_GetDict(PyImport_AddModule("pysonloader"));
-            PyObject* pFunc = PyDict_GetItemString(pDict, "reinstanciateTemplate");
+            PyObject* pDict = PyModule_GetDict(PyImport_AddModule("pslengine"));
+            PyObject* pFunc = PyDict_GetItemString(pDict, "reinstanciateAllTemplates");
 
             if(!pDict || !pFunc)
+            {
+                std::cout << "UNABLE TO GET FUNCTIOn " << pFunc << std::endl ;
                 return;
+            }
 
             std::cout << "INSTANTIATE TEMPLATE " << pFunc << std::endl ;
 
