@@ -145,8 +145,7 @@ Node : {
 To simplify scene writing the scenes elements ("root, child1", ...) within the scene graph "scope"
 are exposed in the Python component so that you can write thing like:
 ```python
-   child1.createChild("...")
-   self.createChild("...")
+child1.createChild("...")
 ```
 
 It is also possible to write python expression attached to given component by using the prefix
@@ -225,6 +224,26 @@ Node : {
         ...
 }
 ```
+
+##### Properties
+In PSL it is possible to add custom Data field to any sofa object. This is done via the keyword
+"properties" that you can use in the following way:
+
+```css
+Node : {
+    name : "root"
+
+    /// properties are Data field attached to the object at load time.
+    properties :
+    {
+        aIntProperty : 1
+        aStringProperty : "Success"
+    }
+}
+```
+
+The type of the poperty is deduced from the type of the data provided among Integer, String and Float
+or an array of these.
 
 ##### Aliasing
 In Sofa the aliasing system is implicit and the alias are defined in the sofa code source. This is really trouble some as users need to *discover* that in a scene "Mesh" is in fact an alias to a "MeshTopology" object. Without proper tools the solution is often to search in the source code which was an alias.
