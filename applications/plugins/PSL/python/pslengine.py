@@ -32,6 +32,8 @@ import Sofa
 import SofaPython
 import difflib
 import os
+import pprint
+import pslparserhjson
 
 # TODO(dmarchal 2017-06-17) Get rid of these ugly globals.
 templates = {}
@@ -120,7 +122,7 @@ def getField(object, name):
 
     return None
 
-pslprefix = "PSL::engine"
+pslprefix = "PSL::engine: "
 
 def processString(object, name, value, stack, frame):
     ## Python Hook to build an eval function.
@@ -196,10 +198,6 @@ def processObject(parent, key, kv, stack, frame):
         for k,v in kv:
                 if len(v) != 0 and v[0] == 'p' and v[1] == '"':
                         v = evalPython(None, v[2:-1], stack, frame)
-
-                #if k == "name":
-                #        frame["name"] = v
-
                 kwargs[k] = str(v)
 
         stack.append(frame)
@@ -249,36 +247,85 @@ def importTemplates(content):
                         for k,v in value:
                                 if k == "name":
                                         name = str(v)
-                                elif k == "properties":
-                                        properties = v
-                                else:
-                                        rvalue.append((k, v))
-                        templates[name] = {"properties":properties, "content" : rvalue}
+                        templates[name] = value
                 else:
                         Sofa.msg_warning(pslprefix, " an imported file contains something that is not a Template.")
 
         return templates
 
+def getFileToImportFromPartialName(parent, partialname):
+        if partialname.endswith(".psl"):
+            return partialname
+
+        if partialname.endswith(".pslx"):
+            return partialname
+
+        if partialname.endswith(".py"):
+            return partialname
+
+        if os.path.exists(partialname+".psl"):
+            if os.path.exists(partialname+".py"):
+                Sofa.msg_warning(parent, pslprefix+"Both '"+partialname+"'.psl and "+partialname+".py. Importing the psl version.")
+            if os.path.exists(partialname+".py"):
+                    Sofa.msg_warning(parent, pslprefix+"Both '"+partialname+"'.psl and "+partialname+".pslx. Importing the psl version.")
+            return partialname+".psl"
+
+        if os.path.exists(partialname+".pslx"):
+            if os.path.exists(partialname+".py"):
+                    Sofa.msg_warning(parent, pslprefix+"Both '"+partialname+"'.pslx and "+partialname+".py. Importing the psl version.")
+            return partialname+".pslx"
+
+        if os.path.exists(partialname+".py"):
+            return partialname+".py"
+
+        return None
+
+def processImportPSL(parent, importname, filename, key, stack, frame):
+    global imports, templates
+    Sofa.msg_info(parent, pslprefix+"Importing "+importname+".psl file format is nearly supported yet... ")
+
+    f = open(filename).read()
+    loadedcontent = pslparserhjson.parse(f)
+    imports[filename] = importTemplates(loadedcontent)
+
+    for tname in imports[filename].keys():
+            templates[importname+"."+tname] = imports[filename][tname]
+
+def processImportPSLX(parent, importname, filename, key, stack, frame):
+    Sofa.msg_error(parent, pslprefix+"Importing .pslx file format is not supported yet... "+ os.getcwd() + "/"+filename)
+
+def processImportPY(parent, importname, filename, key, stack, frame):
+    Sofa.msg_error(parent, pslprefix+"Importing .py file format is not supported yet... "+ os.getcwd() + "/"+filename)
+
 # TODO gérer les imports circulaires...
 def processImport(parent, key, kv, stack, frame):
-        global imports, templates
+        """ This function "import" the file provided as parameter """
+
+        ## Check that the kv value is in fact a string or an unicode
         if not (isinstance(kv, str) or isinstance(kv, unicode)):
-                Sofa.msg_error(parent, pslprefix+" expecting a single 'string' entry....in procesImport " + str(type(kv)))
+                Sofa.msg_error(parent, pslprefix+" to much parameter given in procesImport " + str(type(kv)))
                 return
-        filename = kv+".psl"
-        if not os.path.exists(filename):
+
+        importname=kv
+        if isinstance(importname, unicode):
+            importname=str(importname)
+
+        ## If it is we get complete the filename and try to open it.
+        filename = getFileToImportFromPartialName(parent, importname)
+        if filename == None or not os.path.exists(filename):
                 dircontent = os.listdir(os.getcwd())
                 matches = difflib.get_close_matches(filename, dircontent, n=4)
                 Sofa.msg_error(parent, pslprefix+" the file '" + filename + "' does not exists. Do you mean: "+str(matches))
                 return
-        Sofa.msg_info(parent, "importing "+ os.getcwd() + "/"+filename)
 
-        f = open(filename).read()
-        loadedcontent = hjson.loads(f, object_pairs_hook=MyObjectHook())
-        imports[filename] = importTemplates(loadedcontent)
+        if filename.endswith(".psl"):
+            return processImportPSL(parent, importname, filename, key, stack, frame)
+        elif filename.endswith(".pslx"):
+            return processImportPSLX(parent, importname, filename, key, stack, frame)
+        elif filename.endswith(".py"):
+            return processImportPY(parent, importname, filename, key, stack, frame)
 
-        for tname in imports[filename].keys():
-                templates[kv+"."+tname] = imports[filename][tname]
+        Sofa.msg_error(parent, pslprefix+"invalid file format to import "+ os.getcwd() + "/"+filename+ " supproted format are [psl, pslx, py]")
 
 def processTemplate(parent, key, kv, stack, frame):
         global templates
@@ -473,41 +520,41 @@ def instanciateTemplate(parent, key, kv, stack, frame):
         nframe={}
         source = None
         if isinstance(templates[key], Sofa.Template):
-                n = templates[key].getTemplate()
-                for k,v in n:
-                        if k == 'name':
-                            None
-                        elif k == 'properties':
-                                for kk,vv in v:
-                                        if not kk in frame:
-                                                nframe[kk] = vv
-                        else:
-                                source = v
+                templatesource = templates[key].getTemplate()
         else:
-                source = templates[key]["content"]
-                for k,v in templates[key]["properties"]:
-                        if not k in frame:
-                                nframe[k] = str(v)
+                templatesource = templates[key]
+
+        ## NOW PROCESSING THE TEMPLATE
+        for k,v in templatesource:
+                if k == 'name':
+                    None
+                elif k == 'properties':
+                        for kk,vv in v:
+                                if not kk in frame:
+                                        nframe[kk] = vv
+                else:
+                        source = v
 
         for k,v in kv:
                 nframe[k] = v
 
         n = processNode(parent, "Node", source, stack, nframe, doCreate=True)
 
-        if isinstance(templates[key], Sofa.Template):
-                for k,v in kv:
-                        if not hasattr(n, k):
-                                if isinstance(v, int):
-                                        n.addData(k, key+".Properties", "Help", "d", v)
-                                elif isinstance(v, str) or isinstance(v,unicode):
-                                        n.addData(k, key+".Properties", "Help", "s", str(v))
-                                elif isinstance(v, float):
-                                        n.addData(k, key+".Properties", "Help", "f", v)
-                                elif isinstance(v, unicode):
-                                        n.addData(k, key+".Properties", "Help", "f", str(v))
+        ## Add to the created node the different template properties.
+        for k,v in kv:
+            if not hasattr(n, k):
+                if isinstance(v, int):
+                    n.addData(k, key+".Properties", "Help", "d", v)
+                elif isinstance(v, str) or isinstance(v,unicode):
+                    n.addData(k, key+".Properties", "Help", "s", str(v))
+                elif isinstance(v, float):
+                    n.addData(k, key+".Properties", "Help", "f", v)
+                elif isinstance(v, unicode):
+                    n.addData(k, key+".Properties", "Help", "f", str(v))
 
-                n.addData("psl_properties", "PSL", "Captured variables for template re-instantiation", "s", repr(kv))
-                n.addData("psl_instanceof", "PSL", "Type of the object", "s", key)
+        ## Add the meta-type information.
+        n.addData("psl_properties", "PSL", "Captured variables for template re-instantiation", "s", repr(kv))
+        n.addData("psl_instanceof", "PSL", "Type of the object", "s", key)
         stack.pop(-1)
 
 def processNode(parent, key, kv, stack, frame, doCreate=True):

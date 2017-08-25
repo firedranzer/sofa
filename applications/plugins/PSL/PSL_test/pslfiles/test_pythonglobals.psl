@@ -4,8 +4,12 @@ Node : {
     Python : '''aGlobal="Fail"'''
 
     Node : {
-        /// This should modify the global value
-        Python : '''aGlobal="Success"'''
+        ### This should modify the global value
+        name : "child"
+        Python : '''
+                 aGlobal="Success"
+                 Sofa.msg_info(self, "Value of A GLOBAL "+aGlobal)
+                 '''
     }
 
     TestResult : p"aGlobal"

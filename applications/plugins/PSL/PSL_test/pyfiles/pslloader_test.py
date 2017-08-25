@@ -24,8 +24,8 @@ def testAstCompare():
 def testAstLoading():
     ok = True
     testlist = [("data/test_ast.psl", "data/test_ast.pslx", True),
-                ("data/test_ast.psl", "data/test_ast_broken.pslx", False),
-                ("data/test_caduceus.psl", "data/test_caduceus.pslx", True)]
+                ("data/test_ast.psl", "data/test_ast_broken.pslx", False)]
+                #("data/test_caduceus.psl", "data/test_caduceus.pslx", True)]
     for astFileA, astFileB, res in testlist:
         ast1 = pslast.reorderAttributes(pslast.removeUnicode(pslloader.loadAst(astFileA)))
         ast2 = pslast.reorderAttributes(pslast.removeUnicode(pslloader.loadAst(astFileB)))

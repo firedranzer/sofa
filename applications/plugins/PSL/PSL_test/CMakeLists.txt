@@ -24,6 +24,7 @@ set(PSL_FILES
         pslfiles/test_pythonglobals.psl
         pslfiles/test_pythonlocals.psl
         pslfiles/test_template.psl
+        pslfiles/test_template_frame.psl
         pslfiles/test_node_fail.psl
         pslfiles/test_object.psl
         pslfiles/test_object_datafield.psl
@@ -31,8 +32,12 @@ set(PSL_FILES
         pslfiles/test_pythonexcept.psl
         pslfiles/test_pythonobject.psl
         pslfiles/test_python.psl
+        pslfiles/test_import.psl
+        pslfiles/test_importpython.psl
         pslfiles/test_objects_lightmanager.psl
         pslfiles/test_objects_lightmanager.pslx
+        pslfiles/importedlib.psl
+        pslfiles/importedpython.py
 )
 
 set(PYTHON_TEST_FILES
