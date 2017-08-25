@@ -32,6 +32,7 @@ import Sofa
 import SofaPython
 import difflib
 import os
+import psl.dsl
 import pprint
 import types
 import pslparserhjson
@@ -537,7 +538,19 @@ def instanciateTemplate(parent, key, kv, stack, frame):
         else:
                 templatesource = templates[key]
 
-        if not isinstance(templatesource, types.FunctionType):
+        if isinstance(templatesource, types.FunctionType):
+            kwargs = {}
+            for k,v in kv:
+                kwargs[k] = v
+
+            n = parent.createChild(key)
+            templatesource(n, **kwargs)
+        elif isinstance(templatesource, psl.dsl.psltemplate):
+            kwargs = {}
+            for k,v in kv:
+                kwargs[k] = v
+            n=templatesource(parent, **kwargs)
+        else:
             ## NOW PROCESSING THE TEMPLATE
             for k,v in templatesource:
                     if k == 'name':
@@ -553,9 +566,6 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                     nframe[k] = v
 
             n = processNode(parent, "Node", source, stack, nframe, doCreate=True)
-        else:
-            n = parent.createChild(key)
-            templatesource(n)
 
         ## Add to the created node the different template properties.
         for k,v in kv:

@@ -1,17 +1,18 @@
 Python Scene Language for Sofa
 ===========
-The Python Scene Language (PSL) is an attempt to mixe the advantages of *scn* and *pyscn* in an unified
-framework. The language has been specifically designed to make sofa scenes in an elegant and powerful
+The Python Scene Language (PSL) project is an attempt to mixe the advantages of *scn* and *pyscn* in an
+unified framework. The language has been specifically designed to make sofa scenes in an elegant and powerful
 way.
 
 PSL features:
 - scene description (as we have in .scn)
 - scene programmability (with embeded Python)
 - scene templates (dynamic element that can be reuse and instantiated)
-- scene libraries (to store scene templates for reuse and sharing)
+- scene templates libraries (to store scene templates for reuse and sharing)
 - explicit aliasing (to simplify scene writing).
 - scene loading & saving.
 - multiple alternative syntax (xml, hjson, python-pickled)
+- a python DSL to make scene in pure-python
 - ... more to come ...
 
 Compared to classical *.scn*, PSL offer scene dynamicity,

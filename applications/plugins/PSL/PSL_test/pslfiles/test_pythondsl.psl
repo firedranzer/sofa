@@ -22,7 +22,7 @@ Node : {
                  MechanicalObject(node, name="coucou1")
                  MechanicalObject(node, name="coucou2")
 
-             MyTemplate(root, name="MyTemplate1")
+			 MyTemplate(root, name="MyTemplate1")
              MyTemplate(root, name="MyTemplate2")
 
              '''
