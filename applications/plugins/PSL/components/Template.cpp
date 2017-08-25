@@ -76,19 +76,12 @@ void Template::checkAndDoUpdates()
 {
     for(BaseData* data : m_trackedDatas){
         if(m_dataTracker.isDirty(*data)){
-            std::cout << "Data is cleaned ... or not " << data->getValueString() << std::endl ;
+            std::cout << "Template re-instanciation..." << data->getValueString() << std::endl ;
             m_dataTracker.clean(*data) ;
 
 
             Base* base = data->getOwner() ;
             Node* node = dynamic_cast<Node*>(base) ;
-
-            //std::vector<BaseObject*> ct;
-            //node->getTreeObjects<BaseObject, std::vector<BaseObject*>>(&ct);
-
-            //for(auto& i : ct){
-            //    node->removeObject(i) ;
-            //}
 
             /// Re-instantiate it.
             PyObject* pDict = PyModule_GetDict(PyImport_AddModule("pslengine"));
@@ -99,8 +92,6 @@ void Template::checkAndDoUpdates()
                 std::cout << "UNABLE TO GET FUNCTIOn " << pFunc << std::endl ;
                 return;
             }
-
-            std::cout << "INSTANTIATE TEMPLATE " << pFunc << std::endl ;
 
             if (PyCallable_Check(pFunc))
             {
@@ -117,7 +108,6 @@ void Template::checkAndDoUpdates()
 
 void Template::addDataToTrack(BaseData* d)
 {
-    std::cout << "ADDING TO DATA TRACKER.. " << d->getName() <<  std::endl ;
     m_dataTracker.trackData(*d) ;
     m_trackedDatas.push_back(d);
 }
