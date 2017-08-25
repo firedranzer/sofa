@@ -34,7 +34,15 @@ set(PYTHON_FILES
 set(EXTRA_FILES
     examples/starthere.psl
     examples/starthere.pslx
+    examples/python01.psl
+    examples/python02.psl
+    examples/python03.psl
     examples/template01.psl
+    examples/template02.psl
+    examples/template03.psl
+    examples/using.psl
+    examples/import.psl
+    examples/mylibrary.psl
     examples/caduceus.psl
     examples/caduceus.pslx
     pep/pep0_pythoncontroller.psl

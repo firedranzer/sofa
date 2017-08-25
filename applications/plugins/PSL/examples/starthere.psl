@@ -1,4 +1,36 @@
 Node : {
-	name : toto
-	OglModel : { name : "Damien" }
+        name : "root2"
+
+        Template : {
+            name : "MyTemplate"
+            properties : {
+                name : "default"
+                numchild : 10
+            }
+            Node : {
+                name : p"name"
+                Python : '''
+                         for i in range(0,numchild):
+                            root2.createChild("lefile"+str(i))
+                         '''
+            }
+        }
+
+        MyTemplate : {
+            name : "Toto"
+            numchild : 5
+        }
+
+        MyTemplate : {
+            name : "Titi"
+        }
+
+        OglModel : {
+            properties : {
+                maProperties : 10
+            }
+            filename : "mesh/ball.obj"
+        }
+
+
 }

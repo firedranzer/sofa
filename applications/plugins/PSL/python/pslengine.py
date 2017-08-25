@@ -93,10 +93,15 @@ def processPython(parent, key, kv, stack, frame):
         local = {}
         exec(kv, context, local)
 
+        #print("CONTEXT IS: "+str(context))
+        #print("LOCAL IS: "+str(local))
+        #print("OUT STACK: "+str(stack[-2]))
         ## Transfer the local entries to the previously defined context
         ## This allow import in one line and use the imported in the following ones.
         for k in local:
                 stack[-1][k] = local[k]
+
+
 
 def evalPython(key, kv, stack, frame):
         """Process a python fragment of code with context provided by the content of the stack."""
@@ -527,12 +532,8 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
         else:
                 tself = frame["self"] = parent
 
-        print("HERE... "+str(kv))
-
         if isinstance(kv, list):
                 for key,value in kv:
-                        print("PROCESS: "+key)
-
                         sofaAliasInitialName = None
                         if isinstance(key, unicode):
                                 key = str(key)
