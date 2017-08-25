@@ -139,6 +139,7 @@ std::vector<std::vector<std::string>> testvalues = {
     {"test_object.psl", "Success", "NoError"},
     {"test_object_datafield.psl", "Success", "NoError"},
     {"test_python.psl", "Success", "NoError"},
+    {"test_pythondsl.psl", "Success", "NoError"},
     {"test_pythonlocals.psl", "Success", "NoError"},
     {"test_pythonglobals.psl", "Success", "NoError"},
     {"test_pythonobject.psl", "Success", "NoError"},

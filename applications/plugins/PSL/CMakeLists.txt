@@ -23,6 +23,7 @@ find_package(SofaFramework REQUIRED)
 find_package(SofaPython REQUIRED)
 
 set(PYTHON_FILES
+    python/psl/dsl.py
     python/pslloader.py
     python/pslengine.py
     python/pslast.py
