@@ -62,7 +62,7 @@ void BaseLink::printValue( std::ostream& o ) const
 {
     std::size_t size = getSize();
     bool first = true;
-	for (std::size_t i = 0; i<size; ++i)
+    for (std::size_t i = 0; i<size; ++i)
     {
         std::string path = getLinkedPath(i);
         if (path.empty()) continue;
@@ -179,6 +179,8 @@ std::string BaseLink::CreateString(const std::string& path, const std::string& d
 {
     std::string result = "@";
     if (!path.empty()) result += path;
+    else result = "@/" ;
+
     if (!data.empty())
     {
         if (result[result.size()-1] == '.')
