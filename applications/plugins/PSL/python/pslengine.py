@@ -33,6 +33,7 @@ import SofaPython
 import difflib
 import os
 import pprint
+import types
 import pslparserhjson
 
 # TODO(dmarchal 2017-06-17) Get rid of these ugly globals.
@@ -282,7 +283,7 @@ def getFileToImportFromPartialName(parent, partialname):
 
 def processImportPSL(parent, importname, filename, key, stack, frame):
     global imports, templates
-    Sofa.msg_info(parent, pslprefix+"Importing "+importname+".psl file format is nearly supported yet... ")
+    Sofa.msg_info(parent, pslprefix+"Importing "+importname+".psl.")
 
     f = open(filename).read()
     loadedcontent = pslparserhjson.parse(f)
@@ -295,7 +296,20 @@ def processImportPSLX(parent, importname, filename, key, stack, frame):
     Sofa.msg_error(parent, pslprefix+"Importing .pslx file format is not supported yet... "+ os.getcwd() + "/"+filename)
 
 def processImportPY(parent, importname, filename, key, stack, frame):
-    Sofa.msg_error(parent, pslprefix+"Importing .py file format is not supported yet... "+ os.getcwd() + "/"+filename)
+    Sofa.msg_info(parent, pslprefix+"Importing '"+importname+".py' file format.")
+    pythonfile = open(filename).read()
+
+    locals = {}
+    frame = flattenStackFrame(stack)
+    exec(pythonfile, frame, locals)
+
+    if not "PSLExport" in locals:
+            Sofa.msg_error(parent, pslprefix+"The file '"+filename+"' does not seem to contain PSL templates.")
+            return
+
+    for name in locals:
+            templates[importname+"."+name] = locals[name]
+
 
 # TODO gérer les imports circulaires...
 def processImport(parent, key, kv, stack, frame):
@@ -436,7 +450,6 @@ def reinstanciateAllTemplates(template):
         for k,v in instanceProperties:
             frame[k] = v
 
-        print("PROCESSING CODE: "+str(src)+ " WITH FRAME: "+str(frame))
         n = processNode(node, "Node", src, [frame], frame, doCreate=False)
 
 
@@ -524,21 +537,25 @@ def instanciateTemplate(parent, key, kv, stack, frame):
         else:
                 templatesource = templates[key]
 
-        ## NOW PROCESSING THE TEMPLATE
-        for k,v in templatesource:
-                if k == 'name':
-                    None
-                elif k == 'properties':
-                        for kk,vv in v:
-                                if not kk in frame:
-                                        nframe[kk] = vv
-                else:
-                        source = v
+        if not isinstance(templatesource, types.FunctionType):
+            ## NOW PROCESSING THE TEMPLATE
+            for k,v in templatesource:
+                    if k == 'name':
+                        None
+                    elif k == 'properties':
+                            for kk,vv in v:
+                                    if not kk in frame:
+                                            nframe[kk] = vv
+                    else:
+                            source = v
 
-        for k,v in kv:
-                nframe[k] = v
+            for k,v in kv:
+                    nframe[k] = v
 
-        n = processNode(parent, "Node", source, stack, nframe, doCreate=True)
+            n = processNode(parent, "Node", source, stack, nframe, doCreate=True)
+        else:
+            n = parent.createChild(key)
+            templatesource(n)
 
         ## Add to the created node the different template properties.
         for k,v in kv:

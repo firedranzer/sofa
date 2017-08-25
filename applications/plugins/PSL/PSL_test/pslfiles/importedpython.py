@@ -1,8 +1,9 @@
-PSLExport = ["Template1", "Template2"]
+PSLExport = ["Template1", "MyTemplate"]
 
-def Template1(parent):
-	print("THIS IS A TEMPLATE")
+def Template1(templateRoot):
+    Sofa.msg_info(templateRoot, "This have been created from a python template")
 
-
-def Template2(parent, arg=10):
-	print("THIS IS A TEMPLATE WITH ARG: "+arg)
+def MyTemplate(templateRoot, numchild=10):
+    Sofa.msg_info(templateRoot, "This have been created from a python template")
+    for i in range(0, numchild):
+        templateRoot.createChild("Something"+str(i))

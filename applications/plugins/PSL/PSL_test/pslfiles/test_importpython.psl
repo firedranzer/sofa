@@ -1,14 +1,19 @@
 Node : {
     name : "root"
-    import : importedpython
+    Import : importedpython
 
     importedpython.Template1 : {}
-    importedpython.Template2 : {}
+    importedpython.MyTemplate : {
+        numchild : 3
+    }
+    importedpython.MyTemplate : {
+        numchild : 3
+    }
 
     Python : '''
              cp=0
              for child in root.getChildren():
-                if child.name == "MyTemplate":
+                if child.name == "importedpython.MyTemplate":
                     cp+=1
              if cp != 2:
                 Sofa.msg_error(root, "The templates that should be instantiated are missing.")
