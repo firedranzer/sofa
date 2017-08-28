@@ -24,6 +24,7 @@ set(PSL_FILES
         pslfiles/test_pythonglobals.psl
         pslfiles/test_pythonlocals.psl
         pslfiles/test_template.psl
+        pslfiles/test_template_dynamic.psl
         pslfiles/test_template_frame.psl
         pslfiles/test_node_fail.psl
         pslfiles/test_object.psl

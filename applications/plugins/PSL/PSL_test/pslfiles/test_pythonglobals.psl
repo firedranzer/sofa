@@ -7,10 +7,16 @@ Node : {
         ### This should modify the global value
         name : "child"
         Python : '''
+                 print("BEFORE: Value of A GLOBAL "+aGlobal)
                  aGlobal="Success"
-                 Sofa.msg_info(self, "Value of A GLOBAL "+aGlobal)
+                 print("Value of A GLOBAL "+aGlobal)
                  '''
     }
+
+    Python : '''
+             print("AFTER: Value of A GLOBAL "+aGlobal)
+             '''
+
 
     TestResult : p"aGlobal"
 }

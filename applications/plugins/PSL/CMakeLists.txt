@@ -57,6 +57,7 @@ set(EXTRA_FILES
     pep/pep8_templateexample.psl
     pep/pep9_pythoncontroller.psl
     pep/pep10_hotreload.psl
+    psl-highlighting.xml
     README.md
     TODO.md
 )

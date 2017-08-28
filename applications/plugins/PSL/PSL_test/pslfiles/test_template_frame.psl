@@ -23,9 +23,11 @@ Node : {
                     cp+=1
              if cp != 2:
                 Sofa.msg_error(root, "Problem in instantiating the templates")
+             else:
+                testresult = "Success"
              '''
 
-    TestResult : "Fail"
+    TestResult : p"testresult"
 }
 
 

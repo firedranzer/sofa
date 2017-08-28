@@ -91,20 +91,27 @@ def populateFrame(cname, frame, stack):
         if fself == None:
                 return
 
+def findStackLevelFor(key, stack):
+    for frame in reversed(stack):
+        if key in frame:
+            return frame
+    return None
+
 def processPython(parent, key, kv, stack, frame):
         """Process a python fragment of code with context provided by the content of the stack."""
         context = flattenStackFrame(stack)
         local = {}
         exec(kv, context, local)
 
-        #print("CONTEXT IS: "+str(context))
-        #print("LOCAL IS: "+str(local))
-        #print("OUT STACK: "+str(stack[-2]))
-        ## Transfer the local entries to the previously defined context
+        ## Transfer the local entries to the previously defined context or in the existing variable
+        ## somewhere in the stack frame.
         ## This allow import in one line and use the imported in the following ones.
         for k in local:
-                stack[-1][k] = local[k]
-
+                lframe = findStackLevelFor(k, stack)
+                if lframe != None:
+                    lframe[k] = local[k]
+                else:
+                    stack[-1][k] = local[k]
 
 
 def evalPython(key, kv, stack, frame):
@@ -420,6 +427,43 @@ def gatherInstances(templatename, node):
             r = r + gatherInstances(templatename, child)
     return r
 
+def reinstanciateATemplateInstance(target, template):
+    print("RE-instiating "+target.name+" from "+template.name)
+    reinstanciateAnInstanceFromText(target, template.psl_source)
+
+def reinstanciateAnInstanceFromText(node, source):
+    frame = {}
+    frame["parent"]=node.getParents()
+    frame["self"]=node
+    instanceProperties = eval(node.psl_properties)
+
+    for c in node.getChildren():
+        node.removeChild(c)
+
+    for o in node.getObjects():
+        node.removeObject(o)
+
+    src = eval(source)
+    res = []
+    for k,v in src:
+        if k == "properties":
+            for kk, vv in v:
+                frame[kk] = vv
+        elif k == "name":
+            None
+        elif k == "Node":
+            res = v
+    src=res
+    for k,v in instanceProperties:
+        data = node.getData(k)
+        if data != None:
+            frame[k] = data.getValue(0)
+        else:
+            Sofa.msg_error(node, "This should not happen for "+k)
+
+    n = processNode(node, "Node", src, [frame], frame, doCreate=False)
+
+
 def reinstanciateAllTemplates(template):
     Sofa.msg_info(template, "Re-instanciating instance of: "+template.name)
     root = template.getContext().getRoot()
@@ -530,8 +574,9 @@ def processProperties(self, key, kv, stack, frame):
 
 def instanciateTemplate(parent, key, kv, stack, frame):
         global templates
-        stack.append(frame)
+        #stack.append(frame)
         nframe={}
+        stack = [nframe]
         source = None
         if isinstance(templates[key], Sofa.Template):
                 templatesource = templates[key].getTemplate()
@@ -567,21 +612,48 @@ def instanciateTemplate(parent, key, kv, stack, frame):
 
             n = processNode(parent, "Node", source, stack, nframe, doCreate=True)
 
-        ## Add to the created node the different template properties.
-        for k,v in kv:
-            if not hasattr(n, k):
-                if isinstance(v, int):
-                    n.addData(k, key+".Properties", "Help", "d", v)
-                elif isinstance(v, str) or isinstance(v,unicode):
-                    n.addData(k, key+".Properties", "Help", "s", str(v))
-                elif isinstance(v, float):
-                    n.addData(k, key+".Properties", "Help", "f", v)
-                elif isinstance(v, unicode):
-                    n.addData(k, key+".Properties", "Help", "f", str(v))
+        if isinstance(templates[key], Sofa.Template):
+            ## Add to the created node the different template properties.
+            for k,v in kv:
+                if not hasattr(n, k):
+                    print("ADDING DATA...for " + str(k))
+                    data = None
+                    t = templates[key]
+                    if isinstance(v, int):
+                        data = t.createATrackedData(k, "Live.Properties", "Help", "d", v)
+                    elif isinstance(v, str) or isinstance(v,unicode):
+                        data = t.createATrackedData(k, "Live.Properties", "Help", "s", str(v))
+                    elif isinstance(v, float):
+                        data = t.createATrackedData(k, "Live.Properties", "Help", "f", v)
+                    elif isinstance(v, unicode):
+                        data = t.createATrackedData(k, "Live.Properties", "Help", "f", str(v))
+
+                    if data != None:
+                        n.realAddData(data)
+                        templates[key].trackData( data )
+
+        else:
+            ## Add to the created node the different template properties.
+            for k,v in kv:
+                if not hasattr(n, k):
+                    if isinstance(v, int):
+                        n.addData(k, "Live.Properties", "Help", "d", v)
+                    elif isinstance(v, str) or isinstance(v,unicode):
+                        n.addData(k, "Live.Properties", "Help", "s", str(v))
+                    elif isinstance(v, float):
+                        n.addData(k, "Live.Properties", "Help", "f", v)
+                    elif isinstance(v, unicode):
+                        n.addData(k, "Live.Properties", "Help", "f", str(v))
+
+                ## Add the data tracker to the template instances (this is bad) :(
+                ##if isinstance(templates[key], Sofa.Template):
+                ##    templates[key].trackData( n.findData(k) )
+
 
         ## Add the meta-type information.
         n.addData("psl_properties", "PSL", "Captured variables for template re-instantiation", "s", repr(kv))
         n.addData("psl_instanceof", "PSL", "Type of the object", "s", key)
+
         stack.pop(-1)
 
 def processNode(parent, key, kv, stack, frame, doCreate=True):

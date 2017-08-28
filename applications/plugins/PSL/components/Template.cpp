@@ -43,7 +43,68 @@ using sofa::core::RegisterObject ;
 using sofa::PythonFactory ;
 
 #include "Template.h"
+using sofa::core::objectmodel::Data ;
 
+#include "SofaPython/PythonEnvironment.h"
+using sofa::simulation::PythonEnvironment ;
+
+#include "SofaPython/Binding_Base.h"
+#include "SofaPython/PythonToSofa.inl"
+using sofa::core::objectmodel::BaseData ;
+
+using sofa::core::objectmodel::BaseData ;
+using sofa::component::_template_::Template ;
+
+template<class T>
+class NotifyingData : public Data<T>
+{
+    Template* m_templatesrc ;
+public:
+    NotifyingData() : Data<T>() {}
+
+    /** Constructor used via the Base::initData() methods. */
+    explicit NotifyingData(const BaseData::BaseInitData& init, Template* src) : Data<T>(init){
+        std::cout << "Constructor... I should call papa" << std::endl;
+        m_templatesrc = src ;
+    }
+
+    virtual ~NotifyingData(){
+        std::cout << "Destructor I should call papa" << std::endl ;
+    }
+
+    virtual T* virtualBeginEdit() override
+    {
+        std::cout << "Virtual Begin Value" << std::endl ;
+        return Data<T>::virtualBeginEdit() ;
+    }
+
+    virtual void virtualEndEdit() override
+    {
+        std::cout << "Virtual Set Value" << std::endl ;
+        Data<T>::virtualEndEdit() ;
+    }
+
+    virtual void virtualSetValue(const T& t) override {
+        std::cout << "Virtual Set Value" << std::endl ;
+        Data<T>::virtualSetValue(t) ;
+    }
+
+    virtual void update() override {
+        std::cout << "Update" << std::endl ;
+        Data<T>::update() ;
+    }
+
+    virtual bool read(const std::string &s) override {
+        std::cout << "READ..." <<  this->getName() << "->" << s << std::endl ;
+        return Data<T>::read(s) ;
+    }
+
+    virtual void operator =( const T& value ) override {
+        this->setValue(value) ;
+        std::cout << "operator= should be overloaded" << std::endl ;
+    }
+
+};
 
 namespace sofa
 {
@@ -74,40 +135,76 @@ void Template::handleEvent(Event *event)
 
 void Template::checkAndDoUpdates()
 {
-    for(BaseData* data : m_trackedDatas){
-        if(m_dataTracker.isDirty(*data)){
-            std::cout << "Template re-instanciation..." << data->getValueString() << std::endl ;
-            m_dataTracker.clean(*data) ;
+    std::map<Base*, Base*> updateList ;
+    for(BaseData* data : m_trackedDatas)
+    {
+        if(m_dataTracker.isDirty(*data))
+        {
+            if(data->getName()=="psl_source") {
+                std::cout << "Template re-instanciation..." << data->getValueString() << std::endl ;
 
+                Base* base = data->getOwner() ;
+                Node* node = dynamic_cast<Node*>(base) ;
 
-            Base* base = data->getOwner() ;
-            Node* node = dynamic_cast<Node*>(base) ;
+                /// Re-instantiate it.
+                PyObject* pDict = PyModule_GetDict(PyImport_AddModule("pslengine"));
+                PyObject* pFunc = PyDict_GetItemString(pDict, "reinstanciateAllTemplates");
 
-            /// Re-instantiate it.
-            PyObject* pDict = PyModule_GetDict(PyImport_AddModule("pslengine"));
-            PyObject* pFunc = PyDict_GetItemString(pDict, "reinstanciateAllTemplates");
+                if(!pDict || !pFunc)
+                {
+                    std::cout << "UNABLE TO GET FUNCTIOn " << pFunc << std::endl ;
+                    return;
+                }
 
-            if(!pDict || !pFunc)
-            {
-                std::cout << "UNABLE TO GET FUNCTIOn " << pFunc << std::endl ;
-                return;
+                if (PyCallable_Check(pFunc))
+                {
+                    PyObject* tgt = PythonFactory::toPython(data->getOwner());
+                    PyObject* res = PyObject_CallFunction(pFunc, "O", tgt) ;
+
+                    if(PyErr_Occurred())
+                        PyErr_Print();
+                }
             }
-
-            if (PyCallable_Check(pFunc))
+            else
             {
-                PyObject* tgt = PythonFactory::toPython(data->getOwner());
-                PyObject* res = PyObject_CallFunction(pFunc, "O", tgt) ;
-
-                if(PyErr_Occurred())
-                    PyErr_Print();
+                updateList[data->getOwner()] = data->getOwner() ;
             }
-
         }
+
+    }
+    m_dataTracker.clean();
+
+    for( auto& kv : updateList )
+    {
+        std::cout << "C++ update of Template" << kv.first->getName() << std::endl ;
+
+        /// Re-instantiate it.
+        PyObject* pDict = PyModule_GetDict(PyImport_AddModule("pslengine"));
+        PyObject* pFunc = PyDict_GetItemString(pDict, "reinstanciateATemplateInstance");
+
+        if(!pDict || !pFunc)
+        {
+            std::cout << "UNABLE TO GET FUNCTIOn " << pFunc << std::endl ;
+            return;
+        }
+
+        if (PyCallable_Check(pFunc))
+        {
+            Node* targetInstance = dynamic_cast<Node*>(kv.first) ;
+            PyObject* src = PythonFactory::toPython(this);
+            PyObject* tgt = PythonFactory::toPython(targetInstance);
+            PyObject* res = PyObject_CallFunction(pFunc, "OO", tgt, src) ;
+
+            if(PyErr_Occurred())
+                PyErr_Print();
+        }
+
     }
 }
 
 void Template::addDataToTrack(BaseData* d)
 {
+    std::cout << "ADD DATA TO TRACK" << std::endl ;
     m_dataTracker.trackData(*d) ;
     m_trackedDatas.push_back(d);
 }
@@ -123,8 +220,6 @@ int TemplateClass = core::RegisterObject("An object template encoded as parsed h
 
 } // namespace sofa
 
-using sofa::core::objectmodel::BaseData ;
-using sofa::component::_template_::Template ;
 
 static PyObject * Template_setTemplate(PyObject *self, PyObject * args)
 {
@@ -176,10 +271,151 @@ static PyObject * Template_trackData(PyObject *self, PyObject * args)
 }
 
 
+static Base* get_base(PyObject* self) {
+    return sofa::py::unwrap<Base>(self);
+}
+
+
+//TODO(dmarchal 2017-07-15) Factor that before PR.
+char* getStringCopy(char *c)
+{
+    char* tmp = new char[strlen(c)+1] ;
+    strcpy(tmp,c);
+    return tmp ;
+}
+
+//TODO(dmarchal 2017-07-15) Factor that before PR.
+/// This function converts an PyObject into a sofa string.
+/// string that can be safely parsed in helper::vector<int> or helper::vector<double>
+static std::ostream& pythonToSofaDataString(PyObject* value, std::ostream& out)
+{
+    /// String are just returned as string.
+    if (PyString_Check(value))
+    {
+        return out << PyString_AsString(value) ;
+    }
+
+
+    if( PySequence_Check(value) )
+    {
+        /// It is a sequence...so we can iterate over it.
+        PyObject *iterator = PyObject_GetIter(value);
+        if(iterator)
+        {
+            bool first = true;
+            while(PyObject* next = PyIter_Next(iterator))
+            {
+                if(first) first = false;
+                else out << ' ';
+
+                pythonToSofaDataString(next, out);
+                Py_DECREF(next);
+            }
+            Py_DECREF(iterator);
+
+            if (PyErr_Occurred())
+            {
+                msg_error("SofaPython") << "error while iterating." << msgendl
+                                        << PythonEnvironment::getStackAsString() ;
+            }
+            return out;
+        }
+    }
+
+
+    /// Check if the object has an explicit conversion to a Sofa path. If this is the case
+    /// we use it.
+    if( PyObject_HasAttrString(value, "getAsACreateObjectParameter") ){
+       PyObject* retvalue = PyObject_CallMethod(value, (char*)"getAsACreateObjectParameter", nullptr) ;
+       return pythonToSofaDataString(retvalue, out);
+    }
+
+    /// Default conversion for standard type:
+    if( !(PyInt_Check(value) || PyLong_Check(value) || PyFloat_Check(value) || PyBool_Check(value) ))
+    {
+        msg_warning("SofaPython") << "You are trying to convert a non primitive type to Sofa using the 'str' operator." << msgendl
+                                  << "Automatic conversion is provided for: String, Integer, Long, Float and Bool and Sequences." << msgendl
+                                  << "Other objects should implement the method getAsACreateObjectParameter(). " << msgendl
+                                  << "This function should return a string usable as a parameter in createObject()." << msgendl
+                                  << "So to remove this message you must add a method getAsCreateObjectParameter(self) "
+                                     "to the object you are passing the createObject function." << msgendl
+                                  << PythonEnvironment::getStackAsString() ;
+    }
+
+
+    PyObject* tmpstr=PyObject_Str(value);
+    out << PyString_AsString(tmpstr) ;
+    Py_DECREF(tmpstr) ;
+    return out ;
+}
+
+
+static PyObject * Template_createATrackedData(PyObject *self, PyObject *args ) {
+    Base* obj = get_base(self);
+    char* dataName;
+    char* dataClass;
+    char* dataHelp;
+    char* dataRawType;
+    PyObject* dataValue;
+
+    if (!PyArg_ParseTuple(args, "ssssO", &dataName, &dataClass, &dataHelp, &dataRawType, &dataValue)) {
+        return NULL;
+    }
+
+    dataName = getStringCopy(dataName) ;
+    dataClass = getStringCopy(dataClass) ;
+    dataHelp  = getStringCopy(dataHelp) ;
+
+
+    //TODO(dmarchal 2017-07-15) il y a une fuite mémoire ici. A cause de l'init qui ne fait
+    // pas de copie des chaines... mais juste du swallow du coup on se retrouve à copier les nom
+    // à chaque template. C'est méga naze !
+    BaseData* bd = nullptr ;
+    if(dataRawType[0] == 's'){
+        NotifyingData<std::string>* t = new NotifyingData<std::string>() ;
+        //t = new(t) NotifyingData<std::string>(obj->initData(t, std::string(""), dataName, dataHelp)) ;
+        bd = t;
+    }
+    else if(dataRawType[0] == 'b'){
+        NotifyingData<bool>* t = new NotifyingData<bool>();
+        //t = new(t) NotifyingData<bool>(obj->initData(t, true, dataName, dataHelp)) ;
+        bd = t;
+    }
+    else if(dataRawType[0] == 'd'){
+        NotifyingData<int>* t = new NotifyingData<int>();
+        //t = new (t) NotifyingData<int> (obj->initData(t, 0, dataName, dataHelp)) ;
+        bd = t;
+    }
+    else if(dataRawType[0] == 'f'){
+        NotifyingData<float>* t = new NotifyingData<float>();
+        //t = new (t) NotifyingData<float>(obj->initData(t, 0.0f, dataName, dataHelp)) ;
+        bd = t;
+    }
+    else{
+        std::stringstream msg;
+        msg << "Invalid data type '" << dataRawType << "'. Supported type are: s(tring), d(ecimal), f(float), b(oolean)" ;
+        PyErr_SetString(PyExc_TypeError, msg.str().c_str());
+        return NULL;
+    }
+
+
+    std::stringstream tmp;
+    pythonToSofaDataString(dataValue, tmp) ;
+    bd->setName(dataName) ;
+    bd->setHelp(dataHelp);
+    bd->read( tmp.str() ) ;
+    bd->setGroup(dataClass);
+
+    return SP_BUILD_PYPTR(Data,BaseData,bd,false);
+}
+
+
+
 SP_CLASS_METHODS_BEGIN(Template)
 SP_CLASS_METHOD(Template, setTemplate)
 SP_CLASS_METHOD(Template, getTemplate)
 SP_CLASS_METHOD(Template, trackData)
+SP_CLASS_METHOD(Template, createATrackedData)
 SP_CLASS_METHODS_END
 
 SP_CLASS_TYPE_SPTR(Template,Template,BaseObject)
