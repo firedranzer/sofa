@@ -308,6 +308,6 @@ Example of use in a *.pyscn* file:
     from psl.dsl import *
 
     createScene(root):
-        child1 = Node(root, name="child1")      ## This replace root.createNode("child1")
-        o = MechanicalObject(name="mstate) ## replace child1.createObject("MechanicalObject", name="mstate)
+        c = Node(root, name="child1")
+        o = MechanicalObject(c, name="mstate)
 ```
