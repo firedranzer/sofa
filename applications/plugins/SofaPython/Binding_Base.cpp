@@ -113,6 +113,21 @@ char* getStringCopy(char *c)
     return tmp ;
 }
 
+static PyObject * Base_realAddData(PyObject *self, PyObject *args )
+{
+    Base* obj = get_base(self);
+    PyObject* pydata;
+
+    if (!PyArg_ParseTuple(args, "O", &pydata)) {
+        return NULL;
+    }
+
+    BaseData* data = sofa::py::unwrap<BaseData>(pydata);
+    obj->addData(data) ;
+
+    Py_RETURN_NONE;
+}
+
 static PyObject * Base_addData(PyObject *self, PyObject *args ) {
     Base* obj = get_base(self);
     char* dataName;
@@ -380,6 +395,7 @@ static PyObject * Base_downCast(PyObject *self, PyObject * /*args*/) {
 
 SP_CLASS_METHODS_BEGIN(Base)
 SP_CLASS_METHOD(Base,addData)
+SP_CLASS_METHOD(Base,realAddData)
 SP_CLASS_METHOD(Base,findData)
 SP_CLASS_METHOD(Base,findLink)
 SP_CLASS_METHOD(Base,getData)
