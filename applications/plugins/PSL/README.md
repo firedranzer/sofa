@@ -19,7 +19,7 @@ Index:
 - [Advanced features](#advanced-features)
     - [Dynamic templates & GUI (DOC TODO)](#dynamic-templates-&-gui-interaction)
     - [Python DSL](#pure-python-dsl)
-    - [Writing templates in python (DOC TODO)](#templates)
+    - [Writing templates in python (DOC TODO)](#writing-templates-in-pure-python.)
 
 #### Installation & requirement.
 The language is under heavy developement so don't trust the code, the examples or the documentation.
@@ -249,6 +249,67 @@ Node : {
 }
 ```
 
+It is also possible to write the template in pure python (TODO- make a link to the right section).
+
+### Aliasing
+In Sofa the aliasing system is implicit and the alias are defined in the sofa code source. This is really trouble some as users need to *discover* that in a scene "Mesh" is in fact an alias to a "MeshTopology" object. Without proper tools the solution is often to search in the source code which was an alias.
+
+In PSL we are preserving the use of Alias but we make them explicit. So each scene can defined its own set of alias and anyone reading the scene knows what are the alias and what are the real underlying objects.
+```hjson
+        Import : mylibrary
+
+        Alias : TSPhereModel-CollisionSphere
+        Alias : mylibrary.MotorA-MotorA
+        Alias : mylibrary.MotorB-MotorB
+
+        /// Now we can use either
+        TSPhereModel : {}
+
+        /// or
+        CollisionSphere : {}
+```
+
+
+### Properties
+In PSL it is possible to add custom Data field to any sofa object. This is done via the keyword
+"properties" that you can use in the following way:
+
+```css
+Node : {
+    name : "root"
+
+    /// properties are Data field attached to the object at load time.
+    properties :
+    {
+        aIntProperty : 1
+        aStringProperty : "Success"
+    }
+}
+```
+
+The type of the poperty is deduced from the type of the data provided among Integer, String and Float
+or an array of these.
+
+## Advanced features
+### Dynamic templates & GUI interaction
+TODO
+Template are re-instanciated if their input changed. This imply editting the source code of the
+template or editting the values in the GUI.
+
+### Pure Python DSL
+To make the writing of python fragment as well as *.pyscn* more elegant we also implemented some
+helper function in python.
+
+Example of use in a *.pyscn* file:
+```python
+    from psl.dsl import *
+
+    createScene(root):
+        c = Node(root, name="child1")
+        o = MechanicalObject(c, name="mstate)
+```
+
+### Writing templates in pure python.
 It is also possible write psl template in python file for easier integration with python
 oriented workflow. Two possibilities exists:
 
@@ -282,62 +343,4 @@ mytemplate.py more elegant:
         for i in range(0, numchild):
             n = Node(self, "Child"+str(i))
             o = MechanicalObject(n)
-```
-
-
-### Properties
-In PSL it is possible to add custom Data field to any sofa object. This is done via the keyword
-"properties" that you can use in the following way:
-
-```css
-Node : {
-    name : "root"
-
-    /// properties are Data field attached to the object at load time.
-    properties :
-    {
-        aIntProperty : 1
-        aStringProperty : "Success"
-    }
-}
-```
-
-The type of the poperty is deduced from the type of the data provided among Integer, String and Float
-or an array of these.
-
-## Advanced features
-### Dynamic templates & GUI interaction
-TODO
-Template are re-instanciated if their input changed. This imply editting the source code of the
-template or editting the values in the GUI.
-
-### Aliasing
-In Sofa the aliasing system is implicit and the alias are defined in the sofa code source. This is really trouble some as users need to *discover* that in a scene "Mesh" is in fact an alias to a "MeshTopology" object. Without proper tools the solution is often to search in the source code which was an alias.
-
-In PSL we are preserving the use of Alias but we make them explicit. So each scene can defined its own set of alias and anyone reading the scene knows what are the alias and what are the real underlying objects.
-```hjson
-        Import : mylibrary
-
-        Alias : TSPhereModel-CollisionSphere
-        Alias : mylibrary.MotorA-MotorA
-        Alias : mylibrary.MotorB-MotorB
-
-        /// Now we can use either
-        TSPhereModel : {}
-
-        /// or
-        CollisionSphere : {}
-```
-
-### Pure Python DSL
-To make the writing of python fragment as well as *.pyscn* more elegant we also implemented some
-helper function in python.
-
-Example of use in a *.pyscn* file:
-```python
-    from psl.dsl import *
-
-    createScene(root):
-        c = Node(root, name="child1")
-        o = MechanicalObject(c, name="mstate)
 ```
