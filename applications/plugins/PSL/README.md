@@ -1,22 +1,21 @@
 Python Scene Language for Sofa
 ===========
 The Python Scene Language (PSL) project is an attempt to mixe the advantages of *scn* and *pyscn* in an
-unified framework. The language has been specifically designed to make sofa scenes in an elegant and powerful
-way.
+unified framework. PSL provides an abstract language that has been specifically designed to make sofa
+scenes in an elegant and powerful way.
 
 PSL features:
-- scene description (as we have in .scn)
-- scene programmability (with embeded Python)
-- scene templates (dynamic element that can be reuse and instantiated)
-- scene templates libraries (to store scene templates for reuse and sharing)
-- explicit aliasing (to simplify scene writing).
-- scene loading & saving.
-- multiple alternative syntax (xml, hjson, python-pickled)
-- a python DSL to make scene in pure-python
+- a declarative scene language (as is .scn) that can be loaded & saved.
+- with multiple alternative syntax (xml, hjson, python-pickled)
+- with procedural elements (with embeded Python)
+- with scene templates (dynamic element that can be reuse and instantiated)
+- with scene libraries (to store scene templates for reuse and sharing)
+- with explicit aliasing (to simplify scene writing).
+- with dedicated python DSL to simpliyfy scene writing in pure-python
 - ... more to come ...
 
 Compared to classical *.scn*, PSL offer scene dynamicity,
-Comparet to *.pyscn*, PSL offer savability, templates and a more compact declarative syntax
+Compared to *.pyscn*, PSL offer savability, templates and a more compact declarative syntax
 
 #### First examples
 The PSL language itself is defined with an abstract syntax semantics. This allow us to very quickly implement concrete syntaxes
@@ -208,7 +207,7 @@ Node : {
 
 #### Import
 To allow template re-usability it is possible to store them in file or directories that can be imported with the Import directive.
-In a file named mylibrary.pyjson" define  a template
+In a file named mylibrary.psl" define  a template
 ```hjson
         Template : { name : "MotorA" ... }
         Template : { name : "MotorB" ... }
@@ -225,6 +224,42 @@ Node : {
         ...
 }
 ```
+
+It is also possible write psl template in python file for easier integration with python
+oriented workflow. Two possibilities exists:
+
+From a file mytemplate.py:
+```python
+    PSLExport=["Template1", "Template2"]
+
+    def Template1(name="undefined", numchild=3):
+        for i in range(0, numchild):
+            c=self.createNode("Child"+str(i))
+            c.createObject("MechanicalObject")
+
+    def Template2(name="undefined", numchild=3):
+        for i in range(0, numchild):
+            c=self.createNode("Child"+str(i))
+            c.createObject("MechanicalObject")
+```
+
+
+Alternatively it is possible to use our helper dsl for python to make the writing of
+mytemplate.py more elegant:
+```python
+    @psltemplate
+    def Template1(name="undefined", numchild=3):
+        for i in range(0, numchild):
+            n = Node(self, "Child"+str(i))
+            o = MechanicalObjec(n)
+
+    @psltemplate
+    def Template2(name="undefined", numchild=3):
+        for i in range(0, numchild):
+            n = Node(self, "Child"+str(i))
+            o = MechanicalObject(n)
+```
+
 
 ##### Properties
 In PSL it is possible to add custom Data field to any sofa object. This is done via the keyword
@@ -262,4 +297,17 @@ In PSL we are preserving the use of Alias but we make them explicit. So each sce
 
         /// or
         CollisionSphere : {}
+```
+
+##### Pure Python DSL
+To make the writing of python fragment as well as *.pyscn* more elegant we also implemented some
+helper function in python.
+
+Example of use in a *.pyscn* file:
+```python
+    from psl.dsl import *
+
+    createScene(root):
+        child1 = Node(root, name="child1")      ## This replace root.createNode("child1")
+        o = MechanicalObject(name="mstate) ## replace child1.createObject("MechanicalObject", name="mstate)
 ```
