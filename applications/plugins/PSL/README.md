@@ -17,6 +17,18 @@ PSL features:
 Compared to classical *.scn*, PSL offer scene dynamicity,
 Compared to *.pyscn*, PSL offer savability, templates and a more compact declarative syntax
 
+
+Index:
+- [First examples](#first-examples)
+- [Installation](#installation-&-requirement.)
+- [Introduction](#introduction)
+- [Adding python fragments](#python-fragments)
+- [Templates](#templates)
+- [Templates libraries](#import)
+- [Dynamic templates (DOC TODO)](#import)
+- [Custom alias](#aliasing)
+- [Python DSL](#pure-python-dsl)
+
 #### First examples
 The PSL language itself is defined with an abstract syntax semantics. This allow us to very quickly implement concrete syntaxes
 depending on the developpers preferences. We currently have implemented an XML base concrete syntax, this syntax is compatible with
