@@ -15,8 +15,9 @@ Index:
     - [Templates](#templates)
     - [Templates libraries](#import)
     - [Custom alias](#aliasing)
+    - [Properties](#properties)
 - [Advanced features](#advanced-features)
-    - [Dynamic templates & GUI (DOC TODO)](#import)
+    - [Dynamic templates & GUI (DOC TODO)](#dynamic-templates-&-gui-interaction)
     - [Python DSL](#pure-python-dsl)
     - [Writing templates in python (DOC TODO)](#templates)
 
@@ -35,7 +36,7 @@ sudo python setup.py install
 ```
 
 
-#### Introduction.
+# Introduction.
 PSL features:
 - a declarative scene language (as is .scn) that can be loaded & saved.
 - with multiple alternative syntax (xml, hjson, python-pickled)
@@ -84,7 +85,7 @@ part of the scene once loaded. The consequence is that saving the scene is in fa
 the execution of the script and thus we are totally loosing the advantages of python. This is why we
 have decided to create a custom DSL for writing scene with Python.
 
-### First examples
+## First examples
 The PSL language itself is defined with an abstract syntax semantics. This allow us to very quickly implement concrete syntaxes
 depending on the developpers preferences. We currently have implemented an XML base concrete syntax, this syntax is compatible with
 most of the existing .scn files. We also have implemented an H-JSON concrete syntax. This one look a lot like QML's or JSON.
@@ -92,7 +93,7 @@ The important aspect to keep in mind while reading this document is that wheteve
 this is mostly a "cosmetic" aspect of PSL and that it is same underlying computational model is shared between
 the different syntaxes.
 
-## Writing PSL scene with XML syntax.
+### Writing PSL scene with XML syntax.
 Let's start with a simple scene example in XML.
 ```xml
 <Node name="root">
@@ -122,7 +123,7 @@ The interesting aspect of this pslx syntax is that it offer a very good backward
 existing scene. If, like me, you prefer curly-braces instead of an XML syntax you can implement
 exactely the same scene using the H-JSON syntax.
 
-## Writing scene with the H-JSON syntax.
+### Writing scene with the H-JSON syntax.
 The same scene as in the previous example should be written like that:
 ```css
 Node : {
@@ -148,7 +149,7 @@ and its other cool features.
 
 
 
-#### Python fragments
+### Python fragments
 In PSL it is possible to add python code to your scene using the *Python* component as in:
 ```css
 Node : {
@@ -184,7 +185,7 @@ be easily modified, re-run and saved. Storing the python fragment in the scene g
 implement powerful feature as *templates*.
 
 
-#### Templates
+### Templates
 In PSL a Template is a component that stores a sub-graph in its textual, or parsed, form. A template
 can be instantiated multiple time in the scene graph.
 ```css
@@ -228,7 +229,7 @@ Node : {
 }
 ```
 
-#### Import
+### Import
 To allow template re-usability it is possible to store them in file or directories that can be imported with the Import directive.
 In a file named mylibrary.psl" define  a template
 ```hjson
@@ -284,7 +285,7 @@ mytemplate.py more elegant:
 ```
 
 
-##### Properties
+### Properties
 In PSL it is possible to add custom Data field to any sofa object. This is done via the keyword
 "properties" that you can use in the following way:
 
@@ -304,7 +305,13 @@ Node : {
 The type of the poperty is deduced from the type of the data provided among Integer, String and Float
 or an array of these.
 
-##### Aliasing
+## Advanced features
+### Dynamic templates & GUI interaction
+TODO
+Template are re-instanciated if their input changed. This imply editting the source code of the
+template or editting the values in the GUI.
+
+### Aliasing
 In Sofa the aliasing system is implicit and the alias are defined in the sofa code source. This is really trouble some as users need to *discover* that in a scene "Mesh" is in fact an alias to a "MeshTopology" object. Without proper tools the solution is often to search in the source code which was an alias.
 
 In PSL we are preserving the use of Alias but we make them explicit. So each scene can defined its own set of alias and anyone reading the scene knows what are the alias and what are the real underlying objects.
@@ -322,7 +329,7 @@ In PSL we are preserving the use of Alias but we make them explicit. So each sce
         CollisionSphere : {}
 ```
 
-##### Pure Python DSL
+### Pure Python DSL
 To make the writing of python fragment as well as *.pyscn* more elegant we also implemented some
 helper function in python.
 
