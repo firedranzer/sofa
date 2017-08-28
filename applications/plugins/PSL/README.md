@@ -19,10 +19,10 @@ Compared to *.pyscn*, PSL offer savability, templates and a more compact declara
 
 
 Index:
-- [First examples](#first-examples)
 - [Installation](#installation-&-requirement.)
 - [Introduction](#introduction)
-- [Adding python fragments](#python-fragments)
+    - [First examples](#first-examples)
+    - [Adding python fragments](#python-fragments)
 - [Templates](#templates)
 - [Templates libraries](#import)
 - [Dynamic templates (DOC TODO)](#import)
