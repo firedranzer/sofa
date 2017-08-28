@@ -98,12 +98,6 @@ public:
         std::cout << "READ..." <<  this->getName() << "->" << s << std::endl ;
         return Data<T>::read(s) ;
     }
-
-    virtual void operator =( const T& value ) override {
-        this->setValue(value) ;
-        std::cout << "operator= should be overloaded" << std::endl ;
-    }
-
 };
 
 namespace sofa
