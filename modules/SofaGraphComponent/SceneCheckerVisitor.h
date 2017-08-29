@@ -52,7 +52,6 @@ public:
     void addHookInChangeSet(const std::string& version, ChangeSetHookFunction fct) ;
 private:
     std::map<std::string,bool> m_requiredPlugins ;
-
     bool m_isRequiredPluginValidationEnabled {true} ;
     bool m_isAPIVersionValidationEnabled {true} ;
     std::string m_currentApiLevel;
