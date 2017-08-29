@@ -1,6 +1,6 @@
 Python Scene Language for Sofa
 ===========
-The Python Scene Language (PSL) project is an attempt to mixe the advantages of *scn* and *pyscn* in an
+The Python Scene Language (PSL) project is an attempt to mix the advantages of *scn* and *pyscn* in an
 unified framework. PSL provides an abstract language that has been specifically designed to make sofa
 scenes in an elegant and powerful way. Compared to classical *.scn*, PSL offer scene dynamicity,
 Compared to *.pyscn*, PSL offer savability, templates and a more compact declarative syntax
@@ -20,6 +20,7 @@ Index:
     - [Dynamic templates & GUI (DOC TODO)](#dynamic-templates-&-gui-interaction)
     - [Python DSL](#pure-python-dsl)
     - [Writing templates in python (DOC TODO)](#writing-templates-in-pure-python.)
+    - [Extending PSL](#extending-psl)
 
 #### Installation & requirement.
 The language is under heavy developement so don't trust the code, the examples or the documentation.
@@ -344,3 +345,7 @@ mytemplate.py more elegant:
             n = Node(self, "Child"+str(i))
             o = MechanicalObject(n)
 ```
+
+### Extending-PSL
+PSL is a work in progress, if you think about additional great features to add you can submit a
+proposal for that. All the proposals we have are stored in the [PEP directory](./pep/).
