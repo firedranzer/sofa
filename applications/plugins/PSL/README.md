@@ -6,11 +6,11 @@ scenes in an elegant and powerful way. Compared to classical *.scn*, PSL offer s
 Compared to *.pyscn*, PSL offer savability, templates and a more compact declarative syntax
 
 Index:
-- [Installation](#installation-and-requirement.)
+- [Installation](#installation-and-requirement)
 - [Introduction](#introduction)
     - [First examples](#first-examples)
-        - [Example with the XML syntax](#writing-scene-with-the-xml-syntax.)
-        - [Example with the HJSON syntax](#writing-scene-with-the-h-json-syntax.)
+        - [Example with the XML syntax](#writing-scene-with-the-xml-syntax)
+        - [Example with the HJSON syntax](#writing-scene-with-the-h-json-syntax)
     - [Adding python fragments](#python-fragments)
     - [Templates](#templates)
     - [Templates libraries](#import)
@@ -19,7 +19,7 @@ Index:
 - [Advanced features](#advanced-features)
     - [Dynamic templates & GUI (DOC TODO)](#dynamic-templates-&-gui-interaction)
     - [Python DSL](#pure-python-dsl)
-    - [Writing templates in python (DOC TODO)](#writing-templates-in-pure-python.)
+    - [Writing templates in python (DOC TODO)](#writing-templates-in-pure-python)
     - [Extending PSL](#extending-psl)
 
 #### Installation and requirement.

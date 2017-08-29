@@ -5,6 +5,7 @@
  ** Writing a Kate Highlighting XML File
  ** http://kate-editor.org/article/writing_a_kate_highlighting_xml_file
  **
+ ** Python part taken from https://github.com/mtorromeo/kate-syntax-files/blob/master/python.xml
  **
  ***************************************************************************
 -->
