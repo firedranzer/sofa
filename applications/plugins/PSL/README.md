@@ -6,7 +6,7 @@ scenes in an elegant and powerful way. Compared to classical *.scn*, PSL offer s
 Compared to *.pyscn*, PSL offer savability, templates and a more compact declarative syntax
 
 Index:
-- [Installation](#installation-&-requirement.)
+- [Installation](#installation-and-requirement.)
 - [Introduction](#introduction)
     - [First examples](#first-examples)
         - [Example with the XML syntax](#writing-scene-with-the-xml-syntax.)
@@ -22,19 +22,24 @@ Index:
     - [Writing templates in python (DOC TODO)](#writing-templates-in-pure-python.)
     - [Extending PSL](#extending-psl)
 
-#### Installation & requirement.
-The language is under heavy developement so don't trust the code, the examples or the documentation.
-It I want it to be finished join the developement effort.
+#### Installation and requirement.
+The PSL framework is implemented as a Sofa plugin named PSL. While developping PSL we noticed several
+bug in Sofa that we have not yet submitted to the master branch of Sofa... so currently to use PSL
+you need to use our whole PSL branch.
 
-The language is defined as a sofa Plugin named PSL which is currently it is only available in the PSL development branch.
-
-In order to use the H-JSON syntax you need to install H-JSON parser available at: http://hjson.org/
-Hjson installation :
+PSL can be used with several alternatives syntax file ending with *.psl* use the H-JSON syntax while
+*.pslx* use the XML one. The XML one is provided by default but if you plan to use the H-JSON syntax
+you need to install H-JSON parser that is available at: http://hjson.org/
+You can do :
 ```shell
 git clone https://github.com/hjson/hjson-py.git
 cd hjson-py
 sudo python setup.py install
 ```
+
+We also provides a syntax coloring scheme to handle *.psl* files in Kate or qtcreator in the file
+[psl-highlighting.xml](./psl-highlighting.xml). Installation instruction
+for [qtcreator](http://doc.qt.io/qtcreator/creator-highlighting.html)
 
 
 # Introduction.
