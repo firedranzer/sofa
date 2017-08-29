@@ -22,7 +22,7 @@ Index:
     - [Writing templates in python (DOC TODO)](#writing-templates-in-pure-python)
     - [Extending PSL](#extending-psl)
 
-#### Installation and requirement.
+# Installation and requirement.
 The PSL framework is implemented as a Sofa plugin named PSL. While developping PSL we noticed several
 bug in Sofa that we have not yet submitted to the master branch of Sofa... so currently to use PSL
 you need to use our whole PSL branch.
@@ -296,8 +296,8 @@ Node : {
 The type of the poperty is deduced from the type of the data provided among Integer, String and Float
 or an array of these.
 
-## Advanced features
-### Dynamic templates & GUI interaction
+# Advanced features
+## Dynamic templates & GUI interaction
 TODO
 Template are re-instanciated if their input changed. This imply editting the source code of the
 template or editting the values in the GUI.
@@ -315,7 +315,7 @@ Example of use in a *.pyscn* file:
         o = MechanicalObject(c, name="mstate)
 ```
 
-### Writing templates in pure python.
+## Writing templates in pure python.
 It is also possible write psl template in python file for easier integration with python
 oriented workflow. Two possibilities exists:
 
@@ -351,6 +351,6 @@ mytemplate.py more elegant:
             o = MechanicalObject(n)
 ```
 
-### Extending-PSL
+## Extending-PSL
 PSL is a work in progress, if you think about additional great features to add you can submit a
 proposal for that. All the proposals we have are stored in the [PEP directory](./pep/).
