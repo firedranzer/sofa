@@ -93,7 +93,6 @@
 #include <sofa/core/objectmodel/IdleEvent.h>
 using sofa::core::objectmodel::IdleEvent ;
 
-
 #include <sofa/helper/system/FileMonitor.h>
 using sofa::helper::system::FileMonitor ;
 
@@ -167,16 +166,13 @@ class RealGUIFileListener : public sofa::helper::system::FileEventListener
 {
 public:
     RealGUIFileListener(RealGUI* realgui){
-        std::cout << "CONSTRUCTOR" << std::endl ;
         m_realgui = realgui ;
     }
     virtual ~RealGUIFileListener(){}
 
     virtual void fileHasChanged(const std::string& filename) override
     {
-        std::cout << "FILE CONTENT HAS CHANGED: "<< filename  << std::endl ;
-        m_realgui->fileReOpen(filename) ;
-        std::cout << "FILE RELOADED: "<< filename  << std::endl ;
+        m_realgui->fileOpen(filename, false, true);
     }
     RealGUI* m_realgui ;
 };
@@ -238,11 +234,16 @@ void RealGUI::CreateApplication(int /*_argc*/, char** /*_argv*/)
 
 void RealGUI::InitApplication( RealGUI* _gui)
 {
-    //application->setMainWidget ( _gui );
-
     QString pathIcon=(sofa::helper::system::DataRepository.getFirstPath() + std::string( "/icons/SOFA.png" )).c_str();
-
     application->setWindowIcon(QIcon(pathIcon));
+
+#ifdef SOFA_GUI_NATIVE_MENU
+    // Use the OS'native menu instead of the Qt one
+    _gui->menubar->setNativeMenuBar(true);
+#else
+    // Use the qt menu instead of the native one in order to standardize the way the menu is showed on every OS
+    _gui->menubar->setNativeMenuBar(false);
+#endif
 
     // show the gui
     _gui->show(); // adding extra line in the console?
@@ -432,6 +433,7 @@ RealGUI::RealGUI ( const char* viewername, const std::vector<std::string>& optio
         getQtViewer()->getQWidget()->installEventFilter(this);
 #endif
 
+    m_filelistener = new RealGUIFileListener(this) ;
 }
 
 //------------------------------------
@@ -460,6 +462,9 @@ RealGUI::~RealGUI()
 #endif
 
     removeViewer();
+
+    FileMonitor::removeListener(m_filelistener) ;
+    delete m_filelistener ;
 }
 //======================= CONSTRUCTOR - DESTRUCTOR ========================= }
 
@@ -669,7 +674,6 @@ void RealGUI::lmlOpen ( const char* filename )
 //======================= METHODS ========================= {
 
 void RealGUI::stepMainLoop () {
-    //QCoreApplication::sendPostedEvents ( application, 0 );
     application->processEvents();
 }
 
@@ -712,7 +716,8 @@ sofa::simulation::Node* RealGUI::currentSimulation()
 
 //------------------------------------
 
-void RealGUI::fileReOpen( std::string filename, bool temporaryFile)
+
+void RealGUI::fileOpen ( std::string filename, bool temporaryFile, bool reload )
 {
     const std::string &extension=sofa::helper::system::SetDirectory::GetExtension(filename.c_str());
     if (extension == "simu")
@@ -725,6 +730,7 @@ void RealGUI::fileReOpen( std::string filename, bool temporaryFile)
     htmlPage->clear();
     startDumpVisitor();
     update();
+
     //Hide all the dialogs to modify the graph
     emit ( newScene() );
 
@@ -735,7 +741,7 @@ void RealGUI::fileReOpen( std::string filename, bool temporaryFile)
 
     sofa::simulation::xml::numDefault = 0;
 
-    if( currentSimulation() ) this->unloadScene();
+       if( currentSimulation() ) this->unloadScene();
     mSimulation = simulation::getSimulation()->load ( filename.c_str() );
     simulation::getSimulation()->init ( mSimulation.get() );
     if ( mSimulation == NULL )
@@ -743,58 +749,11 @@ void RealGUI::fileReOpen( std::string filename, bool temporaryFile)
         msg_warning("RealGUI")<<"Failed to load "<<filename.c_str();
         return;
     }
-    setScene ( mSimulation, filename.c_str(), temporaryFile );
-    configureGUI(mSimulation.get());
-
-    this->setWindowFilePath(filename.c_str());
-    setExportGnuplot(exportGnuplotFilesCheckbox->isChecked());
-    stopDumpVisitor();
-
-    /// We want to warn user that there is component that are implemented in specific plugin
-    /// and that there is no RequiredPlugin in their scene.
-    SceneCheckerVisitor checker(ExecParams::defaultInstance()) ;
-    checker.validate(mSimulation.get()) ;
-}
-
-void RealGUI::fileOpen ( std::string filename, bool temporaryFile )
-{
-    const std::string &extension=sofa::helper::system::SetDirectory::GetExtension(filename.c_str());
-    if (extension == "simu")
-    {
-        return fileOpenSimu(filename);
-    }
-
-    startButton->setChecked(false);
-    descriptionScene->hide();
-    htmlPage->clear();
-    startDumpVisitor();
-    update();
-    //Hide all the dialogs to modify the graph
-    emit ( newScene() );
-
-    if ( sofa::helper::system::DataRepository.findFile (filename) )
-        filename = sofa::helper::system::DataRepository.getFile ( filename );
+    if(reload)
+        setSceneWithoutMonitor(mSimulation, filename.c_str(), temporaryFile);
     else
-        return;
+        setScene(mSimulation, filename.c_str(), temporaryFile);
 
-    sofa::simulation::xml::numDefault = 0;
-
-    if(m_filelistener){
-        FileMonitor::removeListener(m_filelistener) ;
-        delete m_filelistener;
-    }
-    m_filelistener = new RealGUIFileListener(this) ;
-    FileMonitor::addFile(filename, m_filelistener ) ;
-
-    if( currentSimulation() ) this->unloadScene();
-    mSimulation = simulation::getSimulation()->load ( filename.c_str() );
-    simulation::getSimulation()->init ( mSimulation.get() );
-    if ( mSimulation == NULL )
-    {
-        msg_warning("RealGUI")<<"Failed to load "<<filename.c_str();
-        return;
-    }
-    setScene ( mSimulation, filename.c_str(), temporaryFile );
     configureGUI(mSimulation.get());
 
     this->setWindowFilePath(filename.c_str());
@@ -826,9 +785,8 @@ void RealGUI::emitIdle()
         getQtViewer()->getQWidget()->update();;
 }
 
-//------------------------------------
-
-void RealGUI::fileOpen()
+/// This open popup the file selection windows.
+void RealGUI::popupOpenFileSelector()
 {
     std::string filename(this->windowFilePath().toStdString());
 
@@ -926,10 +884,11 @@ void RealGUI::fileOpenSimu ( std::string s )
 
 //------------------------------------
 
-void RealGUI::setScene ( Node::SPtr root, const char* filename, bool temporaryFile )
+void RealGUI::setSceneWithoutMonitor (Node::SPtr root, const char* filename, bool temporaryFile)
 {
     if (filename)
     {
+
         if (!temporaryFile)
             recentlyOpenedFilesManager.openFile(filename);
         saveReloadFile=temporaryFile;
@@ -970,6 +929,15 @@ void RealGUI::setScene ( Node::SPtr root, const char* filename, bool temporaryFi
 
         resetScene();
     }
+}
+
+void RealGUI::setScene(Node::SPtr root, const char* filename, bool temporaryFile)
+{
+    if(m_enableInteraction &&  filename){
+        FileMonitor::removeListener(m_filelistener) ;
+        FileMonitor::addFile(filename, m_filelistener) ;
+    }
+    setSceneWithoutMonitor(root, filename, temporaryFile) ;
 }
 
 //------------------------------------
@@ -1075,15 +1043,6 @@ void RealGUI::fileExit()
     this->close();
 }
 
-//------------------------------------
-
-//void RealGUI::saveXML()
-//{
-//    simulation::getSimulation()->exportXML ( currentSimulation(), "scene.scn" );
-//}
-
-//------------------------------------
-
 void RealGUI::editRecordDirectory()
 {
     std::string filename(this->windowFilePath().toStdString());
@@ -1149,14 +1108,12 @@ void RealGUI::setViewerResolution ( int w, int h )
         QSize viewSize = ( getViewer() ) ? getQtViewer()->getQWidget()->size() : QSize(0,0);
 
         const QRect screen = QApplication::desktop()->availableGeometry(QApplication::desktop()->screenNumber(this));
-//      QSize newWinSize(dockWidget->width() + w, dockWidget->height() + h);
 
         QSize newWinSize(winSize.width() - viewSize.width() + w, winSize.height() - viewSize.height() + h);
         if (newWinSize.width() > screen.width()) newWinSize.setWidth(screen.width()-20);
         if (newWinSize.height() > screen.height()) newWinSize.setHeight(screen.height()-20);
 
         this->resize(newWinSize);
-        //std::cout << "Setting windows dimension to " << size().width() << " x " << size().height() << std::endl;
     }
     else
     {
@@ -1189,7 +1146,6 @@ void RealGUI::setFullScreen (bool enable)
             m_fullScreen = true;
 
             dockWidget->setFloating(true);
-            //dockWidget->undock();
             dockWidget->setVisible(false);
         }
         else
@@ -1262,7 +1218,6 @@ void RealGUI::setViewerConfiguration(sofa::component::configurationsetting::View
 void RealGUI::setMouseButtonConfiguration(sofa::component::configurationsetting::MouseButtonSetting *button)
 {
     SofaMouseManager::getInstance()->updateOperation(button);
-    // SofaMouseManager::getInstance()->updateContent();
 }
 
 //------------------------------------
@@ -1380,7 +1335,6 @@ void RealGUI::removeViewer()
         if(isEmbeddedViewer())
         {
             getQtViewer()->removeViewerTab(tabs);
-            //left_stack->removeWidget( getQtViewer()->getQWidget() );
         }
         delete mViewer;
         mViewer = NULL;

@@ -42,7 +42,6 @@
 using sofa::helper::logging::ComponentInfo ;
 using sofa::helper::logging::SofaComponentInfo ;
 #include <sofa/helper/Utils.h>
-
 #include "SceneLoaderPY.h"
 
 #include <sofa/helper/system/PluginManager.h>
@@ -360,7 +359,16 @@ static PyObject* parse_emitter_message_then(PyObject* args, const Action& action
 
     const size_t argSize = PyTuple_Size(args);
 
-    if( argSize == 2 ) {
+    if( argSize == 1 ) {
+        /// no emitter
+        char* message;
+        if( !PyArg_ParseTuple(args, "s", &message) ) {
+            return NULL;
+        }
+
+        action(ComponentInfo::SPtr(new ComponentInfo(s_emitter)), message, PythonEnvironment::getPythonCallingPointAsFileInfo());
+    } else if( argSize == 2 ) {
+        /// SOURCE, "Message"
         if( !PyArg_ParseTuple(args, "OO", &py_emitter, &py_message) ){
             return NULL;
         }
@@ -378,26 +386,20 @@ static PyObject* parse_emitter_message_then(PyObject* args, const Action& action
             PyErr_SetString(PyExc_TypeError, "The first parameter must be a string or a Sofa.Base");
             return NULL;
         }
-    } else if( argSize == 1 ) {
-        // no emitter
-        char* message;
-        if( !PyArg_ParseTuple(args, "s", &message) ) {
-            return NULL;
-        }
-
-        action(ComponentInfo::SPtr(new ComponentInfo(s_emitter)), message, PythonEnvironment::getPythonCallingPointAsFileInfo());
     } else if( argSize == 3 ){
+        /// "Message", "FILENAME", LINENO
         char* message;
         char* filename;
         int   lineno;
         if( !PyArg_ParseTuple(args, "ssi", &message, &filename, &lineno) ) {
             return NULL;
         }
-        action(ComponentInfo::SPtr(new ComponentInfo(s_emitter)), message, SOFA_FILE_INFO2(filename, lineno));
+        action(ComponentInfo::SPtr(new ComponentInfo(s_emitter)), message, SOFA_FILE_INFO_COPIED_FROM(filename, lineno));
     } else if (argSize == 4 ){
+        /// SOURCE, "Message", "FILENAME", LINENO
         char* filename;
         int   lineno;
-        if( !PyArg_ParseTuple(args, "OO", &py_emitter, &py_message, &filename, &lineno) ){
+        if( !PyArg_ParseTuple(args, "OOsi", &py_emitter, &py_message, &filename, &lineno) ){
             return NULL;
         }
         if( !PyString_Check(py_message) ){
@@ -406,11 +408,11 @@ static PyObject* parse_emitter_message_then(PyObject* args, const Action& action
         }
         if( PyString_Check(py_emitter) ){
             action(ComponentInfo::SPtr(new ComponentInfo(PyString_AsString(py_emitter))),
-                   PyString_AsString(py_message),  SOFA_FILE_INFO2(filename, lineno));
+                   PyString_AsString(py_message),  SOFA_FILE_INFO_COPIED_FROM(filename, lineno));
         }else if (PyObject_IsInstance(py_emitter, reinterpret_cast<PyObject*>(&SP_SOFAPYTYPEOBJECT(Base)))) {
             Base* base=(((PySPtr<Base>*)py_emitter)->object).get();
             action(ComponentInfo::SPtr(new SofaComponentInfo(base)),
-                   PyString_AsString(py_message),  SOFA_FILE_INFO2(filename, lineno));
+                   PyString_AsString(py_message),  SOFA_FILE_INFO_COPIED_FROM(filename, lineno));
         }else{
             PyErr_SetString(PyExc_TypeError, "The first parameter must be a string or a Sofa.Base");
             return NULL;
@@ -421,31 +423,31 @@ static PyObject* parse_emitter_message_then(PyObject* args, const Action& action
 
 static PyObject * Sofa_msg_info(PyObject * /*self*/, PyObject * args) {
     return parse_emitter_message_then(args, [](const ComponentInfo::SPtr& emitter, const char* message, const sofa::helper::logging::FileInfo::SPtr& fileinfo) {
-            msg_info(emitter) << message << fileinfo;
+        msg_info(emitter) << message << fileinfo;
     });
 }
 
 static PyObject * Sofa_msg_deprecated(PyObject * /*self*/, PyObject * args) {
     return parse_emitter_message_then(args, [](const ComponentInfo::SPtr& emitter, const char* message, const sofa::helper::logging::FileInfo::SPtr& fileinfo) {
-            msg_deprecated(emitter) << message << fileinfo;
-     });
+        msg_deprecated(emitter) << message << fileinfo;
+    });
 }
 
 static PyObject * Sofa_msg_warning(PyObject * /*self*/, PyObject * args) {
     return parse_emitter_message_then(args, [](const ComponentInfo::SPtr& emitter, const char* message, const sofa::helper::logging::FileInfo::SPtr& fileinfo) {
-            msg_warning(emitter) << message << fileinfo;
-        });
+        msg_warning(emitter) << message << fileinfo;
+    });
 }
 
 static PyObject * Sofa_msg_error(PyObject * /*self*/, PyObject * args) {
     return parse_emitter_message_then(args, [](const ComponentInfo::SPtr& emitter, const char* message, const sofa::helper::logging::FileInfo::SPtr& fileinfo) {
-            msg_error(emitter) << message << fileinfo;
+        msg_error(emitter) << message << fileinfo;
     });
 }
 
 static PyObject * Sofa_msg_fatal(PyObject * /*self*/, PyObject * args) {
     return parse_emitter_message_then(args, [](const ComponentInfo::SPtr& emitter, const char* message, const sofa::helper::logging::FileInfo::SPtr& fileinfo) {
-            msg_fatal(emitter) << message << fileinfo;
+        msg_fatal(emitter) << message << fileinfo;
     });
 }
 

@@ -43,7 +43,7 @@ public:
 
     void validate(Node* node) ;
 
-    void enableValidationAPIVersion(Node *node, const std::string& currentApiLevel) ;
+    void enableValidationAPIVersion(Node *node) ;
     void enableValidationRequiredPlugins(Node* node) ;
 
     virtual Result processNodeTopDown(Node* node) override ;
@@ -52,9 +52,10 @@ public:
     void addHookInChangeSet(const std::string& version, ChangeSetHookFunction fct) ;
 private:
     std::map<std::string,bool> m_requiredPlugins ;
+
     bool m_isRequiredPluginValidationEnabled {true} ;
     bool m_isAPIVersionValidationEnabled {true} ;
-    std::string m_currentApiLevel {"17.12"} ;
+    std::string m_currentApiLevel;
     std::string m_selectedApiLevel {"17.06"} ;
 
     std::map<std::string, std::vector<ChangeSetHookFunction>> m_changesets ;

@@ -21,6 +21,14 @@
 ******************************************************************************/
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/helper/system/PluginManager.h>
+#include <sofa/version.h>
+
+#include "SceneCheckerVisitor.h"
+#include "RequiredPlugin.h"
+
+
+#include "APIVersion.h"
+using sofa::component::APIVersion ;
 
 #include "SceneCheckerVisitor.h"
 #include "RequiredPlugin.h"
@@ -41,6 +49,10 @@ using sofa::helper::system::PluginManager ;
 
 SceneCheckerVisitor::SceneCheckerVisitor(const ExecParams* params) : Visitor(params)
 {
+    std::stringstream version;
+    version << SOFA_VERSION / 10000 << "." << SOFA_VERSION / 100 % 100;
+    m_currentApiLevel = version.str();
+
     installChangeSets() ;
 }
 
@@ -73,7 +85,7 @@ void SceneCheckerVisitor::installChangeSets()
 
 void SceneCheckerVisitor::validate(Node* node)
 {
-    enableValidationAPIVersion(node, "17.12") ;
+    enableValidationAPIVersion(node) ;
     enableValidationRequiredPlugins(node) ;
 
     msg_info("SceneChecker") << "Validating a scene: " << msgendl
@@ -83,18 +95,17 @@ void SceneCheckerVisitor::validate(Node* node)
     execute(node) ;
 }
 
-void SceneCheckerVisitor::enableValidationAPIVersion(Node* node, const std::string& currentApiLevel)
+void SceneCheckerVisitor::enableValidationAPIVersion(Node* node)
 {
     APIVersion* apiversion {nullptr} ;
 
     /// 1. Find if there is an APIVersion component in the scene. If there is none, warn the user and set
     /// the version to 17.06 (the last version before it was introduced). If there is one...use
     /// this component to request the API version requested by the scene.
-    m_currentApiLevel = currentApiLevel ;
     node->getTreeObject(apiversion) ;
     if(!apiversion)
     {
-        msg_info("SceneChecker") << "The 'APIVersion' directive is missing in the current scene. Switching to the APIVersion level '"<< m_selectedApiLevel <<"' " ;
+        msg_info("SceneChecker") << "The 'APIVersion' directive is missing in the current scene. Switching to the default APIVersion level '"<< m_selectedApiLevel <<"' " ;
     }
     else
     {
@@ -132,10 +143,11 @@ Visitor::Result SceneCheckerVisitor::processNodeTopDown(Node* node)
                     if( PluginManager::getInstance().pluginIsLoaded(path)
                             && m_requiredPlugins.find(pluginName) == m_requiredPlugins.end() )
                     {
-                        msg_warning("SceneChecker") << "This scene is using component '" << object->getClassName() << "'. " << msgendl
-                                                    << "This component is part of the '" << pluginName << "' plugin but there is no <RequiredPlugin name='" << pluginName << "'> directive in your scene." << msgendl
-                                                    << "Your scene may not work on a sofa environment that does not have pre-loaded the plugin." << msgendl
-                                                    << "To fix your scene and remove this warning you need to add the RequiredPlugin directive at the beginning of your scene. ";
+                        msg_warning("SceneChecker")
+                            << "This scene is using component '" << object->getClassName() << "'. " << msgendl
+                            << "This component is part of the '" << pluginName << "' plugin but there is no <RequiredPlugin name='" << pluginName << "'> directive in your scene." << msgendl
+                            << "Your scene may not work on a sofa environment that does not have pre-loaded the plugin." << msgendl
+                            << "To fix your scene and remove this warning you need to add the RequiredPlugin directive at the beginning of your scene. ";
                     }
                 }
             }
