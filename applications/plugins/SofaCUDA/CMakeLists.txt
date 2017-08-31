@@ -196,8 +196,8 @@ endif()
 
 
 
-find_package(SofaVolumetricData QUIET)
-if(SofaVolumetricData_FOUND)
+find_package(SofaDistanceGrid QUIET)
+if(SofaDistanceGrid_FOUND)
     find_package(MiniFlowVR QUIET)
     if(MiniFlowVR_FOUND)
         add_definitions("-DSOFA_HAVE_MINIFLOWVR")
@@ -219,7 +219,7 @@ if(SofaVolumetricData_FOUND)
         sofa/gpu/cuda/CudaContactMapper.cu
         sofa/gpu/cuda/CudaCollisionDetection.cu)
 else()
-    message(STATUS "SofaCUDA: SofaVolumetricData was not enabled, therefore CudaDistanceGridCollisionModel will not be compiled.")
+    message(STATUS "SofaCUDA: SofaDistanceGrid was not enabled, therefore CudaDistanceGridCollisionModel will not be compiled.")
 endif()
 
 option(SOFACUDA_VERBOSE_PTXAS "???" OFF)
@@ -299,8 +299,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CUR
 set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "${SOFACUDA_COMPILE_DEFINITIONS}")
 target_link_libraries(${PROJECT_NAME} SofaOpenglVisual SofaGeneralEngine SofaGeneralDeformable SofaEngine SofaSphFluid SofaUserInteraction SofaComponentAdvanced SofaComponentMisc)
 
-if(SofaVolumetricData_FOUND)
-    target_link_libraries(${PROJECT_NAME} SofaVolumetricData)
+if(SofaDistanceGrid_FOUND)
+    target_link_libraries(${PROJECT_NAME} SofaDistanceGrid)
 endif()
 
 if(SOFACUDA_CUBLAS)

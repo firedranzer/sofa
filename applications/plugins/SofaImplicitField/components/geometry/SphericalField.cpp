@@ -19,11 +19,15 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include <SofaMiscCollision/BarycentricStickContact.inl>
-#include <SofaMeshCollision/BarycentricContactMapper.h>
-#include <SofaMeshCollision/IdentityContactMapper.h>
+/******************************************************************************
+* Contributors:                                                               *
+*   - thomas.goss@etudiant.univ-lille1.fr                                     *
+*   - damien.marchal@univ-lille1.fr                                           *
+******************************************************************************/
+#include <sofa/core/ObjectFactory.h>
+using sofa::core::RegisterObject ;
 
-using namespace sofa::core::collision ;
+#include "SphericalField.h"
 
 namespace sofa
 {
@@ -31,26 +35,23 @@ namespace sofa
 namespace component
 {
 
-namespace collision
+namespace implicit
 {
 
-SOFA_DECL_CLASS(BarycentricStickContact)
+double SphericalField::eval(Vector3 p) {
 
-Creator<Contact::Factory, BarycentricStickContact<SphereModel, SphereModel> > SphereSphereStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<SphereModel, PointModel> > SpherePointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<PointModel, PointModel> > PointPointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<LineModel, PointModel> > LinePointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<LineModel, LineModel> > LineLineStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<LineModel, SphereModel> > LineSphereStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, SphereModel> > TriangleSphereStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, PointModel> > TrianglePointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, LineModel> > TriangleLineStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, TriangleModel> > TriangleTriangleStickContactClass("stick",true);
+    double x=p.x(), y=p.y(), z=p.z();
+    double x2=x*x, y2=y*y, z2=z*z;
+    double x4=x2*x2, y4=y2*y2, z4=z2*z2;
+    return x4  + y4  + z4  + 2 *x2*  y2  + 2* x2*z2  + 2*y2*  z2  - 5 *x2  + 4* y2  - 5*z2+4;
+}
 
 
-} // namespace collision
+///factory register
+int SphericalFieldComponent = RegisterObject("Implement a spherical distance field function").add< SphericalField >();
 
-} // namespace component
+SOFA_DECL_CLASS(SphericalField)
 
-} // namespace sofa
-
+} /// implicit
+} /// component
+} /// sofa

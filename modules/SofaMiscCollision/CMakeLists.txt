@@ -35,14 +35,8 @@ if(SOFA_HAVE_SMP)
     list(APPEND SOURCE_FILES ParallelCollisionPipeline.cpp)
 endif()
 
-if(SOFA_HAVE_MINIFLOWVR)
-    list(APPEND SOURCE_FILES FrictionContact_DistanceGrid.cpp)
-endif()
 
 list(APPEND SOURCE_FILES TetrahedronBarycentricDistanceLMConstraintContact.cpp)
-if(SOFA_HAVE_MINIFLOWVR)
-    list(APPEND SOURCE_FILES BarycentricDistanceLMConstraintContact_DistanceGrid.cpp)
-endif()
 
 if(NOT SOFA_NO_OPENGL)
     list(APPEND HEADER_FILES RayTriangleVisitor.h)

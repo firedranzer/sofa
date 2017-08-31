@@ -19,11 +19,10 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include <SofaMiscCollision/BarycentricStickContact.inl>
-#include <SofaMeshCollision/BarycentricContactMapper.h>
-#include <SofaMeshCollision/IdentityContactMapper.h>
+#define SOFA_COMPONENT_MAPPING_IMPLICITSURFACEMAPPING_CPP
+#include <sofa/core/ObjectFactory.h>
 
-using namespace sofa::core::collision ;
+#include "ImplicitSurfaceMapping.inl"
 
 namespace sofa
 {
@@ -31,24 +30,52 @@ namespace sofa
 namespace component
 {
 
-namespace collision
+namespace mapping
 {
 
-SOFA_DECL_CLASS(BarycentricStickContact)
+using namespace sofa::defaulttype;
 
-Creator<Contact::Factory, BarycentricStickContact<SphereModel, SphereModel> > SphereSphereStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<SphereModel, PointModel> > SpherePointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<PointModel, PointModel> > PointPointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<LineModel, PointModel> > LinePointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<LineModel, LineModel> > LineLineStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<LineModel, SphereModel> > LineSphereStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, SphereModel> > TriangleSphereStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, PointModel> > TrianglePointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, LineModel> > TriangleLineStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, TriangleModel> > TriangleTriangleStickContactClass("stick",true);
+SOFA_DECL_CLASS(ImplicitSurfaceMapping)
+
+// Register in the Factory
+int ImplicitSurfaceMappingClass = core::RegisterObject("Compute an iso-surface from a set of particles")
+#ifndef SOFA_FLOAT
+        .add< ImplicitSurfaceMapping< Vec3dTypes, Vec3dTypes > >()
+        .add< ImplicitSurfaceMapping< Vec3dTypes, ExtVec3fTypes > >()
+#endif
+#ifndef SOFA_DOUBLE
+        .add< ImplicitSurfaceMapping< Vec3fTypes, Vec3fTypes > >()
+        .add< ImplicitSurfaceMapping< Vec3fTypes, ExtVec3fTypes > >()
+#endif
 
 
-} // namespace collision
+#ifndef SOFA_FLOAT
+#ifndef SOFA_DOUBLE
+        .add< ImplicitSurfaceMapping< Vec3fTypes, Vec3dTypes > >()
+        .add< ImplicitSurfaceMapping< Vec3dTypes, Vec3fTypes > >()
+#endif
+#endif
+        ;
+
+
+#ifndef SOFA_FLOAT
+template class SOFA_SOFAIMPLICITFIELD_API ImplicitSurfaceMapping< Vec3dTypes, Vec3dTypes >;
+template class SOFA_SOFAIMPLICITFIELD_API ImplicitSurfaceMapping< Vec3dTypes, ExtVec3fTypes >;
+#endif
+#ifndef SOFA_DOUBLE
+template class SOFA_SOFAIMPLICITFIELD_API ImplicitSurfaceMapping< Vec3fTypes, Vec3fTypes >;
+template class SOFA_SOFAIMPLICITFIELD_API ImplicitSurfaceMapping< Vec3fTypes, ExtVec3fTypes >;
+#endif
+
+#ifndef SOFA_FLOAT
+#ifndef SOFA_DOUBLE
+template class SOFA_SOFAIMPLICITFIELD_API ImplicitSurfaceMapping< Vec3dTypes, Vec3fTypes >;
+template class SOFA_SOFAIMPLICITFIELD_API ImplicitSurfaceMapping< Vec3fTypes, Vec3dTypes >;
+#endif
+#endif
+
+
+} // namespace mapping
 
 } // namespace component
 

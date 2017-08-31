@@ -19,11 +19,10 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include <SofaMiscCollision/BarycentricStickContact.inl>
-#include <SofaMeshCollision/BarycentricContactMapper.h>
-#include <SofaMeshCollision/IdentityContactMapper.h>
-
-using namespace sofa::core::collision ;
+#define SOFA_COMPONENT_INTERACTIONFORCEFIELD_DISTANCEGRIDFORCEFIELD_CPP
+#include <sofa/defaulttype/Vec3Types.h>
+#include <sofa/core/ObjectFactory.h>
+#include "DistanceGridForceField.inl"
 
 namespace sofa
 {
@@ -31,26 +30,31 @@ namespace sofa
 namespace component
 {
 
-namespace collision
+namespace forcefield
 {
 
-SOFA_DECL_CLASS(BarycentricStickContact)
-
-Creator<Contact::Factory, BarycentricStickContact<SphereModel, SphereModel> > SphereSphereStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<SphereModel, PointModel> > SpherePointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<PointModel, PointModel> > PointPointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<LineModel, PointModel> > LinePointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<LineModel, LineModel> > LineLineStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<LineModel, SphereModel> > LineSphereStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, SphereModel> > TriangleSphereStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, PointModel> > TrianglePointStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, LineModel> > TriangleLineStickContactClass("stick",true);
-Creator<Contact::Factory, BarycentricStickContact<TriangleModel, TriangleModel> > TriangleTriangleStickContactClass("stick",true);
+using namespace sofa::defaulttype;
 
 
-} // namespace collision
+SOFA_DECL_CLASS(DistanceGridForceField)
+
+int DistanceGridForceFieldClass = core::RegisterObject("Force applied by a distancegrid toward the exterior, the interior, or the surface")
+#ifndef SOFA_FLOAT
+        .add< DistanceGridForceField<Vec3dTypes> >()
+#endif
+#ifndef SOFA_DOUBLE
+        .add< DistanceGridForceField<Vec3fTypes> >()
+#endif
+        ;
+#ifndef SOFA_FLOAT
+template class SOFA_SOFADISTANCEGRID_API DistanceGridForceField<Vec3dTypes>;
+#endif
+#ifndef SOFA_DOUBLE
+template class SOFA_SOFADISTANCEGRID_API DistanceGridForceField<Vec3fTypes>;
+#endif
+
+} // namespace forcefield
 
 } // namespace component
 
 } // namespace sofa
-
