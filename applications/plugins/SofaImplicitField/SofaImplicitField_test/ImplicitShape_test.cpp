@@ -1,46 +1,29 @@
 #include <SofaTest/Sofa_test.h>
-typedef sofa::defaulttype::Vector3 Coord;
-
-#include <SofaImplicitField/components/geometry/ScalarField.h>
-using sofa::component::implicit::ScalarField ;
+using sofa::defaulttype::Vec3d ;
 
 #include <SofaImplicitField/components/geometry/SphericalField.h>
-using sofa::component::implicit::SphericalField ;
-
-#include <SofaImplicitField/components/geometry/DiscreteGridField.h>
-#include <sofa/core/objectmodel/BaseObject.h>
-using sofa::component::implicit::DiscreteGridField ;
+using sofa::component::geometry::SphericalField ;
 
 namespace
 {
 
-struct ImplicitShape_test : public sofa::Sofa_test<>
+class SphericalFieldTest : public sofa::Sofa_test<>
 {
-    bool SphericalFieldTest();
-    bool DiscreteGridFieldTest();
+public:
+    bool checkSphericalField();
+    bool checkDiscreteGridField();
 };
 
 
-bool ImplicitShape_test::SphericalFieldTest()
+bool SphericalFieldTest::checkSphericalField()
 {
     SphericalField sphere_test;
-    Coord p(1,1,2);
-    EXPECT_EQ(sphere_test.eval(p),19);
+    Vec3d p(1,1,2);
+    sphere_test.getValue(p) ;
     return true;
 }
 
 
-bool ImplicitShape_test::DiscreteGridFieldTest()
-{
-    DiscreteGridField dgc_test;
-    dgc_test.setFilename("/path/shape.obj");
-    Coord pmin(0,0,0), pmax(243,243,243);
-    dgc_test.loadGrid(0,0,243,243,243,pmin,pmax);
-    EXPECT_NE(dgc_test.grid,nullptr);
-    return true;
-}
-
-TEST_F(ImplicitShape_test, SphericalFieldTest) { ASSERT_TRUE( SphericalFieldTest() ); }
-TEST_F(ImplicitShape_test, DiscreteGridFieldTest) { ASSERT_TRUE( DiscreteGridFieldTest() ); }
+TEST_F(SphericalFieldTest, checkSphericalField) { ASSERT_TRUE( checkSphericalField() ); }
 
 }

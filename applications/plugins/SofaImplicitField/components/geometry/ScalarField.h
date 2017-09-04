@@ -19,13 +19,9 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-/******************************************************************************
-* Contributors:                                                               *
-*   - thomas.goss@etudiant.univ-lille1.fr                                     *
-*   - damien.marchal@univ-lille1.fr                                           *
-******************************************************************************/
-#ifndef SOFA_IMPLICIT_SCALARFIELD_H
-#define SOFA_IMPLICIT_SCALARFIELD_H
+#ifndef SOFAIMPLICITFIELD_COMPONENT_SCALARFIELD_H
+#define SOFAIMPLICITFIELD_COMPONENT_SCALARFIELD_H
+#include <SofaImplicitField/config.h>
 
 #include <sofa/core/objectmodel/BaseObject.h>
 
@@ -35,26 +31,107 @@ namespace sofa
 namespace component
 {
 
-namespace implicit
+namespace geometry
+{
+
+namespace _scalarfield_
 {
 
 using sofa::core::objectmodel::BaseObject ;
-using sofa::defaulttype::Vector3 ;
+using sofa::defaulttype::Vec3d ;
 
-class ScalarField : public BaseObject {
+////////////////// ///////////////
+class SOFA_SOFAIMPLICITFIELD_API ScalarField : public BaseObject
+{
+public:
+    SOFA_CLASS(ScalarField, BaseObject);
 
 public:
-    ScalarField() { }
+    /// Compute the gradient using a first order finite-difference scheme.
+    /// This is of lower precision compared to analytical gradient computed by derivating
+    /// the equations.
+    Vec3d getGradientByFinitDifference(Vec3d& pos, int& domain) ;
+
+    virtual int getDomain(Vec3d& pos, int domain) {
+        SOFA_UNUSED(pos);
+        SOFA_UNUSED(domain);
+        return -1;
+    }
+
+    virtual double getValue(Vec3d& pos, int& domain) = 0;
+    inline double getValue(Vec3d& pos) { int domain=-1; return getValue(pos,domain); }
+
+    /// By default compute the gradient using a first order finite difference approache
+    /// If you have analytical derivative don't hesitate to override this function.
+    virtual Vec3d getGradient(Vec3d& pos, int& domain);
+    inline Vec3d getGradient(Vec3d& pos) {int domain=-1; return getGradient(pos,domain); }
+
+    /// Returns the value and the gradiant by evaluating one after an other.
+    /// For some computation it is possible to implement more efficiently the computation
+    /// By factoring the computing of the two...if you can do this please override this function.
+    virtual void getValueAndGradient(Vec3d& pos, double &value, Vec3d& grad, int& domain) ;
+    inline void getValueAndGradient(Vec3d& pos, double &value, Vec3d& grad)
+    {
+      int domain=-1;
+      return getValueAndGradient(pos,value,grad,domain);
+    }
+
+    virtual bool computeSegIntersection(Vec3d& posInside, Vec3d& posOutside, Vec3d& intersecPos, int domain=-1);
+    bool computeSegIntersection(Vec3d& posInside, double valInside, Vec3d& gradInside,
+                    Vec3d& posOutside, double valOutside, Vec3d& gradOutside,
+                    Vec3d& intersecPos, int domain=-1)
+    {
+      (void)valInside;
+      (void)gradInside;
+      (void)valOutside;
+      (void)gradOutside;
+      return computeSegIntersection(posInside, posOutside, intersecPos, domain);
+    }
+
+    virtual void projectPointonSurface(Vec3d& point, int i=-1);
+    void projectPointonSurface(Vec3d& point, double value, Vec3d& grad, int domain=-1)
+    {
+      (void)value;
+      (void)grad;
+      projectPointonSurface(point, domain);
+    }
+
+    // TODO mettre les paramètres step=0.1 & countMax=30 en paramètre
+    virtual bool projectPointonSurface2(Vec3d& point, int i, Vec3d& dir);
+    bool projectPointonSurface2(Vec3d& point, int domain=-1)
+    {
+        Vec3d dir = Vec3d(0,0,0);
+        return projectPointonSurface2(point, domain, dir);
+    }
+
+    virtual bool projectPointOutOfSurface(Vec3d& point, int i, Vec3d& dir, double &dist_out);
+    bool projectPointOutOfSurface(Vec3d& point, int domain=-1)
+    {
+        Vec3d dir;
+        double dist_out = 0.0;
+        return projectPointOutOfSurface(point, domain, dir, dist_out);
+    }
+
+
+protected:
+    ScalarField( ) { }
     virtual ~ScalarField() { }
-    virtual double eval(Vector3 p) = 0;
+
+private:
+    ScalarField(const ScalarField& n) ;
+    ScalarField& operator=(const ScalarField& n) ;
 };
 
-}
 
-using implicit::ScalarField ;
+} /// namespace _scalarfield_
 
-} /// component
+using _scalarfield_::ScalarField ;
 
-} /// sofa
+} /// namespace geometry
 
-#endif // IMPLICIT_SHAPE
+} /// namespace component
+
+} /// namespace sofa
+
+#endif
+

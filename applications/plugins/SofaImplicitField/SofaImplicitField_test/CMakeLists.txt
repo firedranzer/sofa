@@ -4,7 +4,10 @@ project(SofaImplicitField_test)
 
 set(SOURCE_FILES
     ImplicitShape_test.cpp
+    CustomField_test.cpp
 )
+
+
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} SofaGTestMain SofaTest SofaImplicitField)

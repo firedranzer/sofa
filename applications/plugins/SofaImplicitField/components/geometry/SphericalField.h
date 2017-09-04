@@ -19,11 +19,6 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-/******************************************************************************
-* Contributors:                                                               *
-*   - thomas.goss@etudiant.univ-lille1.fr                                     *
-*   - damien.marchal@univ-lille1.fr                                           *
-******************************************************************************/
 #ifndef SOFA_IMPLICIT_SPHERICALFIELD_H
 #define SOFA_IMPLICIT_SPHERICALFIELD_H
 
@@ -35,21 +30,51 @@ namespace sofa
 namespace component
 {
 
-namespace implicit
+namespace geometry
 {
 
-class SphericalField : public ScalarField {
+namespace _sphericalfield_
+{
+
+using sofa::defaulttype::Vec3d ;
+
+class SphericalField  : public ScalarField
+{
+public:
+    SOFA_CLASS(SphericalField, ScalarField);
 
 public:
-    SOFA_CLASS(SphericalField, BaseObject);
-    SphericalField() { }
-    virtual ~SphericalField() { }
-    virtual double eval(Vector3 p) override ;
+    SphericalField() ;
+    ~SphericalField() { }
+
+    /// Inherited from BaseObject
+    virtual void init() override ;
+    virtual void reinit() override ;
+
+    /// Inherited from ScalarField.
+    virtual double getValue(Vec3d& Pos, int &domain) override ;
+    virtual Vec3d getGradient(Vec3d &Pos, int& domain) override ;
+    virtual void getValueAndGradient(Vec3d& pos, double& val, Vec3d& grad, int& domain) override ;
+
+    using ScalarField::getValue ;
+    using ScalarField::getGradient ;
+    using ScalarField::getValueAndGradient ;
+
+    Data<bool> d_inside;
+    Data<double> d_radiusSphere;
+    Data<Vec3d> d_centerSphere;
+
+protected:
+    Vec3d m_center;
+    double m_radius;
+    bool m_inside;
 };
 
-} /// implicit
+} /// _sphericalfield_
 
-using implicit::SphericalField ;
+using _sphericalfield_::SphericalField ;
+
+} /// geometry
 
 } /// component
 

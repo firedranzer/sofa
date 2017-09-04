@@ -19,15 +19,65 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_SOFAIMPLICITFIELD_CONFIG_H
-#define SOFA_SOFAIMPLICITFIELD_CONFIG_H
+#ifndef SOFAIMPLICITFIELD_COMPONENT_POINTCLOUDIMPLICITFIELD_H
+#define SOFAIMPLICITFIELD_COMPONENT_POINTCLOUDIMPLICITFIELD_H
+#include <SofaImplicitField/config.h>
 
-#include <SofaBase/config.h>
+#include <sofa/core/objectmodel/BaseObject.h>
+#include <sofa/core/objectmodel/Link.h>
+#include <SofaImplicitField/components/geometry/ScalarField.h>
 
-#ifdef SOFA_BUILD_SOFAIMPLICITFIELD
-#  define SOFA_SOFAIMPLICITFIELD_API SOFA_EXPORT_DYNAMIC_LIBRARY
-#else
-#  define SOFA_SOFAIMPLICITFIELD_API SOFA_IMPORT_DYNAMIC_LIBRARY
+namespace sofa
+{
+
+namespace component
+{
+
+namespace visual
+{
+
+namespace _pointcloudimplicitfieldvisualization_
+{
+
+using  sofa::component::geometry::ScalarField;
+using sofa::core::objectmodel::BaseObject ;
+using sofa::defaulttype::Vec3d ;
+
+////////////////// ///////////////
+class SOFA_SOFAIMPLICITFIELD_API PointCloudImplicitFieldVisualization : public BaseObject
+{
+public:
+    SOFA_CLASS(PointCloudImplicitFieldVisualization, BaseObject);
+
+    SingleLink<PointCloudImplicitFieldVisualization, ScalarField,
+               BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> l_field ;
+
+protected:
+    PointCloudImplicitFieldVisualization( ) ;
+    virtual ~PointCloudImplicitFieldVisualization() { }
+
+    virtual void init() override ;
+    virtual void reinit() override ;
+    virtual void draw(const core::visual::VisualParams*) override ;
+
+private:
+    PointCloudImplicitFieldVisualization(const PointCloudImplicitFieldVisualization& n) ;
+    PointCloudImplicitFieldVisualization& operator=(const PointCloudImplicitFieldVisualization& n) ;
+};
+
+
+
+/////////////////////////////////////////////////////////
+
+} // namespace _scalarfield_
+
+using _pointcloudimplicitfieldvisualization_::PointCloudImplicitFieldVisualization ;
+
+} // namespace visual
+
+} // namespace component
+
+} // namespace sofa
+
 #endif
 
-#endif

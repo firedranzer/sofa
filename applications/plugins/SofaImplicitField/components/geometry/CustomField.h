@@ -19,13 +19,15 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFAIMPLICITFIELD_COMPONENT_DISCRETEGRIDFIELD_H
-#define SOFAIMPLICITFIELD_COMPONENT_DISCRETEGRIDFIELD_H
+#ifndef SOFAIMPLICITFIELD_COMPONENT_CUSTOMFIELD_H
+#define SOFAIMPLICITFIELD_COMPONENT_CUSTOMFIELD_H
 #include <SofaImplicitField/config.h>
 
-#include <sofa/core/objectmodel/DataFileName.h>
 #include <SofaImplicitField/components/geometry/ScalarField.h>
 
+#include <SofaPython/PythonEnvironment.h>
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace sofa
 {
 
@@ -35,57 +37,50 @@ namespace component
 namespace geometry
 {
 
-namespace _discretegrid_
+namespace _customfield_
 {
 
-using sofa::defaulttype::Vec3d;
+using sofa::component::geometry::ScalarField ;
+using sofa::defaulttype::Vec3d ;
+using sofa::core::objectmodel::Data ;
 
-class DomainCache
+
+//////////////////////////// CLASS DEFINITION //////////////////////////////////////////////////////
+class SOFA_SOFAIMPLICITFIELD_API CustomField : public ScalarField
 {
 public:
-    bool insideImg; // shows if the domain lies inside the valid image region or outside
-    Vec3d bbMin, bbMax; // bounding box (min and max) of the domain
-    double val[8]; // corner values of the domain
+    SOFA_CLASS(CustomField, BaseObject);
+
+public:
+    virtual void init() override ;
+    virtual void reinit() override ;
+
+    using ScalarField::getValue ;
+    using ScalarField::getGradient ;
+
+    virtual double getValue(Vec3d& pos, int& domain) override ;
+    virtual Vec3d getGradient(Vec3d& pos, int& i) override ;
+
+    Data<std::string> d_function ;
+    Data<std::string> d_gradient ;
+    PyObject*         m_evalFunction ;
+    PyObject*         m_gradFunction ;
+protected:
+    CustomField( ) ;
+    virtual ~CustomField() { }
+
+private:
+    CustomField(const CustomField& n) ;
+    CustomField& operator=(const CustomField& n) ;
+
+    PyObject* getPythonFunction(const std::string& attribname,
+                                const std::string& attribvalue) const ;
+
 };
 
-class SOFA_SOFAIMPLICITFIELD_API DiscreteGridField : public virtual ScalarField
-{
+} /// namespace _scalarfield_
 
-public:
-    SOFA_CLASS(DiscreteGridField, ScalarField);
-
-public:
-    DiscreteGridField();
-    ~DiscreteGridField();
-
-    virtual void init();
-
-    virtual double getValue( Vec3d &transformedPos );
-    virtual double getValue( Vec3d &transformedPos, int &domain );
-    virtual int getDomain( Vec3d &pos, int ref_domain ) { (void)pos; return ref_domain; }
-
-    void setFilename(const std::string& filename) ;
-    bool loadGridFromMHD( const char *filename ) ;
-
-    void updateCache( DomainCache *cache, Vec3d& pos );
-    int getNextDomain();
-
-    sofa::core::objectmodel::DataFileName d_distanceMapHeader;
-    Data< int > d_maxDomains;
-    Data< double > dx, dy, dz;    // translation of original image
-
-    int m_usedDomains;              // number of domains already given out
-    unsigned int m_imgSize[3];      // number of voxels
-    double m_spacing[3];            // physical distance between two neighboring voxels
-    double m_scale[3];              // (1/spacing)
-    double m_imgMin[3], m_imgMax[3];  // physical locations of the centers of both corner voxels
-    float *m_imgData;               // raw data
-    unsigned int m_deltaOfs[8];     // offsets to define 8 corners of cube for interpolation
-    std::vector<DomainCache> m_domainCache;
-};
-
-} /// namespace _discretegrid_
-using _discretegrid_::DiscreteGridField ;
+using _customfield_::CustomField ;
 
 } /// namespace geometry
 

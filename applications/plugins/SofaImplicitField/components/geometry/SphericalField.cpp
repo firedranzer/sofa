@@ -19,11 +19,6 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-/******************************************************************************
-* Contributors:                                                               *
-*   - thomas.goss@etudiant.univ-lille1.fr                                     *
-*   - damien.marchal@univ-lille1.fr                                           *
-******************************************************************************/
 #include <sofa/core/ObjectFactory.h>
 using sofa::core::RegisterObject ;
 
@@ -35,23 +30,94 @@ namespace sofa
 namespace component
 {
 
-namespace implicit
+namespace geometry
 {
 
-double SphericalField::eval(Vector3 p) {
+namespace _sphericalfield_
+{
 
-    double x=p.x(), y=p.y(), z=p.z();
-    double x2=x*x, y2=y*y, z2=z*z;
-    double x4=x2*x2, y4=y2*y2, z4=z2*z2;
-    return x4  + y4  + z4  + 2 *x2*  y2  + 2* x2*z2  + 2*y2*  z2  - 5 *x2  + 4* y2  - 5*z2+4;
+SphericalField::SphericalField()
+    : d_inside(initData(&d_inside, false, "inside", "If true the field is oriented inside (resp. outside) the sphere. (default = false)"))
+    , d_radiusSphere(initData(&d_radiusSphere, 1.0, "radius", "Radius of Sphere emitting the field. (default = 1)"))
+    , d_centerSphere(initData(&d_centerSphere, Vec3d(0.0,0.0,0.0), "center", "Position of the Sphere Surface. (default=0 0 0)" ))
+{init();
+    }
+
+void SphericalField::init()
+{
+    m_inside = d_inside.getValue();
+    m_center = d_centerSphere.getValue();
+    m_radius = d_radiusSphere.getValue();
+}
+
+void SphericalField::reinit()
+{
+    init();
+}
+
+double SphericalField::getValue(Vec3d& Pos, int& domain)
+{
+    SOFA_UNUSED(domain) ;
+    double result = (Pos[0] - m_center[0])*(Pos[0] - m_center[0]) +
+            (Pos[1] - m_center[1])*(Pos[1] - m_center[1]) +
+            (Pos[2] - m_center[2])*(Pos[2] - m_center[2]) -
+            m_radius * m_radius ;
+    if(m_inside)
+        result = -result;
+
+    return result;
+}
+
+Vec3d SphericalField::getGradient(Vec3d &Pos, int &domain)
+{
+    SOFA_UNUSED(domain);
+    Vec3d g;
+    if (m_inside)
+    {
+        g[0] = -2* (Pos[0] - m_center[0]);
+        g[1] = -2* (Pos[1] - m_center[1]);
+        g[2] = -2* (Pos[2] - m_center[2]);
+    }
+    else
+    {
+        g[0] = 2* (Pos[0] - m_center[0]);
+        g[1] = 2* (Pos[1] - m_center[1]);
+        g[2] = 2* (Pos[2] - m_center[2]);
+    }
+
+    return g;
+}
+
+void SphericalField::getValueAndGradient(Vec3d& Pos, double &value, Vec3d& /*grad*/, int& domain)
+{
+    SOFA_UNUSED(domain);
+    Vec3d g;
+    g[0] = (Pos[0] - m_center[0]);
+    g[1] = (Pos[1] - m_center[1]);
+    g[2] = (Pos[2] - m_center[2]);
+    if (m_inside)
+    {
+        value = m_radius*m_radius - g.norm2();
+        g = g * (-2);
+    }
+    else
+    {
+        value = g.norm2() - m_radius*m_radius;
+        g = g * 2;
+    }
+
+    return;
 }
 
 
-///factory register
-int SphericalFieldComponent = RegisterObject("Implement a spherical distance field function").add< SphericalField >();
-
 SOFA_DECL_CLASS(SphericalField)
 
+// Register in the Factory
+int SphericalFieldClass = core::RegisterObject("A spherical implicit field.")
+        .add< SphericalField >()
+        ;
+
+} /// _sphericalfield_
 } /// implicit
 } /// component
 } /// sofa

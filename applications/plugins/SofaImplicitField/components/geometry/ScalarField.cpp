@@ -21,40 +21,34 @@
 ******************************************************************************/
 
 #include <sofa/core/ObjectFactory.h>
-#include "ImplicitSurfaceContainer.h"
+#include "ScalarField.h"
 namespace sofa
 {
 
 namespace component
 {
 
-namespace container
+namespace geometry
 {
 
-
-SOFA_DECL_CLASS(SphereSurface)
-
-// Register in the Factory
-int SphereSurfaceClass = core::RegisterObject("")
-        .add< SphereSurface >()
-        ;
-
-defaulttype::Vec3d ImplicitSurface::getGradient(defaulttype::Vec3d& Pos, int& i)
+namespace _scalarfield_
 {
 
+Vec3d ScalarField::getGradientByFinitDifference(Vec3d& pos, int& i)
+{
     double epsilon=0.0001;
-    defaulttype::Vec3d Result;
-    Pos[0] += epsilon;
-    Result[0] = getValue(Pos, i);
-    Pos[0] -= epsilon;
-    Pos[1] += epsilon;
-    Result[1] = getValue(Pos, i);
-    Pos[1] -= epsilon;
-    Pos[2] += epsilon;
-    Result[2] = getValue(Pos, i);
-    Pos[2] -= epsilon;
+    Vec3d Result;
+    pos[0] += epsilon;
+    Result[0] = getValue(pos, i);
+    pos[0] -= epsilon;
+    pos[1] += epsilon;
+    Result[1] = getValue(pos, i);
+    pos[1] -= epsilon;
+    pos[2] += epsilon;
+    Result[2] = getValue(pos, i);
+    pos[2] -= epsilon;
 
-    double v = getValue(Pos, i);
+    double v = getValue(pos, i);
     Result[0] = (Result[0]-v)/epsilon;
     Result[1] = (Result[1]-v)/epsilon;
     Result[2] = (Result[2]-v)/epsilon;
@@ -62,7 +56,19 @@ defaulttype::Vec3d ImplicitSurface::getGradient(defaulttype::Vec3d& Pos, int& i)
     return Result;
 }
 
-bool ImplicitSurface::computeSegIntersection(defaulttype::Vec3d& posInside, defaulttype::Vec3d& posOutside, defaulttype::Vec3d& intersecPos, int i)
+Vec3d ScalarField::getGradient(Vec3d& pos, int& i)
+{
+    return getGradientByFinitDifference(pos, i);
+}
+
+void ScalarField::getValueAndGradient(Vec3d& pos, double &value, Vec3d& grad, int& domain)
+{
+  value = getValue(pos,domain);
+  grad = getGradient(pos,domain);
+}
+
+
+bool ScalarField::computeSegIntersection(Vec3d& posInside, Vec3d& posOutside, Vec3d& intersecPos, int i)
 {
 
 
@@ -85,7 +91,7 @@ bool ImplicitSurface::computeSegIntersection(defaulttype::Vec3d& posInside, defa
 
 
 
-    defaulttype::Vec3d Seg = posInside-posOutside;
+    Vec3d Seg = posInside-posOutside;
     if (Seg.norm() < tolerance) // TODO : macro on the global precision
     {
         intersecPos = posOutside;
@@ -94,7 +100,7 @@ bool ImplicitSurface::computeSegIntersection(defaulttype::Vec3d& posInside, defa
 
     // we start on posInside and search for the first point outside with a step given by scale //
     int count=0;
-    defaulttype::Vec3d step = Seg;
+    Vec3d step = Seg;
     double val = b;
     intersecPos = posOutside;
 
@@ -134,10 +140,10 @@ bool ImplicitSurface::computeSegIntersection(defaulttype::Vec3d& posInside, defa
 
 }
 
-void ImplicitSurface::projectPointonSurface(defaulttype::Vec3d& point, int i)
+void ScalarField::projectPointonSurface(Vec3d& point, int i)
 {
 
-    defaulttype::Vec3d grad;
+    Vec3d grad;
     double value= getValue(point, i);
     int it;
     for (it=0; it<10; it++)
@@ -161,11 +167,11 @@ void ImplicitSurface::projectPointonSurface(defaulttype::Vec3d& point, int i)
 
 
 
-bool ImplicitSurface::projectPointonSurface2(defaulttype::Vec3d& point, int i, defaulttype::Vec3d& dir)
+bool ScalarField::projectPointonSurface2(Vec3d& point, int i, Vec3d& dir)
 {
 
 
-    defaulttype::Vec3d posInside, posOutside;
+    Vec3d posInside, posOutside;
     if (dir.norm()< 0.001)
     {
         msg_warning() << "grad is too small" ;
@@ -212,13 +218,13 @@ bool ImplicitSurface::projectPointonSurface2(defaulttype::Vec3d& point, int i, d
 }
 
 
-bool ImplicitSurface::projectPointOutOfSurface(defaulttype::Vec3d& point, int i, defaulttype::Vec3d& dir, double &dist_out)
+bool ScalarField::projectPointOutOfSurface(Vec3d& point, int i, Vec3d& dir, double &dist_out)
 {
 
 
     if (projectPointonSurface2(point, i, dir))
     {
-        defaulttype::Vec3d grad = getGradient(point, i);
+        Vec3d grad = getGradient(point, i);
         grad.normalize();
         point += grad*dist_out;
         return true;
@@ -229,83 +235,10 @@ bool ImplicitSurface::projectPointOutOfSurface(defaulttype::Vec3d& point, int i,
 
 }
 
+} /// namespace _scalarfield_
 
+} /// namespace geometry
 
-  double SphereSurface::getValue(defaulttype::Vec3d& Pos, int& domain)
-{
-  (void)domain;
-  double result = (Pos[0] - _Center[0])*(Pos[0] - _Center[0]) +
-    (Pos[1] - _Center[1])*(Pos[1] - _Center[1]) +
-    (Pos[2] - _Center[2])*(Pos[2] - _Center[2]) -
-    _radius * _radius ;
-  if(_inside)
-    result = -result;
+} /// namespace component
 
-  return result;
-}
-
-defaulttype::Vec3d SphereSurface::getGradient(defaulttype::Vec3d &Pos, int &domain)
-{
-  (void)domain;
-  defaulttype::Vec3d g;
-  if (_inside)
-    {
-      g[0] = -2* (Pos[0] - _Center[0]);
-      g[1] = -2* (Pos[1] - _Center[1]);
-      g[2] = -2* (Pos[2] - _Center[2]);
-    }
-  else
-    {
-      g[0] = 2* (Pos[0] - _Center[0]);
-      g[1] = 2* (Pos[1] - _Center[1]);
-      g[2] = 2* (Pos[2] - _Center[2]);
-    }
-
-  return g;
-}
-
-void SphereSurface::getValueAndGradient(defaulttype::Vec3d& Pos, double &value, defaulttype::Vec3d& /*grad*/, int& domain)
-{
-  (void)domain;
-  defaulttype::Vec3d g;
-  g[0] = (Pos[0] - _Center[0]);
-  g[1] = (Pos[1] - _Center[1]);
-  g[2] = (Pos[2] - _Center[2]);
-  if (_inside)
-    {
-      value = _radius*_radius - g.norm2();
-      g = g * (-2);
-    }
-  else
-    {
-      value = g.norm2() - _radius*_radius;
-      g = g * 2;
-    }
-
-  return;
-}
-
-double SphereSurface::getDistance(defaulttype::Vec3d& Pos, int& /*domain*/)
-{
-  double result = _radius - sqrt((Pos[0] - _Center[0])*(Pos[0] - _Center[0]) +
-                 (Pos[1] - _Center[1])*(Pos[1] - _Center[1]) +
-                 (Pos[2] - _Center[2])*(Pos[2] - _Center[2]));
-  return _inside ? result : -result;
-}
-
-double SphereSurface::getDistance(defaulttype::Vec3d& /*Pos*/, double value, double grad_norm, int &domain)
-{
-  (void)domain;
-  if (grad_norm < 0) // use value
-    grad_norm = sqrt(_inside ? _radius*_radius - value : value + _radius*_radius);
-  else grad_norm /= 2;
-  return _inside ? _radius - grad_norm : grad_norm - _radius;
-}
-
-
-
-} // namespace container
-
-} // namespace component
-
-} // namespace sofa
+} /// namespace sofa
