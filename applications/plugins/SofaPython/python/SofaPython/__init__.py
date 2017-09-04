@@ -73,6 +73,27 @@ def sendMessageFromException(e):
     exc_type, exc_value, exc_tb = sys.exc_info()
     sofaExceptHandler(exc_type, exc_value, exc_tb)
 
+def sofaFormatHandler(type, value, tb):
+    global oldexcepthook
+    """This exception handler, convert python exceptions & traceback into more classical sofa error messages of the form:
+       Message Description
+       Python Stack (most recent are at the end)
+          File file1.py line 4  ...
+          File file1.py line 10 ...
+          File file1.py line 40 ...
+          File file1.py line 23 ...
+            faulty line
+    """
+    s="\nPython Stack (most recent are at the end): \n"
+    for line in traceback.format_tb(tb):
+        s += line
+
+    return repr(value)+" "+s
+
+
+def getSofaFormattedStringFromException(e):
+    exc_type, exc_value, exc_tb = sys.exc_info()
+    return sofaFormatHandler(exc_type, exc_value, exc_tb)
 
 def sofaExceptHandler(type, value, tb):
     global oldexcepthook
