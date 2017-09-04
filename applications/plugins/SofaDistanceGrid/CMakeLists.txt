@@ -33,6 +33,9 @@ set(SOURCE_FILES
 set(EXTRA_FILES
     README.md
     examples/README.md
+    examples/DistanceGridCollisionModel.scn
+    examples/FFDDistanceGridCollisionModel.scn
+    examples/DistanceGridForceField-liver.scn
     )
 
 add_subdirectory(SofaDistanceGrid_test)

@@ -53,7 +53,7 @@ namespace component
 namespace collision
 {
 
-int registerVolumetricDataCollisionModel()
+int registerDistanceGridCollisionModel()
 {
     return 0;
 }

@@ -46,7 +46,7 @@ void initExternalModule()
     {
         first = false;
     }
-    sofa::component::collision::registerVolumetricDataCollisionModel();
+    sofa::component::collision::registerDistanceGridCollisionModel();
 }
 
 const char* getModuleName()

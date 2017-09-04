@@ -28,7 +28,7 @@ namespace component
 
 namespace collision
 {
-    int registerVolumetricDataCollisionModel() ;
+    int registerDistanceGridCollisionModel() ;
 } /// collision
 } /// component
 } /// sofa

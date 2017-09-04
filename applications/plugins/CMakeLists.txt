@@ -52,3 +52,6 @@ else()
     sofa_add_plugin(SofaSimpleGUI SofaSimpleGUI) # SofaSimpleGUI plugin can't work without OPENGL
     sofa_add_plugin(VolumetricRendering VolumetricRendering) # VolumetricRendering plugin can't work without OPENGL
 endif()
+
+# The following are just transitional packages to help switching module to plugin while refactoring.
+sofa_add_plugin(SofaVolumetricData SofaVolumetricData)

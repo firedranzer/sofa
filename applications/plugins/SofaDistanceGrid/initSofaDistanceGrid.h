@@ -30,7 +30,7 @@ namespace component
 {
 
 
-void SOFA_SOFADISTANCEGRID_API initVolumetricData();
+void SOFA_SOFADISTANCEGRID_API initSofaDistanceGrid();
 
 } // namespace component
 
