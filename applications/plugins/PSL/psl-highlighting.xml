@@ -415,8 +415,8 @@
             <DetectSpaces/>
             <keyword String="PSLKeywords" context="#stay" attribute="Style_SofaKeyword"/>
             <keyword String="SofaKeywords" context="#stay" attribute="Style_SofaKeyword"/>
-            <RegExpr String="[A-Z][a-zA-Z_0-9]+" context="#stay" attribute="Style_SofaKeyword"/>
-            <RegExpr String="[a-z][a-zA-Z_0-9]+" context="#stay" attribute="Style_SofaProperty"/>
+            <RegExpr String="[A-Z][a-zA-Z_0-9\._]*" context="#stay" attribute="Style_SofaKeyword"/>
+            <RegExpr String="[a-z][a-zA-Z_0-9\._]*" context="#stay" attribute="Style_SofaProperty"/>
             <DetectChar char=":" context="#stay" attribute="Style_SofaKeyword"/>
             <RegExpr attribute="Style_Comment" String="#" insensitive="true" firstNonSpace="false" context="Q-comment"/>
             <RegExpr attribute="Style_Comment" String="//" insensitive="true" firstNonSpace="false" context="Q-comment"/>

@@ -1,34 +1,48 @@
+###################################################################################################
+## RIEN DU TOUT du tout
+##
+###################################################################################################
+// MAIS CA MARCHE AUSSI !
 Node : {
+    ## Commentaire ICI.
     name : "root"
 
-    ### Declaring a template. It is instanciated lated.
-    Template : {
+    Template : #A commentaire here Template.
+    {
         name : "MyTemplate"
         properties : {
             name : "defaultName"
-            numchild : 3
+            numchild : [3, 3, 3]
         }
+
 
         Node : {
             name : p"name"
+
+            Template : {
+
+            }
+
 
             MechanicalObject : {
                     name : "mstate"
             }
 
             Python : '''
+
                      for i in range(0,numchild):
                         self.createChild("child"+str(i))
                      '''
         }
     }
 
-    ### Instanciating the same template two times.
-    MyTemplate : {
+    MyTemplate :
+    {
         name : "Object1"
         numchild : 5
     }
-    MyTemplate: {
+
+    MyTemplate : {
         name : "Object2"
         numchild : 9
     }

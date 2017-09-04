@@ -42,6 +42,7 @@ templates = {}
 aliases = {}
 sofaAliases = {}
 sofaComponents = []
+sofaHelp = {}
 SofaStackFrame = []
 datafieldQuirks = []
 sofaRoot = None
@@ -53,6 +54,7 @@ def refreshComponentListFromFactory():
     sofaAliases = {}
     for (name, desc) in Sofa.getAvailableComponents():
             sofaComponents.append(name)
+            sofaHelp[name] = desc
             for alias in Sofa.getAliasesFor(name):
                 sofaAliases[alias] = name
 
@@ -99,6 +101,9 @@ def findStackLevelFor(key, stack):
 
 def processPython(parent, key, kv, stack, frame):
         """Process a python fragment of code with context provided by the content of the stack."""
+        p=parent.createObject("Python", name='"'+kv[0:20]+'..."')
+        p.addData("psl_source","PSL", "This hold a python expression.", "s", str(kv))
+
         context = flattenStackFrame(stack)
         local = {}
         exec(kv, context, local)
@@ -132,6 +137,19 @@ def getField(object, name):
     return None
 
 pslprefix = "PSL::engine: "
+
+def whatis(name, n=5):
+    ret = difflib.get_close_matches(name, sofaComponents+templates.keys()+sofaAliases.keys(), n=n)
+    res = "Searching for <i>"+ name + "</i> returns: <br><ul>"
+    for i in ret:
+        if i in sofaComponents:
+            res += "<li>"+i+" (a component) <br> "+sofaHelp[i]+"</li>"
+        elif i in templates:
+            res += "<li>"+i+" (a template)</li>"
+        elif i in templates:
+            res += "<li>"+i+" (an alias)</li>"
+    res += "</ul>"
+    return res
 
 def processString(object, name, value, stack, frame):
     ## Python Hook to build an eval function.
@@ -291,14 +309,21 @@ def getFileToImportFromPartialName(parent, partialname):
 
 def processImportPSL(parent, importname, filename, key, stack, frame):
     global imports, templates
-    Sofa.msg_info(parent, pslprefix+"Importing "+importname+".psl.")
+
+    im = parent.createObject("Import")
+    im.name = importname
 
     f = open(filename).read()
     loadedcontent = pslparserhjson.parse(f)
     imports[filename] = importTemplates(loadedcontent)
 
+    msg = "From <i>"+filename+"</i> importing: <ul>"
     for tname in imports[filename].keys():
             templates[importname+"."+tname] = imports[filename][tname]
+            msg+=" <li> template <i>"+tname+"</i> </li>"
+    msg += "</ul>"
+    Sofa.msg_info(im, msg)
+
 
 def processImportPSLX(parent, importname, filename, key, stack, frame):
     Sofa.msg_error(parent, pslprefix+"Importing .pslx file format is not supported yet... "+ os.getcwd() + "/"+filename)
@@ -571,6 +596,17 @@ def processProperties(self, key, kv, stack, frame):
 
     Sofa.msg_info(self, pslprefix+"Adding a user properties: \n"+msg)
 
+def instanciate(parent, templateName, **kwargs):
+    params = []
+    for k in kwargs:
+        p = ""
+        if isinstance(kwargs[k], list):
+            for i in kwargs[k]:
+                p = p +  " " + str(i)
+        else:
+            p = str(kwargs[k])
+        params.append((k, p))
+    instanciateTemplate(parent, templateName, params, [], {})
 
 def instanciateTemplate(parent, key, kv, stack, frame):
         global templates
@@ -597,6 +633,7 @@ def instanciateTemplate(parent, key, kv, stack, frame):
             n=templatesource(parent, **kwargs)
         else:
             ## NOW PROCESSING THE TEMPLATE
+            source = []
             for k,v in templatesource:
                     if k == 'name':
                         None
@@ -605,18 +642,20 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                                     if not kk in frame:
                                             nframe[kk] = vv
                     else:
-                            source = v
+                            source.append((k,v))
 
             for k,v in kv:
                     nframe[k] = v
 
-            n = processNode(parent, "Node", source, stack, nframe, doCreate=True)
+            if len(source)==1 and source[0][0]=="Node":
+                n = processNode(parent, "Node", source[0][1], stack, nframe, doCreate=True)
+            else:
+                n = processNode(parent, "", source, stack, nframe, doCreate=False)
 
         if isinstance(templates[key], Sofa.Template):
             ## Add to the created node the different template properties.
             for k,v in kv:
                 if not hasattr(n, k):
-                    print("ADDING DATA...for " + str(k))
                     data = None
                     t = templates[key]
                     if isinstance(v, int):
@@ -649,10 +688,9 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                 ##if isinstance(templates[key], Sofa.Template):
                 ##    templates[key].trackData( n.findData(k) )
 
-
         ## Add the meta-type information.
         n.addData("psl_properties", "PSL", "Captured variables for template re-instantiation", "s", repr(kv))
-        n.addData("psl_instanceof", "PSL", "Type of the object", "s", key)
+        n.addData("psl_instanceof", "PSL", "Type of the object", "s", str(key))
 
         stack.pop(-1)
 
@@ -678,7 +716,8 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
         else:
                 tself = frame["self"] = parent
 
-        if isinstance(kv, list):
+        try:
+            if isinstance(kv, list):
                 for key,value in kv:
                         sofaAliasInitialName = None
                         if isinstance(key, unicode):
@@ -719,8 +758,11 @@ def processNode(parent, key, kv, stack, frame, doCreate=True):
                                         if o != None:
                                                 tself.addObject(o)
                                 processParameter(tself, key, value, stack, frame)
-        else:
+            else:
                 raise Exception("This shouldn't happen, expecting only list")
+        except Exception,e:
+            s=SofaPython.getSofaFormattedStringFromException(e)
+            Sofa.msg_error(tself, "Problem while loading file.  <br>"+s)
         stack.pop(-1)
         return tself
 

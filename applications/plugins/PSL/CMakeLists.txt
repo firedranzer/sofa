@@ -5,6 +5,8 @@ set(HEADER_FILES
     config.h
     SceneLoaderPSL.h
     components/Undefined.h
+    components/Import.h
+    components/Python.h
     components/TestResult.h
     components/PSLVersion.h
     components/Template.h
@@ -13,6 +15,8 @@ set(HEADER_FILES
 set(SOURCE_FILES
     initPSL.cpp
     SceneLoaderPSL.cpp
+    components/Import.cpp
+    components/Python.cpp
     components/Undefined.cpp
     components/TestResult.cpp
     components/PSLVersion.cpp
@@ -33,7 +37,10 @@ set(PYTHON_FILES
 )
 
 set(EXTRA_FILES
-    examples/starthere.psl
+    examples/livedemo1/mytemplates.psl
+    examples/livedemo1/sceneinit.psl
+    examples/livedemo1/starthere.psl
+    examples/livedemo1/shapes.psl
     examples/starthere.pslx
     examples/python01.psl
     examples/python02.psl

@@ -64,38 +64,38 @@ public:
 
     /** Constructor used via the Base::initData() methods. */
     explicit NotifyingData(const BaseData::BaseInitData& init, Template* src) : Data<T>(init){
-        std::cout << "Constructor... I should call papa" << std::endl;
+        //std::cout << "Constructor... I should call papa" << std::endl;
         m_templatesrc = src ;
     }
 
     virtual ~NotifyingData(){
-        std::cout << "Destructor I should call papa" << std::endl ;
+        //std::cout << "Destructor I should call papa" << std::endl ;
     }
 
     virtual T* virtualBeginEdit() override
     {
-        std::cout << "Virtual Begin Value" << std::endl ;
+        //std::cout << "Virtual Begin Value" << std::endl ;
         return Data<T>::virtualBeginEdit() ;
     }
 
     virtual void virtualEndEdit() override
     {
-        std::cout << "Virtual Set Value" << std::endl ;
+        //std::cout << "Virtual Set Value" << std::endl ;
         Data<T>::virtualEndEdit() ;
     }
 
     virtual void virtualSetValue(const T& t) override {
-        std::cout << "Virtual Set Value" << std::endl ;
+        //std::cout << "Virtual Set Value" << std::endl ;
         Data<T>::virtualSetValue(t) ;
     }
 
     virtual void update() override {
-        std::cout << "Update" << std::endl ;
+        //std::cout << "Update" << std::endl ;
         Data<T>::update() ;
     }
 
     virtual bool read(const std::string &s) override {
-        std::cout << "READ..." <<  this->getName() << "->" << s << std::endl ;
+        //std::cout << "READ..." <<  this->getName() << "->" << s << std::endl ;
         return Data<T>::read(s) ;
     }
 };
@@ -198,7 +198,6 @@ void Template::checkAndDoUpdates()
 
 void Template::addDataToTrack(BaseData* d)
 {
-    std::cout << "ADD DATA TO TRACK" << std::endl ;
     m_dataTracker.trackData(*d) ;
     m_trackedDatas.push_back(d);
 }

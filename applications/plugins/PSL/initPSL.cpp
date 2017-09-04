@@ -22,6 +22,7 @@
 #include <PSL/config.h>
 
 #include <PSL/components/PSLVersion.h>
+#include <PSL/components/Import.h>
 #include <PSL/components/Undefined.h>
 #include <PSL/components/TestResult.h>
 #include <PSL/components/Template.h>
@@ -93,6 +94,8 @@ const char* getModuleComponentList()
 }
 
 SOFA_LINK_CLASS(Undefined)
+SOFA_LINK_CLASS(Import)
+SOFA_LINK_CLASS(Python)
 SOFA_LINK_CLASS(TestResult)
 SOFA_LINK_CLASS(PSLVersion)
 

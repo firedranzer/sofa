@@ -1,6 +1,10 @@
 import Sofa
 import pprint
+import pslengine
 PSLExport = []
+
+def whatis(string, n=10):
+    return pslengine.whatis(string,n)
 
 def Node(parent, **kwargs):
     """Create a node and attach it to the provided graph"""

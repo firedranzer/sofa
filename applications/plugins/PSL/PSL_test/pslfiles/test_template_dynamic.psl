@@ -10,11 +10,12 @@ Node : {
     Template : {
         name : "MyTemplate"
         properties : {
-            name : "no-name"
+            tname : "no-name"
             numchild : 3
+			color : "1.0 0.0 0.0 0.0"
         }
         Node : {
-            name : p"name"
+            name : p"tname"
             Python : '''
                      from psl.dsl import *
                      for i in range(0, numchild):
@@ -26,11 +27,12 @@ Node : {
     }
 
     MyTemplate : {
-        name : "objet1"
+        tname : "objet1"
         numchild : 2
+		color : "1.0 0.0 0.0 0.0"
     }
     MyTemplate : {
-        name : "objet1"
+        tname : "objet2"
         numchild : 4
     }
 
