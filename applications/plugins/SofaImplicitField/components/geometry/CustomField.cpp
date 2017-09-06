@@ -27,6 +27,14 @@
 #include <sofa/core/ObjectFactory.h>
 using sofa::core::RegisterObject ;
 
+#include <sofa/helper/system/FileMonitor.h>
+using sofa::helper::system::FileMonitor ;
+
+#include <sofa/core/objectmodel/IdleEvent.h>
+using sofa::core::objectmodel::IdleEvent ;
+
+#include <cmath>
+using std::max;
 using sofa::core::objectmodel::ComponentState ;
 
 #include "CustomField.h"
@@ -44,14 +52,40 @@ namespace _customfield_
 
 using sofa::simulation::PythonEnvironment ;
 
+
+class MyFileListener : public sofa::helper::system::FileEventListener
+{
+        CustomField* m_cf ;
+public:
+        MyFileListener(CustomField* cf)
+        {
+            m_cf = cf ;
+        }
+
+        void fileHasChanged(const std::string& sourcefile) override
+        {
+            m_cf->reinit() ;
+        }
+};
+
+void CustomField::handleEvent(sofa::core::objectmodel::Event *event)
+{
+    if (dynamic_cast<sofa::core::objectmodel::IdleEvent *>(event))
+        FileMonitor::updates() ;
+    else
+        BaseObject::handleEvent(event);
+}
+
 CustomField::CustomField() :
     d_function (initData(&d_function, (std::string)"", "function", "Use a python function to implement the implicit field.")),
-    d_gradient (initData(&d_gradient, (std::string)"", "gradient", "Use a python function to implement the gradient field. If not provided returns gradient using finite difference."))
+    d_gradient (initData(&d_gradient, (std::string)"", "gradient", "Use a python function to implement the gradient field. If not provided returns gradient using finite difference.")),
+    d_state (initData(&d_state, 0, "state", "This is a number indicating change in this component."))
 {
+    m_sourcefile = new MyFileListener(this) ;
 }
 
 
-PyObject* CustomField::getPythonFunction(const std::string& attribname, const std::string& attribvalue) const
+PyObject* CustomField::getPythonFunction(const std::string& attribname, const std::string& attribvalue, PyObject*& module) const
 {
     /// Parsing.
     if(attribvalue.empty())
@@ -77,14 +111,18 @@ PyObject* CustomField::getPythonFunction(const std::string& attribname, const st
         return nullptr ;
     }
 
-    PyObject* pMod = PyImport_ImportModule(modulename.c_str()) ;
-    if(pMod==nullptr)
+    if(module==nullptr)
+        module = PyImport_ImportModule(modulename.c_str()) ;
+    else
+        module = PyImport_ReloadModule(module) ;
+
+    if(module==nullptr)
     {
         PyErr_Print();
         return nullptr;
     }
 
-    PyObject* pDict = PyModule_GetDict(pMod);
+    PyObject* pDict = PyModule_GetDict(module);
     if(pDict==nullptr)
     {
         PyErr_Print();
@@ -103,12 +141,16 @@ PyObject* CustomField::getPythonFunction(const std::string& attribname, const st
         msg_error() << "The object '"<< functionname <<"' is not callable '"<< modulename <<"'" ;
         return nullptr;
     }
+
+    modulename += ".py" ;
+    if( FileMonitor::addFile(modulename, m_sourcefile) < 0 )
+        msg_error() << "Unable to register file: " << modulename ;
     return fct ;
 }
 
 void CustomField::init()
 {
-    m_evalFunction = getPythonFunction("function", d_function.getValue()) ;
+    m_evalFunction = getPythonFunction("function", d_function.getValue(), m_functionModule) ;
     if(m_evalFunction==nullptr)
     {
         msg_error() << "Unable to find a required callable object from attribute 'function=\""<< d_function.getValue() <<"\"'" ;
@@ -116,13 +158,14 @@ void CustomField::init()
         return ;
     }
 
-    m_gradFunction = getPythonFunction("gradient", d_gradient.getValue()) ;
+    m_gradFunction = getPythonFunction("gradient", d_gradient.getValue(), m_gradientModule) ;
     if(m_gradFunction==nullptr)
     {
         msg_info() << "No gradient function found from attribute 'gradient=\"" << d_gradient.getValue() <<"\"'. Falling back to finite difference implementation" ;
     }
 
     m_componentstate = ComponentState::Valid ;
+    d_state.setValue(d_state.getValue()+1);
 }
 
 
@@ -134,6 +177,32 @@ void CustomField::reinit()
 
 double CustomField::getValue(Vec3d& pos, int& domain)
 {
+    double ssa0 = 1.0;
+    double ssa1 = 0.5;
+    double ssa2 = pos.x();
+    double ssa3 = ssa1 - ssa2;
+    double ssa7 = ssa3 * ssa3;
+    double ssa9 = pos.y();
+    double ssa10 = ssa1 - ssa9;
+    double ssa14 = ssa10 * ssa10;
+    double ssa15 = ssa7 + ssa14;
+    double ssa17 = pos.z();
+    double ssa18 = ssa1 - ssa17;
+    double ssa22 = ssa18 * ssa18;
+    double ssa23 = ssa15 + ssa22;
+    double ssa24 = sqrt(ssa23);
+    double ssa26 = ssa24 - ssa1;
+    double ssa27 = ssa0 - ssa26;
+    double ssa28 = 0.1;
+    double ssa30 = ssa28 - ssa2;
+    double ssa34 = ssa30 * ssa30;
+    double ssa42 = ssa34 + ssa14;
+    double ssa50 = ssa42 + ssa22;
+    double ssa51 = sqrt(ssa50);
+    double ssa53 = ssa51 - ssa1;
+    double ssa54 = max(-ssa26, ssa53);
+    return ssa54;
+
     SOFA_UNUSED(domain);
     assert(m_evalFunction!=nullptr) ;
 
@@ -152,8 +221,9 @@ double CustomField::getValue(Vec3d& pos, int& domain)
         msg_error() << "The evalFunction does not returns a Floating point value.";
         return std::nan("") ;
     }
-
-    return PyFloat_AsDouble(res) ;
+    double tmp = PyFloat_AsDouble(res) ;
+    Py_DecRef(res) ;
+    return tmp;
 }
 
 Vec3d CustomField::getGradient(Vec3d& pos, int& domain)
@@ -200,6 +270,9 @@ Vec3d CustomField::getGradient(Vec3d& pos, int& domain)
     tmp.set(PyFloat_AsDouble(PyList_GetItem(res,0)),
             PyFloat_AsDouble(PyList_GetItem(res,1)),
             PyFloat_AsDouble(PyList_GetItem(res,2))) ;
+
+    Py_DecRef(res) ;
+
     return tmp ;
 }
 

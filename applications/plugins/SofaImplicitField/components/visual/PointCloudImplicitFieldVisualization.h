@@ -24,6 +24,7 @@
 #include <SofaImplicitField/config.h>
 
 #include <sofa/core/objectmodel/BaseObject.h>
+#include <sofa/core/DataEngine.h>
 #include <sofa/core/objectmodel/Link.h>
 #include <SofaImplicitField/components/geometry/ScalarField.h>
 
@@ -41,6 +42,9 @@ namespace _pointcloudimplicitfieldvisualization_
 
 using  sofa::component::geometry::ScalarField;
 using sofa::core::objectmodel::BaseObject ;
+using sofa::core::DataEngine ;
+using sofa::core::DataTracker ;
+
 using sofa::defaulttype::Vec3d ;
 
 ////////////////// ///////////////
@@ -59,10 +63,18 @@ protected:
     virtual void init() override ;
     virtual void reinit() override ;
     virtual void draw(const core::visual::VisualParams*) override ;
-
 private:
     PointCloudImplicitFieldVisualization(const PointCloudImplicitFieldVisualization& n) ;
     PointCloudImplicitFieldVisualization& operator=(const PointCloudImplicitFieldVisualization& n) ;
+
+    std::vector<Vec3d> m_points ;
+    std::vector<double> m_field ;
+    std::vector<Vec3d> m_colors ;
+    std::vector<Vec3d> m_normals ;
+
+
+    DataTracker m_datatracker ;
+
 };
 
 

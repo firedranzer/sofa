@@ -27,6 +27,16 @@
 
 #include <SofaPython/PythonEnvironment.h>
 
+///////////////////////////// FORWARD DEFINITIONS //////////////////////////////////////////////////
+namespace sofa {
+namespace helper {
+namespace system {
+    class FileEventListener ;
+}
+}
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace sofa
 {
@@ -43,7 +53,7 @@ namespace _customfield_
 using sofa::component::geometry::ScalarField ;
 using sofa::defaulttype::Vec3d ;
 using sofa::core::objectmodel::Data ;
-
+using sofa::helper::system::FileEventListener ;
 
 //////////////////////////// CLASS DEFINITION //////////////////////////////////////////////////////
 class SOFA_SOFAIMPLICITFIELD_API CustomField : public ScalarField
@@ -54,6 +64,7 @@ public:
 public:
     virtual void init() override ;
     virtual void reinit() override ;
+    virtual void handleEvent(sofa::core::objectmodel::Event *event) override ;
 
     using ScalarField::getValue ;
     using ScalarField::getGradient ;
@@ -74,8 +85,15 @@ private:
     CustomField& operator=(const CustomField& n) ;
 
     PyObject* getPythonFunction(const std::string& attribname,
-                                const std::string& attribvalue) const ;
+                                const std::string& attribvalue,
+                                PyObject*& module) const ;
 
+    PyObject* m_functionModule {nullptr} ;
+    PyObject* m_gradientModule {nullptr} ;
+
+    FileEventListener* m_sourcefile ;
+
+    Data<int> d_state ;
 };
 
 } /// namespace _scalarfield_
