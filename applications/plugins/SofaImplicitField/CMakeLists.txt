@@ -53,6 +53,11 @@ endif()
 set(EXTRA_FILES
     README.md
     examples/README.md
+    examples/CustomField.scn
+    examples/customfield.py
+    examples/cython/CustomField.scn
+    examples/cython/customfield.py
+    examples/cython/cythonfield.pyx
     )
 
 add_subdirectory(SofaImplicitField_test)
