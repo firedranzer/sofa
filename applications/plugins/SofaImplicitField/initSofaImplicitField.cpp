@@ -54,7 +54,8 @@ void initExternalModule()
         first = false;
     }
 
-    PluginManager::getInstance().loadPlugin("SofaPython") ;
+    if(DO_SOFAPYTHON_FEATURES)
+        PluginManager::getInstance().loadPlugin("SofaPython") ;
 }
 
 const char* getModuleName()
@@ -77,7 +78,7 @@ const char* getModuleDescription()
 {
     return "ImplicitField describe shapes of objects using implicit equation.  \n"
            "In general of function of a n-dimentional space f(X) returns a scalar value  \n"
-           "The shape is then defined as f(x) = aConstant.";
+           "The surface is then defined as f(x) = aConstant.";
 }
 
 const char* getModuleComponentList()
@@ -85,7 +86,6 @@ const char* getModuleComponentList()
     return "SphereSurface ImplicitSurfaceMapping InterpolatedImplicitSurface "
            "SphericalField DiscreteGridField CustomField PointCloudImplicitFieldVisualization";
 }
-
 
 SOFA_LINK_CLASS(CustomField)
 SOFA_LINK_CLASS(SphericalField)
