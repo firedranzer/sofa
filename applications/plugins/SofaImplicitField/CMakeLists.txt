@@ -20,7 +20,6 @@ set(HEADER_FILES
     components/geometry/ScalarField.h
     components/mapping/ImplicitSurfaceMapping.h
     components/mapping/ImplicitSurfaceMapping.inl
-    components/visual/PointCloudImplicitFieldVisualization.h
 )
 
 set(SOURCE_FILES
@@ -34,21 +33,7 @@ set(SOURCE_FILES
     components/geometry/DiscreteGridField.cpp
     components/geometry/SphericalField.cpp
     components/mapping/ImplicitSurfaceMapping.cpp
-    components/visual/PointCloudImplicitFieldVisualization.cpp
 )
-
-find_package(SofaPython QUIET)
-if(SofaPython_FOUND)
-    list(APPEND HEADER_FILES
-        components/geometry/CustomField.h)
-
-    list(APPEND SOURCE_FILES
-        components/geometry/CustomField.cpp)
-
-    add_definitions("-DSOFA_HAVE_SOFAPYTHON")
-else()
-    message(STATUS "SofaImplicitField: could not find SofaPython, won't build the component(s): <CustomField>.")
-endif()
 
 set(EXTRA_FILES
     README.md
@@ -62,17 +47,8 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${EXTRA_FILES
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
 target_link_libraries(${PROJECT_NAME} PUBLIC SofaDistanceGrid)
 
-if(SofaPython_FOUND)
-    target_link_libraries(${PROJECT_NAME} PUBLIC SofaPython)
-endif()
-
-# Config files and install rules for pythons scripts
-sofa_set_python_directory(${PROJECT_NAME} "python")
-
-
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>")
 target_include_directories(${PROJECT_NAME} PUBLIC "$<INSTALL_INTERFACE:include>")
-
 
 ## Install rules for the library and headers; CMake package configurations files
 sofa_create_package(SofaImplicitField ${SOFAIMPLICITFIELD_VERSION} ${PROJECT_NAME} SofaImplicitField)

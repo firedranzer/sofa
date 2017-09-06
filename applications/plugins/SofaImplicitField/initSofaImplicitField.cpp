@@ -20,18 +20,20 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 #include <SofaImplicitField/config.h>
+
 #include "initSofaImplicitField.h"
 #include "components/geometry/ScalarField.h"
 #include "components/geometry/SphericalField.h"
 #include "components/geometry/DiscreteGridField.h"
-#include "components/geometry/CustomField.h"
-#include "components/visual/PointCloudImplicitFieldVisualization.h"
 
-#ifdef SOFA_HAVE_SOFAPYTHON
 #include <sofa/helper/system/PluginManager.h>
 using sofa::helper::system::PluginManager ;
-#endif // SOFA_HAVE_SOFAPYTHON
 
+#ifdef SOFA_HAVE_SOFAPYTHON
+#define DO_SOFAPYTHON_FEATURES true
+#else
+#define DO_SOFAPYTHON_FEATURES false
+#endif
 namespace sofa
 {
 
@@ -54,7 +56,8 @@ void initExternalModule()
         first = false;
     }
 
-    PluginManager::getInstance().loadPlugin("SofaPython") ;
+    if(DO_SOFAPYTHON_FEATURES)
+        PluginManager::getInstance().loadPlugin("SofaPython") ;
 }
 
 const char* getModuleName()
@@ -77,20 +80,17 @@ const char* getModuleDescription()
 {
     return "ImplicitField describe shapes of objects using implicit equation.  \n"
            "In general of function of a n-dimentional space f(X) returns a scalar value  \n"
-           "The shape is then defined as f(x) = aConstant.";
+           "The surface is then defined as f(x) = aConstant.";
 }
 
 const char* getModuleComponentList()
 {
     return "SphereSurface ImplicitSurfaceMapping InterpolatedImplicitSurface "
-           "SphericalField DiscreteGridField CustomField PointCloudImplicitFieldVisualization";
+           "SphericalField DiscreteGridField";
 }
 
-
-SOFA_LINK_CLASS(CustomField)
 SOFA_LINK_CLASS(SphericalField)
 SOFA_LINK_CLASS(DiscreteGridField)
-SOFA_LINK_CLASS(PointCloudImplicitFieldVisualization)
 
 
 } /// component

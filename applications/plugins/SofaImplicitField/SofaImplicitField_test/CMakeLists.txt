@@ -4,7 +4,6 @@ project(SofaImplicitField_test)
 
 set(SOURCE_FILES
     ImplicitShape_test.cpp
-    CustomField_test.cpp
 )
 
 
