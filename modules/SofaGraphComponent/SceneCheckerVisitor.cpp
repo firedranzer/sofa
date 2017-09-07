@@ -58,7 +58,6 @@ SceneCheckerVisitor::~SceneCheckerVisitor()
 {
 }
 
-#include <algorithm>
 void SceneCheckerVisitor::addCheck(SceneCheck* check)
 {
     if( std::find(m_checkset.begin(), m_checkset.end(), check) == m_checkset.end() )
