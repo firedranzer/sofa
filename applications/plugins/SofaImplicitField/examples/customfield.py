@@ -1,5 +1,5 @@
-import pyximport; pyximport.install()
-import cythonfield
+#import pyximport; pyximport.install()
+#import cythonfield
 
 import math
 
@@ -25,7 +25,7 @@ class Difference(object):
 		rightv = self.right.eval(x,y,z)
 		return max(leftv, -rightv) 		
 
-def evalPythonField(x,y,z):
+def evalField(x,y,z):
 	f=Difference( Sphere([0.5, 0.5, 0.5], 0.2),
 				  Sphere([0.3, 0.5, 0.5], 0.2) ) 
 	f=Sphere([0.5,0.5,0.5], 0.3)

@@ -150,6 +150,8 @@ PyObject* CustomField::getPythonFunction(const std::string& attribname, const st
 
 void CustomField::init()
 {
+    PythonEnvironment::gil lock(__func__) ;
+
     m_evalFunction = getPythonFunction("function", d_function.getValue(), m_functionModule) ;
     if(m_evalFunction==nullptr)
     {
@@ -177,31 +179,7 @@ void CustomField::reinit()
 
 double CustomField::getValue(Vec3d& pos, int& domain)
 {
-    double ssa0 = 1.0;
-    double ssa1 = 0.5;
-    double ssa2 = pos.x();
-    double ssa3 = ssa1 - ssa2;
-    double ssa7 = ssa3 * ssa3;
-    double ssa9 = pos.y();
-    double ssa10 = ssa1 - ssa9;
-    double ssa14 = ssa10 * ssa10;
-    double ssa15 = ssa7 + ssa14;
-    double ssa17 = pos.z();
-    double ssa18 = ssa1 - ssa17;
-    double ssa22 = ssa18 * ssa18;
-    double ssa23 = ssa15 + ssa22;
-    double ssa24 = sqrt(ssa23);
-    double ssa26 = ssa24 - ssa1;
-    double ssa27 = ssa0 - ssa26;
-    double ssa28 = 0.1;
-    double ssa30 = ssa28 - ssa2;
-    double ssa34 = ssa30 * ssa30;
-    double ssa42 = ssa34 + ssa14;
-    double ssa50 = ssa42 + ssa22;
-    double ssa51 = sqrt(ssa50);
-    double ssa53 = ssa51 - ssa1;
-    double ssa54 = max(-ssa26, ssa53);
-    return ssa54;
+    PythonEnvironment::gil lock(__func__) ;
 
     SOFA_UNUSED(domain);
     assert(m_evalFunction!=nullptr) ;
@@ -229,7 +207,7 @@ double CustomField::getValue(Vec3d& pos, int& domain)
 Vec3d CustomField::getGradient(Vec3d& pos, int& domain)
 {
     SOFA_UNUSED(domain);
-
+    PythonEnvironment::gil lock(__func__) ;
     Vec3d tmp(std::nan(""),std::nan(""),std::nan("")) ;
 
     /// The component is not valid. We return nan.
