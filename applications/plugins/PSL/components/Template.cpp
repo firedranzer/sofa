@@ -129,6 +129,8 @@ void Template::handleEvent(Event *event)
 
 void Template::checkAndDoUpdates()
 {
+    PythonEnvironment::gil lock();
+
     std::map<Base*, Base*> updateList ;
     for(BaseData* data : m_trackedDatas)
     {
@@ -216,6 +218,8 @@ int TemplateClass = core::RegisterObject("An object template encoded as parsed h
 
 static PyObject * Template_setTemplate(PyObject *self, PyObject * args)
 {
+    PythonEnvironment::gil lock();
+
     Template* obj= dynamic_cast<Template*>(((PySPtr<Base>*)self)->object.get()) ;
     if(obj->m_rawTemplate)
         Py_DECREF(obj->m_rawTemplate);
@@ -238,6 +242,8 @@ static PyObject * Template_setTemplate(PyObject *self, PyObject * args)
 
 static PyObject * Template_getTemplate(PyObject *self, PyObject * args)
 {
+    PythonEnvironment::gil lock();
+
     Template* obj= dynamic_cast<Template*>(((PySPtr<Base>*)self)->object.get()) ;
     if(obj->m_rawTemplate){
         Py_INCREF(obj->m_rawTemplate);
@@ -248,6 +254,7 @@ static PyObject * Template_getTemplate(PyObject *self, PyObject * args)
 
 static PyObject * Template_trackData(PyObject *self, PyObject * args)
 {
+    PythonEnvironment::gil lock();
 
     Template* obj = dynamic_cast<Template*>(((PySPtr<Base>*)self)->object.get()) ;
     PyObject* o  {nullptr} ;
@@ -344,6 +351,8 @@ static std::ostream& pythonToSofaDataString(PyObject* value, std::ostream& out)
 
 
 static PyObject * Template_createATrackedData(PyObject *self, PyObject *args ) {
+    PythonEnvironment::gil lock();
+
     Base* obj = get_base(self);
     char* dataName;
     char* dataClass;

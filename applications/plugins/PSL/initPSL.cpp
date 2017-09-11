@@ -53,6 +53,7 @@ extern "C" {
 
 void initExternalModule()
 {
+
     static bool first = true;
     if (first)
     {
@@ -60,6 +61,8 @@ void initExternalModule()
         PluginManager::getInstance().loadPlugin("SofaPython") ;
         first = false;
     }
+
+    PythonEnvironment::gil lock();
 
     // Add the python classes in the Python Factory
     SP_ADD_CLASS_IN_FACTORY(Template,sofa::component::Template)

@@ -72,6 +72,8 @@ void SceneLoaderPSL::getExtensionList(ExtensionList* list)
 
 void SceneLoaderPSL::write(sofa::simulation::Node* n, const char *filename)
 {
+    PythonEnvironment::gil lock(__func__);
+
     std::stringstream s;
     s << "from pslloader import save as pslsave" ;
 
@@ -100,6 +102,8 @@ void SceneLoaderPSL::write(sofa::simulation::Node* n, const char *filename)
 
 sofa::simulation::Node::SPtr SceneLoaderPSL::load(const char *filename)
 {
+    PythonEnvironment::gil lock(__func__);
+
     std::stringstream s ;
     s << "from pslloader import load as pslload" ;
 
