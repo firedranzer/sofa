@@ -45,9 +45,10 @@ if(SofaPython_FOUND)
     list(APPEND SOURCE_FILES
         components/geometry/CustomField.cpp)
 
-    add_definitions("-DSOFA_HAVE_SOFAPYTHON")
+    add_definitions("-DDO_SOFAPYTHON_FEATURES=1")
 else()
     message(STATUS "SofaImplicitField: could not find SofaPython, won't build the component(s): <CustomField>.")
+    add_definitions("-DDO_SOFAPYTHON_FEATURES=0")
 endif()
 
 set(EXTRA_FILES

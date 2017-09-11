@@ -24,13 +24,15 @@
 #include "components/geometry/ScalarField.h"
 #include "components/geometry/SphericalField.h"
 #include "components/geometry/DiscreteGridField.h"
-#include "components/geometry/CustomField.h"
 #include "components/visual/PointCloudImplicitFieldVisualization.h"
 
-#ifdef SOFA_HAVE_SOFAPYTHON
+#if DO_SOFAPYTHON_FEATURES == 1
+#include "components/geometry/CustomField.h"
+#endif // SOFA_HAVE_SOFAPYTHON
+
 #include <sofa/helper/system/PluginManager.h>
 using sofa::helper::system::PluginManager ;
-#endif // SOFA_HAVE_SOFAPYTHON
+
 
 namespace sofa
 {
@@ -87,7 +89,9 @@ const char* getModuleComponentList()
            "SphericalField DiscreteGridField CustomField PointCloudImplicitFieldVisualization";
 }
 
+#if DO_SOFAPYTHON_FEATURES == 1
 SOFA_LINK_CLASS(CustomField)
+#endif
 SOFA_LINK_CLASS(SphericalField)
 SOFA_LINK_CLASS(DiscreteGridField)
 SOFA_LINK_CLASS(PointCloudImplicitFieldVisualization)
