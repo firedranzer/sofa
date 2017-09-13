@@ -12,25 +12,24 @@ set(HEADER_FILES
     MeshGenerationFromPolyhedron.inl
     TriangularConvexHull3D.h
     TriangularConvexHull3D.inl
-    MeshGenerationFromImplicit.h
 )
 
 set(SOURCE_FILES
     DecimateMesh.cpp
     MeshGenerationFromPolyhedron.cpp
     TriangularConvexHull3D.cpp
-    MeshGenerationFromImplicit.cpp
     initCGALPlugin.cpp
 )
 
 set(README_FILES CGALPlugin.txt)
 
 
-### Dependencies
-
-
 find_package(SofaFramework REQUIRED)
 find_package(CGAL REQUIRED)
+
+################################### DEPENDENCY TO image ############################################
+## The following lines adds additional source file and header if the SofaImplicitFIeld is activated
+## There is also the added linking option...see further in the source .
 find_package(image QUIET)
 if(image_FOUND)
     list(APPEND HEADER_FILES MeshGenerationFromImage.h)
@@ -39,6 +38,28 @@ if(image_FOUND)
 else()
     message(STATUS "CGALPlugin: could not find image, won't build MeshGenerationFromImage")
 endif()
+
+
+
+####################### DEPENDENCY TO SOFAIMPLICITFIELD ############################################
+## The following lines adds additional source file and header if the SofaImplicitFIeld is activated
+## There is also the added linking option...see further in the source .
+find_package(SofaImplicitField QUIET)
+if(SofaImplicitField_FOUND)
+    list(APPEND HEADER_FILES
+        components/engine/MeshGenerationFromImplicit.h)
+
+    list(APPEND SOURCE_FILES
+        components/engine/MeshGenerationFromImplicit.cpp)
+
+    add_definitions("-DDO_SOFAIMPLICITFIELD_FEATURES=1")
+else()
+    message(STATUS "CGALPlugin: could not find SofaImplicitField, won't build the component(s): <MeshGenerationFromImplicit>.")
+    add_definitions("-DDO_SOFAIMPLICITFIELD_FEATURES=0")
+endif()
+
+
+
 ## CGAL dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 find_package(MPFR REQUIRED)
@@ -88,10 +109,20 @@ set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "_d")
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${CGALPLUGIN_VERSION})
 set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-DSOFA_BUILD_CGALPLUGIN")
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
-target_link_libraries(${PROJECT_NAME} SofaCore SofaSimulationCommon SofaVolumetricData ${Boost_LIBRARIES} ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CGAL_LIBRARY})
+target_link_libraries(${PROJECT_NAME} SofaCore SofaSimulationCommon ${Boost_LIBRARIES} ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CGAL_LIBRARY})
+
+
+####################### ADD DEPENDENCY TO IMAGE ####################################################
 if(image_FOUND)
     target_link_libraries(${PROJECT_NAME} ${CGAL_ImageIO_LIBRARY} image)
 endif()
+
+
+################### ADD DEPENDENCY TO SOFAIMPLICITFIELD ############################################
+if(SofaImplicitField_FOUND)
+    target_link_libraries(${PROJECT_NAME} SofaImplicitField)
+endif()
+
 
 if(SOFA_BUILD_TESTS)
    find_package(SofaTest QUIET)

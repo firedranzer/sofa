@@ -1,11 +1,59 @@
+/******************************************************************************
+*       SOFA, Simulation Open-Framework Architecture, development version     *
+*                (c) 2006-2017 INRIA, USTL, UJF, CNRS, MGH                    *
+*                                                                             *
+* This program is free software; you can redistribute it and/or modify it     *
+* under the terms of the GNU Lesser General Public License as published by    *
+* the Free Software Foundation; either version 2.1 of the License, or (at     *
+* your option) any later version.                                             *
+*                                                                             *
+* This program is distributed in the hope that it will be useful, but WITHOUT *
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       *
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License *
+* for more details.                                                           *
+*                                                                             *
+* You should have received a copy of the GNU Lesser General Public License    *
+* along with this program. If not, see <http://www.gnu.org/licenses/>.        *
+*******************************************************************************
+* Authors: The SOFA Team and external contributors (see Authors.txt)          *
+*                                                                             *
+* Contact information: contact@sofa-framework.org                             *
+******************************************************************************/
+
+#include <fstream>
+#include <sofa/core/ObjectFactory.h>
+
+/// Misc
+#include <sofa/core/visual/VisualParams.h>
+#include <sofa/core/objectmodel/Link.h>
+
+/// Mesh Volume
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Mesh_triangulation_3.h>
+#include <CGAL/Mesh_complex_3_in_triangulation_3.h>
+#include <CGAL/Mesh_criteria_3.h>
+#include <CGAL/Implicit_to_labeling_function_wrapper.h>
+#include <CGAL/Labeled_mesh_domain_3.h>
+#include <CGAL/make_mesh_3.h>
+#include <CGAL/Bbox_3.h>
+
 #include "MeshGenerationFromImplicit.h"
 
-namespace cgal {
+
+namespace sofa
+{
+namespace component
+{
+namespace engine
+{
+namespace _meshgenerationfromimplicit_
+{
 
 using namespace CGAL::parameters;
 using namespace sofa::core;
 using namespace sofa::core::visual;
 using namespace sofa::core::objectmodel;
+using sofa::defaulttype::Vec3d ;
 
 // Domain
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
@@ -13,17 +61,17 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 class ImplicitFunction : public std::unary_function<K::Point_3, K::FT> {
 
 private:
-    ImplicitShape* m_shape;
+    ScalarField* m_shape;
 
 public:
     typedef result_type return_type;
     typedef K::Point_3 Point;
-    ImplicitFunction(ImplicitShape* shape) {m_shape=shape;}
-    K::FT operator()(Point p) const {
-        Coord p2(p.x(),p.y(),p.z());
-        return (m_shape->eval(p2));
+    ImplicitFunction(ScalarField* shape) {m_shape=shape;}
+    K::FT operator()(Point p) const
+    {
+        Vec3d tmp(p.x(),p.y(),p.z());
+        return m_shape->getValue(tmp);
     }
-
 };
 
 typedef CGAL::Implicit_multi_domain_to_labeling_function_wrapper<ImplicitFunction> Function_wrapper;
@@ -53,6 +101,43 @@ CGAL::Bbox_3 MeshGenerationFromImplicitShape::BoundingBox(double x_min, double y
 
 }
 
+MeshGenerationFromImplicitShape::MeshGenerationFromImplicitShape()
+    : in_facetsize(initData(&in_facetsize,"facet_size","size of facet"))
+    , in_approximation(initData(&in_approximation,"approximation","approximation"))
+    , in_cellsize(initData(&in_cellsize,"cell_size","size of cell"))
+    , xmin_box(initData(&xmin_box,0.0,"xmin_box","xmin of bbox"))
+    , ymin_box(initData(&ymin_box,0.0,"ymin_box","ymin of bbox"))
+    , zmin_box(initData(&zmin_box,-5.0,"zmin_box","zmin of bbox"))
+    , xmax_box(initData(&xmax_box,27.0,"xmax_box","xmax of bbox"))
+    , ymax_box(initData(&ymax_box,27.0,"ymax_box","ymax of bbox"))
+    , zmax_box(initData(&zmax_box,5.0,"zmax_box","zmax of bbox"))
+    , drawTetras(initData(&drawTetras,false,"drawTetras","display generated tetra mesh"))
+    , out_Points(initData(&out_Points, "outputPoints", "position coordinates from the tetrahedral generation"))
+    , out_tetrahedra(initData(&out_tetrahedra, "outputTetras", "list of tetrahedra"))
+    , in_scalarfield(initLink("scalarfield", "The scalar field that defined the iso-function"))
+{
+}
+
+void MeshGenerationFromImplicitShape::init() {
+
+    if(in_scalarfield.empty() == false)
+    {
+        if(in_scalarfield->isComponentStateValid() == false) {
+            m_componentstate = ComponentState::Invalid;
+            msg_error() << "Previous component invalid";
+        }
+        volumeMeshGeneration(in_facetsize.getValue(),in_approximation.getValue(),in_cellsize.getValue());
+    }
+    else
+    {
+        m_componentstate = ComponentState::Invalid;
+        msg_error() << "Component non linked";
+    }
+
+}
+
+
+
 
 //mesh the implicit domain and export it to vtu file
 int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size, float approximation, float cell_size) {
@@ -62,20 +147,13 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size, floa
 
     //Domain
     Mesh_domain *domain = NULL;
-    if(in_function.empty() == false) {
-        ImplicitFunction function(in_function);
-        Function_vector v;
-        v.push_back(function);
-        domain = new Mesh_domain(v, K::Sphere_3(CGAL::ORIGIN, 5. *5.), 1e-3);
-    }
-    else if(in_grid.empty() == false) {
-        ImplicitFunction function(in_grid);
-        Function_vector v;
-        v.push_back(function);
-        CGAL::Bbox_3 bbox = BoundingBox(xmin_box.getValue(),ymin_box.getValue(),zmin_box.getValue(),xmax_box.getValue(),ymax_box.getValue(),zmax_box.getValue());
-        domain = new Mesh_domain(v, bbox, 1e-3);
-    }
-    else return 0;
+    if(in_scalarfield.empty())
+        return ;
+
+    ImplicitFunction function(in_scalarfield);
+    Function_vector v;
+    v.push_back(function);
+    domain = new Mesh_domain(v, K::Sphere_3(CGAL::ORIGIN, 5. *5.), 1e-3);
 
     //Criteria
     Facet_criteria facet_criteria(30, facet_size, approximation); // angle, size, approximation
@@ -132,7 +210,6 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size, floa
     }
 
     return 0;
-
 }
 
 
@@ -185,31 +262,10 @@ void MeshGenerationFromImplicitShape::draw(const sofa::core::visual::VisualParam
 }
 
 
-void MeshGenerationFromImplicitShape::init() {
+SOFA_DECL_CLASS(MeshGenerationFromImplicitShape)
+SOFA_LINK_CLASS(MeshGenerationFromImplicitShape)
 
-    if(in_grid.empty() == false) {
-        if(in_grid->isComponentStateValid() == false) {
-            m_componentstate = ComponentState::Invalid;
-            msg_error() << "Previous component invalid";
-        }
-        volumeMeshGeneration(in_facetsize.getValue(),in_approximation.getValue(),in_cellsize.getValue());
-    }
-    else if(in_function.empty() == false) {
-        if(in_function->isComponentStateValid() == false) {
-            m_componentstate = ComponentState::Invalid;
-            msg_error() << "Previous component invalid";
-        }
-        volumeMeshGeneration(in_facetsize.getValue(),in_approximation.getValue(),in_cellsize.getValue());
-    }
-    else {
-        m_componentstate = ComponentState::Invalid;
-        msg_error() << "Component non linked";
-    }
-
-}
-
-
-SOFA_DECL_CLASS(MeshGenerationFromDG)
-SOFA_LINK_CLASS(MeshGenerationFromDG)
-
-} //namespace cgal
+} /// namespace _meshgenerationfromimplicit_
+} /// namespace engine
+} /// namespace component
+} /// namespace sofa
