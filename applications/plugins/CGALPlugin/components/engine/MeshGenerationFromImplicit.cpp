@@ -148,7 +148,7 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size, floa
     //Domain
     Mesh_domain *domain = NULL;
     if(in_scalarfield.empty())
-        return ;
+        return 0;
 
     ImplicitFunction function(in_scalarfield);
     Function_vector v;
