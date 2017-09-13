@@ -61,6 +61,17 @@ PointCloudImplicitFieldVisualization::PointCloudImplicitFieldVisualization() :
 {
 }
 
+PointCloudImplicitFieldVisualization::~PointCloudImplicitFieldVisualization()
+{
+    {
+        std::lock_guard<std::mutex> lk(m_cmdmutex);
+        m_cmd = CMD_STOP ;
+        m_cmdcond.notify_one();
+    }
+    std::cout << "Waiting job to terminated" << std::endl ;
+    m_asyncthread.join() ;
+}
+
 void PointCloudImplicitFieldVisualization::init()
 {
     if(l_field.getSize() == 0)
@@ -82,6 +93,7 @@ void PointCloudImplicitFieldVisualization::init()
     m_datatracker.trackData(*l_field.get()->findData("state"));
 
     /// WE RESET THE COMPUTATION.
+
     std::lock_guard<std::mutex> lk(m_cmdmutex);
     m_cmd = CMD_START ;
     m_cmdcond.notify_one();
@@ -97,7 +109,9 @@ void PointCloudImplicitFieldVisualization::reinit()
 
 void PointCloudImplicitFieldVisualization::updateBufferFromComputeKernel()
 {
-    if( m_datamutex.try_lock() ){
+    std::unique_lock<std::mutex> lock(m_datamutex, std::defer_lock) ;
+
+    if( lock.try_lock() ){
         double colorScale = m_maxv - m_minv ;
         for(unsigned int i=0;i<m_cpoints.size();i++)
         {
@@ -116,7 +130,6 @@ void PointCloudImplicitFieldVisualization::updateBufferFromComputeKernel()
         m_cfield.clear();
         m_minv = +1000;
         m_maxv = 0.0;
-        m_datamutex.unlock();
     }
 }
 
@@ -141,9 +154,13 @@ void PointCloudImplicitFieldVisualization::asyncCompute()
     {
         // Wait until main() sends data
         std::cout << "THREAD IS WAITING TO START" << std::endl ;
-        std::unique_lock<std::mutex> lk(m_cmdmutex);
-        m_cmdcond.wait(lk, [this]{return m_cmd == CMD_START;});
-        m_cmd = CMD_PROCESS ;
+        {
+            std::unique_lock<std::mutex> lk(m_cmdmutex);
+            m_cmdcond.wait(lk, [this]{return m_cmd == CMD_START || m_cmd == CMD_STOP;});
+            if(m_cmd==CMD_STOP)
+                return ;
+            m_cmd = CMD_PROCESS ;
+        }
         std::cout << "THREAD STARTED.." << std::endl ;
 
         uint32_t rndval = 1;
@@ -169,24 +186,23 @@ void PointCloudImplicitFieldVisualization::asyncCompute()
                 z=0;
                 for(unsigned int k=0;k<res;k++)
                 {
+                    if(m_cmd==CMD_STOP)
+                        return;
+                    if(m_cmd==CMD_START)
+                        goto endl;
+
                     z = minbox.z()+scalebox.z()*k;
                     Vec3d pos { x, y, z }  ;
 
                     double dd = l_field.get()->getValue(pos) ;
-                    //Vec3d grad = l_field.get()->getGradient(pos) ;
-                    //Vec3d npos = pos - grad ;
-                    //Vec3d outP, outG;
-                    //double dd2 = locateZero(+10000, pos, grad, npos, outP, outG, l_field.get() ) ;
                     double d = fabs(dd) ;
                     if( dd < 0.001 )
                     {
-                        m_datamutex.lock() ;
-                        if(m_cmd==CMD_START)
-                            goto endl;
+
+                        std::lock_guard<std::mutex> guard(m_datamutex) ;
                         m_cpoints.push_back(pos);
                         m_cfield.push_back(dd) ;
                         m_cnormals.push_back( l_field.get()->getGradient(pos).normalized() );
-                        m_datamutex.unlock() ;
                     }
 
                     if(m_minv > d)
@@ -222,6 +238,7 @@ void PointCloudImplicitFieldVisualization::draw(const core::visual::VisualParams
     }
 
 
+    updateBufferFromComputeKernel();
 
 #ifndef SOFA_NO_OPENGL
     auto& box = m_box.getValue();
@@ -244,7 +261,6 @@ void PointCloudImplicitFieldVisualization::draw(const core::visual::VisualParams
     glNormal3f(1.0,0.0,0.0);
 
 #endif //SOFA_NO_OPENGL
-    updateBufferFromComputeKernel();
 }
 
 

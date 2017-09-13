@@ -64,6 +64,7 @@ public:
 
         void fileHasChanged(const std::string& sourcefile) override
         {
+            SOFA_UNUSED(sourcefile) ;
             m_cf->reinit() ;
         }
 };

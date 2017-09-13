@@ -55,7 +55,7 @@ void SphericalField::reinit()
     init();
 }
 
-double SphericalField::getValue(Vec3d& Pos, int& domain)
+double SphericalField::getValue(defaulttype::Vec3d &Pos, int& domain)
 {
     SOFA_UNUSED(domain) ;
     double result = (Pos[0] - m_center[0])*(Pos[0] - m_center[0]) +

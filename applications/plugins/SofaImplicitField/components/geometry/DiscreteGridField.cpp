@@ -357,7 +357,7 @@ double DiscreteGridField::getValue( Vec3d &transformedPos, int &domain )
 }
 
 
-double DiscreteGridField::getValue( Vec3d &transformedPos )
+double DiscreteGridField::getValue(defaulttype::Vec3d &transformedPos )
 {
     static int domain=-1;
     return getValue( transformedPos, domain );

@@ -66,7 +66,7 @@ public:
 
 protected:
     PointCloudImplicitFieldVisualization( ) ;
-    virtual ~PointCloudImplicitFieldVisualization() { }
+    virtual ~PointCloudImplicitFieldVisualization() ;
 
     virtual void init() override ;
     virtual void reinit() override ;
@@ -98,7 +98,8 @@ private:
         CMD_IDLE,
         CMD_RESET,
         CMD_START,
-        CMD_PROCESS
+        CMD_PROCESS,
+        CMD_STOP,
     }  ;
     Cmd m_cmd {CMD_IDLE};
 
