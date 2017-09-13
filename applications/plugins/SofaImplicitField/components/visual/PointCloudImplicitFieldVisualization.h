@@ -59,6 +59,11 @@ public:
     SingleLink<PointCloudImplicitFieldVisualization, ScalarField,
                BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> l_field ;
 
+    Data<unsigned int> d_gridresolution ;
+
+    Data< sofa::defaulttype::BoundingBox > m_box;
+
+
 protected:
     PointCloudImplicitFieldVisualization( ) ;
     virtual ~PointCloudImplicitFieldVisualization() { }

@@ -54,10 +54,11 @@ int Class = RegisterObject("A cheap visualization of implicit field using colore
         .add< PointCloudImplicitFieldVisualization >() ;
 
 PointCloudImplicitFieldVisualization::PointCloudImplicitFieldVisualization() :
-    l_field(initLink("field", "The field to render.")),
-    m_asyncthread(&PointCloudImplicitFieldVisualization::asyncCompute, this)
+     l_field(initLink("field", "The field to render."))
+    ,d_gridresolution(initData(&d_gridresolution, (unsigned int)128, "resolution", "The amount of samples per axis"))
+    ,m_asyncthread(&PointCloudImplicitFieldVisualization::asyncCompute, this)
+    ,m_box(initData(&m_box, sofa::defaulttype::BoundingBox(0,1,0,1,0,1), "box", "min - max coordinate of the grid where to sample the function. "))
 {
-
 }
 
 void PointCloudImplicitFieldVisualization::init()
@@ -119,27 +120,6 @@ void PointCloudImplicitFieldVisualization::updateBufferFromComputeKernel()
     }
 }
 
-/// https://en.wikipedia.org/wiki/Linear-feedback_shift_register
-/// Taken from the wolfenstein source code :)
-bool fizzlefade(void)
-{
-    uint32_t rndval = 1;
-    uint16_t x,y;
-    do
-    {
-        y =  rndval & 0x000FF;        /* Y = low 8 bits */
-        x = (rndval & 0x1FF00) >> 8;  /* X = High 9 bits */
-        unsigned lsb = rndval & 1;    /* Get the output bit. */
-        rndval >>= 1;                 /* Shift register */
-        if (lsb) {                    /* If the output is 0, the xor can be skipped. */
-            rndval ^= 0x00012000;
-        }
-        //if (x < 320 && y < 200)
-        //fizzle_pixel(x , y) ;
-    } while (rndval != 1);
-
-    return 0;
-}
 
 double locateZero(double cv, Vec3d& cpos, Vec3d& cgrad, Vec3d& npos, Vec3d& outP, Vec3d& outG, ScalarField* f)
 {
@@ -168,8 +148,11 @@ void PointCloudImplicitFieldVisualization::asyncCompute()
 
         uint32_t rndval = 1;
         uint16_t ix,iy;
-        float x=0,y=0,z=0;
+        double x=0,y=0,z=0;
 
+        const Vec3d& minbox = m_box.getValue().minBBox() ;
+        unsigned int res = d_gridresolution.getValue() ;
+        Vec3d scalebox = (m_box.getValue().maxBBox() - minbox) / res ;
         do
         {
             iy =  rndval & 0x000FF;        /* Y = low 8 bits */
@@ -179,16 +162,15 @@ void PointCloudImplicitFieldVisualization::asyncCompute()
             if (lsb) {                    /* If the output is 0, the xor can be skipped. */
                 rndval ^= 0x00012000;
             }
-            if( ix < 64 && iy < 128 ){
-                x = (1.0*ix)/128 ;
-                y = (1.0*iy)/128 ;
+            if( ix < res && iy < res ){
+                x = minbox.x()+(scalebox.x()*ix) ;
+                y = minbox.y()+(scalebox.y()*iy) ;
 
                 z=0;
-                for(unsigned int k=0;k<128;k++)
+                for(unsigned int k=0;k<res;k++)
                 {
-                    z = 1.0*k/128;
+                    z = minbox.z()+scalebox.z()*k;
                     Vec3d pos { x, y, z }  ;
-
 
                     double dd = l_field.get()->getValue(pos) ;
                     //Vec3d grad = l_field.get()->getGradient(pos) ;
@@ -242,7 +224,7 @@ void PointCloudImplicitFieldVisualization::draw(const core::visual::VisualParams
 
 
 #ifndef SOFA_NO_OPENGL
-    auto& box = f_bbox.getValue();
+    auto& box = m_box.getValue();
     params->drawTool()->drawBoundingBox(box.minBBox(), box.maxBBox()) ;
 
     glPointSize(3);
