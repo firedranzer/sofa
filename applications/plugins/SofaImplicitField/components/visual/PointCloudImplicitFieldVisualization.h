@@ -28,6 +28,9 @@
 #include <sofa/core/objectmodel/Link.h>
 #include <SofaImplicitField/components/geometry/ScalarField.h>
 
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 namespace sofa
 {
 
@@ -67,14 +70,37 @@ private:
     PointCloudImplicitFieldVisualization(const PointCloudImplicitFieldVisualization& n) ;
     PointCloudImplicitFieldVisualization& operator=(const PointCloudImplicitFieldVisualization& n) ;
 
+    /// Rendering data
     std::vector<Vec3d> m_points ;
     std::vector<double> m_field ;
     std::vector<Vec3d> m_colors ;
     std::vector<Vec3d> m_normals ;
 
+    /// Field last computation data
+    std::vector<Vec3d> m_cpoints ;
+    std::vector<double> m_cfield ;
+    std::vector<Vec3d> m_cnormals ;
+
+    std::thread m_asyncthread;
+    std::mutex m_datamutex ;
+    std::mutex m_cmdmutex ;
+    std::condition_variable m_cmdcond ;
+
+    double m_minv = +1000;
+    double m_maxv = 0.0;
+
+    enum Cmd {
+        CMD_IDLE,
+        CMD_RESET,
+        CMD_START,
+        CMD_PROCESS
+    }  ;
+    Cmd m_cmd {CMD_IDLE};
 
     DataTracker m_datatracker ;
 
+    void asyncCompute() ;
+    void updateBufferFromComputeKernel() ;
 };
 
 
