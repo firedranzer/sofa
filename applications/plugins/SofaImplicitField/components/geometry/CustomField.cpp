@@ -37,6 +37,9 @@ using sofa::core::objectmodel::IdleEvent ;
 using std::max;
 using sofa::core::objectmodel::ComponentState ;
 
+#include "ScalarField.h"
+using sofa::core::objectmodel::CStatus ;
+
 #include "CustomField.h"
 namespace sofa
 {
@@ -85,6 +88,36 @@ CustomField::CustomField() :
     m_sourcefile = new MyFileListener(this) ;
 }
 
+
+
+void CustomField::getCythonHook(PyObject*& module) const
+{
+     if(module==nullptr)
+    {
+        PyErr_Print();
+        return ;
+    }
+
+    PyObject* pDict = PyModule_GetDict(module);
+    if(pDict==nullptr)
+    {
+        PyErr_Print();
+        return ;
+    }
+
+    PyObject* fct = PyDict_GetItemString(pDict, "getEvalFunction");
+    if (fct==nullptr)
+    {
+        PyErr_Print();
+        return ;
+    }
+
+    if (!PyCallable_Check(fct))
+    {
+        msg_error() << "The object does not have getEvalFunction" ;
+        return ;
+    }
+}
 
 PyObject* CustomField::getPythonFunction(const std::string& attribname, const std::string& attribvalue, PyObject*& module) const
 {
@@ -151,6 +184,7 @@ PyObject* CustomField::getPythonFunction(const std::string& attribname, const st
 
 void CustomField::init()
 {
+    setStatus(CStatus::Busy) ;
     PythonEnvironment::gil lock(__func__) ;
 
     m_evalFunction = getPythonFunction("function", d_function.getValue(), m_functionModule) ;
@@ -158,6 +192,7 @@ void CustomField::init()
     {
         msg_error() << "Unable to find a required callable object from attribute 'function=\""<< d_function.getValue() <<"\"'" ;
         m_componentstate = ComponentState::Invalid ;
+        setStatus(CStatus::Invalid) ;
         return ;
     }
 
@@ -165,10 +200,16 @@ void CustomField::init()
     if(m_gradFunction==nullptr)
     {
         msg_info() << "No gradient function found from attribute 'gradient=\"" << d_gradient.getValue() <<"\"'. Falling back to finite difference implementation" ;
-    }
+    }    
+
+    getCythonHook(m_functionModule) ;
+
 
     m_componentstate = ComponentState::Valid ;
     d_state.setValue(d_state.getValue()+1);
+
+    dmsg_warning() << "UPDATED THE STATUS !! " ;
+    setStatus(CStatus::Valid) ;
 }
 
 
