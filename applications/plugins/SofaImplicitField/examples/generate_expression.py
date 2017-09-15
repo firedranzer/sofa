@@ -39,6 +39,7 @@ writeHeadLine()
 
 import numpy
 import math
+from math import cos, sin, sqrt
 from libc.math cimport sin, cos, acos, exp, sqrt, fabs, M_PI
 cimport numpy
 cimport cython
@@ -50,7 +51,7 @@ cimport primitives
         litteral_expression.close()
 
 
-def soNice(shape):
+def litteralExpression(shape):
 
     writeHeadLine()
 
@@ -63,13 +64,63 @@ def soNice(shape):
 
         litteral_expression.write("LISTE DES PARAMETRES DES PRIMITIVES\n\n")
 
+        listPrimitives=primitives.getListPrimitives()
+
+        for identifier in listPrimitives:
+
+            type=identifier[0]
+
+            if type=="cylinder":
+
+                [type,sign, axisX,axisY,axisZ,theta,phi,center,radial,height,index]=identifier
+
+                prm="#############\n"+"##PRIMITIVE   "+str(index)+"\n"+"############\n\n\n"\
+                    +"type"+str(index)+"="+type+"\n"\
+                    +"sign"+str(index)+"="+sign+"\n"\
+                    +"axis"+str(index)+"X="+str(axisX)+"\n"\
+                    +"axis"+str(index)+"Y="+str(axisY)+"\n"\
+                    +"axis"+str(index)+"Z="+str(axisZ)+"\n"\
+                    +"theta"+str(index)+"="+str(theta)+"\n"\
+                    +"phi"+str(index)+"="+str(phi)+"\n"\
+                    +"cosTheta"+str(index)+"=cos("+str(theta)+")\n"\
+                    +"cosPhi"+str(index)+"=cos("+str(phi)+")\n"\
+                    +"sinTheta"+str(index)+"=sin("+str(theta)+")\n"\
+                    +"sinPhi"+str(index)+"=sin("+str(phi)+")\n"\
+                    +"(center"+str(index)+".x,center"+str(index)+".y,center"+str(index)+".z)="+str(center)+"\n\n\n"\
+                    +"radial"+str(index)+"="+str(radial)+"\n\n"\
+                    +"height"+str(index)+"="+str(height)+"\n\n"\
+                    +"\n\n\n\n"
+
+            else:
+
+                 [type,sign, axisX,axisY,axisZ,theta,phi,center,index]=identifier
+
+                 prm="#############\n"+"##PRIMITIVE   "+str(index)+"\n"+"############\n\n\n"\
+                     +"type"+str(index)+"="+type+"\n"\
+                     +"sign"+str(index)+"="+sign+"\n"\
+                     +"axis"+str(index)+"X="+str(axisX)+"\n"\
+                     +"axis"+str(index)+"Y="+str(axisY)+"\n"\
+                     +"axis"+str(index)+"Z="+str(axisZ)+"\n"\
+                     +"theta"+str(index)+"="+str(theta)+"\n"\
+                     +"phi"+str(index)+"="+str(phi)+"\n"\
+                     +"cosTheta"+str(index)+"=cos("+str(theta)+")\n"\
+                     +"cosPhi"+str(index)+"=cos("+str(phi)+")\n"\
+                     +"sinTheta"+str(index)+"=sin("+str(theta)+")\n"\
+                     +"sinPhi"+str(index)+"=sin("+str(phi)+")\n"\
+                     +"(center"+str(index)+".x,center"+str(index)+".y,center"+str(index)+".z)="+str(center)\
+                     +"\n\n\n\n"
+
+
+
+            litteral_expression.write(prm)
+
 
         litteral_expression.write("\n\n\n\n\n")
         litteral_expression.write("LISTE DES EXPRESIONS INTERMEDIAIRES\n\n")
 
         (expression,(gradX,gradY,gradZ))=shape.toString()
 
-        listA,listB=primitives.getList()
+        listA,listB=primitives.getListAandB()
         length=len(listA)
 
         if len(listA)!=len(listB):
@@ -113,7 +164,7 @@ union=primitives.Union(ellipsoid1,primitives.Intersection(ellipsoid2,cylinder1))
 
 niceaccordion=accordion.accordionUniform(10.0,2.0,0.1,"ellipsoid",10,4.0,4.0,4.5)
 
-soNice(niceaccordion)
+litteralExpression(niceaccordion)
 
 
 

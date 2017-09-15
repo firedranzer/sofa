@@ -24,6 +24,14 @@ listA=[]
 listB=[]
 listPrimitives=[]
 
+cpdef getListAandB():
+    return listA, listB
+
+
+cpdef getListPrimitives():
+
+    return listPrimitives
+
 cdef int i=0
 cdef int j=0
 
@@ -206,10 +214,11 @@ cdef class Difference(Shape):
 
         return (expression,(gradX,gradY,gradZ))
 
-cpdef tuple generateNewPrimitives():
+cpdef int generateNewPrimitives():
             global j
+            cdef int temp=j
             j+=1
-            return j
+            return temp
 
 
 cdef class Primitives(Shape):
@@ -220,16 +229,19 @@ cdef class Primitives(Shape):
         self.axisX=axisX
         self.axisY=axisY
         self.axisZ=axisZ
+        self.theta=theta
+        self.phi=phi
+
         self.cosTheta=cos(theta)
         self.sinTheta=sin(theta)
         self.cosPhi=cos(phi)
+
         self.sinPhi=sin(phi)
         self.center=center
         index=generateNewPrimitives()
         self.index=index
-        identifier=["pmt"+str(index),sign, axisX,axisY,axisZ,theta,phi,(self.center.x,self.center.y,self.center.z),index]
-        self.identifier=identifier
-        listPrimitives.append(identifier)
+        self.type
+        self.identifier
 
     cdef translationRotation(self,Point point):
 
@@ -247,59 +259,59 @@ cdef class Primitives(Shape):
 
     cpdef translationRotationToString(self):
 
-        if self.cosTheta==0.0:
 
-            x1="(-"+minus("y",self.center.y)+")"
-            y=minus("x",self.center.x)
+#        if self.cosTheta==0.0:
 
-
-        elif self.cosTheta==1.0:
-
-            x1=minus("x",self.center.x)
-            y=minus("y",self.center.y)
+#            x1="(-"+minus("y",self.center.y)+")"
+#            y=minus("x",self.center.x)
 
 
-        else:
+#        elif self.cosTheta==1.0:
 
-            x1="("+str(self.cosTheta)+"*(x-"+str(self.center.x)+")-"+str(self.sinTheta)+"*(y-"+str(self.center.y)+"))"
-            y="("+str(self.sinTheta)+"*(x-"+str(self.center.x)+")+"+str(self.cosTheta)+"*(y-"+str(self.center.y)+"))"
+#            x1=minus("x",self.center.x)
+#            y=minus("y",self.center.y)
 
-        if self.cosPhi==0.0:
 
-           x="(-"+minus("z",self.center.z)+")"
-           z=x1
+#        else:
 
-        elif self.cosPhi==1.0:
+        x1="(cosTheta"+str(self.index)+"*(x-center"+str(self.index)+".x)-sinTheta"+str(self.index)+"*(y-center"+str(self.index)+".y))"
+        y="(sinTheta"+str(self.index)+"*(x-center"+str(self.index)+".x)+cosTheta"+str(self.index)+"*(y-center"+str(self.index)+".y)))"
 
-            x=x1
-            z=minus("z",self.center.z)
+#        if self.cosPhi==0.0:
 
-        else:
-            x="("+str(self.cosPhi)+"*"+x1+"-"+str(self.sinPhi)+"*(z-"+str(self.center.z)+"))"
-            z="("+str(self.sinPhi)+"*"+x1+"+"+str(self.cosPhi)+"*(z-"+str(self.center.z)+"))"
+#           x="(-"+minus("z",self.center.z)+")"
+#           z=x1
+
+#        elif self.cosPhi==1.0:
+
+#            x=x1
+#            z=minus("z",self.center.z)
+
+#        else:
+
+        x="cosPhi"+str(self.index)+"*"+x1+"-sinPhi"+str(self.index)+"*(z-center"+str(self.index)+".z))"
+        z="(sinPhi"+str(self.index)+"*"+x1+"+cosPhi"+str(self.index)+"*(z-center"+str(self.index)+".z)))"
 
         return (x,y,z)
 
 
     cpdef gradXtranslationRotationToString(self):
 
-        (dxX,dxY,dxZ)=(multiply(str(self.cosPhi),str(self.cosTheta)), str(self.sinTheta),multiply(str(self.sinPhi),str(self.cosTheta)))
-
+#        (dxX,dxY,dxZ)=(multiply(str(self.cosPhi),str(self.cosTheta)), str(self.sinTheta),multiply(str(self.sinPhi),str(self.cosTheta)))
+        (dxX,dxY,dxZ)=("cosPhi"+str(self.index)+"*"+"cosTheta"+str(self.index), "sinTheta"+str(self.index),"sinPhi"+str(self.index)+"*"+"cosTheta"+str(self.index))
         return (dxX,dxY,dxZ)
 
     cpdef gradYtranslationRotationToString(self):
 
-        (dyX,dyY,dyZ)=(multiply(str(-self.cosPhi),str(self.sinTheta)), str(self.cosTheta),multiply(str(-self.sinPhi),str(self.sinTheta)))
+        (dyX,dyY,dyZ)=("(-cosPhi"+str(self.index)+")*sinTheta"+str(self.index), "cosTheta"+str(self.index),"-sinPhi"+str(self.index)+"*"+"sinTheta"+str(self.index))
 
         return (dyX,dyY,dyZ)
 
     cpdef gradZtranslationRotationToString(self):
 
-        (dzX,dzY,dzZ)=(str(-self.sinPhi), str(0.0),str(self.cosPhi))
+        (dzX,dzY,dzZ)=("sinPhi"+str(self.index), str(0.0),"cosPhi"+str(self.index))
 
         return (dzX,dzY,dzZ)
-
-
 
 
 cdef class Ellipsoid(Primitives):
@@ -309,6 +321,9 @@ cdef class Ellipsoid(Primitives):
 
         Primitives.__init__(self,sign,axisX,axisY,axisZ,theta,phi,center)
         self.type="ellipsoid"
+        identifier=[self.type,self.sign, self.axisX,self.axisY,self.axisZ,self.theta,self.phi,(self.center.x,self.center.y,self.center.z),self.index]
+        self.identifier=identifier
+        listPrimitives.append(identifier)
 
 
     cpdef double eval(self,Point point):
@@ -322,24 +337,34 @@ cdef class Ellipsoid(Primitives):
         (x,y,z)=self.translationRotationToString()
         (dxX,dxY,dxZ)=self.gradXtranslationRotationToString()
 
-        return add(add(multiply(dxX,divide("2.0*"+x,self.axisX**2)),multiply(dxY,divide("2.0*"+y,self.axisY**2))),\
-               multiply(dxZ,divide("2.0*"+z,self.axisZ**2)))
+#        add(add(multiply(dxX,divide("2.0*"+x,self.axisX**2)),multiply(dxY,divide("2.0*"+y,self.axisY**2))),\
+#        multiply(dxZ,divide("2.0*"+z,self.axisZ**2)))
+
+        return "("+dxX+"*2.0*"+x+"/axis"+str(self.index)+"X*axis"+str(self.index)+"X)"+"+"+"("+dxY+"*2.0*"+y+"/axis"+str(self.index)+"Y*axis"+str(self.index)+"Y)"+"+"+\
+                "("+dxZ+"*2.0*"+z+"/axis"+str(self.index)+"Z*axis"+str(self.index)+"Z)"
+
 
     cpdef str gradY(self):
 
         (x,y,z)=self.translationRotationToString()
         (dyX,dyY,dyZ)=self.gradYtranslationRotationToString()
 
-        return add(add(multiply(dyX,divide("2.0*"+x,self.axisX**2)),multiply(dyY,divide("2.0*"+y,self.axisY**2))),\
-               multiply(dyZ,divide("2.0*"+z,self.axisZ**2)))
+#         add(add(multiply(dyX,divide("2.0*"+x,self.axisX**2)),multiply(dyY,divide("2.0*"+y,self.axisY**2))),\
+#         multiply(dyZ,divide("2.0*"+z,self.axisZ**2)))
+
+        return "("+dyX+"*2.0*"+x+"/axis"+str(self.index)+"X*axis"+str(self.index)+"X)"+"+"+"("+dyY+"*2.0*"+y+"/axis"+str(self.index)+"Y*axis"+str(self.index)+"Y)"+"+"+\
+                "("+dyZ+"*2.0*"+z+"/axis"+str(self.index)+"Z*axis"+str(self.index)+"Z)"
 
     cpdef str gradZ(self):
 
         (x,y,z)=self.translationRotationToString()
         (dzX,dzY,dzZ)=self.gradZtranslationRotationToString()
 
-        return add(add(multiply(dzX,divide("2.0*"+x,self.axisX**2)),multiply(dzY,divide("2.0*"+y,self.axisY**2))),\
-               multiply(dzZ,divide("2.0*"+z,self.axisZ**2)))
+#        add(add(multiply(dzX,divide("2.0*"+x,self.axisX**2)),multiply(dzY,divide("2.0*"+y,self.axisY**2))),\
+#        multiply(dzZ,divide("2.0*"+z,self.axisZ**2)))
+
+        return "("+dzX+"*2.0*"+x+"/axis"+str(self.index)+"X*axis"+str(self.index)+"X)"+"+"+"("+dzY+"*2.0*"+y+"/axis"+str(self.index)+"Y*axis"+str(self.index)+"Y)"+"+"+\
+            "("+dzZ+"*2.0*"+z+"/axis"+str(self.index)+"Z*axis"+str(self.index)+"Z)"
 
     cpdef tuple grad(self):
         return (self.gradX(),self.gradY(),self.gradZ())
@@ -348,8 +373,11 @@ cdef class Ellipsoid(Primitives):
 
         (x,y,z)=self.translationRotationToString()
 
-        expression=divide(x,self.axisX)+"*"+divide(x,self.axisX)+"+"+divide(y,self.axisY)+"*"+divide(y,self.axisY)+"+"+divide(z,self.axisZ)+"*"+\
-             divide(z,self.axisZ)+"-1.0"
+        expression="("+x+"/axis"+str(self.index)+"X)*("+x+"/axis"+str(self.index)+"X)"+"+"+"("+y+"/axis"+str(self.index)+"Y)*("+y+"/axis"+str(self.index)+"Y)"+"+"\
+                  +"("+z+"/axis"+str(self.index)+"Z)*("+z+"/axis"+str(self.index)+"Z)"
+
+#        divide(x,self.axisX)+"*"+divide(x,self.axisX)+"+"+divide(y,self.axisY)+"*"+divide(y,self.axisY)+"+"+divide(z,self.axisZ)+"*"+\
+#        divide(z,self.axisZ)+"-1.0"
 
         return (expression, self.grad())
 
@@ -358,6 +386,9 @@ cdef class Frisbee(Primitives):
     def __init__(self,sign,axisX,axisY,axisZ,theta,phi,center):
         Primitives.__init__(self,sign,axisX,axisY,axisZ,theta,phi,center)
         self.type="frisbee"
+        identifier=[self.type,self.sign, self.axisX,self.axisY,self.axisZ,self.theta,self.phi,(self.center.x,self.center.y,self.center.z),self.index]
+        self.identifier=identifier
+        listPrimitives.append(identifier)
 
     cpdef double eval(self,Point point):
 
@@ -369,21 +400,31 @@ cdef class Frisbee(Primitives):
     cpdef str gradX(self):
 
         (x,y,z)=self.translationRotationToString()
+        (dxX,dxY,dxZ)=self.gradXtranslationRotationToString()
 
-        return "("+x+"/sqrt("+divide(x,self.axisX)+"*"+divide(x,self.axisX)+"+"+divide(y,self.axisY)+"*"+divide(y,self.axisY)+")"
+        return dxX+"*("+x+"/sqrt(("+x+"/axis"+str(self.index)+"X)"+"*"+"("+x+"/axis"+str(self.index)+"X)"+"+"+"("+y+"/axis"+str(self.index)+"Y)"+"*"+"("+y+"/axis"+str(self.index)+"Y)"+")"\
+              +dxY+"*("+y+"/sqrt(("+x+"/axis"+str(self.index)+"X)"+"*"+"("+x+"/axis"+str(self.index)+"X)"+"+"+"("+y+"/axis"+str(self.index)+"Y)"+"*"+"("+y+"/axis"+str(self.index)+"Y)"+")"\
+              +dxZ+"*"+"sign("+z+")/axis"+str(self.index)+"Z)"
 
     cpdef str gradY(self):
 
         (x,y,z)=self.translationRotationToString()
+        (dyX,dyY,dyZ)=self.gradXtranslationRotationToString()
 
-        return "("+y+"/sqrt("+divide(x,self.axisX)+"*"+divide(x,self.axisX)+"+"+divide(y,self.axisY)+"*"+divide(y,self.axisY)+")"
+        return dyX+"*("+x+"/sqrt(("+x+"/axis"+str(self.index)+"X)"+"*"+"("+x+"/axis"+str(self.index)+"X)"+"+"+"("+y+"/axis"+str(self.index)+"Y)"+"*"+"("+y+"/axis"+str(self.index)+"Y)"+")"\
+              +dyY+"*("+y+"/sqrt(("+x+"/axis"+str(self.index)+"X)"+"*"+"("+x+"/axis"+str(self.index)+"X)"+"+"+"("+y+"/axis"+str(self.index)+"Y)"+"*"+"("+y+"/axis"+str(self.index)+"Y)"+")"\
+              +dyZ+"*"+"sign("+z+")/axis"+str(self.index)+"Z)"
 
 
     cpdef str gradZ(self):
 
         (x,y,z)=self.translationRotationToString()
+        (dzX,dzY,dzZ)=self.gradXtranslationRotationToString()
 
-        return divide("sign("+z+")",self.axisZ)
+        return dzX+"*("+x+"/sqrt(("+x+"/axis"+str(self.index)+"X)"+"*"+"("+x+"/axis"+str(self.index)+"X)"+"+"+"("+y+"/axis"+str(self.index)+"Y)"+"*"+"("+y+"/axis"+str(self.index)+"Y)"+")"\
+              +dzY+"*("+y+"/sqrt(("+x+"/axis"+str(self.index)+"X)"+"*"+"("+x+"/axis"+str(self.index)+"X)"+"+"+"("+y+"/axis"+str(self.index)+"Y)"+"*"+"("+y+"/axis"+str(self.index)+"Y)"+")"\
+              +dzZ+"*"+"sign("+z+")/axis"+str(self.index)+"Z)"
+
 
 
     cpdef tuple grad(self):
@@ -393,30 +434,12 @@ cdef class Frisbee(Primitives):
 
         (x,y,z)=self.translationRotationToString()
 
-        expression="abs("+divide(z,self.axisZ)+")+sqrt("+divide(x,self.axisX)+"*"+divide(x,self.axisX)+"+"+\
-             divide(y,self.axisY)+"*"+divide(y,self.axisY)+")-1.0"
+        expression="abs("+z+"/axis"+str(self.index)+"Z)"+"+"\
+                    +"sqrt(("+x+"/axis"+str(self.index)+"X)"+"*"+"("+x+"/axis"+str(self.index)+"X)"\
+                    +"+"+"("+y+"/axis"+str(self.index)+"Y)"+"*"+"("+y+"/axis"+str(self.index)+"Y)"+")-1.0"
 
         return (expression, self.grad())
 
-#cdef class Ball(Primitives):
-
-#    def __init__(self,sign,radius,center):
-#        Primitives.__init__(self,sign,radius,radius,radius,0,0,center)
-#        self.type="ball"
-
-
-#    cpdef double eval(self,Point point):
-#        return ((point.x**2+point.y**2+point.z**2)/self.axisX**2)-1.0
-
-
-#    cpdef str toString(self):
-
-#        (x,y,z)=self.translationRotationToString()
-
-#        return "(("+x+"*"+x+y+"*"+y+z+"*"+z+")/"+str(self.axisX)+"*"+str(self.axisX)+")-1.0"
-
-#    cpdef tuple grad(self):
-#        return (self.gradX(),self.gradY(),self.gradZ())
 
 cdef class Cylinder(Primitives):
 
@@ -424,7 +447,13 @@ cdef class Cylinder(Primitives):
     def __init__(self,sign,axisX,axisY,axisZ,theta,phi,center):
         Primitives.__init__(self,sign,axisX,axisY,axisZ,theta,phi,center)
         self.type="cylinder"
+        (x,y,z)=self.translationRotationToString()
 
+        self.radial="("+x+"/axis"+str(self.index)+"X)"+"("+x+"/axis"+str(self.index)+"X)"+"+"+"("+y+"/axis"+str(self.index)+"Y)"+"("+y+"/axis"+str(self.index)+"Y)"+"-1.0"
+        self.height="abs("+z+"-axis"+str(self.index)+"Z)"
+        identifier=[self.type,self.sign, self.axisX,self.axisY,self.axisZ,self.theta,self.phi,(self.center.x,self.center.y,self.center.z),self.radial,self.height,self.index]
+        self.identifier=identifier
+        listPrimitives.append(identifier)
 
     cpdef double eval(self,Point point):
         point=self.translationRotation(point)
@@ -435,22 +464,29 @@ cdef class Cylinder(Primitives):
     cpdef str gradX(self):
 
         (x,y,z)=self.translationRotationToString()
+        (dxX,dxY,dxZ)=self.gradXtranslationRotationToString()
 
-        return "ind("+divide(x,self.axisX)+"*"+divide(x,self.axisX)+"+"+divide(y,self.axisY)+"*"+divide(y,self.axisY)+"-1.0,"\
-                +"abs("+minus(z,self.axisZ)+"))*"+divide("2.0*"+x,self.axisX*self.axisX)
+        return dxX+"*ind(radial,height)"+"*2.0*"+x+"/(axis"+str(self.index)+"X"+"*"+"axis"+str(self.index)+"X)"\
+              +dxY+"*ind(radial,height)"+"*2.0*"+y+"/(axis"+str(self.index)+"Y"+"*"+"axis"+str(self.index)+"Y)"\
+              +dxZ+"*ind(height"+str(self.index)+",radial"+str(self.index)+")*sign("+z+")"
 
     cpdef str gradY(self):
 
         (x,y,z)=self.translationRotationToString()
+        (dyX,dyY,dyZ)=self.gradXtranslationRotationToString()
 
-        return "ind("+divide(x,self.axisX)+"*"+divide(x,self.axisX)+"+"+divide(y,self.axisY)+"*"+divide(y,self.axisY)+"-1.0,"\
-                +"abs("+minus(z,self.axisZ)+"))*"+divide("2.0*"+y,self.axisY*self.axisY)
+        return dyX+"*ind(radial,height)"+"*2.0*"+x+"/(axis"+str(self.index)+"X"+"*"+"axis"+str(self.index)+"X)"\
+              +dyY+"*ind(radial,height)"+"*2.0*"+y+"/(axis"+str(self.index)+"Y"+"*"+"axis"+str(self.index)+"Y)"\
+              +dyZ+"*ind(height"+str(self.index)+",radial"+str(self.index)+")*sign("+z+")"
 
     cpdef str gradZ(self):
 
         (x,y,z)=self.translationRotationToString()
-        return "ind(abs("+minus(z,self.axisZ)+","+divide(x,self.axisX)+"*"+divide(x,self.axisX)+"+"+divide(y,self.axisY)+"*"+divide(y,self.axisY)+\
-               "-1.0))*sign("+z+")"
+        (dzX,dzY,dzZ)=self.gradXtranslationRotationToString()
+
+        return dzX+"*ind(radial,height)"+"*2.0*"+x+"/(axis"+str(self.index)+"X"+"*"+"axis"+str(self.index)+"X)"\
+              +dzY+"*ind(radial,height)"+"*2.0*"+y+"/(axis"+str(self.index)+"Y"+"*"+"axis"+str(self.index)+"Y)"\
+              +dzZ+"*ind(height"+str(self.index)+",radial"+str(self.index)+")*sign("+z+")"
 
     cpdef tuple grad(self):
         return (self.gradX(),self.gradY(),self.gradZ())
@@ -459,41 +495,7 @@ cdef class Cylinder(Primitives):
 
         (x,y,z)=self.translationRotationToString()
 
-        expression="max(abs("+minus(z,self.axisZ)+"),"+divide(x,self.axisX)+"*"+divide(x,self.axisX)+"+"+\
-        divide(y,self.axisY)+"*"+divide(y,self.axisY)+"-1.0)"
+        expression="max(height"+str(self.index)+",radial"+str(self.index)+")"
 
         return (expression, self.grad())
-
-cdef point=Point(2.0,3.0,1.5)
-
-cpdef getList():
-
-    return listA, listB
-
-if __name__ == '__main__':
-
-#    print("A simple demo")
-#    b=Ball('+', 1.0, Point(0.0,0.0,0.0))
-#    print("ball: "+str(b.eval(Point(0.0,0.0,0.0))))
-#    print("ball: "+str(b.eval(Point(2.0,0.0,0.0))))
-#    print("ball: "+str(b.eval(Point(-2.0,0.0,0.0))))
-
-    e=Ellipsoid('+',1.0,1.0,2.0,0,0,Point(0.0,0.0,0.0))
-    print("ellipsoid: "+str(e.eval(Point(0.0,0.0,01.0))))
-    print("ellipsoid: "+str(e.eval(Point(0.0,0.0,2.0))))
-    print("ellipsoid: "+str(e.eval(Point(-2.0,0.0,4.0))))
-
-    c=Cylinder('+',1.0,1.0,2.0,0,0,Point(0.0,0.0,0.0))
-    print("cylinder: "+str(c.eval(Point(0.0,0.0,1.0))))
-    print("cylinder: "+str(c.eval(Point(0.0,0.0,2.0))))
-    print("cylinder: "+str(c.eval(Point(-2.0,0.0,4.0))))
-
-    f=Frisbee('+',1.0,1.0,2.0,0,0,Point(0.0,0.0,0.0))
-    print("frisbee: "+str(f.eval(Point(0.0,0.0,1.0))))
-    print("frisbee: "+str(f.eval(Point(0.0,0.0,2.0))))
-    print("frisbee: "+str(f.eval(Point(-2.0,0.0,4.0))))
-
-    print "union: ", Union(c,e).eval(Point(1.0,1.0,1.0))
-    print "intersection: ", Intersection(e,c).eval(Point(1.0,1.0,1.0))
-    print "difference: ", Difference(c,f).eval(Point(1.0,1.0,1.0))
 

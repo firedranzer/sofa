@@ -24,6 +24,9 @@ cpdef list listB
 
 cdef int i
 
+cpdef getListAandB()
+cpdef getListPrimitives()
+
 cdef class Point(object):
 
     cdef double x, y, z
@@ -61,15 +64,15 @@ cdef class Difference(Shape):
 
     cpdef tuple toString(self)
 
-cpdef tuple generateNewPrimitives()
+cpdef int generateNewPrimitives()
 
 cdef class Primitives(Shape):
 
-    cdef str sign
-    cdef double axisX, axisY, axisZ, cosTheta, cosPhi, sinTheta, sinPhi
+    cdef str sign, type
+    cdef double axisX, axisY, axisZ, theta, phi, cosTheta, cosPhi, sinTheta, sinPhi
     cdef Point center
     cdef int index
-    cdef tuple identifier
+    cdef list identifier
 
     cdef translationRotation(self,Point)
     cpdef translationRotationToString(self)
@@ -78,8 +81,6 @@ cdef class Primitives(Shape):
     cpdef gradZtranslationRotationToString(self)
 
 cdef class Ellipsoid(Primitives):
-
-    cdef str type
 
     cpdef double eval(self,Point)
 
@@ -95,8 +96,6 @@ cdef class Ellipsoid(Primitives):
 
 cdef class Frisbee(Primitives):
 
-    cdef str type
-
     cpdef double eval(self,Point)
 
     cpdef str gradX(self)
@@ -109,27 +108,9 @@ cdef class Frisbee(Primitives):
 
     cpdef tuple toString(self)
 
-
-
-#cdef class Ball(Primitives):
-
-#    cdef str type
-
-#    cpdef double eval(self,Point)
-
-#    cpdef tuple toString(self)
-
-#    cpdef str gradX(self)
-
-#    cpdef str gradY(self)
-
-#    cpdef str gradZ(self)
-
-#    cpdef tuple grad(se4lf)
-
 cdef class Cylinder(Primitives):
 
-    cdef str type
+    cdef str radial, height
 
     cpdef double eval(self,Point)
 
