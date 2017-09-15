@@ -21,7 +21,14 @@ set(SOURCE_FILES
     initCGALPlugin.cpp
 )
 
-set(README_FILES CGALPlugin.txt)
+set(README_FILES README.md
+                 examples/MeshGenerationFromImage.scn
+                 examples/MeshGenerationFromImageWithFeatures.scn
+                 examples/MeshGenerationFromImplicit.scn
+                 examples/Refine2DMesh.scn
+                 examples/customfield.py
+                 examples/customfield2.py
+                 examples/dfgeom.pyx)
 
 
 find_package(SofaFramework REQUIRED)

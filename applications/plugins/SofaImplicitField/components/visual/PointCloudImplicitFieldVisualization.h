@@ -31,6 +31,8 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+
+#include <sofa/helper/types/RGBAColor.h>
 namespace sofa
 {
 
@@ -62,7 +64,7 @@ public:
     Data<unsigned int> d_gridresolution ;
 
     Data< sofa::defaulttype::BoundingBox > m_box;
-
+    Data< sofa::helper::types::RGBAColor > m_color ;
 
 protected:
     PointCloudImplicitFieldVisualization( ) ;

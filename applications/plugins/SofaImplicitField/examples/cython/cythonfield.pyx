@@ -1,6 +1,6 @@
 from libc.math cimport sin, sqrt
 
-def eval(x,y,z):
+cpdef evalField(x,y,z):
 	cdef double cx = x - 0.5
 	cdef double cy = y - 0.5
 	cdef double cz = z - 0.5

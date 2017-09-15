@@ -58,6 +58,7 @@ PointCloudImplicitFieldVisualization::PointCloudImplicitFieldVisualization() :
     ,d_gridresolution(initData(&d_gridresolution, (unsigned int)128, "resolution", "The amount of samples per axis"))
     ,m_asyncthread(&PointCloudImplicitFieldVisualization::asyncCompute, this)
     ,m_box(initData(&m_box, sofa::defaulttype::BoundingBox(0,1,0,1,0,1), "box", "min - max coordinate of the grid where to sample the function. "))
+    ,m_color(initData(&m_color, sofa::helper::types::RGBAColor::white(), "color", "..."))
 {
 }
 
@@ -120,10 +121,13 @@ void PointCloudImplicitFieldVisualization::updateBufferFromComputeKernel()
             m_field.push_back (m_cfield[i] ) ;
             double value = m_cfield[i] ;
             double absvalue = fabs(value) ;
-            if(absvalue < 0.001 )
-                m_colors.push_back(Vec3d(1.0,0.0,0.0));
-            else if(value < 0.0)
-                m_colors.push_back(Vec3d(1.0*absvalue/colorScale,0.8*absvalue/colorScale,0.2)) ;
+            if(absvalue < 0.001 ){
+                const sofa::helper::types::RGBAColor& color = m_color.getValue() ;
+                m_colors.push_back( Vec3d( color.r(), color.g(), color.b() ) ) ;
+            }else if(value < 0.0){
+                const sofa::helper::types::RGBAColor& color = m_color.getValue() ;
+                m_colors.push_back( Vec3d( color.r(), color.g(), color.b() ) ) ;
+            }
         }
         m_cpoints.clear();
         m_cnormals.clear();
@@ -245,6 +249,8 @@ void PointCloudImplicitFieldVisualization::draw(const core::visual::VisualParams
     params->drawTool()->drawBoundingBox(box.minBBox(), box.maxBBox()) ;
 
     glPointSize(3);
+    glEnable(GL_COLOR_MATERIAL) ;
+    glEnable(GL_LIGHTING) ;
     glEnable(GL_COLOR);
     glPolygonMode(GL_FRONT_AND_BACK , GL_FILL);
     glColorMaterial (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
@@ -259,6 +265,7 @@ void PointCloudImplicitFieldVisualization::draw(const core::visual::VisualParams
     }
     glEnd();
     glNormal3f(1.0,0.0,0.0);
+    glDisable(GL_COLOR_MATERIAL) ;
 
 #endif //SOFA_NO_OPENGL
 }

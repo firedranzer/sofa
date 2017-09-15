@@ -76,6 +76,8 @@ public:
     Data<std::string> d_gradient ;
     PyObject*         m_evalFunction ;
     PyObject*         m_gradFunction ;
+
+    void getCythonHook(PyObject*& module) const ;
 protected:
     CustomField( ) ;
     virtual ~CustomField() { }
