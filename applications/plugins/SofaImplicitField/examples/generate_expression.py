@@ -131,8 +131,35 @@ def litteralExpression(shape):
             litteral_expression.write(listB[j]+"\n\n\n")
 
         litteral_expression.write("Litteral expression  of the IMPLICIT FIELD is "+expression+"\n\n\n")
+
+        listgradientDxPrimitives=primitives.getListgradientDxPrimitivess()
+
+        litteral_expression.write("LISTE DES GRADIENTS INTERMEDIAIRES SELON X\n\n\n")
+
+        for gradx in listgradientDxPrimitives:
+            litteral_expression.write(gradx)
+
+
         litteral_expression.write("Litteral expression  of the  GRADX is "+gradX+"\n\n\n")
+
+        listgradientDyPrimitives=primitives.getListgradientDyPrimitivess()
+
+        litteral_expression.write("LISTE DES GRADIENTS INTERMEDIAIRES SELON Y\n\n\n")
+
+        for grady in listgradientDyPrimitives:
+            litteral_expression.write(grady)
+
         litteral_expression.write("Litteral expression  of the  GRADY is "+gradY+"\n\n\n")
+
+
+        listgradientDzPrimitives=primitives.getListgradientDzPrimitivess()
+
+        litteral_expression.write("LISTE DES GRADIENTS INTERMEDIAIRES SELON Z\n\n\n")
+
+        for gradz in listgradientDzPrimitives:
+            litteral_expression.write(gradz)
+
+
         litteral_expression.write("Litteral expression  of the  GRADZ is "+gradZ+"\n\n\n")
 
         litteral_expression.close()

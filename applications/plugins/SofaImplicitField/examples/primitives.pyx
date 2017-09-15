@@ -23,6 +23,9 @@ cimport primitives
 listA=[]
 listB=[]
 listPrimitives=[]
+listgradientDxPrimitives=[]
+listgradientDyPrimitives=[]
+listgradientDzPrimitives=[]
 
 cpdef getListAandB():
     return listA, listB
@@ -31,6 +34,19 @@ cpdef getListAandB():
 cpdef getListPrimitives():
 
     return listPrimitives
+
+cpdef getListgradientDxPrimitivess():
+
+    return listgradientDxPrimitives
+
+cpdef getListgradientDyPrimitivess():
+
+    return listgradientDyPrimitives
+
+cpdef getListgradientDzPrimitivess():
+
+    return listgradientDzPrimitives
+
 
 cdef int i=0
 cdef int j=0
@@ -299,19 +315,23 @@ cdef class Primitives(Shape):
 
 #        (dxX,dxY,dxZ)=(multiply(str(self.cosPhi),str(self.cosTheta)), str(self.sinTheta),multiply(str(self.sinPhi),str(self.cosTheta)))
         (dxX,dxY,dxZ)=("cosPhi"+str(self.index)+"*"+"cosTheta"+str(self.index), "sinTheta"+str(self.index),"sinPhi"+str(self.index)+"*"+"cosTheta"+str(self.index))
-        return (dxX,dxY,dxZ)
+
+        listgradientDxPrimitives.append("dxX"+str(self.index)+"="+dxX+"\n"+"dxY"+str(self.index)+"="+dxY+"\n"+"dxZ"+str(self.index)+"="+dxZ+"\n\n\n")
+        return ("dxX"+str(self.index),"dxY"+str(self.index),"dxZ"+str(self.index))
 
     cpdef gradYtranslationRotationToString(self):
 
         (dyX,dyY,dyZ)=("(-cosPhi"+str(self.index)+")*sinTheta"+str(self.index), "cosTheta"+str(self.index),"-sinPhi"+str(self.index)+"*"+"sinTheta"+str(self.index))
 
-        return (dyX,dyY,dyZ)
+        listgradientDyPrimitives.append("dyX"+str(self.index)+"="+dyX+"\n"+"dyY"+str(self.index)+"="+dyY+"\n"+"dyZ"+str(self.index)+"="+dyZ+"\n\n\n")
+        return ("dyX"+str(self.index),"dyY"+str(self.index),"dyZ"+str(self.index))
 
     cpdef gradZtranslationRotationToString(self):
 
         (dzX,dzY,dzZ)=("sinPhi"+str(self.index), str(0.0),"cosPhi"+str(self.index))
 
-        return (dzX,dzY,dzZ)
+        listgradientDzPrimitives.append("dzX"+str(self.index)+"="+dzX+"\n"+"dzY"+str(self.index)+"="+dzY+"\n"+"dzZ"+str(self.index)+"="+dzZ+"\n\n\n")
+        return ("dzX"+str(self.index),"dzY"+str(self.index),"dzZ"+str(self.index))
 
 
 cdef class Ellipsoid(Primitives):
