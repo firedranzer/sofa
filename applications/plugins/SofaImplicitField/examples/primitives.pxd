@@ -19,6 +19,10 @@ from libc.math cimport sin, cos, acos, exp, sqrt, fabs, M_PI
 cimport numpy
 cimport cython
 
+cpdef list listA
+cpdef list listB
+
+cdef int i
 
 cdef class Point(object):
 
@@ -30,14 +34,7 @@ cdef class Shape(object):
 
     cpdef double eval(self, Point)
 
-    cpdef str toString(self)
-
-    cpdef str gradX(self)
-
-    cpdef str gradY(self)
-
-    cpdef str gradZ(self)
-
+    cpdef tuple toString(self)
 
 cdef class Union(Shape):
 
@@ -45,15 +42,7 @@ cdef class Union(Shape):
 
     cpdef double eval(self,Point)
 
-    cpdef str toString(self)
-
-    cpdef str indPos(self)
-
-    cpdef str gradX(self)
-
-    cpdef str gradY(self)
-
-    cpdef str gradZ(self)
+    cpdef tuple toString(self)
 
 
 cdef class Intersection(Shape):
@@ -62,15 +51,7 @@ cdef class Intersection(Shape):
 
     cpdef double eval(self,Point)
 
-    cpdef str toString(self)
-
-    cpdef str indPos(self)
-
-    cpdef str gradX(self)
-
-    cpdef str gradY(self)
-
-    cpdef str gradZ(self)
+    cpdef tuple toString(self)
 
 cdef class Difference(Shape):
 
@@ -78,24 +59,23 @@ cdef class Difference(Shape):
 
     cpdef double eval(self,Point)
 
-    cpdef str toString(self)
+    cpdef tuple toString(self)
 
-    cpdef str indPosDiff(self)
-
-    cpdef str gradX(self)
-
-    cpdef str gradY(self)
-
-    cpdef str gradZ(self)
+cpdef tuple generateNewPrimitives()
 
 cdef class Primitives(Shape):
 
     cdef str sign
     cdef double axisX, axisY, axisZ, cosTheta, cosPhi, sinTheta, sinPhi
     cdef Point center
+    cdef int index
+    cdef tuple identifier
 
     cdef translationRotation(self,Point)
     cpdef translationRotationToString(self)
+    cpdef gradXtranslationRotationToString(self)
+    cpdef gradYtranslationRotationToString(self)
+    cpdef gradZtranslationRotationToString(self)
 
 cdef class Ellipsoid(Primitives):
 
@@ -103,13 +83,15 @@ cdef class Ellipsoid(Primitives):
 
     cpdef double eval(self,Point)
 
-    cpdef str toString(self)
-
     cpdef str gradX(self)
 
     cpdef str gradY(self)
 
     cpdef str gradZ(self)
+
+    cpdef tuple grad(self)
+
+    cpdef tuple toString(self)
 
 cdef class Frisbee(Primitives):
 
@@ -117,27 +99,33 @@ cdef class Frisbee(Primitives):
 
     cpdef double eval(self,Point)
 
-    cpdef str toString(self)
-
     cpdef str gradX(self)
 
     cpdef str gradY(self)
 
     cpdef str gradZ(self)
 
-cdef class Ball(Primitives):
+    cpdef tuple grad(self)
 
-    cdef str type
+    cpdef tuple toString(self)
 
-    cpdef double eval(self,Point)
 
-    cpdef str toString(self)
 
-    cpdef str gradX(self)
+#cdef class Ball(Primitives):
 
-    cpdef str gradY(self)
+#    cdef str type
 
-    cpdef str gradZ(self)
+#    cpdef double eval(self,Point)
+
+#    cpdef tuple toString(self)
+
+#    cpdef str gradX(self)
+
+#    cpdef str gradY(self)
+
+#    cpdef str gradZ(self)
+
+#    cpdef tuple grad(se4lf)
 
 cdef class Cylinder(Primitives):
 
@@ -145,10 +133,12 @@ cdef class Cylinder(Primitives):
 
     cpdef double eval(self,Point)
 
-    cpdef str toString(self)
-
     cpdef str gradX(self)
 
     cpdef str gradY(self)
 
     cpdef str gradZ(self)
+
+    cpdef tuple grad(self)
+
+    cpdef tuple toString(self)

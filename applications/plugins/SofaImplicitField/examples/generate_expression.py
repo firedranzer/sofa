@@ -1,0 +1,126 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+####################################################################################################
+## Copyright 2017 INRIA
+##
+## This file is part of the ShapeGenerator project.
+##
+## Contributors:
+##     - thomas.morzadec@inria.fr
+##
+####################################################################################################
+
+
+import accordion
+import primitives
+
+import math
+from math import sqrt
+
+
+def writeHeadLine():
+
+    with open("litteral.pyx", "w") as litteral_expression:
+
+        temp="""#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+####################################################################################################
+## Copyright 2017 INRIA
+##
+## This file is part of the ShapeGenerator project.
+##
+## Contributors:
+##     - thomas.morzadec@inria.fr
+##
+####################################################################################################
+writeHeadLine()
+# distutils: language=c++
+# cython: profile=True
+
+import numpy
+import math
+from libc.math cimport sin, cos, acos, exp, sqrt, fabs, M_PI
+cimport numpy
+cimport cython
+cimport primitives
+
+
+"""
+        litteral_expression.write(temp)
+        litteral_expression.close()
+
+
+def soNice(shape):
+
+    writeHeadLine()
+
+    with open("litteral.pyx", "a") as litteral_expression:
+
+        litteral_expression.write(primitives.sign())
+        litteral_expression.write(primitives.ind())
+
+        litteral_expression.write("\n\n\n\n\n")
+
+        litteral_expression.write("LISTE DES PARAMETRES DES PRIMITIVES\n\n")
+
+
+        litteral_expression.write("\n\n\n\n\n")
+        litteral_expression.write("LISTE DES EXPRESIONS INTERMEDIAIRES\n\n")
+
+        (expression,(gradX,gradY,gradZ))=shape.toString()
+
+        listA,listB=primitives.getList()
+        length=len(listA)
+
+        if len(listA)!=len(listB):
+            raise ValueError, "check something"
+
+        for j in range(length):
+            litteral_expression.write(listA[j]+"\n\n")
+            litteral_expression.write(listB[j]+"\n\n\n")
+
+        litteral_expression.write("Litteral expression  of the IMPLICIT FIELD is "+expression+"\n\n\n")
+        litteral_expression.write("Litteral expression  of the  GRADX is "+gradX+"\n\n\n")
+        litteral_expression.write("Litteral expression  of the  GRADY is "+gradY+"\n\n\n")
+        litteral_expression.write("Litteral expression  of the  GRADZ is "+gradZ+"\n\n\n")
+
+        litteral_expression.close()
+
+
+ellipsoid1=primitives.Ellipsoid("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
+ellipsoid2=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(0.0,0.0,0.0))
+ellipsoid3=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(5.5,0.0,0.0))
+
+cylinder1=primitives.Cylinder("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
+frisbee1=primitives.Cylinder("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
+
+
+union=primitives.Union(ellipsoid1,primitives.Intersection(ellipsoid2,cylinder1))
+
+#expressionUnion=union.toString()
+
+
+#with open("litteral.pyx", "a") as litteral_expression:
+
+#    litteral_expression.write("expressionUnion is "+expressionUnion+"\n\n\n")
+#    litteral_expression.write("gradxUnion is "+gradxUnion+"\n\n\n")
+#    litteral_expression.write("gradyUnion is "+gradyUnion+"\n\n\n")
+#    litteral_expression.write("gradzUnion is "+gradzUnion+"\n\n\n")
+#    litteral_expression.close()
+
+
+
+
+niceaccordion=accordion.accordionUniform(10.0,2.0,0.1,"ellipsoid",10,4.0,4.0,4.5)
+
+soNice(niceaccordion)
+
+
+
+
+
+
+
+
+
+

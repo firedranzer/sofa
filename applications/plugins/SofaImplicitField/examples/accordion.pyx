@@ -57,7 +57,7 @@ cdef class TubeWithCavities(primitives.Shape):
         self.listCavities.append(cavity)
 
 
-cpdef accordionFreeDimension(double heigthTube, double radiusTube, double thickness, list listCavities):
+cpdef primitives.Shape accordionFreeDimension(double heigthTube, double radiusTube, double thickness, list listCavities):
     """
      The Cavities have to be given as [heigth,"type",axisX,axisY,axisZ]
      The shape is given has the difference between ShapePlus and ShapeMinus
@@ -106,7 +106,7 @@ cpdef accordionFreeDimension(double heigthTube, double radiusTube, double thickn
     return shape
 
 
-cpdef accordionRecoveringGiven(double heigthTube,double radiusTube, double thickness, str typeCavities,
+cpdef primitives.Shape accordionRecoveringGiven(double heigthTube,double radiusTube, double thickness, str typeCavities,
                               list listheigthsJoiningPoints, list listAxesX, list listAxesY, double Zrecovering):
     """
      There is a unique type of cavities. Only their heigth, axes among X and Y can variate.
@@ -136,7 +136,7 @@ cpdef accordionRecoveringGiven(double heigthTube,double radiusTube, double thick
 
     return accordionFreeDimension(heigthTube,radiusTube,thickness,listCavities)
 
-cpdef accordionUniform(double heigthTube,double radiusTube, double thickness, str typeCavities,int numberCavities, double axisX, double axisY, double Zrecovering):
+cpdef primitives.Shape accordionUniform(double heigthTube,double radiusTube, double thickness, str typeCavities,int numberCavities, double axisX, double axisY, double Zrecovering):
     """
      There is a unique type of cavities, a unique axisX and axisY. The Cavities are uniformly dispatched
     """

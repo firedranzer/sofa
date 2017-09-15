@@ -6,9 +6,9 @@ setup(
 #                             language="c++")
 )
 
-setup(
-    ext_modules = cythonize("primitives.pxd")
-)
+#setup(
+#    ext_modules = cythonize("primitives.pxd")
+#)
 
 setup(
     ext_modules = cythonize("accordion.pyx")#,
