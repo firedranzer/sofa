@@ -51,54 +51,9 @@ using sofa::simulation::PythonEnvironment ;
 #include "SofaPython/Binding_Base.h"
 #include "SofaPython/PythonToSofa.inl"
 using sofa::core::objectmodel::BaseData ;
-
-using sofa::core::objectmodel::BaseData ;
 using sofa::component::_template_::Template ;
 
-template<class T>
-class NotifyingData : public Data<T>
-{
-    Template* m_templatesrc ;
-public:
-    NotifyingData() : Data<T>() {}
 
-    /** Constructor used via the Base::initData() methods. */
-    explicit NotifyingData(const BaseData::BaseInitData& init, Template* src) : Data<T>(init){
-        //std::cout << "Constructor... I should call papa" << std::endl;
-        m_templatesrc = src ;
-    }
-
-    virtual ~NotifyingData(){
-        //std::cout << "Destructor I should call papa" << std::endl ;
-    }
-
-    virtual T* virtualBeginEdit() override
-    {
-        //std::cout << "Virtual Begin Value" << std::endl ;
-        return Data<T>::virtualBeginEdit() ;
-    }
-
-    virtual void virtualEndEdit() override
-    {
-        //std::cout << "Virtual Set Value" << std::endl ;
-        Data<T>::virtualEndEdit() ;
-    }
-
-    virtual void virtualSetValue(const T& t) override {
-        //std::cout << "Virtual Set Value" << std::endl ;
-        Data<T>::virtualSetValue(t) ;
-    }
-
-    virtual void update() override {
-        //std::cout << "Update" << std::endl ;
-        Data<T>::update() ;
-    }
-
-    virtual bool read(const std::string &s) override {
-        //std::cout << "READ..." <<  this->getName() << "->" << s << std::endl ;
-        return Data<T>::read(s) ;
-    }
-};
 
 namespace sofa
 {
@@ -374,22 +329,22 @@ static PyObject * Template_createATrackedData(PyObject *self, PyObject *args ) {
     // à chaque template. C'est méga naze !
     BaseData* bd = nullptr ;
     if(dataRawType[0] == 's'){
-        NotifyingData<std::string>* t = new NotifyingData<std::string>() ;
+        Data<std::string>* t = new Data<std::string>() ;
         //t = new(t) NotifyingData<std::string>(obj->initData(t, std::string(""), dataName, dataHelp)) ;
         bd = t;
     }
     else if(dataRawType[0] == 'b'){
-        NotifyingData<bool>* t = new NotifyingData<bool>();
+        Data<bool>* t = new Data<bool>();
         //t = new(t) NotifyingData<bool>(obj->initData(t, true, dataName, dataHelp)) ;
         bd = t;
     }
     else if(dataRawType[0] == 'd'){
-        NotifyingData<int>* t = new NotifyingData<int>();
+        Data<int>* t = new Data<int>();
         //t = new (t) NotifyingData<int> (obj->initData(t, 0, dataName, dataHelp)) ;
         bd = t;
     }
     else if(dataRawType[0] == 'f'){
-        NotifyingData<float>* t = new NotifyingData<float>();
+        Data<float>* t = new Data<float>();
         //t = new (t) NotifyingData<float>(obj->initData(t, 0.0f, dataName, dataHelp)) ;
         bd = t;
     }
