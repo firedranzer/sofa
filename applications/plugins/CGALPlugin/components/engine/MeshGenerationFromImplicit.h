@@ -23,7 +23,7 @@
 #define SOFA_CGAL_MESHGENERATIONFROMIMPLICIT_H
 
 #include <CGALPlugin/config.h>
-
+#include <future>
 
 /// Topology
 #include <SofaBaseTopology/MeshTopology.h>
@@ -50,15 +50,22 @@ using namespace sofa::core;
 using namespace sofa::core::visual;
 using namespace sofa::core::objectmodel;
 
-class SOFA_CGALPLUGIN_API MeshGenerationFromImplicitShape : public BaseObject
+class SOFA_CGALPLUGIN_API MeshGenerationFromImplicitShape : public BaseObject,
+        public ComponentTracker,
+        public TrackedComponent
 {
 public:
     SOFA_CLASS(MeshGenerationFromImplicitShape, BaseObject);
-    void draw(const VisualParams* vparams);
     MeshGenerationFromImplicitShape() ;
     virtual ~MeshGenerationFromImplicitShape() { }
     int volumeMeshGeneration(float facet_size, float approximation, float cell_size);
-    virtual void init();
+
+    virtual void init() override ;
+    virtual void reinit() override ;
+    virtual void handleEvent(sofa::core::objectmodel::Event *event) override ;
+    virtual void draw(const VisualParams* vparams) override ;
+
+    virtual void update() ;
 
 private:
     CGAL::Bbox_3 BoundingBox(double x_min, double y_min, double z_min,
@@ -80,6 +87,8 @@ private:
     /// Link
     typedef SingleLink< MeshGenerationFromImplicitShape, ScalarField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> LinkGrid;
     LinkGrid in_scalarfield;
+
+    std::shared_future<unsigned int> m_com;
 };
 
 } /// namespace _meshgenerationfromimplicit_

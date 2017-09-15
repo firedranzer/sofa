@@ -38,7 +38,12 @@
 #include <CGAL/Bbox_3.h>
 
 #include "MeshGenerationFromImplicit.h"
+#include <sofa/core/objectmodel/IdleEvent.h>
 
+#include <fstream>
+#include <future>
+#include <thread>
+#include <chrono>
 
 namespace sofa
 {
@@ -48,6 +53,8 @@ namespace engine
 {
 namespace _meshgenerationfromimplicit_
 {
+
+using sofa::core::objectmodel::CStatus ;
 
 using namespace CGAL::parameters;
 using namespace sofa::core;
@@ -102,7 +109,8 @@ CGAL::Bbox_3 MeshGenerationFromImplicitShape::BoundingBox(double x_min, double y
 }
 
 MeshGenerationFromImplicitShape::MeshGenerationFromImplicitShape()
-    : in_facetsize(initData(&in_facetsize,"facet_size","size of facet"))
+    : TrackedComponent(this)
+    , in_facetsize(initData(&in_facetsize,"facet_size","size of facet"))
     , in_approximation(initData(&in_approximation,"approximation","approximation"))
     , in_cellsize(initData(&in_cellsize,"cell_size","size of cell"))
     , xmin_box(initData(&xmin_box,0.0,"xmin_box","xmin of bbox"))
@@ -116,39 +124,97 @@ MeshGenerationFromImplicitShape::MeshGenerationFromImplicitShape()
     , out_tetrahedra(initData(&out_tetrahedra, "outputTetras", "list of tetrahedra"))
     , in_scalarfield(initLink("scalarfield", "The scalar field that defined the iso-function"))
 {
+    f_listening.setValue(true);
 }
 
-void MeshGenerationFromImplicitShape::init() {
-
-    if(in_scalarfield.empty() == false)
+void MeshGenerationFromImplicitShape::init()
+{
+    if(in_scalarfield.empty())
     {
-        if(in_scalarfield->isComponentStateValid() == false) {
-            m_componentstate = ComponentState::Invalid;
-            msg_error() << "Previous component invalid";
-        }
-        volumeMeshGeneration(in_facetsize.getValue(),in_approximation.getValue(),in_cellsize.getValue());
+        m_componentstate = ComponentState::Invalid ;
+        msg_error() << "Component non linked" ;
+        return ;
     }
-    else
-    {
+
+    /// Start tracking the component
+    addComponent(in_scalarfield.get());
+
+    if(in_scalarfield->getStatus() != CStatus::Valid) {
         m_componentstate = ComponentState::Invalid;
-        msg_error() << "Component non linked";
+        msg_warning() << "Lazy Init()";
+        return ;
     }
+
+    /// std::cout << "LINK STATE " << in_scalarfield->findData("state") << std::endl ;
+    /// volumeMeshGeneration(in_facetsize.getValue(),in_approximation.getValue(),in_cellsize.getValue());
+
+    /// future from an async()
+    m_com = std::async(std::launch::async, [this](){
+        unsigned int countervalue = this->in_scalarfield->getCounter() ;
+        this->volumeMeshGeneration(this->in_facetsize.getValue(),
+                                   this->in_approximation.getValue(),
+                                   this->in_cellsize.getValue());
+        return countervalue; });
+}
+
+void MeshGenerationFromImplicitShape::reinit()
+{
+    std::cout << "REINIT" << std::endl ;
+    update() ;
+}
+
+void MeshGenerationFromImplicitShape::handleEvent(sofa::core::objectmodel::Event *event)
+{
+    if (dynamic_cast<sofa::core::objectmodel::IdleEvent *>(event))
+        update() ;
+    else
+        BaseObject::handleEvent(event);
+
 
 }
 
+void MeshGenerationFromImplicitShape::update()
+{
+    /// The inputs have changed
+    if(  !m_com.valid() && hasChanged() )
+    {
+         /// The inputs are not valid
+        if(in_scalarfield->getStatus() != CStatus::Valid)
+            return ;
+
+        std::cout << "Fire an async thread" << std::endl ;
+        /// The inputs are valid & we should grab them.
+        m_componentstate = ComponentState::Invalid ;
+        m_com = std::async(std::launch::async, [this](){
+            unsigned int countervalue = this->in_scalarfield->getCounter() ;
+            this->volumeMeshGeneration(this->in_facetsize.getValue(),
+                                       this->in_approximation.getValue(),
+                                       this->in_cellsize.getValue());
+            return countervalue; });
+    }
+
+    if( !m_com.valid() )
+        return ;
+
+    if( m_com.wait_for(std::chrono::microseconds::zero()) == std::future_status::ready )
+    {
+        m_componentstate = ComponentState::Valid ;
+        updateCounterAt(m_com.get());
+        dmsg_warning() << "Update component from source at " << m_com.get() ;
+        m_com = std::future<unsigned int>() ;
+    }
+}
 
 
-
-//mesh the implicit domain and export it to vtu file
-int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size, float approximation, float cell_size) {
-
-    if(m_componentstate == ComponentState::Invalid)
-        return 0;
-
+//mesh the implicit domain
+int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size, float approximation, float cell_size)
+{
     //Domain
     Mesh_domain *domain = NULL;
     if(in_scalarfield.empty())
         return 0;
+
+    while(in_scalarfield->getComponentState() != ComponentState::Valid ) ;
 
     ImplicitFunction function(in_scalarfield);
     Function_vector v;
@@ -167,6 +233,10 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size, floa
     //Topology
     sofa::helper::WriteAccessor< Data<VecCoord> > newPoints = out_Points;
     sofa::helper::WriteAccessor< Data<SeqTetrahedra> > tetrahedra = out_tetrahedra;
+
+    newPoints.clear();
+    tetrahedra.clear();
+
     Tr& tr = c3t3.triangulation();
     std::map<Vertex_handle, int> Vnbe;
     for( Cell_iterator cit = c3t3.cells_begin() ; cit != c3t3.cells_end() ; ++cit )
@@ -190,6 +260,7 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size, floa
             ++notconnected;
         }
         else
+
         {
             V[vit] = inum++;
             if (newPoints.empty())
@@ -216,7 +287,7 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size, floa
 //visualisation of the shape before mesh
 void MeshGenerationFromImplicitShape::draw(const sofa::core::visual::VisualParams* vparams) {
 
-    if(m_componentstate == ComponentState::Invalid)
+    if(m_componentstate != ComponentState::Valid)
         return;
 
     if(drawTetras.getValue()) {
