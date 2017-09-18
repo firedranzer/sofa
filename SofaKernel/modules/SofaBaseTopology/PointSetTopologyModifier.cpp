@@ -27,7 +27,7 @@
 #include <sofa/core/topology/TopologyChange.h>
 #include <SofaBaseTopology/PointSetTopologyContainer.h>
 #include <sofa/core/ObjectFactory.h>
-
+#include <algorithm>
 
 namespace sofa
 {

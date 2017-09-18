@@ -23,13 +23,8 @@
 #define SOFA_HELPER_VECTOR_H
 
 #include <vector>
-#include <string>
-#include <algorithm>
-#include <cassert>
-#include <iostream>
-#include <cstdlib>
+#include <iosfwd>
 #include <typeinfo>
-#include <cstdio>
 
 #include <sofa/helper/helper.h>
 #include <sofa/helper/MemoryManager.h>
@@ -49,14 +44,6 @@ namespace helper
 {
 
 void SOFA_HELPER_API vector_access_failure(const void* vec, unsigned size, unsigned i, const std::type_info& type);
-
-/// Convert the string 's' into an unsigned int. The error are reported in msg & numErrors
-/// is incremented.
-int SOFA_HELPER_API getInteger(const std::string& s, std::stringstream& msg, unsigned int& numErrors) ;
-
-/// Convert the string 's' into an unsigned int. The error are reported in msg & numErrors
-/// is incremented.
-unsigned int SOFA_HELPER_API getUnsignedInteger(const std::string& s, std::stringstream& msg, unsigned int& numErrors) ;
 
 
 template <class T, class MemoryManager = CPUMemoryManager<T> >
@@ -193,247 +180,14 @@ public:
     void fastResize(size_type n) {
         this->resize(n);
     }
-
 };
 
-/// Input stream
-/// Specialization for reading vectors of int and unsigned int using "A-B" notation for all integers between A and B, optionnally specifying a step using "A-B-step" notation.
-template<> inline
-std::istream& vector<int>::read( std::istream& in )
-{
-    int t;
-    this->clear();
-    std::string s;
-    std::stringstream msg;
-    unsigned int numErrors=0;
-
-    /// Cut the input stream in words using the standard's '<space>' token eparator.
-    while(in>>s)
-    {
-        /// Check if there is the sign '-' in the string s.
-        std::string::size_type hyphen = s.find_first_of('-',1);
-
-        /// If there is no '-' in s
-        if (hyphen == std::string::npos)
-        {
-            /// Convert the word into an integer number.
-            /// Use strtol because it reports error in case of parsing problem.
-            t = getInteger(s, msg, numErrors) ;
-            this->push_back(t);
-        }
-
-        /// If there is at least one '-'
-        else
-        {
-            int t1,t2,tinc;
-            std::string s1(s,0,hyphen);
-            t1 = getInteger(s1, msg, numErrors) ;
-            std::string::size_type hyphen2 = s.find_first_of('-',hyphen+2);
-            if (hyphen2 == std::string::npos)
-            {
-                std::string s2(s,hyphen+1);
-                t2 = getInteger(s2, msg, numErrors) ;
-                tinc = (t1<t2) ? 1 : -1;
-            }
-            else
-            {
-                std::string s2(s,hyphen+1,hyphen2-hyphen-1);
-                std::string s3(s,hyphen2+1);
-                t2 =  getInteger(s2, msg, numErrors) ;
-                tinc =  getInteger(s3, msg, numErrors) ;
-                if (tinc == 0)
-                {
-                    tinc = (t1<t2) ? 1 : -1;
-                    msg << "- Increment 0 is replaced by "<< tinc << msgendl;
-                }
-                if ((t2-t1)*tinc < 0)
-                {
-                    // increment not of the same sign as t2-t1 : swap t1<->t2
-                    t = t1;
-                    t1 = t2;
-                    t2 = t;
-                }
-            }
-
-            /// Go in backward order.
-            if (tinc < 0)
-                for (t=t1; t>=t2; t+=tinc)
-                    this->push_back(t);
-            /// Go in Forward order
-            else
-                for (t=t1; t<=t2; t+=tinc)
-                    this->push_back(t);
-        }
-    }
-    if( in.rdstate() & std::ios_base::eofbit ) { in.clear(); }
-    if(numErrors!=0)
-    {
-        msg_warning("vector<int>") << "Unable to parse vector values:" << msgendl
-                                   << msg.str() ;
-    }
-    return in;
-}
-
-
-/// Input stream
-/// Specialization for reading vectors of int and unsigned int using "A-B" notation for all integers between A and B
-template<> inline
-std::istream& vector<unsigned int>::read( std::istream& in )
-{
-    std::stringstream errmsg ;
-    unsigned int errcnt = 0 ;
-    unsigned int t = 0 ;
-
-    this->clear();
-    std::string s;
-    while(in>>s)
-    {
-        std::string::size_type hyphen = s.find_first_of('-',1);
-        if (hyphen == std::string::npos)
-        {
-            t = getUnsignedInteger(s, errmsg, errcnt) ;
-            this->push_back(t);
-        }
-        else
-        {
-            unsigned int t1,t2;
-            int tinc;
-            std::string s1(s,0,hyphen);
-            t1 = getUnsignedInteger(s1, errmsg, errcnt) ;
-            std::string::size_type hyphen2 = s.find_first_of('-',hyphen+2);
-            if (hyphen2 == std::string::npos)
-            {
-                std::string s2(s,hyphen+1);
-                t2 = getUnsignedInteger(s2, errmsg, errcnt);
-                tinc = (t1<=t2) ? 1 : -1;
-            }
-            else
-            {
-                std::string s2(s,hyphen+1,hyphen2-hyphen-1);
-                std::string s3(s,hyphen2+1);
-                t2 = getUnsignedInteger(s2, errmsg, errcnt);
-                tinc = getInteger(s3, errmsg, errcnt);
-                if (tinc == 0)
-                {
-                    tinc = (t1<=t2) ? 1 : -1;
-                    errmsg << "- problem while parsing '"<<s<<"': increment is 0. Use " << tinc << " instead." ;
-                }
-                if (((int)(t2-t1))*tinc < 0)
-                {
-                    /// increment not of the same sign as t2-t1 : swap t1<->t2
-                    t = t1;
-                    t1 = t2;
-                    t2 = t;
-                }
-            }
-            if (tinc < 0){
-                for (t=t1; t>t2; t=t+tinc)
-                    this->push_back(t);
-                this->push_back(t2);
-            } else {
-                for (t=t1; t<=t2; t=t+tinc)
-                    this->push_back(t);
-            }
-        }
-    }
-    if( in.rdstate() & std::ios_base::eofbit ) { in.clear(); }
-    if(errcnt!=0)
-    {
-        msg_warning("vector<unsigned int>") << "Unable to parse values" << msgendl
-                                            << errmsg.str() ;
-    }
-
-    return in;
-}
-
-/// Output stream
-/// Specialization for writing vectors of unsigned char
-template<> inline
-std::ostream& vector<unsigned char>::write(std::ostream& os) const
-{
-    if( this->size()>0 )
-    {
-        for( size_type i=0; i<this->size()-1; ++i )
-            os<<(int)(*this)[i]<<" ";
-        os<<(int)(*this)[this->size()-1];
-    }
-    return os;
-}
-
-/// Input stream
-/// Specialization for reading vectors of unsigned char
-template<> inline
-std::istream& vector<unsigned char>::read(std::istream& in)
-{
-    int t;
-    this->clear();
-    while(in>>t)
-    {
-        this->push_back((unsigned char)t);
-    }
-    if( in.rdstate() & std::ios_base::eofbit ) { in.clear(); }
-    return in;
-}
-
-
-// ======================  operations on standard vectors
-
-// -----------------------------------------------------------
-//
-/*! @name vector class-related methods
-
-*/
-//
-// -----------------------------------------------------------
-//@{
-/** Remove the first occurence of a given value.
-
-The remaining values are shifted.
-*/
-template<class T1, class T2>
-void remove( T1& v, const T2& elem )
-{
-    typename T1::iterator e = std::find( v.begin(), v.end(), elem );
-    if( e != v.end() )
-    {
-        typename T1::iterator next = e;
-        next++;
-        for( ; next != v.end(); ++e, ++next )
-            *e = *next;
-    }
-    v.pop_back();
-}
-
-/** Remove the first occurence of a given value.
-
-The last value is moved to where the value was found, and the other values are not shifted.
-*/
-template<class T1, class T2>
-void removeValue( T1& v, const T2& elem )
-{
-    typename T1::iterator e = std::find( v.begin(), v.end(), elem );
-    if( e != v.end() )
-    {
-        if (e != v.end()-1)
-            *e = v.back();
-        v.pop_back();
-    }
-}
-
-/// Remove value at given index, replace it by the value at the last index, other values are not changed
-template<class T, class TT>
-void removeIndex( std::vector<T,TT>& v, size_t index )
-{
-#if defined(SOFA_VECTOR_ACCESS_FAILURE)
-    //assert( 0<= static_cast<int>(index) && index <v.size() );
-    if (index>=v.size())
-        vector_access_failure(&v, v.size(), index, typeid(T));
+#ifndef SOFA_HELPER_VECTOR_CPP
+extern template std::istream& vector<int>::read( std::istream& in ) ;
+extern template std::istream& vector<unsigned int>::read( std::istream& in ) ;
+extern template std::ostream& vector<unsigned char>::write(std::ostream& os) const ;
+extern template std::istream& vector<unsigned char>::read(std::istream& in) ;
 #endif
-    if (index != v.size()-1)
-        v[index] = v.back();
-    v.pop_back();
-}
-
 
 } // namespace helper
 } // namespace sofa

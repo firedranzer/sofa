@@ -19,7 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-
+#include <algorithm>
 #include <map>
 #include <sofa/helper/gl/template.h>
 #include <sofa/core/ObjectFactory.h>

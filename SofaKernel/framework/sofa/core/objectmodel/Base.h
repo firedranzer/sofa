@@ -31,7 +31,6 @@
 #include <sofa/core/objectmodel/BaseClass.h>
 #include <sofa/core/objectmodel/SPtr.h>
 #include <sofa/core/objectmodel/Data.h>
-#include <sofa/core/objectmodel/BaseLink.h>
 #include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <sofa/core/objectmodel/Tag.h>
 
@@ -54,6 +53,7 @@ namespace core {
     class DataEngine;
     class DevBaseMonitor;
 namespace objectmodel {
+    class BaseLink;
     class BaseContext;
     class BaseObject;
     class BaseNode;
@@ -119,6 +119,7 @@ namespace core
 
 namespace objectmodel
 {
+
 
 /**
  *  \brief Base class for everything

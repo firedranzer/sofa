@@ -19,6 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#include<algorithm>
 #include <sofa/core/topology/TopologyChange.h>
 
 namespace sofa

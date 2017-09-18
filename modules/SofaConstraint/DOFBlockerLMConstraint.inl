@@ -28,7 +28,7 @@
 #include <sofa/helper/gl/Axis.h>
 #include <sofa/helper/gl/template.h>
 #include <SofaBaseTopology/TopologySubsetData.inl>
-
+#include <sofa/helper/vector_algorithm.h>
 
 namespace sofa
 {

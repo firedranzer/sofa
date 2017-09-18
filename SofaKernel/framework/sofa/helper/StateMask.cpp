@@ -21,7 +21,7 @@
 ******************************************************************************/
 
 #include "StateMask.h"
-
+#include <Eigen/SparseCore>
 #include <functional>
 
 namespace sofa
@@ -62,6 +62,40 @@ namespace helper
     }
 
 
+    /// filtering the given input matrix by using the mask as a diagonal projection matrix
+    /// output = mask.asDiagonal() * input
+    template<typename A>
+    void StateMask::maskedMatrix( A& output, const A& input, size_t blockSize ) const
+    {
+        typedef A Mat;
+
+        output.resize( input.rows(), input.cols() );
+
+        for( size_t k=0 ; k<mask.size() ; ++k )
+        {
+            for( size_t i=0 ; i<blockSize ; ++i )
+            {
+                int row = k*blockSize+i;
+                output.startVec( row );
+                if( mask[k] )
+                {
+                    for( typename Mat::InnerIterator it(input,row) ; it ; ++it )
+                        output.insertBack( row, it.col() ) = it.value();
+                }
+            }
+        }
+        output.finalize();
+    }
+
+    /*
+    template void StateMask::maskedMatrix<Eigen::SparseMatrix<double, Eigen::RowMajor, int>>(A& output,
+                                                                        const A& input,
+                                                                        size_t blockSize) ;
+
+    template void StateMask::maskedMatrix<Eigen::SparseMatrix<float, Eigen::RowMajor, int>>(A& output,
+                                                                        A& input,
+                                                                        size_t blockSize) ;
+                                                                        */
 #endif
 
 } // namespace helper

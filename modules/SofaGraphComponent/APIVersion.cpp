@@ -22,6 +22,8 @@
 *  Contributors:                                                              *
 *  - damien.marchal@univ-lille1.fr                                            *
 ******************************************************************************/
+#include <algorithm>
+
 #include <sofa/core/objectmodel/BaseObject.h>
 using sofa::core::objectmodel::BaseObject ;
 

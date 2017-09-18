@@ -26,7 +26,7 @@
 #include <SofaGeneralEngine/TransformEngine.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/helper/rmath.h> //M_PI
-
+#include <algorithm>
 #include <cassert>
 
 namespace sofa

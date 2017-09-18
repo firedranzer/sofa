@@ -23,7 +23,6 @@
 #define SOFA_HELPER_MEMORYMANAGER_H
 
 #include <sofa/helper/helper.h>
-#include <cstring>
 
 namespace sofa
 {
@@ -56,7 +55,7 @@ public :
     static int numDevices();
     //
     static void hostAlloc(host_pointer* hPointer,int n) { *hPointer = new T[n/sizeof(T)]; }
-    static void memsetHost(host_pointer hPointer, int value,size_t n) { memset((void*) hPointer, value, n); }
+    static void memsetHost(host_pointer hPointer, int value,size_t n) ;
     static void hostFree(const host_pointer hSrcPointer);
 
     static void deviceAlloc(int d,device_pointer* dPointer, int n);

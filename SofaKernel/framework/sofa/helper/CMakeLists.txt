@@ -101,6 +101,7 @@ set(HEADER_FILES
     system/FileMonitor.h
     system/FileRepository.h
     vector.h
+    vector_algorithm.h
     vectorData.h
     vectorLinks.h
     vector_algebra.h

@@ -25,7 +25,7 @@
 
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/helper/vector.h>
-
+#include <algorithm>
 namespace sofa
 {
 

@@ -27,7 +27,7 @@
 #include <SofaSimulationCommon/xml/XML.h>
 #include <SofaSimulationCommon/xml/NodeElement.h>
 #include <SofaSimulationCommon/FindByTypeVisitor.h>
-
+#include <algorithm>
 namespace sofa
 {
 

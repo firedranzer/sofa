@@ -25,7 +25,7 @@
 #include <sofa/helper/system/PipeProcess.h>
 #include <SofaSimulationCommon/xml/NodeElement.h>
 #include <sofa/helper/system/FileRepository.h>
-
+#include <algorithm>
 namespace sofa
 {
 

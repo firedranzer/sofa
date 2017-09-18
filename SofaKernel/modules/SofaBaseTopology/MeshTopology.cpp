@@ -26,6 +26,7 @@
 #include <sofa/helper/fixed_array.h>
 #include <set>
 #include <string.h>
+#include <algorithm>
 
 namespace sofa
 {

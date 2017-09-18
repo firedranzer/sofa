@@ -30,7 +30,7 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/simulation/Node.h>
 #include <sofa/simulation/Simulation.h>
-
+#include <algorithm>
 namespace sofa
 {
 

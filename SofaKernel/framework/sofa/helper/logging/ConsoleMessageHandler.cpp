@@ -27,7 +27,7 @@
 #include "Message.h"
 #include "ConsoleMessageHandler.h"
 #include "DefaultStyleMessageFormatter.h"
-
+#include <iostream>
 namespace sofa
 {
 

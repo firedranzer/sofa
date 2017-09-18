@@ -32,7 +32,7 @@
 #include <SofaBaseTopology/TopologySubsetData.inl>
 
 #include <sofa/core/visual/VisualParams.h>
-
+#include <sofa/helper/vector_algorithm.h>
 
 namespace sofa
 {

@@ -21,7 +21,7 @@
 ******************************************************************************/
 #include <sofa/core/loader/MeshLoader.h>
 #include <cstdlib>
-
+#include <algorithm>
 namespace sofa
 {
 

@@ -48,6 +48,7 @@
 #include <sofa/helper/map.h>
 #include <iostream>
 #include <functional>
+#include <algorithm>
 
 namespace sofa
 {

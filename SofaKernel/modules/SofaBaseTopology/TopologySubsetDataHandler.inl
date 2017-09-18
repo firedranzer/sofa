@@ -23,6 +23,7 @@
 #define SOFA_COMPONENT_TOPOLOGY_TOPOLOGYSUBSETDATAHANDLER_INL
 
 #include <SofaBaseTopology/TopologySubsetDataHandler.h>
+#include <algorithm>
 
 namespace sofa
 {

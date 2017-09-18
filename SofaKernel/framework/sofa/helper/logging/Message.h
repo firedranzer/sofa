@@ -25,14 +25,11 @@
 *****************************************************************************/
 #ifndef MESSAGE_H
 #define MESSAGE_H
-
-#include <iostream>
 #include <string>
-#include <cstring>
 #include <sofa/helper/helper.h>
-#include <sstream>
 #include <set>
-#include <boost/shared_ptr.hpp>
+#include <sstream>
+#include <iosfwd>
 
 #include "ComponentInfo.h"
 #include "FileInfo.h"

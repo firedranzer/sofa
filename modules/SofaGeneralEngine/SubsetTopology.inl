@@ -32,7 +32,7 @@
 #include <sofa/helper/gl/BasicShapes.h>
 #include <sofa/defaulttype/BoundingBox.h>
 #include <limits>
-
+#include <algorithm>
 namespace sofa
 {
 

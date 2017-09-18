@@ -30,7 +30,7 @@
 #include <sofa/helper/gl/template.h>
 #include <iostream>
 #include <sofa/helper/cast.h>
-
+#include <sofa/helper/vector_algorithm.h>
 
 namespace sofa
 {

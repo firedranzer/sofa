@@ -24,7 +24,7 @@
 #include <sofa/core/visual/VisualParams.h>
 
 #include <sofa/core/ObjectFactory.h>
-
+#include <algorithm>
 
 namespace sofa
 {

@@ -23,9 +23,6 @@
 #define SOFA_HELPER_PARTICLEMASK_H
 #include <sofa/helper/vector.h>
 
-#include <sofa/defaulttype/Mat.h>
-#include <Eigen/SparseCore>
-
 
 namespace sofa
 {
@@ -99,30 +96,8 @@ public:
 
     /// filtering the given input matrix by using the mask as a diagonal projection matrix
     /// output = mask.asDiagonal() * input
-    template<class Real>
-    void maskedMatrix( Eigen::SparseMatrix<Real,Eigen::RowMajor>& output, const Eigen::SparseMatrix<Real,Eigen::RowMajor>& input, size_t blockSize=1 ) const
-    {
-        typedef Eigen::SparseMatrix<Real,Eigen::RowMajor> Mat;
-
-        output.resize( input.rows(), input.cols() );
-
-        for( size_t k=0 ; k<mask.size() ; ++k )
-        {
-            for( size_t i=0 ; i<blockSize ; ++i )
-            {
-                int row = k*blockSize+i;
-                output.startVec( row );
-                if( mask[k] )
-                {
-                    for( typename Mat::InnerIterator it(input,row) ; it ; ++it )
-                        output.insertBack( row, it.col() ) = it.value();
-                }
-            }
-        }
-        output.finalize();
-    }
-
-
+    template<typename A>
+    void maskedMatrix( A& output, const A& input, size_t blockSize=1 ) const ;
 
     /// return the number of dofs in the mask
     size_t nbActiveDofs() const;
@@ -136,6 +111,7 @@ protected:
     bool activated; // automatic switch (the mask is only used for specific operations)
 
 };
+
 
 #else
 
@@ -178,8 +154,8 @@ public:
 
     /// filtering the given input matrix by using the mask as a diagonal projection matrix
     /// output = mask.asDiagonal() * input
-    template<class Real>
-    void maskedMatrix( Eigen::SparseMatrix<Real,Eigen::RowMajor>& output, const Eigen::SparseMatrix<Real,Eigen::RowMajor>& input, size_t blockSize=1 ) const {SOFA_UNUSED(blockSize); output=input;}
+    template<typename A>
+    void maskedMatrix( A& output, const A& input, size_t blockSize=1 ) const {SOFA_UNUSED(blockSize); output=input;}
 
     /// return the number of dofs in the mask
     size_t nbActiveDofs() const {return m_size;}

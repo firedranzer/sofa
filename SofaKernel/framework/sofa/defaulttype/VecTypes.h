@@ -29,7 +29,7 @@
 #include <sofa/helper/random.h>
 #include <sofa/defaulttype/MapMapSparseMatrix.h>
 #include <iostream>
-#include <algorithm>
+///#include <algorithm>
 #include <memory>
 #include <sofa/helper/logging/Messaging.h>
 

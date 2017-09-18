@@ -23,9 +23,7 @@
 #include <sofa/core/visual/VisualParams.h>
 
 #include <sofa/core/ObjectFactory.h>
-//#include <SofaBaseMechanics/MechanicalObject.inl>
-//#include <sofa/helper/gl/glText.inl>
-
+#include <algorithm>
 namespace sofa
 {
 

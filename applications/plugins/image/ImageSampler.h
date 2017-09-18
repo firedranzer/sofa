@@ -36,6 +36,8 @@
 #include <sofa/defaulttype/Vec.h>
 #include <sofa/helper/OptionsGroup.h>
 
+#include <algorithm>
+
 #define REGULAR 0
 #define LLOYD 1
 

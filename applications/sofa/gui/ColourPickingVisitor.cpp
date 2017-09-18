@@ -25,7 +25,7 @@
 #include <sofa/core/objectmodel/BaseContext.h>
 #include <sofa/helper/gl/BasicShapes.h>
 #include <sofa/simulation/Simulation.h>
-
+#include <algorithm>
 namespace sofa
 {
 namespace gui

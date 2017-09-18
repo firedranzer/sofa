@@ -58,7 +58,7 @@
 #include <cstddef>
 #include <stdexcept>
 #include <iterator>
-#include <algorithm>
+//#include <algorithm>
 #include <cmath>
 #include <cassert>
 

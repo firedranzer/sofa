@@ -27,6 +27,7 @@
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
 #include <sofa/helper/SVector.h>
+#include <algorithm>
 
 namespace sofa
 {

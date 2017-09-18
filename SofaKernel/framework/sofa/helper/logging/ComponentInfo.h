@@ -26,15 +26,13 @@
 #ifndef COMPONENTINFO_H
 #define COMPONENTINFO_H
 
-#include <iostream>
-#include <string>
-#include <cstring>
 #include <sofa/helper/helper.h>
-#include <sstream>
+#include <memory>
 #include <set>
+#include <iosfwd>
+#include <string>
 
-#include <boost/shared_ptr.hpp>
-
+////////////////////////////////////////  DECLARATION //////////////////////////////////////////////
 namespace sofa
 {
 namespace helper
@@ -63,7 +61,7 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const ComponentInfo& nfo) ;
     friend std::ostream& operator<<(std::ostream& out, const ComponentInfo* nfo) ;
 
-    typedef boost::shared_ptr<ComponentInfo> SPtr;
+    typedef std::shared_ptr<ComponentInfo> SPtr;
 protected:
     std::string m_sender ;
 };

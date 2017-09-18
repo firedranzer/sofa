@@ -30,6 +30,7 @@
 
 #include <sofa/helper/logging/Messaging.h>
 #include <sofa/helper/system/FileRepository.h>
+#include <algorithm>
 
 namespace sofa
 {

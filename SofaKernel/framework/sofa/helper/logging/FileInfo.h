@@ -26,13 +26,12 @@
 #ifndef FILEINFO_H
 #define FILEINFO_H
 
-#include <iostream>
+#include <iosfwd>
 #include <string>
-#include <cstring>
 #include <sofa/helper/helper.h>
-#include <sstream>
 #include <set>
-#include <boost/shared_ptr.hpp>
+#include <cstring>
+#include <memory>
 
 
 namespace sofa
@@ -52,7 +51,7 @@ static const char * s_unknownFile = "unknown-file";
 /// instead.
 struct FileInfo
 {
-    typedef boost::shared_ptr<FileInfo> SPtr;
+    typedef std::shared_ptr<FileInfo> SPtr;
 
     const char *filename {nullptr};
     int line             {0};

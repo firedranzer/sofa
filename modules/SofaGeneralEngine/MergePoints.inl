@@ -29,6 +29,7 @@
 #include <SofaGeneralEngine/MergePoints.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/helper/gl/template.h>
+#include <algorithm>
 
 namespace sofa
 {

@@ -39,6 +39,8 @@
 #include <newmat/newmatap.h>
 #include <sofa/helper/vectorData.h>
 
+#include <algorithm>
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif

@@ -28,14 +28,11 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/simulation/Simulation.h>
 #include <sofa/helper/gl/template.h>
-//#include <sofa/defaulttype/RigidTypes.h>
 #include <iostream>
 
 #include <SofaBaseTopology/TopologySubsetData.inl>
-
-
 #include <sofa/helper/gl/BasicShapes.h>
-
+#include <sofa/helper/vector_algorithm.h>
 
 
 

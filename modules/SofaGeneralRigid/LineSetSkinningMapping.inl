@@ -25,6 +25,7 @@
 
 #include <SofaGeneralRigid/LineSetSkinningMapping.h>
 #include <sofa/core/visual/VisualParams.h>
+#include <algorithm>
 
 namespace sofa
 {

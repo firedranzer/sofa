@@ -31,7 +31,6 @@
 #include <sofa/core/core.h>
 #include <sofa/core/objectmodel/Link.h>
 #include <sofa/core/objectmodel/BaseClass.h>
-#include <list>
 
 namespace sofa
 {
@@ -223,8 +222,6 @@ protected:
         return BaseLink::InitLink<DDGNode>(this, name, help);
     }
 
-    //std::list<DDGNode*> inputs;
-    //std::list<DDGNode*> outputs;
     DDGLink inputs;
     DDGLink outputs;
 
