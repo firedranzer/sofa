@@ -1,0 +1,8 @@
+#!/bin/sh
+#echo "GCC COMMAND" $@
+if echo "$@" | grep -q "\-o extlibs"; then
+  g++ $@ 
+else
+  g++ $@ -H
+fi
+

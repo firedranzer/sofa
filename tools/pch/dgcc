@@ -1,0 +1,10 @@
+#!/bin/sh
+#echo "GCC COMMAND" $@
+if echo "$@" | grep -q "\-o extlibs"; then
+  gcc $@ 
+  echo "matched";
+else
+  gcc $@ -include all1.h 
+  echo "no match";
+fi
+
