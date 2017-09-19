@@ -67,7 +67,6 @@ set(HEADER_FILES
     ScriptController.h
     ScriptEvent.h
     ScriptFunction.h
-    PythonComponent.h
 )
 
 set(SOURCE_FILES
@@ -124,7 +123,6 @@ set(SOURCE_FILES
     ScriptController.cpp
     ScriptEvent.cpp
     ScriptFunction.cpp
-    PythonComponent.cpp
     initSofaPython.cpp
 )
 
