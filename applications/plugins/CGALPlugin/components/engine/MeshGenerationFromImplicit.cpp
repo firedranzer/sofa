@@ -64,7 +64,7 @@ using sofa::defaulttype::Vec3d ;
 
 // Domain
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-
+using namespace CGAL::parameters;
 class ImplicitFunction : public std::unary_function<K::Point_3, K::FT> {
 
 private:
@@ -93,8 +93,21 @@ typedef typename C3t3::Cell_iterator Cell_iterator;
 typedef typename Tr::Vertex_handle Vertex_handle;
 //Mesh Criteria
 typedef CGAL::Mesh_criteria_3<Tr> Mesh_criteria;
+
 typedef Mesh_criteria::Facet_criteria Facet_criteria;
 typedef Mesh_criteria::Cell_criteria Cell_criteria;
+
+
+// Sizing field
+struct Spherical_sizing_field
+{
+  typedef Mesh_domain::Index Index;
+  typedef K::FT FT ;
+  K::FT operator()(const K::Point_3& p, const int, const Index&) const
+  {
+    return abs(cos(p.x()*10))+0.3;
+  }
+};
 
 
 //factory register
@@ -207,7 +220,7 @@ void MeshGenerationFromImplicitShape::update()
 
 
 //mesh the implicit domain
-int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size, float approximation, float cell_size)
+int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size2, float approximation, float cell_size2)
 {
     //Domain
     Mesh_domain *domain = NULL;
@@ -222,9 +235,12 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_size, floa
     domain = new Mesh_domain(v, K::Sphere_3(CGAL::ORIGIN, 5. *5.), 1e-3);
 
     //Criteria
-    Facet_criteria facet_criteria(30, facet_size, approximation); // angle, size, approximation
-    Cell_criteria cell_criteria(2., cell_size); // radius-edge ratio, size
-    Mesh_criteria criteria(facet_criteria, cell_criteria);
+    Spherical_sizing_field fsize ;
+    //Facet_criteria facet_criteria(30, facet_size2, approximation); // angle, size, approximation
+    //Cell_criteria cell_criteria(2., cell_size=fsize); // radius-edge ratio, size
+    ///Mesh_criteria criteria(facet_criteria, cell_criteria);
+    Mesh_criteria criteria(facet_angle=30.0, facet_size=facet_size2, facet_distance=approximation,
+                           cell_radius_edge_ratio=2.0, cell_size=fsize);
 
     //Mesh generation
     C3t3 c3t3 = CGAL::make_mesh_3<C3t3>(*domain, criteria, no_exude(), no_perturb());

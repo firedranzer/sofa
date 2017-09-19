@@ -90,25 +90,25 @@ CustomField::CustomField() :
 
 
 
-void CustomField::getCythonHook(PyObject*& module) const
+void CustomField::getCythonHook(PyObject*& module)
 {
-     if(module==nullptr)
+    if(module==nullptr)
     {
-        PyErr_Print();
+        msg_error() << "Invalid module" ;
         return ;
     }
 
     PyObject* pDict = PyModule_GetDict(module);
     if(pDict==nullptr)
     {
-        PyErr_Print();
+        msg_error() << "Missing dict" ;
         return ;
     }
 
-    PyObject* fct = PyDict_GetItemString(pDict, "getEvalFunction");
+    PyObject* fct = PyDict_GetItemString(pDict, "getCythonFunction");
     if (fct==nullptr)
     {
-        PyErr_Print();
+        msg_error() << "Get EvalFunction missing." ;
         return ;
     }
 
@@ -116,6 +116,23 @@ void CustomField::getCythonHook(PyObject*& module) const
     {
         msg_error() << "The object does not have getEvalFunction" ;
         return ;
+    }
+    msg_info() << "Got Cython HOOK ? " ;
+    PyObject* res = PyObject_CallFunction(fct, "");
+
+    if( res != nullptr )
+    {
+        PyObject* f=PyTuple_GetItem(res, 0) ;
+        PyObject* s=PyTuple_GetItem(res, 1) ;
+
+        if( PyCapsule_CheckExact(f) ){
+            std::cout << "IT IS A CAPSULE ! " << (int64_t)PyCapsule_GetPointer(f, "evalFunction")  <<std::endl ;
+        }
+        std::cout << "HELLO " << std::endl ;
+        m_rawFunction = (FieldFunction)PyCapsule_GetPointer(f, "evalFunction") ;
+        m_rawShape = s ;
+        std::cout << "TEST: " << m_rawFunction(m_rawShape,1.0,2.0,3.0) << std::endl ;
+        std::cout << "END" << std::endl ;
     }
 }
 
@@ -202,6 +219,7 @@ void CustomField::init()
         msg_info() << "No gradient function found from attribute 'gradient=\"" << d_gradient.getValue() <<"\"'. Falling back to finite difference implementation" ;
     }    
 
+    msg_warning() << "Search for getCythonHook" ;
     getCythonHook(m_functionModule) ;
 
 
@@ -221,13 +239,16 @@ void CustomField::reinit()
 
 double CustomField::getValue(Vec3d& pos, int& domain)
 {
-    PythonEnvironment::gil lock(__func__) ;
-
     SOFA_UNUSED(domain);
     assert(m_evalFunction!=nullptr) ;
 
     if(m_componentstate!=ComponentState::Valid)
         return std::nan("") ;
+
+    if(m_rawFunction)
+        return m_rawFunction(m_rawShape, pos.x(), pos.y(), pos.z()) ;
+
+    PythonEnvironment::gil lock(__func__) ;
 
     PyObject* res = PyObject_CallFunction(m_evalFunction, "fff", pos.x(), pos.y(), pos.z());
     if(!res)
@@ -249,7 +270,6 @@ double CustomField::getValue(Vec3d& pos, int& domain)
 Vec3d CustomField::getGradient(Vec3d& pos, int& domain)
 {
     SOFA_UNUSED(domain);
-    PythonEnvironment::gil lock(__func__) ;
     Vec3d tmp(std::nan(""),std::nan(""),std::nan("")) ;
 
     /// The component is not valid. We return nan.
@@ -259,6 +279,8 @@ Vec3d CustomField::getGradient(Vec3d& pos, int& domain)
     //// The component is valid but we have no gradient function. Thus we use the finite difference version.
     if(m_gradFunction==nullptr)
         return ScalarField::getGradient(pos, domain) ;
+
+    PythonEnvironment::gil lock(__func__) ;
 
     PyObject* res = PyObject_CallFunction(m_gradFunction, "fff", pos.x(), pos.y(), pos.z());
     if(!res)

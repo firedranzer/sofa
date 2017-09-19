@@ -16,8 +16,16 @@ cdef class Shape:
     def __init__(self):
         None
 
-    cdef double evalField(Shape tgt, Vec3d p):
+    cdef double evalFieldC(Shape tgt, Vec3d p):
         return 0.0
+
+    def evalField(self, p):
+        return self.evalFieldC(Vec3d(p[0],p[1], p[2]))
+
+
+cdef class PythonShape(Shape):
+    cdef double evalFieldC(self, Vec3d p):
+        return  self.evalField((p.x, p.y, p.z))
 
 cdef class Sphere(Shape):
         cdef Vec3d center
@@ -29,8 +37,9 @@ cdef class Sphere(Shape):
         def setCenter(self, a):
             self.center.x = self.center.x + a
 
-        cdef double evalField(self, Vec3d p):
+        cdef double evalFieldC(self, Vec3d p):
             return  (self.center + p).length() - self.radius
+
 
 cdef class Union(Shape):
         cdef Shape a
@@ -39,8 +48,9 @@ cdef class Union(Shape):
             self.a = a
             self.b = b
 
-        cdef double evalField(self, Vec3d p):
-                return  min(self.a.evalField(p), self.b.evalField(p))
+        cdef double evalFieldC(self, Vec3d p):
+                return  min(self.a.evalFieldC(p), self.b.evalFieldC(p))
+
 
 cdef class Difference(Shape):
         cdef Shape a
@@ -49,8 +59,8 @@ cdef class Difference(Shape):
             self.a = a
             self.b = b
 
-        cdef double evalField(self, Vec3d p):
-                return  max(-self.a.evalField(p), self.b.evalField(p))
+        cdef double evalFieldC(self, Vec3d p):
+                return  max(-self.a.evalFieldC(p), self.b.evalFieldC(p))
 
 
 cdef class Intersection(Shape):
@@ -60,20 +70,20 @@ cdef class Intersection(Shape):
             self.a = a
             self.b = b
 
-        cdef double evalField(self, Vec3d p):
-                return  max(self.a.evalField(p), self.b.evalField(p))
+        cdef double evalFieldC(self, Vec3d p):
+              return  max(self.a.evalFieldC(p), self.b.evalFieldC(p))
 
-
-cdef double evalFieldC(Shape tgt, Vec3d p):
+cdef double rawEvalFieldC(Shape tgt, double x, double y, double z):
     #with nogil:
-    return tgt.evalField(p)
+    return tgt.evalFieldC(Vec3d(x,y,z))
 
 cpdef double evalField(Shape tgt, x, y ,z):
-    return evalFieldC(tgt, Vec3d(x,y,z))
+    return rawEvalFieldC(tgt,x,y,z)
 
-cdef installCythonHookC(obj, Shape shape):
-    return PyCapsule_New(<void*>12345678, "evalFunction", NULL)
 
-cpdef installCythonHook(obj, shape):
+cdef getCythonRawFunctionC(Shape shape):
+    return ( PyCapsule_New(<void*>rawEvalFieldC, "evalFunction", NULL), shape )
+
+cpdef getCythonRawFunction(shape):
     print("INSTALLING A LOW LEVEL CYTHON HOOK TO: ")
-    return installCythonHook(obj, shape)
+    return getCythonRawFunctionC(shape)

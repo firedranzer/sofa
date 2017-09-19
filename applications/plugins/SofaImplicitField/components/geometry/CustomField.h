@@ -55,7 +55,12 @@ using sofa::defaulttype::Vec3d ;
 using sofa::core::objectmodel::Data ;
 using sofa::helper::system::FileEventListener ;
 
+
+
+
 //////////////////////////// CLASS DEFINITION //////////////////////////////////////////////////////
+typedef  double (*FieldFunction)(void*, double x, double y, double z) ;
+
 class SOFA_SOFAIMPLICITFIELD_API CustomField : public ScalarField
 {
 public:
@@ -77,7 +82,8 @@ public:
     PyObject*         m_evalFunction ;
     PyObject*         m_gradFunction ;
 
-    void getCythonHook(PyObject*& module) const ;
+    void getCythonHook(PyObject*& module) ;
+
 protected:
     CustomField( ) ;
     virtual ~CustomField() { }
@@ -92,6 +98,9 @@ private:
 
     PyObject* m_functionModule {nullptr} ;
     PyObject* m_gradientModule {nullptr} ;
+
+    FieldFunction  m_rawFunction {nullptr} ;
+    PyObject*      m_rawShape {nullptr} ;
 
     FileEventListener* m_sourcefile ;
 
