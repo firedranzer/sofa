@@ -3,6 +3,10 @@ import dfgeom
 from dfgeom import *
 import math
 
+import accordion
+import primitives
+
+
 class Difference2(PythonShape):
         def __init__(self, a, b):
             self.a = a
@@ -12,8 +16,8 @@ class Difference2(PythonShape):
                 return  max(-self.a.evalField(p), self.b.evalField(p))
 
 
-r = 0.7
-dd = -0.5
+r = 0.
+dd = -0.0
 s1 = Sphere([1.0,0.0,0.0],1.0)
 s2 = Sphere([dd,0.0,0.0],1.3)
 s3 = Sphere([-1.0,0.0,0.0],1.0)
@@ -29,8 +33,11 @@ u5= Union(u3,u4)
 d = Difference(u5, d)
 
 
-def getCythonFunction():
-    return dfgeom.getCythonRawFunction(d)
+#def getCythonFunction():
+#    return dfgeom.getCythonRawFunction(d)
+
+shape=accordion.accordionUniform(10.0,4.0,2.0,"frisbee",5,5.0,5.0,5.0)
 
 def evalField(x, y, z):
-        return dfgeom.evalField(d, x, y, z)
+    point=primitives.Point(x,y,z)
+    return shape.eval(point) #dfgeom.evalField(d, x, y, z)

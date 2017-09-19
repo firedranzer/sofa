@@ -1,8 +1,8 @@
 from libc.math cimport cos, sin, sqrt
 from cpython.pycapsule cimport *
 # distutils: language = c++
-# distutils: sources = /home/dmarchal/projects/2016/DEFROST/04-code/sofa-src/sofa/master/forkdefrost/sofa/applications/plugins/CGALPlugin/examples/vector.cpp
-cdef extern from "/home/dmarchal/projects/2016/DEFROST/04-code/sofa-src/sofa/master/forkdefrost/sofa/applications/plugins/CGALPlugin/examples/vector.h" namespace "":
+# distutils: sources = /home/morzadec/Documents/sofa/src/applications/plugins/CGALPlugin/examples/vector.cpp
+cdef extern from "/home/morzadec/Documents/sofa/src/applications/plugins/CGALPlugin/examples/vector.h" namespace "":
     cdef cppclass Vec3d:
             Vec3d()
             Vec3d(double x, double y, double z)
