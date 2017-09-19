@@ -25,9 +25,7 @@
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <sofa/core/behavior/BaseMechanicalState.h>
 #include <sofa/core/MultiVecId.h>
-#include <sofa/core/MechanicalParams.h>
-#include <sofa/defaulttype/BaseMatrix.h>
-#include <sofa/defaulttype/BaseVector.h>
+#include <sofa/core/MechanicalParams_fwd.h>
 
 namespace sofa
 {

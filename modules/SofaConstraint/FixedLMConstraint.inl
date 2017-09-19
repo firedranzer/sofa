@@ -23,6 +23,7 @@
 #define SOFA_COMPONENT_CONSTRAINTSET_FIXEDLMCONSTRAINT_INL
 
 #include <SofaConstraint/FixedLMConstraint.h>
+#include <sofa/core/behavior/LMConstraint.inl>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/simulation/Simulation.h>
 #include <sofa/helper/gl/template.h>

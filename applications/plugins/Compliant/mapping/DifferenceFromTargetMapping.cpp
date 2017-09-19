@@ -1,5 +1,6 @@
 #include "DifferenceFromTargetMapping.h"
 
+#include <sofa/core/Mapping.inl>
 #include <sofa/core/ObjectFactory.h>
 
 namespace sofa

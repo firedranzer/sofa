@@ -23,7 +23,7 @@
 #define SOFA_COMPONENT_MAPPING_CENTERPOINTMAPPING_INL
 
 #include "CenterPointMechanicalMapping.h"
-
+#include <sofa/core/Mapping.inl>
 #include <sofa/core/topology/BaseMeshTopology.h>
 
 

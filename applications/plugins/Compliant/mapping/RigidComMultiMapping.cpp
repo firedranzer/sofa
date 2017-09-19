@@ -1,5 +1,6 @@
 #include "RigidComMultiMapping.h"
 
+#include <sofa/core/MultiMapping.inl>
 
 #include <sofa/defaulttype/RigidTypes.h>
 

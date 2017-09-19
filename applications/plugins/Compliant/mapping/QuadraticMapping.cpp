@@ -1,4 +1,6 @@
 #include "QuadraticMapping.h"
+#include <sofa/core/Mapping.inl>
+
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/ObjectFactory.h>
 

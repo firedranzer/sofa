@@ -25,6 +25,7 @@
 #include <sofa/core/behavior/LMConstraint.h>
 #include <sofa/core/BaseMapping.h>
 #include <sofa/core/objectmodel/BaseNode.h>
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 
 
 namespace sofa
@@ -100,6 +101,49 @@ void LMConstraint<DataTypes1,DataTypes2>::init()
             simulatedObject2 = mapping->getMechFrom()[0];
         }
     }
+}
+
+
+/// Pre-construction check method called by ObjectFactory.
+template<class DataTypes1,class DataTypes2>
+template<class T>
+bool LMConstraint<DataTypes1,DataTypes2>::canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+{
+    if (arg->getAttribute("object1") || arg->getAttribute("object2"))
+    {
+        if (dynamic_cast<MechanicalState<DataTypes1>*>(arg->findObject(arg->getAttribute("object1",".."))) == NULL)
+            return false;
+        if (dynamic_cast<MechanicalState<DataTypes2>*>(arg->findObject(arg->getAttribute("object2",".."))) == NULL)
+            return false;
+    }
+    else
+    {
+        if (dynamic_cast<MechanicalState<DataTypes1>*>(context->getMechanicalState()) == NULL)
+            return false;
+    }
+    return sofa::core::objectmodel::BaseObject::canCreate(obj, context, arg);
+}
+
+/// Construction method called by ObjectFactory.
+template<class DataTypes1,class DataTypes2>
+template<class T>
+typename T::SPtr LMConstraint<DataTypes1,DataTypes2>::create(T* p0, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+{
+    typename T::SPtr obj = sofa::core::objectmodel::BaseObject::create(p0, context, arg);
+
+    if (arg && (arg->getAttribute("object1") || arg->getAttribute("object2")))
+    {
+        obj->constrainedObject1 = dynamic_cast<MechanicalState<DataTypes1>*>(arg->findObject(arg->getAttribute("object1","..")));
+        obj->constrainedObject2 = dynamic_cast<MechanicalState<DataTypes2>*>(arg->findObject(arg->getAttribute("object2","..")));
+    }
+    else if (context)
+    {
+        obj->constrainedObject1 =
+            obj->constrainedObject2 =
+                    dynamic_cast<MechanicalState<DataTypes1>*>(context->getMechanicalState());
+    }
+
+    return obj;
 }
 
 

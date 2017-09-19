@@ -102,24 +102,11 @@ public:
     /// Pre-construction check method called by ObjectFactory.
     /// Check that DataTypes matches the MechanicalState.
     template<class T>
-    static bool canCreate(T*& obj, BaseContext* context, BaseObjectDescription* arg)
-    {
-        if (!arg->getAttribute("template"))
-        {
-            // only check if this template is correct if no template was given
-            if (context->getMechanicalState() && dynamic_cast<MechanicalState<DataTypes>*>(context->getMechanicalState()) == NULL)
-                return false; // this template is not the same as the existing MechanicalState
-        }
-
-        return BaseObject::canCreate(obj, context, arg);
-    }
+    static bool canCreate(T*& obj, BaseContext* context, BaseObjectDescription* arg) ;
 
     /// Construction method called by ObjectFactory.
     template<class T>
-    static typename T::SPtr create(T* tObj, BaseContext* context, BaseObjectDescription* arg)
-    {
-        return BaseObject::create(tObj, context, arg);
-    }
+    static typename T::SPtr create(T* tObj, BaseContext* context, BaseObjectDescription* arg) ;
 
     virtual string getTemplateName() const
     {

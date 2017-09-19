@@ -20,6 +20,7 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <SofaBaseCollision/ContactListener.h>
 
 #include <sofa/core/collision/NarrowPhaseDetection.h>
@@ -136,6 +137,95 @@ namespace sofa
 
 			}
 
+
+            template<class T>
+            bool ContactListener::canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+            {
+                core::CollisionModel* collModel1 = NULL;
+                core::CollisionModel* collModel2 = NULL;
+
+                std::string collModelPath1;
+                std::string collModelPath2;
+
+                if (arg->getAttribute("collisionModel1"))
+                    collModelPath1 = arg->getAttribute("collisionModel1");
+                else
+                    collModelPath1 = "";
+
+                context->findLinkDest(collModel1, collModelPath1, NULL);
+
+                if (arg->getAttribute("collisionModel2"))
+                    collModelPath2 = arg->getAttribute("collisionModel2");
+                else
+                    collModelPath2 = "";
+
+                context->findLinkDest(collModel2, collModelPath2, NULL);
+
+                if (collModel1 == NULL && collModel2 == NULL )
+                {
+                    context->serr << "Creation of " << className(obj) <<
+                        " CollisonListener failed because no Collision Model links are found: \"" << collModelPath1
+                        << "\" and \"" << collModelPath2 << "\" " << context->sendl;
+                    return false;
+                }
+
+                return BaseObject::canCreate(obj, context, arg);
+            }
+
+
+
+            template<class T>
+            typename T::SPtr ContactListener::create(T* , core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+            {
+                CollisionModel* collModel1 = NULL;
+                CollisionModel* collModel2 = NULL;
+
+                std::string collModelPath1;
+                std::string collModelPath2;
+
+                if(arg)
+                {
+                    collModelPath1 = arg->getAttribute(std::string("collisionModel1"), NULL );
+                    collModelPath2 = arg->getAttribute(std::string("collisionModel2"), NULL );
+
+                    // now 3 cases
+                    if ( strcmp( collModelPath1.c_str(),"" ) != 0  )
+                    {
+                        context->findLinkDest(collModel1, collModelPath1, NULL);
+
+                        if ( strcmp( collModelPath2.c_str(),"" ) != 0 )
+                        {
+                            context->findLinkDest(collModel2, collModelPath2, NULL);
+                        }
+                    }
+                    else
+                    {
+                        context->findLinkDest(collModel1, collModelPath2, NULL);
+                    }
+
+
+                }
+
+                typename T::SPtr obj = sofa::core::objectmodel::New<T>( collModel1, collModel2 );
+
+                //if ( obj )
+                //{
+                //	obj->mLinkCollisionModel1.setPath( collModelPath1 );
+                //	obj->mLinkCollisionModel2.setPath( collModelPath2 );
+                //}
+
+                if (context)
+                {
+                    context->addObject(obj);
+                }
+
+                if (arg)
+                {
+                    obj->parse(arg);
+                }
+
+                return obj;
+            }
 
 		} // namespace collision
 

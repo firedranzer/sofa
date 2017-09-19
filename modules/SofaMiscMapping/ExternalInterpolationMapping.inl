@@ -24,7 +24,7 @@
 
 #include "ExternalInterpolationMapping.h"
 #include <sofa/core/topology/BaseMeshTopology.h>
-
+#include <sofa/core/Mapping.inl>
 namespace sofa
 {
 

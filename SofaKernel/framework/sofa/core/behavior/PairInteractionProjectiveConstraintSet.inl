@@ -22,6 +22,7 @@
 #ifndef SOFA_CORE_BEHAVIOR_PAIRINTERACTIONPROJECTIVECONSTRAINTSET_INL
 #define SOFA_CORE_BEHAVIOR_PAIRINTERACTIONPROJECTIVECONSTRAINTSET_INL
 
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <sofa/core/behavior/PairInteractionProjectiveConstraintSet.h>
 
 
@@ -155,6 +156,52 @@ void PairInteractionProjectiveConstraintSet<DataTypes>::projectPosition(const Me
 #endif /* SOFA_SMP */
             projectPosition(mparams, *xId[mstate1.get(mparams)].write(), *xId[mstate2.get(mparams)].write());
     }
+}
+
+template<class DataTypes>
+template<class T>
+bool PairInteractionProjectiveConstraintSet<DataTypes>::canCreate(T* obj, objectmodel::BaseContext* context, objectmodel::BaseObjectDescription* arg)
+{
+    MechanicalState<DataTypes>* mstate1 = NULL;
+    MechanicalState<DataTypes>* mstate2 = NULL;
+    std::string object1 = arg->getAttribute("object1","@./");
+    std::string object2 = arg->getAttribute("object2","@./");
+    if (object1.empty()) object1 = "@./";
+    if (object2.empty()) object2 = "@./";
+    context->findLinkDest(mstate1, object1, NULL);
+    context->findLinkDest(mstate2, object2, NULL);
+
+    if (!mstate1 || !mstate2)
+        return false;
+    return BaseInteractionProjectiveConstraintSet::canCreate(obj, context, arg);
+}
+
+/// Construction method called by ObjectFactory.
+template<class DataTypes>
+template<class T>
+typename T::SPtr PairInteractionProjectiveConstraintSet<DataTypes>::create(T* /*p0*/, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+{
+    typename T::SPtr obj = sofa::core::objectmodel::New<T>();
+
+    if (context)
+        context->addObject(obj);
+
+    if (arg)
+    {
+        std::string object1 = arg->getAttribute("object1","");
+        std::string object2 = arg->getAttribute("object2","");
+        if (!object1.empty())
+        {
+            arg->setAttribute("object1", object1.c_str());
+        }
+        if (!object2.empty())
+        {
+            arg->setAttribute("object2", object2.c_str());
+        }
+        obj->parse(arg);
+    }
+
+    return obj;
 }
 
 } // namespace behavior

@@ -27,6 +27,8 @@
 #include <SofaEigen2Solver/EigenSparseMatrix.h>
 #include <iostream>
 #include <SofaBaseMechanics/IdentityMapping.h>
+#include <sofa/core/Mapping.inl>
+#include <sofa/core/MultiMapping.inl>
 
 namespace sofa
 {

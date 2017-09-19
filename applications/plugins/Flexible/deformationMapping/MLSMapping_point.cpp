@@ -28,7 +28,9 @@
 #include <sofa/defaulttype/VecTypes.h>
 #include "../types/DeformationGradientTypes.h"
 
+#include <sofa/core/Mapping.inl>
 #include "BaseDeformationMapping.inl"
+
 
 namespace sofa
 {

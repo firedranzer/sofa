@@ -24,7 +24,6 @@
 
 #include <sofa/core/objectmodel/Base.h>
 #include <sofa/core/objectmodel/BaseContext.h>
-#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <sofa/core/objectmodel/Link.h>
 #ifdef SOFA_SMP
 #include <sofa/defaulttype/SharedTypes.h>

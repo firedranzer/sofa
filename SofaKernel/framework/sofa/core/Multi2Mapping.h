@@ -294,38 +294,14 @@ public:
     /// if they are compatible with the input and output models types of this
     /// mapping.
     template<class T>
-    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
-    {
-        std::string input1 = arg->getAttribute("input1","");
-        std::string input2 = arg->getAttribute("input2","");
-        std::string output = arg->getAttribute("output","");
-        if (!input1.empty() && !LinkFromModels1::CheckPaths(input1, context))
-            return false;
-        if (!input2.empty() && !LinkFromModels2::CheckPaths(input2, context))
-            return false;
-        if (output.empty() || !LinkToModels::CheckPaths(output, context))
-            return false;
-
-        return BaseMapping::canCreate(obj, context, arg);
-    }
+    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg) ;
 
     /// Construction method called by ObjectFactory.
     ///
     /// This implementation read the input and output attributes to
     /// find the input and output models of this mapping.
     template<class T>
-    static typename T::SPtr create(T*, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
-    {
-        typename T::SPtr obj = sofa::core::objectmodel::New<T>();
-
-        if (context)
-            context->addObject(obj);
-
-        if (arg)
-            obj->parse(arg);
-
-        return obj;
-    }
+    static typename T::SPtr create(T*, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg) ;
 
 
 protected:

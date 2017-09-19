@@ -22,15 +22,12 @@
 #ifndef SOFA_DEFAULTTYPE_COLOR_H
 #define SOFA_DEFAULTTYPE_COLOR_H
 
-#include <functional>
-#include <limits>
+//#include <functional>
+//#include <limits>
+//#include <sofa/helper/rmath.h>
+//#include <sofa/defaulttype/DataTypeInfo.h>
 
-#include <sofa/helper/rmath.h>
 #include <sofa/helper/types/RGBAColor.h>
-
-#include <sofa/defaulttype/DataTypeInfo.h>
-
-
 namespace sofa
 {
 

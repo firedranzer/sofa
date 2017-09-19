@@ -33,7 +33,7 @@
 #include <SofaMeshCollision/TriangleModel.h>
 #include <SofaBaseCollision/NewProximityIntersection.h>
 #include <SofaBaseCollision/BruteForceDetection.h>
-
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 namespace sofa
 {
 

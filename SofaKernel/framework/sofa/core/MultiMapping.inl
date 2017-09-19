@@ -21,7 +21,7 @@
 ******************************************************************************/
 #ifndef SOFA_CORE_MULTIMAPPING_INL
 #define SOFA_CORE_MULTIMAPPING_INL
-
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <sofa/core/MultiMapping.h>
 
 namespace sofa
@@ -264,6 +264,47 @@ void MultiMapping<In,Out>::updateForceMask()
     for (size_t i=0 ; i<fromModels.size() ; i++)
         fromModels[i]->forceMask.assign(fromModels[i]->getSize(),true);
 }
+
+
+/// Pre-construction check method called by ObjectFactory.
+///
+/// This implementation read the object1 and object2 attributes and check
+/// if they are compatible with the input and output models types of this
+/// mapping.
+template < class In, class Out >
+template<class T>
+bool MultiMapping<In,Out>::canCreate(T*& obj, core::objectmodel::BaseContext* context,
+                                            core::objectmodel::BaseObjectDescription* arg)
+{
+    std::string input  = arg->getAttribute("input","");
+    if( input.empty() || !LinkFromModels::CheckPaths( input, context ) ) return false;
+    std::string output = arg->getAttribute("output","");
+    if( output.empty() || !LinkToModels::CheckPaths( output, context ) ) return false;
+    return BaseMapping::canCreate(obj, context, arg);
+}
+
+/// Construction method called by ObjectFactory.
+///
+/// This implementation read the input and output attributes to
+/// find the input and output models of this mapping.
+template < class In, class Out >
+template<class T>
+typename T::SPtr MultiMapping<In,Out>::create(T*, core::objectmodel::BaseContext* context,
+                                                     core::objectmodel::BaseObjectDescription* arg)
+{
+    typename T::SPtr obj = sofa::core::objectmodel::New<T>();
+
+    if (context)
+        context->addObject(obj);
+
+    if (arg)
+    {
+        obj->parse(arg);
+    }
+
+    return obj;
+}
+
 
 } // namespace core
 

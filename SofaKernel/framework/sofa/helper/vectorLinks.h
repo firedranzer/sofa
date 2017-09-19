@@ -29,6 +29,7 @@
 #include <sofa/core/objectmodel/Link.h>
 #include <sofa/core/DataEngine.h>
 #include <sofa/helper/helper.h>
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 
 namespace sofa
 {

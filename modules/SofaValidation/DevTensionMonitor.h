@@ -29,7 +29,7 @@
 #include <SofaValidation/DevMonitor.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/behavior/MechanicalState.h>
-
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 namespace sofa
 {
 

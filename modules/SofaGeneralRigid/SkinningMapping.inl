@@ -23,6 +23,7 @@
 #define SOFA_COMPONENT_MAPPING_SKINNINGMAPPING_INL
 
 #include <SofaGeneralRigid/SkinningMapping.h>
+#include <sofa/core/Mapping.inl>
 #include <sofa/core/visual/VisualParams.h>
 
 #include <SofaBaseTopology/TriangleSetTopologyContainer.h>

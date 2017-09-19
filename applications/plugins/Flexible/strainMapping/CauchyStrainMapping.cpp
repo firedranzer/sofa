@@ -28,6 +28,8 @@
 #include "../types/DeformationGradientTypes.h"
 #include "../types/StrainTypes.h"
 
+#include <sofa/core/Mapping.inl>
+
 namespace sofa
 {
 namespace component

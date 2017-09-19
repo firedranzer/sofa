@@ -25,6 +25,7 @@
 #include "SquareMapping.h"
 #include <sofa/core/visual/VisualParams.h>
 #include <iostream>
+#include <sofa/core/Mapping.inl>
 #include <sofa/simulation/Node.h>
 
 namespace sofa

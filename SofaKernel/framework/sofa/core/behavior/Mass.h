@@ -24,7 +24,7 @@
 
 #include <sofa/core/core.h>
 #include <sofa/core/MultiVecId.h>
-#include <sofa/core/MechanicalParams.h>
+#include <sofa/core/MechanicalParams_fwd.h>
 #include <sofa/core/behavior/BaseMass.h>
 #include <sofa/core/behavior/ForceField.h>
 #include <sofa/core/behavior/MechanicalState.h>

@@ -22,6 +22,7 @@
 #define SOFA_COMPONENT_MAPPING_LINEARMAPPING_affine_CPP
 
 #include <Flexible/config.h>
+#include <sofa/core/Mapping.inl>
 #include "LinearMapping.h"
 #include <sofa/core/ObjectFactory.h>
 

@@ -23,6 +23,7 @@
 
 
 #include "RelativeStrainMapping.h"
+#include <sofa/core/Mapping.inl>
 #include <sofa/core/ObjectFactory.h>
 
 #include "../types/DeformationGradientTypes.h"

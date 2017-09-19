@@ -23,6 +23,7 @@
 #define SOFA_COMPONENT_MAPPING_SPHFLUIDSURFACEMAPPING_INL
 
 #include <SofaSphFluid/SPHFluidSurfaceMapping.h>
+#include <sofa/core/Mapping.inl>
 #include <sofa/core/visual/VisualParams.h>
 #include <SofaSphFluid/SpatialGridContainer.inl>
 

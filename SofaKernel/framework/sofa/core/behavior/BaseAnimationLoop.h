@@ -23,7 +23,7 @@
 #define SOFA_CORE_BEHAVIOR_BASEANIMATIONLOOP_H
 
 #include <sofa/core/objectmodel/BaseObject.h>
-#include <sofa/core/ExecParams.h>
+#include <sofa/core/ExecParams_fwd.h>
 
 namespace sofa
 {

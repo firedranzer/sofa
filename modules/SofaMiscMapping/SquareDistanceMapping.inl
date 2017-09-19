@@ -23,6 +23,7 @@
 #define SOFA_COMPONENT_MAPPING_SquareDistanceMapping_INL
 
 #include "SquareDistanceMapping.h"
+#include <sofa/core/Mapping.inl>
 #include <sofa/core/visual/VisualParams.h>
 #include <iostream>
 #include <sofa/simulation/Node.h>

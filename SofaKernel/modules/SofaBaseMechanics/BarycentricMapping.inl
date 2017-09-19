@@ -22,6 +22,7 @@
 #ifndef SOFA_COMPONENT_MAPPING_BARYCENTRICMAPPING_INL
 #define SOFA_COMPONENT_MAPPING_BARYCENTRICMAPPING_INL
 
+#include <sofa/core/Mapping.inl>
 #include <SofaBaseMechanics/BarycentricMapping.h>
 #include <sofa/core/visual/VisualParams.h>
 

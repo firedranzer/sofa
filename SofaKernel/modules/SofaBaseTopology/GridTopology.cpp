@@ -19,6 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <SofaBaseTopology/GridTopology.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
@@ -390,6 +391,23 @@ GridTopology::Quad GridTopology::getQuad(int x, int y, int z)
         return Quad(point(1, y, z),point(1, y+1, z),
                 point(1, y+1, z+1),point(1, y, z+1));
 }
+
+/// Overload method from \sa BaseObject::parse . /// Parse the given description to assign values to this object's fields and potentially other parameters
+void GridTopology::parse(core::objectmodel::BaseObjectDescription* arg)
+{
+    this->MeshTopology::parse(arg);
+
+    if (arg->getAttribute("nx")!=NULL && arg->getAttribute("ny")!=NULL && arg->getAttribute("nz")!=NULL )
+    {
+        int nx = arg->getAttributeAsInt("nx", d_n.getValue().x());
+        int ny = arg->getAttributeAsInt("ny", d_n.getValue().y());
+        int nz = arg->getAttributeAsInt("nz", d_n.getValue().z());
+        d_n.setValue(Vec3i(nx,ny,nz));
+    }
+
+    this->setNbGridPoints();
+}
+
 
 } // namespace topology
 

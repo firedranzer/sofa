@@ -22,6 +22,7 @@
 #ifndef SOFA_COMPONENT_MAPPING_RIGIDMAPPING_INL
 #define SOFA_COMPONENT_MAPPING_RIGIDMAPPING_INL
 
+#include <sofa/core/Mapping.inl>
 #include <SofaRigid/RigidMapping.h>
 #include <sofa/core/visual/VisualParams.h>
 

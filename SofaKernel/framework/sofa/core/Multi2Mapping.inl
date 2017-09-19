@@ -22,6 +22,7 @@
 #ifndef SOFA_CORE_MULTI2MAPPING_INL
 #define SOFA_CORE_MULTI2MAPPING_INL
 
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <sofa/core/Multi2Mapping.h>
 
 namespace sofa
@@ -204,6 +205,50 @@ void Multi2Mapping<In1,In2,Out>::updateMapping()
   applyJ( vecOutVel, vecIn1Vel, vecIn2Vel);
 }
 */
+
+/// Pre-construction check method called by ObjectFactory.
+///
+/// This implementation read the object1 and object2 attributes and check
+/// if they are compatible with the input and output models types of this
+/// mapping.
+template < class In1, class In2, class Out >
+template<class T>
+bool Multi2Mapping<In1,In2,Out>::canCreate(T*& obj, core::objectmodel::BaseContext* context,
+                                                  core::objectmodel::BaseObjectDescription* arg)
+{
+    std::string input1 = arg->getAttribute("input1","");
+    std::string input2 = arg->getAttribute("input2","");
+    std::string output = arg->getAttribute("output","");
+    if (!input1.empty() && !LinkFromModels1::CheckPaths(input1, context))
+        return false;
+    if (!input2.empty() && !LinkFromModels2::CheckPaths(input2, context))
+        return false;
+    if (output.empty() || !LinkToModels::CheckPaths(output, context))
+        return false;
+
+    return BaseMapping::canCreate(obj, context, arg);
+}
+
+/// Construction method called by ObjectFactory.
+///
+/// This implementation read the input and output attributes to
+/// find the input and output models of this mapping.
+template < class In1, class In2, class Out >
+template<class T>
+typename T::SPtr Multi2Mapping<In1,In2,Out>::create(T*, core::objectmodel::BaseContext* context,
+                                                           core::objectmodel::BaseObjectDescription* arg)
+{
+    typename T::SPtr obj = sofa::core::objectmodel::New<T>();
+
+    if (context)
+        context->addObject(obj);
+
+    if (arg)
+        obj->parse(arg);
+
+    return obj;
+}
+
 
 template < class In1, class In2, class Out >
 std::string Multi2Mapping<In1,In2,Out>::templateName(const Multi2Mapping<In1, In2, Out>* /*mapping*/)

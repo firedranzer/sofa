@@ -26,7 +26,7 @@
 #include <SofaMiscMapping/IdentityMultiMapping.h>
 #include <SofaBaseMechanics/IdentityMapping.h>
 #include <iostream>
-
+#include <sofa/core/MultiMapping.inl>
 namespace sofa
 {
 

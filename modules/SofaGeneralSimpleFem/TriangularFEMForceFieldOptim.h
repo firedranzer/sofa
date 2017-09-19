@@ -139,15 +139,7 @@ public:
     //}
 
     // parse method attribute (for compatibility with non-optimized version)
-    void parse ( sofa::core::objectmodel::BaseObjectDescription* arg )
-    {
-        const char* method = arg->getAttribute("method");
-        if (method && *method && std::string(method) != std::string("large"))
-        {
-            serr << "Attribute method was specified as \""<<method<<"\" while this version only implements the \"large\" method. Ignoring..." << sendl;
-        }
-        Inherited::parse(arg);
-    }
+    void parse ( sofa::core::objectmodel::BaseObjectDescription* arg ) ;
 
     /// Class to store FEM information on each triangle, for topology modification handling
     class TriangleInfo

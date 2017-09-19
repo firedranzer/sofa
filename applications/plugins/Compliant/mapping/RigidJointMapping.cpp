@@ -1,4 +1,5 @@
 #include "RigidJointMapping.h"
+#include <sofa/core/Mapping.inl>
 
 #include <sofa/defaulttype/RigidTypes.h>
 
@@ -21,7 +22,7 @@ int RigidJointMappingClass = core::RegisterObject("Computes relative rigid confi
 #ifndef SOFA_FLOAT
 .add< RigidJointMapping< Rigid3dTypes, Vec6dTypes > >()
 #endif
-#ifndef SOFA_DOUBLE
+#ifndef SOFA_DOUBLEé
 .add< RigidJointMapping< Rigid3fTypes, Vec6fTypes > >()
 #endif
 ;

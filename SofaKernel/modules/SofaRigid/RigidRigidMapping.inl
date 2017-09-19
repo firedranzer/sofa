@@ -36,6 +36,7 @@
 
 #include <string.h>
 #include <iostream>
+#include <sofa/core/Mapping.inl>
 
 namespace sofa
 {

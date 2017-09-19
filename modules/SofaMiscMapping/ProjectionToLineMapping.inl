@@ -25,6 +25,8 @@
 #include "ProjectionToLineMapping.h"
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/defaulttype/RGBAColor.h>
+#include <sofa/core/Mapping.inl>
+#include <sofa/core/MultiMapping.inl>
 #include <iostream>
 
 namespace sofa

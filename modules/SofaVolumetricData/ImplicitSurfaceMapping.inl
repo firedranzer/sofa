@@ -23,6 +23,8 @@
 #define SOFA_COMPONENT_MAPPING_IMPLICITSURFACEMAPPING_INL
 
 #include <SofaVolumetricData/ImplicitSurfaceMapping.h>
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
+#include <sofa/core/Mapping.inl>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/helper/rmath.h>
 #include <map>

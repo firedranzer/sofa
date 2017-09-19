@@ -1,4 +1,5 @@
 #include "RigidRestJointMapping.h"
+#include <sofa/core/Mapping.inl>
 
 #include <sofa/defaulttype/RigidTypes.h>
 

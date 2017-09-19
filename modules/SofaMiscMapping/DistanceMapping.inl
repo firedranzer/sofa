@@ -26,7 +26,8 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <iostream>
 #include <sofa/simulation/Node.h>
-
+#include <sofa/core/Mapping.inl>
+#include <sofa/core/MultiMapping.inl>
 namespace sofa
 {
 

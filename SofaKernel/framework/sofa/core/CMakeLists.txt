@@ -13,9 +13,12 @@ set(HEADER_FILES
     DataEngine.h
     DataTracker.h
     ExecParams.h
+    ExecParams_fwd.h
+
     Mapping.h
     Mapping.inl
     MechanicalParams.h
+    MechanicalParams_fwd.h
     Multi2Mapping.h
     Multi2Mapping.inl
     MultiMapping.h

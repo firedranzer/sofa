@@ -23,6 +23,7 @@
 #include <sofa/core/objectmodel/Base.h>
 #include <sofa/helper/Factory.h>
 #include <sofa/helper/logging/Messaging.h>
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 using sofa::helper::logging::MessageDispatcher ;
 using sofa::helper::logging::Message ;
 

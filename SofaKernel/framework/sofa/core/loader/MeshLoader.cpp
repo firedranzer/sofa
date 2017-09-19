@@ -19,6 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <sofa/core/loader/MeshLoader.h>
 #include <cstdlib>
 #include <algorithm>

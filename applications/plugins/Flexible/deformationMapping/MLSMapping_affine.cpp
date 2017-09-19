@@ -23,6 +23,8 @@
 
 #include <Flexible/config.h>
 #include "MLSMapping.h"
+#include <sofa/core/Mapping.inl>
+
 #include <sofa/core/ObjectFactory.h>
 
 #include <sofa/defaulttype/VecTypes.h>

@@ -22,9 +22,8 @@
 #ifndef SOFA_DEFAULTTYPE_BOUNDINGBOX_H
 #define SOFA_DEFAULTTYPE_BOUNDINGBOX_H
 
-#include <sofa/defaulttype/VecTypes.h>
 #include <sofa/defaulttype/defaulttype.h>
-
+#include <sofa/defaulttype/Vec.h>
 
 namespace sofa
 {

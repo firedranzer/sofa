@@ -26,11 +26,20 @@
 #include <sofa/core/MultiVecId.h>
 #include <sofa/core/MechanicalParams.h>
 #include <sofa/core/objectmodel/BaseObject.h>
-#include <sofa/core/behavior/MultiMatrixAccessor.h>
-#include <sofa/defaulttype/BaseMatrix.h>
-#include <sofa/defaulttype/BaseVector.h>
-#include <sofa/defaulttype/Vec.h>
 
+//////////////////////////////////// FORWARD DEFINITION ////////////////////////////////////////////
+namespace sofa{
+    namespace core {
+        namespace behavior {
+            class MultiMatrixAccessor ;
+        }
+    }
+    namespace defaulttype {
+        class BaseMatrix ;
+    }
+}
+
+////////////////////////////////////// DEFINITIONS /////////////////////////////////////////////////
 namespace sofa
 {
 
@@ -157,7 +166,6 @@ public:
     /// \param mparams \a mparams->kFactor() is the coefficient for stiffness contributions (i.e. DOFs term in the ODE)
     /// \param matrix the matrix to add the result to
     virtual void addKToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix ) = 0;
-    //virtual void addKToMatrix(sofa::defaulttype::BaseMatrix * matrix, SReal kFact, unsigned int &offset);
 
     virtual void addSubKToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix, const helper::vector<unsigned> & subMatrixIndex);
 
@@ -166,7 +174,6 @@ public:
     /// \param mparams \a mparams->bFactor() is the coefficient for damping contributions (i.e. first derivatives term in the ODE)
     /// \param matrix the matrix to add the result to
     virtual void addBToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix );
-    //virtual void addBToMatrix(sofa::defaulttype::BaseMatrix * matrix, SReal bFact, unsigned int &offset);
 
     virtual void addSubBToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix, const helper::vector<unsigned> & vecIds);
 
@@ -178,7 +185,6 @@ public:
     /// - \a mparams->kFactor() is the coefficient for stiffness contributions (i.e. DOFs term in the ODE)
     /// \param matrix the matrix to add the result to
     virtual void addMBKToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix );
-    ////virtual void addMBKToMatrix(sofa::defaulttype::BaseMatrix * matrix, SReal mFact, SReal bFact, SReal kFact, unsigned int &offset);
 
     /// \brief addMBKToMatrix only on the subMatrixIndex
     virtual void addSubMBKToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix, const helper::vector<unsigned> subMatrixIndex);

@@ -1,6 +1,8 @@
 #define SOFA_COMPONENT_MAPPING_ContactMapping_CPP
 
 #include "ContactMapping.h"
+
+#include <sofa/core/Mapping.inl>
 #include <sofa/core/ObjectFactory.h>
 
 namespace sofa

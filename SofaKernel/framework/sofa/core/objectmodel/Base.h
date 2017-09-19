@@ -31,7 +31,6 @@
 #include <sofa/core/objectmodel/BaseClass.h>
 #include <sofa/core/objectmodel/SPtr.h>
 #include <sofa/core/objectmodel/Data.h>
-#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <sofa/core/objectmodel/Tag.h>
 
 #include <boost/intrusive_ptr.hpp>
@@ -57,6 +56,7 @@ namespace objectmodel {
     class BaseContext;
     class BaseObject;
     class BaseNode;
+    class BaseObjectDescription;
     class ContextObject;
     class ConfigurationSetting;
 } // namespace objectmodel

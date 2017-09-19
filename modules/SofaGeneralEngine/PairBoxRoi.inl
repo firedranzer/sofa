@@ -26,6 +26,7 @@
 #pragma once
 #endif
 
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <SofaGeneralEngine/PairBoxRoi.h>
 #include <sofa/helper/gl/template.h>
 #include <sofa/helper/gl/BasicShapes.h>
@@ -305,7 +306,30 @@ void PairBoxROI<DataTypes>::draw(const core::visual::VisualParams* vparams)
         }
         vparams->drawTool()->drawPoints(vertices, pointsWidth, color);
     }
+}
 
+/// Pre-construction check method called by ObjectFactory.
+/// Check that DataTypes matches the MechanicalState.
+template <class DataTypes>
+template<class T>
+bool PairBoxROI<DataTypes>::canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+{
+    if (!arg->getAttribute("template"))
+    {
+        // only check if this template is correct if no template was given
+        if (context->getMechanicalState() && dynamic_cast<sofa::core::behavior::MechanicalState<DataTypes>*>(context->getMechanicalState()) == NULL)
+            return false; // this template is not the same as the existing MechanicalState
+    }
+
+    return BaseObject::canCreate(obj, context, arg);
+}
+
+/// Construction method called by ObjectFactory.
+template <class DataTypes>
+template<class T>
+typename T::SPtr PairBoxROI<DataTypes>::create(T* tObj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+{
+    return core::objectmodel::BaseObject::create(tObj, context, arg);
 }
 
 } // namespace engine

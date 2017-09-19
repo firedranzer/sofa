@@ -1,5 +1,7 @@
 #include "GearMapping.h"
 
+#include <sofa/core/Mapping.inl>
+#include <sofa/core/MultiMapping.inl>
 #include <sofa/core/ObjectFactory.h>
 
 namespace sofa

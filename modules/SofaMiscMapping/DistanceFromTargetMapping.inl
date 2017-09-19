@@ -26,7 +26,7 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/defaulttype/RGBAColor.h>
 #include <iostream>
-
+#include <sofa/core/Mapping.inl>
 namespace sofa
 {
 

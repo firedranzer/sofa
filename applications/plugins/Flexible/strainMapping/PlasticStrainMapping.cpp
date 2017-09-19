@@ -21,7 +21,7 @@
 ******************************************************************************/
 #define SOFA_COMPONENT_MAPPING_CorotationalStrainMAPPING_CPP
 
-
+#include <sofa/core/Mapping.inl>
 #include "PlasticStrainMapping.h"
 #include <sofa/core/ObjectFactory.h>
 

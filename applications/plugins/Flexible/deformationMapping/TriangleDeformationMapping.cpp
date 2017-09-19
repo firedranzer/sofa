@@ -23,6 +23,7 @@
 
 #include <Flexible/config.h>
 #include "TriangleDeformationMapping.inl"
+#include <sofa/core/Mapping.inl>
 #include <sofa/core/ObjectFactory.h>
 
 namespace sofa

@@ -22,7 +22,7 @@
 #define SOFA_COMPONENT_LINEARSTRAINMAPPING_CPP
 
 #include "LinearStrainMapping.h"
-
+#include <sofa/core/Mapping.inl>
 #include <sofa/core/ObjectFactory.h>
 
 #include "../types/StrainTypes.h"

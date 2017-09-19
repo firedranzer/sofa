@@ -23,6 +23,7 @@
 #define SOFA_COMPONENT_CONSTRAINTSET_SLIDINGCONSTRAINT_INL
 
 #include <SofaConstraint/SlidingConstraint.h>
+#include <sofa/core/behavior/PairInteractionConstraint.inl>
 #include <sofa/core/visual/VisualParams.h>
 #include <SofaConstraint/BilateralInteractionConstraint.h>
 #include <SofaConstraint/UnilateralInteractionConstraint.h>

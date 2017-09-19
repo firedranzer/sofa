@@ -23,6 +23,7 @@
 
 #include <Flexible/config.h>
 #include "TriangleStrainAverageMapping.inl"
+#include <sofa/core/Mapping.inl>
 #include "../types/StrainTypes.h"
 #include <sofa/core/ObjectFactory.h>
 

@@ -198,85 +198,14 @@ public:
     /// if they are compatible with the input and output model types of this
     /// mapping.
     template<class T>
-    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
-    {
-        State<In>* stin = NULL;
-        State<Out>* stout = NULL;
-
-        std::string inPath, outPath;
-
-        if (arg->getAttribute("input"))
-            inPath = arg->getAttribute("input");
-        else
-            inPath = "@../";
-
-        context->findLinkDest(stin, inPath, NULL);
-
-        if (arg->getAttribute("output"))
-            outPath = arg->getAttribute("output");
-        else
-            outPath = "@./";
-
-        context->findLinkDest(stout, outPath, NULL);
-
-        if (stin == NULL)
-        {
-//            This warning seems irrelevant, as it is raised multiple times while the creation works fine (Francois Faure, Feb. 2012)
-//            context->serr << "Cannot create "<<className(obj)<<" as input model "<< inPath << " is missing or invalid." << context->sendl;
-            return false;
-        }
-
-        if (stout == NULL)
-        {
-//            This warning seems irrelevant, as it is raised multiple times OutDataVecCoord& out, const InDataVecCoord& in)while the creation works fine (Francois Faure, Feb. 2012)
-//            context->serr << "Cannot create "<<className(obj)<<" as output model "<< outPath << " is missing or invalid." << context->sendl;
-            return false;
-        }
-
-        if (static_cast<BaseObject*>(stin) == static_cast<BaseObject*>(stout))
-        {
-            // we should refuse to create mappings with the same input and output model, which may happen if a State object is missing in the child node
-            context->serr << "Creation of " << className(obj) << " mapping failed because the same object \"" << stin->getName() << "\" is linked as both input and output." << context->sendl;
-            context->serr << "  Maybe a MechanicalObject should be added before this mapping." << context->sendl;
-            return false;
-        }
-
-        return BaseMapping::canCreate(obj, context, arg);
-    }
+    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg) ;
 
     /// Construction method called by ObjectFactory.
     ///
     /// This implementation read the input and output attributes to
     /// find the input and output models of this mapping.
     template<class T>
-    static typename T::SPtr create(T*, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
-    {
-        typename T::SPtr obj = sofa::core::objectmodel::New<T>();
-
-        if (context)
-            context->addObject(obj);
-
-        if (arg)
-        {
-            std::string inPath, outPath;
-            if (arg->getAttribute("input"))
-                inPath = arg->getAttribute("input");
-            else
-                inPath = "@../";
-
-            if (arg->getAttribute("output"))
-                outPath = arg->getAttribute("output");
-            else
-                outPath = "@./";
-
-            obj->fromModel.setPath( inPath );
-            obj->toModel.setPath( outPath );
-
-            obj->parse(arg);
-        }
-
-        return obj;
-    }
+    static typename T::SPtr create(T*, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg) ;
 
     virtual std::string getTemplateName() const
     {

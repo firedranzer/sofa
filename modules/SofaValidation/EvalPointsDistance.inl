@@ -29,6 +29,7 @@
 #include <sofa/simulation/UpdateMappingEndEvent.h>
 #include <sofa/helper/gl/template.h>
 
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <iomanip>
 
 #include <fstream>
@@ -288,6 +289,22 @@ void EvalPointsDistance<DataTypes>::handleEvent(sofa::core::objectmodel::Event* 
             lastTime = time;
         }
     }
+}
+
+/// Pre-construction check method called by ObjectFactory.
+/// Check that DataTypes matches the MechanicalState.
+template<class DataTypes>
+template<class T>
+bool EvalPointsDistance<DataTypes>::canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+{
+    std::string object1 = arg->getAttribute("object1","@./");
+    std::string object2 = arg->getAttribute("object2","@./");
+    if (!LinkMState::CheckPath(object1, context))
+        return false;
+    if (!LinkMState::CheckPath(object2, context))
+        return false;
+
+    return core::objectmodel::BaseObject::canCreate(obj, context, arg);
 }
 
 } // namespace misc

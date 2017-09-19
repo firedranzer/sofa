@@ -23,7 +23,7 @@
 #define SOFA_COMPONENT_MAPPING_MESH2POINTMAPPING_INL
 
 #include "Mesh2PointMechanicalMapping.h"
-
+#include <sofa/core/Mapping.inl>
 #include <SofaTopologyMapping/Mesh2PointTopologicalMapping.h>
 
 

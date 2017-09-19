@@ -22,7 +22,7 @@
 #define TESTPLUGIN_COMPONENT_B_CPP
 
 #include "ComponentB.h"
-
+#include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/ObjectFactory.h>
 
 

@@ -31,6 +31,7 @@
 #include "../types/QuadraticTypes.h"
 #include "../types/DeformationGradientTypes.h"
 
+#include <sofa/core/Mapping.inl>
 #include "BaseDeformationMapping.inl"
 
 namespace sofa

@@ -28,7 +28,7 @@
 
 #include <SofaDeformable/SpringForceField.h>
 #include <sofa/defaulttype/Mat.h>
-#include <sofa/core/MechanicalParams.h>
+#include <sofa/core/MechanicalParams_fwd.h>
 
 
 namespace sofa

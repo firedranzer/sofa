@@ -26,7 +26,6 @@
 #ifndef SOFA_RGBAHELPER_COLOR_H
 #define SOFA_RGBAHELPER_COLOR_H
 #include <iostream>
-
 #include <string>
 
 #include <sofa/helper/helper.h>

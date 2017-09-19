@@ -31,6 +31,7 @@
 #include <vector>
 #include <limits>
 
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <SofaGeneralEngine/ProximityROI.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/helper/gl/template.h>
@@ -258,6 +259,30 @@ void ProximityROI<DataTypes>::update()
     f_indices.endEdit();
     f_indicesOut.endEdit();
     f_pointsInROI.endEdit();
+}
+
+/// Pre-construction check method called by ObjectFactory.
+/// Check that DataTypes matches the MechanicalState.
+template <class DataTypes>
+template<class T>
+bool ProximityROI<DataTypes>::canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+{
+    if (!arg->getAttribute("template"))
+    {
+        // only check if this template is correct if no template was given
+        if (context->getMechanicalState() && dynamic_cast<sofa::core::behavior::MechanicalState<DataTypes>*>(context->getMechanicalState()) == NULL)
+            return false; // this template is not the same as the existing MechanicalState
+    }
+
+    return BaseObject::canCreate(obj, context, arg);
+}
+
+/// Construction method called by ObjectFactory.
+template <class DataTypes>
+template<class T>
+typename T::SPtr ProximityROI<DataTypes>::create(T* tObj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+{
+    return core::objectmodel::BaseObject::create(tObj, context, arg);
 }
 
 template <class DataTypes>

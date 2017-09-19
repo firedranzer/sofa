@@ -35,7 +35,7 @@
 #include <sofa/helper/set.h>
 #include <sofa/helper/map.h>
 #include <sofa/helper/OptionsGroup.h>
-
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #define TYPE_GEODESIC 0
 #define TYPE_HARMONIC 1
 #define TYPE_STIFFNESS_DIFFUSION 2

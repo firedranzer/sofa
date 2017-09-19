@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <iostream>
 #include <set>
+#include <sofa/core/behavior/MultiMatrixAccessor.h>
 
 #include <SofaBaseTopology/TopologyData.inl>
 

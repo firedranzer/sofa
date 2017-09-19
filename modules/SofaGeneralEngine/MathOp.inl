@@ -22,6 +22,7 @@
 #ifndef SOFA_COMPONENT_ENGINE_MATHOP_INL
 #define SOFA_COMPONENT_ENGINE_MATHOP_INL
 
+#include <sofa/core/objectmodel/BaseObjectDescription.h>
 #include <SofaGeneralEngine/MathOp.h>
 
 namespace sofa

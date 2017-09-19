@@ -23,6 +23,7 @@
 #define SOFA_COMPONENT_CONSTRAINTSET_BILATERALINTERACTIONCONSTRAINT_INL
 
 #include <SofaConstraint/BilateralInteractionConstraint.h>
+#include <sofa/core/behavior/PairInteractionConstraint.inl>
 #include <sofa/core/visual/VisualParams.h>
 
 #include <sofa/defaulttype/Vec.h>

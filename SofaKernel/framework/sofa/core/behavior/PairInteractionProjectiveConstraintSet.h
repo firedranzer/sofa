@@ -137,48 +137,11 @@ public:
     /// Pre-construction check method called by ObjectFactory.
     /// Check that DataTypes matches the MechanicalState.
     template<class T>
-    static bool canCreate(T* obj, objectmodel::BaseContext* context, objectmodel::BaseObjectDescription* arg)
-    {
-        MechanicalState<DataTypes>* mstate1 = NULL;
-        MechanicalState<DataTypes>* mstate2 = NULL;
-        std::string object1 = arg->getAttribute("object1","@./");
-        std::string object2 = arg->getAttribute("object2","@./");
-        if (object1.empty()) object1 = "@./";
-        if (object2.empty()) object2 = "@./";
-        context->findLinkDest(mstate1, object1, NULL);
-        context->findLinkDest(mstate2, object2, NULL);
-
-        if (!mstate1 || !mstate2)
-            return false;
-        return BaseInteractionProjectiveConstraintSet::canCreate(obj, context, arg);
-    }
+    static bool canCreate(T* obj, objectmodel::BaseContext* context, objectmodel::BaseObjectDescription* arg) ;
 
     /// Construction method called by ObjectFactory.
     template<class T>
-    static typename T::SPtr create(T* /*p0*/, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
-    {
-        typename T::SPtr obj = sofa::core::objectmodel::New<T>();
-
-        if (context)
-            context->addObject(obj);
-
-        if (arg)
-        {
-            std::string object1 = arg->getAttribute("object1","");
-            std::string object2 = arg->getAttribute("object2","");
-            if (!object1.empty())
-            {
-                arg->setAttribute("object1", object1.c_str());
-            }
-            if (!object2.empty())
-            {
-                arg->setAttribute("object2", object2.c_str());
-            }
-            obj->parse(arg);
-        }
-
-        return obj;
-    }
+    static typename T::SPtr create(T* /*p0*/, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg) ;
 
     virtual std::string getTemplateName() const
     {

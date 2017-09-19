@@ -111,43 +111,11 @@ public:
 
     /// Pre-construction check method called by ObjectFactory.
     template<class T>
-    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
-    {
-        if (arg->getAttribute("object1") || arg->getAttribute("object2"))
-        {
-            if (dynamic_cast<MechanicalState<DataTypes1>*>(arg->findObject(arg->getAttribute("object1",".."))) == NULL)
-                return false;
-            if (dynamic_cast<MechanicalState<DataTypes2>*>(arg->findObject(arg->getAttribute("object2",".."))) == NULL)
-                return false;
-        }
-        else
-        {
-            if (dynamic_cast<MechanicalState<DataTypes1>*>(context->getMechanicalState()) == NULL)
-                return false;
-        }
-        return sofa::core::objectmodel::BaseObject::canCreate(obj, context, arg);
-    }
+    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg) ;
 
     /// Construction method called by ObjectFactory.
     template<class T>
-    static typename T::SPtr create(T* p0, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
-    {
-        typename T::SPtr obj = sofa::core::objectmodel::BaseObject::create(p0, context, arg);
-
-        if (arg && (arg->getAttribute("object1") || arg->getAttribute("object2")))
-        {
-            obj->constrainedObject1 = dynamic_cast<MechanicalState<DataTypes1>*>(arg->findObject(arg->getAttribute("object1","..")));
-            obj->constrainedObject2 = dynamic_cast<MechanicalState<DataTypes2>*>(arg->findObject(arg->getAttribute("object2","..")));
-        }
-        else if (context)
-        {
-            obj->constrainedObject1 =
-                obj->constrainedObject2 =
-                        dynamic_cast<MechanicalState<DataTypes1>*>(context->getMechanicalState());
-        }
-
-        return obj;
-    }
+    static typename T::SPtr create(T* p0, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg) ;
 
     virtual std::string getTemplateName() const
     {

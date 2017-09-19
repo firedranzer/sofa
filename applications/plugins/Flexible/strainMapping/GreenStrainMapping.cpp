@@ -25,6 +25,7 @@
 #include "GreenStrainMapping.h"
 #include <sofa/core/ObjectFactory.h>
 
+#include <sofa/core/Mapping.inl>
 #include "../types/DeformationGradientTypes.h"
 #include "../types/StrainTypes.h"
 

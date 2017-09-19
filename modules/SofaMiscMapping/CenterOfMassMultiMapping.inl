@@ -24,7 +24,7 @@
 
 #include <SofaMiscMapping/CenterOfMassMultiMapping.h>
 #include <sofa/core/visual/VisualParams.h>
-
+#include <sofa/core/MultiMapping.inl>
 #include <sofa/simulation/Simulation.h>
 
 #include <algorithm>

@@ -22,6 +22,7 @@
 #define SOFA_COMPONENT_MAPPING_InvariantMAPPING_CPP
 
 #include <Flexible/config.h>
+#include <sofa/core/Mapping.inl>
 #include "../strainMapping/InvariantMapping.h"
 #include <sofa/core/ObjectFactory.h>
 
