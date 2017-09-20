@@ -23,6 +23,7 @@
 #include <boost/algorithm/string.hpp>
 #include <sofa/core/ObjectFactory.h>
 #include <SofaPython/PythonEnvironment.h>
+#include <SofaPython/PythonFactory.h>
 
 #include <sofa/core/ObjectFactory.h>
 using sofa::core::RegisterObject ;
@@ -32,6 +33,9 @@ using sofa::helper::system::FileMonitor ;
 
 #include <sofa/core/objectmodel/IdleEvent.h>
 using sofa::core::objectmodel::IdleEvent ;
+
+#include <sofa/simulation/Node.h>
+using sofa::simulation::Node ;
 
 #include <cmath>
 using std::max;
@@ -108,16 +112,15 @@ void CustomField::getCythonHook(PyObject*& module)
     PyObject* fct = PyDict_GetItemString(pDict, "getCythonFunction");
     if (fct==nullptr)
     {
-        msg_error() << "Get EvalFunction missing." ;
+        msg_warning() << "No getCythonFunction() found. Use slow path instead." ;
         return ;
     }
 
     if (!PyCallable_Check(fct))
     {
-        msg_error() << "The object does not have getEvalFunction" ;
+        msg_error() << "The object does not have a callable 'getCythonFunction'" ;
         return ;
     }
-    msg_info() << "Got Cython HOOK ? " ;
     PyObject* res = PyObject_CallFunction(fct, "");
 
     if( res != nullptr )
@@ -126,17 +129,13 @@ void CustomField::getCythonHook(PyObject*& module)
         PyObject* s=PyTuple_GetItem(res, 1) ;
 
         if( PyCapsule_CheckExact(f) ){
-            std::cout << "IT IS A CAPSULE ! " << (int64_t)PyCapsule_GetPointer(f, "evalFunction")  <<std::endl ;
-        }
-        std::cout << "HELLO " << std::endl ;
-        m_rawFunction = (FieldFunction)PyCapsule_GetPointer(f, "evalFunction") ;
-        m_rawShape = s ;
-        std::cout << "TEST: " << m_rawFunction(m_rawShape,1.0,2.0,3.0) << std::endl ;
-        std::cout << "END" << std::endl ;
+            m_rawFunction = (FieldFunction)PyCapsule_GetPointer(f, "evalFunction") ;
+            m_rawShape = s ;
+       }
     }
 }
 
-PyObject* CustomField::getPythonFunction(const std::string& attribname, const std::string& attribvalue, PyObject*& module) const
+PyObject* CustomField::getPythonFunction(const std::string& attribname, const std::string& attribvalue, PyObject*& module, bool doReload) const
 {
     /// Parsing.
     if(attribvalue.empty())
@@ -162,9 +161,9 @@ PyObject* CustomField::getPythonFunction(const std::string& attribname, const st
         return nullptr ;
     }
 
-    if(module==nullptr)
-        module = PyImport_ImportModule(modulename.c_str()) ;
-    else
+    if(module==nullptr){
+        module = PyImport_ImportModule((char*)modulename.c_str()) ;
+    }else if(doReload)
         module = PyImport_ReloadModule(module) ;
 
     if(module==nullptr)
@@ -204,7 +203,7 @@ void CustomField::init()
     setStatus(CStatus::Busy) ;
     PythonEnvironment::gil lock(__func__) ;
 
-    m_evalFunction = getPythonFunction("function", d_function.getValue(), m_functionModule) ;
+    m_evalFunction = getPythonFunction("function", d_function.getValue(), m_functionModule, true) ;
     if(m_evalFunction==nullptr)
     {
         msg_error() << "Unable to find a required callable object from attribute 'function=\""<< d_function.getValue() <<"\"'" ;
@@ -213,15 +212,31 @@ void CustomField::init()
         return ;
     }
 
-    m_gradFunction = getPythonFunction("gradient", d_gradient.getValue(), m_gradientModule) ;
+    m_gradFunction = getPythonFunction("gradient", d_gradient.getValue(), m_gradientModule, true) ;
     if(m_gradFunction==nullptr)
     {
         msg_info() << "No gradient function found from attribute 'gradient=\"" << d_gradient.getValue() <<"\"'. Falling back to finite difference implementation" ;
     }    
 
+    PyObject* loadShape = getPythonFunction("function", "customfield.loadShape", m_functionModule, false) ;
+    if (PyCallable_Check(loadShape)){
+        Node* me = (Node*)getContext() ;
+        Node* root = (Node*)me->getRoot() ;
+
+        PyObject* res = PyObject_CallFunction(loadShape, "O", PythonFactory::toPython(root));
+        if(!res)
+        {
+            PyErr_Print() ;
+            m_componentstate = ComponentState::Invalid ;
+            setStatus(CStatus::Invalid) ;
+            return ;
+        }
+    }else{
+        dmsg_warning() << "No loadShape function found. use evalFunction." ;
+    }
+
     msg_warning() << "Search for getCythonHook" ;
     getCythonHook(m_functionModule) ;
-
 
     m_componentstate = ComponentState::Valid ;
     d_state.setValue(d_state.getValue()+1);

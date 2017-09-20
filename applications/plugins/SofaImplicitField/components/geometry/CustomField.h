@@ -94,7 +94,7 @@ private:
 
     PyObject* getPythonFunction(const std::string& attribname,
                                 const std::string& attribvalue,
-                                PyObject*& module) const ;
+                                PyObject*& module, bool doReload) const ;
 
     PyObject* m_functionModule {nullptr} ;
     PyObject* m_gradientModule {nullptr} ;

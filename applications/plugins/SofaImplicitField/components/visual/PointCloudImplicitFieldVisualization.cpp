@@ -62,6 +62,12 @@ PointCloudImplicitFieldVisualization::PointCloudImplicitFieldVisualization() :
 {
 }
 
+void PointCloudImplicitFieldVisualization::computeBBox(const core::ExecParams *, bool t)
+{
+    f_bbox = m_box.getValue() ;
+}
+
+
 PointCloudImplicitFieldVisualization::~PointCloudImplicitFieldVisualization()
 {
     {
@@ -100,12 +106,12 @@ void PointCloudImplicitFieldVisualization::init()
     m_cmdcond.notify_one();
     std::cout << "NOTIFY ALL" << std::endl ;
 
+    f_bbox = m_box.getValue() ;
 }
 
 void PointCloudImplicitFieldVisualization::reinit()
 {
     init() ;
-
 }
 
 void PointCloudImplicitFieldVisualization::updateBufferFromComputeKernel()
@@ -245,7 +251,7 @@ void PointCloudImplicitFieldVisualization::draw(const core::visual::VisualParams
     updateBufferFromComputeKernel();
 
 #ifndef SOFA_NO_OPENGL
-    auto& box = m_box.getValue();
+    auto& box = f_bbox.getValue();
     params->drawTool()->drawBoundingBox(box.minBBox(), box.maxBBox()) ;
 
     glPointSize(3);

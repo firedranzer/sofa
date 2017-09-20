@@ -66,6 +66,8 @@ public:
     Data< sofa::defaulttype::BoundingBox > m_box;
     Data< sofa::helper::types::RGBAColor > m_color ;
 
+    virtual void computeBBox(const core::ExecParams *, bool) override ;
+
 protected:
     PointCloudImplicitFieldVisualization( ) ;
     virtual ~PointCloudImplicitFieldVisualization() ;
