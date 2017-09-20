@@ -36,7 +36,24 @@ d = Difference(u5, d)
 #def getCythonFunction():
 #    return dfgeom.getCythonRawFunction(d)
 
-shape=accordion.accordionUniform(10.0,4.0,2.0,"frisbee",5,5.0,5.0,5.0)
+ellipsoid1=primitives.Ellipsoid("+",1.0,1.0,5.0,0.0,0.0,primitives.Point(0.0,0.0,5.0))
+ellipsoid2=primitives.Ellipsoid("+",0.5,0.5,4.5,0.0,0.0,primitives.Point(0.0,0.0,5.0))
+ellipsoidcreux=primitives.Difference(ellipsoid1,ellipsoid2)
+
+cylinder1=primitives.Cylinder("+",1.0,1.0,5.0,0.0,0.0,primitives.Point(0.0,0.0,5.0))
+cylinder2=primitives.Cylinder("+",0.5,0.5,4.5,0.0,0.0,primitives.Point(0.0,0.0,5.0))
+cylindercreux=primitives.Difference(cylinder1,cylinder2)
+#shape1=primitives.Union(cylindercreux,ellipsoidcreux)
+
+
+#formepleine=primitives.Union(ellipsoid1,cylinder1)
+#formecreuse=primitives.Union(ellipsoid2,cylinder2)
+#shape2=primitives.Difference(formepleine,formecreuse)
+
+#(shape,shapeInt)=accordion.accordionUniform(7.0,2.0,0.5, "ellipsoid",1,5.0,5.0,0.0)
+#(shape,shapeInt)=accordion.accordionFreeDimension(7.0,3.0,1.0,[[5.0,"ellipsoid",5.0,5.0,5.0]])
+
+shape=primitives.Difference(cylinder1,cylinder2)
 
 def evalField(x, y, z):
     point=primitives.Point(x,y,z)

@@ -26,6 +26,9 @@ cdef class TubeWithCavities(primitives.Shape):
 
     def __init__(self, heigth,radius,thickness):
 
+        if heigth<0.5:
+            raise ValueError, "the heigth of the tube has to be more than 0.5"
+
         if thickness>radius:
             raise ValueError, "the thickness of the tube has to be less than the radius, otherwise it will be inefficient"
 
@@ -47,8 +50,8 @@ cdef class TubeWithCavities(primitives.Shape):
 
         [heigth,type,axisX,axisY,axisZ]=cavity
 
-        if heigth>(self.heigth) or heigth<0.0:
-            raise ValueError, "the heigth of the center of the cavity has to be between "+str(self.heigth)+ " and "+"0.0"+ " to ensure connectidness"
+        if heigth>(self.heigth) or heigth-axisZ<0.5:
+            raise ValueError, "the heigth of the center of the cavity has to be between "+str(self.heigth)+ " and "+"axisZ+0.5"+ " to ensure connectidness and flat base"
 
         elif min(axisX,axisY)<self.radius:
             raise ValueError, "the min dimension in the horizontal plane has to be bigger than the radius"
@@ -57,7 +60,7 @@ cdef class TubeWithCavities(primitives.Shape):
         self.listCavities.append(cavity)
 
 
-cpdef primitives.Shape accordionFreeDimension(double heigthTube, double radiusTube, double thickness, list listCavities):
+cpdef tuple accordionFreeDimension(double heigthTube, double radiusTube, double thickness, list listCavities):
     """
      The Cavities have to be given as [heigth,"type",axisX,axisY,axisZ]
      The shape is given has the difference between ShapePlus and ShapeMinus
@@ -103,10 +106,10 @@ cpdef primitives.Shape accordionFreeDimension(double heigthTube, double radiusTu
 
     shape=primitives.Difference(shapePlus,shapeMinus)
 
-    return shape
+    return (shape,shapeMinus)
 
 
-cpdef primitives.Shape accordionRecoveringGiven(double heigthTube,double radiusTube, double thickness, str typeCavities,
+cpdef tuple accordionRecoveringGiven(double heigthTube,double radiusTube, double thickness, str typeCavities,
                               list listheigthsJoiningPoints, list listAxesX, list listAxesY, double Zrecovering):
     """
      There is a unique type of cavities. Only their heigth, axes among X and Y can variate.
@@ -116,17 +119,23 @@ cpdef primitives.Shape accordionRecoveringGiven(double heigthTube,double radiusT
     if not((len(listheigthsJoiningPoints)+1)==len(listAxesX) and len(listAxesX)==len(listAxesY)):
         raise ValueError, "the lists have to have coordinated length"
 
-    listheigthsJoiningPoints.insert(0,0.0)
+    listheigthsJoiningPoints.insert(0,0.5)
     listheigthsJoiningPoints.append(heigthTube)
     listheigthsJoiningPoints.sort()
 
-    if listheigthsJoiningPoints[0]<0.0 or listheigthsJoiningPoints[-1]>heigthTube:
-        raise ValueError, "the extremal joining points do not belong to the tube"
+    if listheigthsJoiningPoints[0]<0.5 or listheigthsJoiningPoints[-1]>heigthTube:
+        raise ValueError, "the extremal joining points have not the right position"
 
 
     listCavities=[]
 
-    for i in range(len(listheigthsJoiningPoints)-1):
+    heigthCenter=(listheigthsJoiningPoints[0]+listheigthsJoiningPoints[1])/2.0
+
+    axisZ=(listheigthsJoiningPoints[1]-listheigthsJoiningPoints[0])/2.0
+
+    listCavities.append([heigthCenter,typeCavities,listAxesX[0],listAxesY[0],axisZ])
+
+    for i in range(1,len(listheigthsJoiningPoints)-1):
 
         heigthCenter=(listheigthsJoiningPoints[i]+listheigthsJoiningPoints[i+1])/2.0
 
@@ -136,7 +145,7 @@ cpdef primitives.Shape accordionRecoveringGiven(double heigthTube,double radiusT
 
     return accordionFreeDimension(heigthTube,radiusTube,thickness,listCavities)
 
-cpdef primitives.Shape accordionUniform(double heigthTube,double radiusTube, double thickness, str typeCavities,int numberCavities, double axisX, double axisY, double Zrecovering):
+cpdef tuple accordionUniform(double heigthTube,double radiusTube, double thickness, str typeCavities,int numberCavities, double axisX, double axisY, double Zrecovering):
     """
      There is a unique type of cavities, a unique axisX and axisY. The Cavities are uniformly dispatched
     """
@@ -149,7 +158,7 @@ cpdef primitives.Shape accordionUniform(double heigthTube,double radiusTube, dou
     elif n==1:
         listheigthsJoiningPoints=[]
     else:
-        listheigthsJoiningPoints=[float(i)*heigthTube/float(n) for i in range(1,n)]
+        listheigthsJoiningPoints=[0.5+float(i)*(heigthTube-0.5)/float(n) for i in range(1,n)]
 
     listAxesX,listAxesY=[axisX for i in range(n)],[axisY for i in range(n)]
 
