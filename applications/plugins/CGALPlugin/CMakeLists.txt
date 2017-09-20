@@ -28,7 +28,9 @@ set(README_FILES README.md
                  examples/Refine2DMesh.scn
                  examples/customfield.py
                  examples/customfield2.py
-                 examples/dfgeom.pyx)
+                 examples/dfgeom.pyx
+                 examples/minipsl.py
+                 )
 
 
 find_package(SofaFramework REQUIRED)

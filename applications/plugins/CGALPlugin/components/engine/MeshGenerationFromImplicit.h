@@ -58,24 +58,28 @@ public:
     SOFA_CLASS(MeshGenerationFromImplicitShape, BaseObject);
     MeshGenerationFromImplicitShape() ;
     virtual ~MeshGenerationFromImplicitShape() { }
-    int volumeMeshGeneration(float facet_size, float approximation, float cell_size);
+    int volumeMeshGeneration(float facet_angle, float facet_size, float facet_distance,
+                             float cell_size, float cell_radius_edge_ratio);
 
     virtual void init() override ;
     virtual void reinit() override ;
     virtual void handleEvent(sofa::core::objectmodel::Event *event) override ;
     virtual void draw(const VisualParams* vparams) override ;
+    virtual void computeBBox(const ExecParams *, bool) override ;
 
-    virtual void update() ;
+    virtual void update(bool forceUpdate=false) ;
 
 private:
     CGAL::Bbox_3 BoundingBox(double x_min, double y_min, double z_min,
                              double x_max, double y_max, double z_max);
 
     /// Inputs and atritbutes
+    Data<float> in_facetangle;
     Data<float> in_facetsize;
-    Data<float> in_approximation;
+    Data<float> in_facetdistance;
+    Data<float> in_cell_radiusedge_ratio;
     Data<float> in_cellsize;
-    Data<double> xmin_box, ymin_box, zmin_box, xmax_box, ymax_box, zmax_box;
+    Data<sofa::defaulttype::BoundingBox> d_box ;
 
     /// Display
     Data<bool> drawTetras;
