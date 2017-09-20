@@ -19,8 +19,15 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+/******************************************************************************
+ * Contributors:                                                              *
+ *   - damien.marchal@univ-lille1.fr                                          *
+ *                                                                            *
+ *****************************************************************************/
 #ifndef SOFA_CGAL_MESHGENERATIONFROMIMPLICIT_H
 #define SOFA_CGAL_MESHGENERATIONFROMIMPLICIT_H
+
+#include <sofa/defaulttype/Vec.h>
 
 #include <CGALPlugin/config.h>
 #include <future>
@@ -40,6 +47,7 @@ namespace engine
 namespace _meshgenerationfromimplicit_
 {
 
+using sofa::defaulttype::Vec3d ;
 using sofa::component::geometry::ScalarField ;
 typedef sofa::core::topology::BaseMeshTopology::SeqTetrahedra SeqTetrahedra;
 typedef sofa::core::topology::BaseMeshTopology::Tetra Tetra;
@@ -58,8 +66,8 @@ public:
     SOFA_CLASS(MeshGenerationFromImplicitShape, BaseObject);
     MeshGenerationFromImplicitShape() ;
     virtual ~MeshGenerationFromImplicitShape() { }
-    int volumeMeshGeneration(float facet_angle, float facet_size, float facet_distance,
-                             float cell_size, float cell_radius_edge_ratio);
+    int volumeMeshGeneration(double facet_angle, double facet_size, double facet_distance,
+                             double cell_size, double cell_radius_edge_ratio);
 
     virtual void init() override ;
     virtual void reinit() override ;
@@ -74,23 +82,25 @@ private:
                              double x_max, double y_max, double z_max);
 
     /// Inputs and atritbutes
-    Data<float> in_facetangle;
-    Data<float> in_facetsize;
-    Data<float> in_facetdistance;
-    Data<float> in_cell_radiusedge_ratio;
-    Data<float> in_cellsize;
-    Data<sofa::defaulttype::BoundingBox> d_box ;
+    Data<double> d_facetangle;
+    Data<double> d_facetsize;
+    Data<double> d_facetdistance;
+    Data<double> d_cell_radiusedge_ratio;
+    Data<double> d_cellsize;
+
+    Data<double> d_radius ;
+    Data<Vec3d>  d_center ;
 
     /// Display
-    Data<bool> drawTetras;
+    Data<bool> d_drawtetras;
 
     /// Output
-    Data<VecCoord> out_Points;
-    Data<SeqTetrahedra> out_tetrahedra;
+    Data<VecCoord> d_out_points;
+    Data<SeqTetrahedra> d_out_tetrahedra;
 
     /// Link
     typedef SingleLink< MeshGenerationFromImplicitShape, ScalarField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> LinkGrid;
-    LinkGrid in_scalarfield;
+    LinkGrid l_scalarfield;
 
     std::shared_future<unsigned int> m_com;
 };

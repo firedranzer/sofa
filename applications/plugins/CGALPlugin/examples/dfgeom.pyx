@@ -1,8 +1,8 @@
 from libc.math cimport cos, sin, sqrt, fmod
 from cpython.pycapsule cimport *
 # distutils: language = c++
-# distutils: sources = /home/morzadec/Documents/sofa/src/applications/plugins/CGALPlugin/examples/vector.cpp
-cdef extern from "/home/morzadec/Documents/sofa/src/applications/plugins/CGALPlugin/examples/vector.h" namespace "":
+# distutils: sources = ./vector.cpp
+cdef extern from "./vector.h" namespace "":
     cdef cppclass Vec3d:
             Vec3d()
             Vec3d(double x, double y, double z)

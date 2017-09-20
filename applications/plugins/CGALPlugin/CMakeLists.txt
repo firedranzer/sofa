@@ -24,14 +24,7 @@ set(SOURCE_FILES
 set(README_FILES README.md
                  examples/MeshGenerationFromImage.scn
                  examples/MeshGenerationFromImageWithFeatures.scn
-                 examples/MeshGenerationFromImplicit.scn
-                 examples/Refine2DMesh.scn
-                 examples/customfield.py
-                 examples/customfield2.py
-                 examples/dfgeom.pyx
-                 examples/minipsl.py
-                 )
-
+                 examples/Refine2DMesh.scn)
 
 find_package(SofaFramework REQUIRED)
 find_package(CGAL REQUIRED)
@@ -56,10 +49,23 @@ endif()
 find_package(SofaImplicitField QUIET)
 if(SofaImplicitField_FOUND)
     list(APPEND HEADER_FILES
-        components/engine/MeshGenerationFromImplicit.h)
+        components/engine/MeshGenerationFromImplicit.h
+        components/engine/SurfaceMeshGenerationFromImplicit.h
+        )
 
     list(APPEND SOURCE_FILES
-        components/engine/MeshGenerationFromImplicit.cpp)
+        components/engine/MeshGenerationFromImplicit.cpp
+        components/engine/SurfaceMeshGenerationFromImplicit.cpp
+        )
+
+    list(APPEND README_FILES
+                     examples/MeshGenerationFromImplicit.scn
+                     examples/SurfaceMeshGenerationFromImplicit.scn
+                     examples/customfield.py
+                     examples/customfield2.py
+                     examples/dfgeom.pyx
+                     examples/minipsl.py
+                     )
 
     add_definitions("-DDO_SOFAIMPLICITFIELD_FEATURES=1")
 else()
