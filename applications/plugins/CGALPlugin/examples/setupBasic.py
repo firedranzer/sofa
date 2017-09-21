@@ -6,6 +6,11 @@ setup(
 #                             language="c++")
 )
 
+setup(
+    ext_modules = cythonize("geneticAlgorithm.pyx")#,
+#                             language="c++")
+)
+
 #setup(
 #    ext_modules = cythonize("primitives.pxd")
 #)

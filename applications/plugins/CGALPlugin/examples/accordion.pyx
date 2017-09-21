@@ -15,14 +15,12 @@ import primitives
 cimport numpy
 cimport cython
 cimport primitives
+cimport accordion
 
 ## Shape generation function
 
 
-cdef class TubeWithCavities(primitives.Shape):
-
-    cdef double heigth, radius, thickness
-    cdef list listCavities
+cdef class TubeWithCavities(object):
 
     def __init__(self, heigth,radius,thickness):
 
@@ -37,7 +35,7 @@ cdef class TubeWithCavities(primitives.Shape):
         self.thickness=thickness
         self.listCavities=[]
 
-    def addCavity(self, list cavity):
+    cpdef addCavity(self, list cavity):
         """
         The cavity as to be given as [heigth,"type",axisX,axisY,axisZ]
         """
@@ -50,14 +48,14 @@ cdef class TubeWithCavities(primitives.Shape):
         if heigth>(self.heigth) or heigth<0.0:
             raise ValueError, "the heigth of the center of the cavity has to be between "+str(self.heigth)+ " and "+"0.0"+ " to ensure connectidness"
 
-        elif min(axisX,axisY)<self.radius:
-            raise ValueError, "the min dimension in the horizontal plane has to be bigger than the radius"
+        elif max(axisX,axisY)<self.radius:
+            raise ValueError, "the max dimension in the horizontal plane has to be bigger than the radius"
 
 
         self.listCavities.append(cavity)
 
 
-cpdef primitives.Shape accordionFreeDimension(double heigthTube, double radiusTube, double thickness, list listCavities):
+cpdef tuple accordionFreeDimension(double heigthTube, double radiusTube, double thickness, list listCavities):
     """
      The Cavities have to be given as [heigth,"type",axisX,axisY,axisZ]
      The shape is given has the difference between ShapePlus and ShapeMinus
@@ -103,10 +101,10 @@ cpdef primitives.Shape accordionFreeDimension(double heigthTube, double radiusTu
 
     shape=primitives.Difference(shapePlus,shapeMinus)
 
-    return shape
+    return (shape,shapeMinus)
 
 
-cpdef primitives.Shape accordionRecoveringGiven(double heigthTube,double radiusTube, double thickness, str typeCavities,
+cpdef tuple accordionRecoveringGiven(double heigthTube,double radiusTube, double thickness, str typeCavities,
                               list listheigthsJoiningPoints, list listAxesX, list listAxesY, double Zrecovering):
     """
      There is a unique type of cavities. Only their heigth, axes among X and Y can variate.
@@ -136,7 +134,7 @@ cpdef primitives.Shape accordionRecoveringGiven(double heigthTube,double radiusT
 
     return accordionFreeDimension(heigthTube,radiusTube,thickness,listCavities)
 
-cpdef primitives.Shape accordionUniform(double heigthTube,double radiusTube, double thickness, str typeCavities,int numberCavities, double axisX, double axisY, double Zrecovering):
+cpdef tuple accordionUniform(double heigthTube,double radiusTube, double thickness, str typeCavities,int numberCavities, double axisX, double axisY, double Zrecovering):
     """
      There is a unique type of cavities, a unique axisX and axisY. The Cavities are uniformly dispatched
     """

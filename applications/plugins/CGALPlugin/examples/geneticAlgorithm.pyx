@@ -18,6 +18,8 @@ import primitives
 import accordion
 import random
 import operator
+import copy
+
 
 cimport numpy
 cimport cython
@@ -30,9 +32,14 @@ from libc.stdlib cimport qsort
 cdef double heigthTube=10.0
 cdef double radiusTube=3.0
 cdef double thickness=0.5
-cdef int number_of_cavities=3
-generate_random="ON"
+cdef int number_of_cavities=2
+generate_random="OFF"
 TYPE=["ellipsoid","frisbee"]
+
+mutationType="ON"
+mutationAxisX="OFF"
+mutationAxisY="OFF"
+mutationAxisZ="OFF"
 
 
 
@@ -43,39 +50,73 @@ cdef class Individual(accordion.TubeWithCavities):
 
 #    global heigthTube, radiusTube, thickness, number_of_cavities
 
-    def __init__(self, str type):
+    def __init__(self,heigth, radius, thickness):
 
-        accordion.TubeWithCavities.__init__(self,heigthTube, radiusTube, thickness)
+        accordion.TubeWithCavities.__init__(self,heigth, radius, thickness)
 
-        for i in range(1,number_of_cavities):
-            heigth=0.5+i*(heigthTube-0.5)/float(number_of_cavities)
+        self.level
 
-            if generate_random=="ON":
-                axisX=random.uniform(4.0,7.0)
-                axisY=random.uniform(1.0,7.0)
-                axisZ=1.58
-            else:
-                axisX=5.0
-                axisY=5.0
-                axisZ=1.58
+    cpdef str display(self):
+        cdef str temp="heigthTube="+str(self.heigth)+"\n"\
+                     +"radiusTube="+str(self.radius)+"\n"\
+                     +"thickness="+str(self.thickness)+"\n\n"\
 
-            cavity=[heigth,type,axisX,axisY,axisZ]
-            self.addCavity(cavity)
+        for i in range(len(self.listCavities)):
 
-        self.level=random.uniform(0.0,10.0)
+            [heigth,type,axisX,axisY,axisZ]=self.listCavities[i]
+
+            temp=temp+"cavity number "+str(i)+"\n"\
+                     +"type="+type+"\n"\
+                     +"heigth="+str(heigth)+"\n"\
+                     +"axisX="+str(axisX)+"\n"\
+                     +"axisY="+str(axisY)+"\n"\
+                     +"axisZ="+str(axisZ)+"\n\n"
+        return temp
+
+cpdef Individual getNewInd(str type):
+
+    cdef Individual individual=Individual(heigthTube, radiusTube, thickness)
+
+    for i in range(1,number_of_cavities+1):
+        heigth=0.5+i*(heigthTube-0.5)/float(number_of_cavities)
+
+        if generate_random=="ON":
+            axisX=random.uniform(4.0,7.0)
+            axisY=random.uniform(1.0,7.0)
+            axisZ=(heigthTube-0.5)/(2*number_of_cavities)
+        else:
+            axisX=5.0
+            axisY=5.0
+            axisZ=(heigthTube-0.5)/(2*number_of_cavities)
+
+        cavity=[heigth,type,axisX,axisY,axisZ]
+        individual.addCavity(cavity)
+
+    individual.level=random.uniform(0.0,10.0)
+
+    return individual
 
 def key_func(Individual ind):
     return ind.level
+
+
+cpdef Individual copyInd (Individual individual):
+
+    cdef Individual temp=Individual(individual.heigth,individual.radius,individual.thickness)
+    cdef list listCavities=copy.deepcopy(individual.listCavities)
+    temp.listCavities=listCavities
+    return temp
+
 
 cdef class Population:
 
     def __init__(self):
         self.pop = []
 
-    cpdef add_pop(self, Individual ind):
+    cpdef void add_pop(self, Individual ind):
         self.pop.append(ind)
 
-    cpdef remove_pop(self, Individual ind):
+    cpdef void remove_pop(self, Individual ind):
         self.pop.remove(ind)
 
     @cython.boundscheck(False)
@@ -85,17 +126,17 @@ cdef class Population:
     @cython.infer_types(True)
     @cython.binding(False)
 
-    cpdef update(self):
+    cpdef void update(self):
         self.pop.sort(key=key_func)
 
 
 cdef Population POPULATION=Population()
 
-cpdef getPOPULATION():
+cpdef void getPOPULATION():
     return POPULATION
 
 
-cpdef generate_initPop(int n):
+cpdef void generate_initPop(int n):
 
     cdef Individual individual
 
@@ -107,7 +148,7 @@ cpdef generate_initPop(int n):
         POPULATION.add_pop(individual)
 
 
-cpdef popDisplay(Population population):
+cpdef void popDisplay(Population population):
 
     population.update()
 
@@ -123,7 +164,7 @@ cpdef popDisplay(Population population):
 ###
 
 
-cpdef mutation_axisX(Individual ind):
+cpdef void mutation_axisX(Individual ind):
 
     length=len(ind.listCavities)
 
@@ -138,7 +179,7 @@ cpdef mutation_axisX(Individual ind):
     axisX=max(4.0, axisX+epsilon)
     ind.listCavities[index][2]=axisX
 
-cpdef mutation_axisY(Individual ind):
+cpdef void mutation_axisY(Individual ind):
 
     length=len(ind.listCavities)
 
@@ -154,10 +195,10 @@ cpdef mutation_axisY(Individual ind):
     ind.listCavities[index][3]=axisY
 
 
-cpdef mutation_axisZ(Individual ind):
+cpdef void mutation_axisZ(Individual ind):
 
     length=len(ind.listCavities)
-
+    print length
     if length<=1:
         raise ValueError, "their is no cavity to mutate, or don't touch the first cavity"
 
@@ -170,7 +211,7 @@ cpdef mutation_axisZ(Individual ind):
     ind.listCavities[index][4]=axisZ
 
 
-cpdef mutation_type(Individual ind):
+cpdef void mutation_type(Individual ind):
 
     length=len(ind.listCavities)
 
@@ -185,6 +226,71 @@ cpdef mutation_type(Individual ind):
         ind.listCavities[index][1]="frisbee"
     else:
         ind.listCavities[index][1]="ellipsoid"
-    print ind.listCavities[index][1]
+
+
+cpdef void mutation(Individual ind):
+
+    if mutationAxisX=="ON":
+        mutation_axisX(ind)
+
+    if mutationAxisY=="ON":
+        mutation_axisY(ind)
+
+    if mutationAxisZ=="ON":
+        mutation_axisZ(ind)
+
+    if mutationType=="ON":
+        mutation_type(ind)
+
+cpdef void mutation_Pop(int number_of_mutated_ind, int number_of_mutation_per_ind):
+
+    length_temp=len(POPULATION)
+
+    cdef int i,j,k
+
+    cdef Individual ind
+
+    for i in range(number_of_mutated_ind):
+        j=random.randint(0,length_temp-1)
+        ind=copyInd(POPULATION[j])
+
+        for k in range(number_of_mutation_per_ind):
+            mutation(ind)
+
+        POPULATION.add_pop(ind)
+
+cpdef void mutation_Pop(int number_of_crossing):
+
+    length_temp=len(POPULATION)
+
+    cdef int i,j,k
+
+    for i in range(number_of_mutated_ind):
+        j=random.randint(0,length_temp-1)
+        K=random.randint(0,length_temp-1)
+        crossing_ind=copyInd(POPULATION[j],POPULATION[k])
+
+###
+###CROSSING
+###
+
+cpdef void crossing_ind(Individual individual1, Individual individual2):
+
+    cdef Individual ind1=copyInd(individual1)
+    cdef Individual ind2=copyInd(individual2)
+
+    cdef int index=random.randint(0,number_of_cavities-1)
+
+    temp=ind1.listCavities[index]
+    print temp
+    ind1.listCavities[index]=ind2.listCavities[index]
+    ind2.listCavities[index]=temp
+
+    POPULATION.add_pop(ind1)
+    POPULATION.add_pop(ind2)
+
+#    return ind1,ind2
+
+
 
 

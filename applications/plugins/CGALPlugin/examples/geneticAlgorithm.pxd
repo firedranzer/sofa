@@ -25,6 +25,8 @@ cimport accordion
 cdef class Individual(accordion.TubeWithCavities):
     cdef double level
 
+    cpdef str display(self)
+
 cdef class Population:
 
     cdef list pop
