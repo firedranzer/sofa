@@ -26,6 +26,7 @@
 #include <SofaImplicitField/components/geometry/ScalarField.h>
 
 #include <SofaPython/PythonEnvironment.h>
+#include <map>
 
 ///////////////////////////// FORWARD DEFINITIONS //////////////////////////////////////////////////
 namespace sofa {
@@ -77,12 +78,23 @@ public:
     virtual double getValue(Vec3d& pos, int& domain) override ;
     virtual Vec3d getGradient(Vec3d& pos, int& i) override ;
 
+    /// Returns a map with "id" and "glsl" textual code of the fragment.
+    /// The idea is that we can tune what we take from python and how
+    /// it is included in the glsl shader. Some convention have to be defined
+    /// on what python should return.
+    /// eg:
+    ///    map["eval"] = "return min(p.x, p.y)"
+    ///    map["eval"] = "return vec3(1.0,1.0,1.0)"
+    /// when the map is empty means the component cannot makes a GLSL version of the
+    /// distance function (eg no python function found)
+    const std::map<std::string, std::string>& getGLSLCode() ;
+
     Data<std::string> d_function ;
+    Data<std::string> d_glslFunction ;
     Data<std::string> d_gradient ;
     PyObject*         m_evalFunction ;
     PyObject*         m_gradFunction ;
 
-    void getCythonHook(PyObject*& module) ;
 
 protected:
     CustomField( ) ;
@@ -95,9 +107,13 @@ private:
     PyObject* getPythonFunction(const std::string& attribname,
                                 const std::string& attribvalue,
                                 PyObject*& module, bool doReload) const ;
+    void getCythonHook(PyObject*& module) ;
+    void updateGLSLCodeCacheFromPython() ;
+
 
     PyObject* m_functionModule {nullptr} ;
     PyObject* m_gradientModule {nullptr} ;
+    PyObject* m_glslFunctionModule {nullptr} ;
 
     FieldFunction  m_rawFunction {nullptr} ;
     PyObject*      m_rawShape {nullptr} ;
@@ -105,6 +121,8 @@ private:
     FileEventListener* m_sourcefile ;
 
     Data<int> d_state ;
+
+    std::map<std::string, std::string> m_glslcodes ;
 };
 
 } /// namespace _scalarfield_
