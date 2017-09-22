@@ -19,6 +19,11 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+/******************************************************************************
+ * Contributors:                                                              *
+ *   - damien.marchal@univ-lille1.fr                                          *
+ *                                                                            *
+ *****************************************************************************/
 
 #include <fstream>
 #include <sofa/core/ObjectFactory.h>
@@ -123,38 +128,39 @@ CGAL::Bbox_3 MeshGenerationFromImplicitShape::BoundingBox(double x_min, double y
 
 MeshGenerationFromImplicitShape::MeshGenerationFromImplicitShape()
     : TrackedComponent(this)
-    , in_facetangle(initData(&in_facetangle,(float)30.0,"facet_angle",
+    , d_facetangle(initData(&d_facetangle,(double)30.0,"facet_angle",
                                                           "This parameter controls the shape of surface facets. Actually, "
                                                           "it is a lower bound for the angle (in degree) of surface facets.(Default 30.0)"))
-    , in_facetsize(initData(&in_facetsize,(float)1.0, "facet_size",
+    , d_facetsize(initData(&d_facetsize,(double)1.0, "facet_size",
                                                        "This parameter controls the size of surface facets. Actually, each "
                                                        "surface facet has a surface Delaunay ball which is a ball circumscribing "
                                                        "the surface facet and centered on the surface patch. (Default 1.0)"))
-    , in_facetdistance(initData(&in_facetdistance,(float)1.0,"facet_distance",
+    , d_facetdistance(initData(&d_facetdistance,(double)1.0,"facet_distance",
                                                                    "This parameter controls the approximation error of boundary and subdivision surfaces. "
                                                                    "Actually, it is either a constant or a spatially variable scalar field. It provides an "
                                                                    "upper bound for the distance between the circumcenter of a surface facet and the center "
                                                                    "of a surface Delaunay ball of this facet. (Default 1.0)"))
-    , in_cellsize(initData(&in_cellsize, (float)1.0, "cell_size",
+    , d_cellsize(initData(&d_cellsize, (double)1.0, "cell_size",
                                                     "This parameter controls the size of mesh tetrahedra. It is either a scalar or a spatially "
                                                     "variable scalar field. It provides an upper bound on the circumradii of the mesh tetrahedra. (Default 1.0)"))
-    , in_cell_radiusedge_ratio(initData(&in_cell_radiusedge_ratio, (float)2.1, "cell_radius_edge_ratio",
+    , d_cell_radiusedge_ratio(initData(&d_cell_radiusedge_ratio, (double)2.1, "cell_radius_edge_ratio",
                                                                   "This parameter controls the shape of mesh cells (but can't filter slivers, as we discussed earlier)."
                                                                   " Actually, it is an upper bound for the ratio between the circumradius of a mesh tetrahedron "
                                                                   "and its shortest edge. There is a theoretical bound for this parameter: the Delaunay refinement "
                                                                   "process is guaranteed to terminate for values of cell_radius_edge_ratio bigger than 2. (Default 2.1)"))
-    , drawTetras(initData(&drawTetras,false,"drawTetras","display generated tetra mesh"))
-    , out_Points(initData(&out_Points, "outputPoints", "position coordinates from the tetrahedral generation"))
-    , out_tetrahedra(initData(&out_tetrahedra, "outputTetras", "list of tetrahedra"))
-    , in_scalarfield(initLink("scalarfield", "The scalar field that defined the iso-function"))
-    , d_box(initData(&d_box, sofa::defaulttype::BoundingBox(0,1,0,1,0,1), "box", "min - max coordinate of the grid where to sample the function. "))
+    , d_center(initData(&d_center, Vec3d(0,0,0), "meshingzone_center", "The center of the sphere where the meshing is done. (Default = 0,0,0)"))
+    , d_radius(initData(&d_radius, (double)2.0,  "meshingzone_radius", "The radius of the sphere where the meshing is done. (Default = 2)"))
+    , d_drawtetras(initData(&d_drawtetras,false,"drawTetras","display generated tetra mesh"))
+    , d_out_points(initData(&d_out_points, "outputPoints", "position coordinates from the tetrahedral generation"))
+    , d_out_tetrahedra(initData(&d_out_tetrahedra, "outputTetras", "list of tetrahedra"))
+    , l_scalarfield(initLink("scalarfield", "The scalar field that defined the iso-function"))
 {
     f_listening.setValue(true);
 }
 
 void MeshGenerationFromImplicitShape::init()
 {
-    if(in_scalarfield.empty())
+    if(l_scalarfield.empty())
     {
         m_componentstate = ComponentState::Invalid ;
         msg_error() << "Component non linked" ;
@@ -162,9 +168,9 @@ void MeshGenerationFromImplicitShape::init()
     }
 
     /// Start tracking the component
-    addComponent(in_scalarfield.get());
+    addComponent(l_scalarfield.get());
 
-    if(in_scalarfield->getStatus() != CStatus::Valid) {
+    if(l_scalarfield->getStatus() != CStatus::Valid) {
         m_componentstate = ComponentState::Invalid;
         msg_warning() << "Lazy Init()";
         return ;
@@ -175,24 +181,28 @@ void MeshGenerationFromImplicitShape::init()
 
     /// future from an async()
     m_com = std::async(std::launch::async, [this](){
-        unsigned int countervalue = this->in_scalarfield->getCounter() ;
-        this->volumeMeshGeneration(this->in_facetangle.getValue(),
-                                   this->in_facetsize.getValue(),
-                                   this->in_facetdistance.getValue(),
-                                   this->in_cellsize.getValue(),
-                                   this->in_cell_radiusedge_ratio.getValue());
+        unsigned int countervalue = this->l_scalarfield->getCounter() ;
+        this->volumeMeshGeneration(this->d_facetangle.getValue(),
+                                   this->d_facetsize.getValue(),
+                                   this->d_facetdistance.getValue(),
+                                   this->d_cellsize.getValue(),
+                                   this->d_cell_radiusedge_ratio.getValue());
         return countervalue; });
 }
 
 void MeshGenerationFromImplicitShape::reinit()
 {
     update(true) ;
-    f_bbox = d_box.getValue() ;
+    computeBBox(ExecParams::defaultInstance(), false) ;
 }
 
 void MeshGenerationFromImplicitShape::computeBBox(const ExecParams *, bool)
 {
-    f_bbox = d_box.getValue() ;
+    const Vec3d& c = d_center.getValue() ;
+    const double r = d_radius.getValue() ;
+    f_bbox.setValue(sofa::defaulttype::BoundingBox(c.x()-r, c.x()+r,
+                                                   c.y()-r, c.y()+r,
+                                                   c.z()-r, c.z()+r)) ;
 }
 
 
@@ -212,18 +222,18 @@ void MeshGenerationFromImplicitShape::update(bool forceUpdate)
     if(  !m_com.valid() && hasChanged() || forceUpdate )
     {
          /// The inputs are not valid
-        if(in_scalarfield->getStatus() != CStatus::Valid)
+        if(l_scalarfield->getStatus() != CStatus::Valid)
             return ;
 
         /// The inputs are valid & we should grab them.
         m_componentstate = ComponentState::Invalid ;
         m_com = std::async(std::launch::async, [this](){
-            unsigned int countervalue = this->in_scalarfield->getCounter() ;
-            this->volumeMeshGeneration(this->in_facetangle.getValue(),
-                                       this->in_facetsize.getValue(),
-                                       this->in_facetdistance.getValue(),
-                                       this->in_cellsize.getValue(),
-                                       this->in_cell_radiusedge_ratio.getValue());
+            unsigned int countervalue = this->l_scalarfield->getCounter() ;
+            this->volumeMeshGeneration(this->d_facetangle.getValue(),
+                                       this->d_facetsize.getValue(),
+                                       this->d_facetdistance.getValue(),
+                                       this->d_cellsize.getValue(),
+                                       this->d_cell_radiusedge_ratio.getValue());
             return countervalue; });
     }
 
@@ -241,20 +251,22 @@ void MeshGenerationFromImplicitShape::update(bool forceUpdate)
 
 
 //mesh the implicit domain
-int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_angleP, float facet_sizeP, float facet_distanceP,
-                                                          float cell_sizeP, float cell_radius_edge_ratioP)
+int MeshGenerationFromImplicitShape::volumeMeshGeneration(double facet_angleP, double facet_sizeP, double facet_distanceP,
+                                                          double cell_sizeP, double cell_radius_edge_ratioP)
 {
     //Domain
     Mesh_domain *domain = NULL;
-    if(in_scalarfield.empty())
+    if(l_scalarfield.empty())
         return 0;
 
-    while(in_scalarfield->getComponentState() != ComponentState::Valid ) ;
+    while(l_scalarfield->getComponentState() != ComponentState::Valid ) ;
 
-    ImplicitFunction function(in_scalarfield);
+    ImplicitFunction function(l_scalarfield);
     Function_vector v;
     v.push_back(function);
-    domain = new Mesh_domain(v, K::Sphere_3(CGAL::ORIGIN, 5. *5.), 1e-3);
+    double dtmp=d_radius.getValue();
+    const Vec3d& ctmp = d_center.getValue() ;
+    domain = new Mesh_domain(v, K::Sphere_3(K::Point_3(ctmp.x(), ctmp.y(), ctmp.z()), dtmp*dtmp), 1e-3);
 
     //Criteria
     Spherical_sizing_field fsize ;
@@ -269,8 +281,8 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_angleP, fl
     delete domain;
 
     //Topology
-    sofa::helper::WriteAccessor< Data<VecCoord> > newPoints = out_Points;
-    sofa::helper::WriteAccessor< Data<SeqTetrahedra> > tetrahedra = out_tetrahedra;
+    sofa::helper::WriteAccessor< Data<VecCoord> > newPoints = d_out_points;
+    sofa::helper::WriteAccessor< Data<SeqTetrahedra> > tetrahedra = d_out_tetrahedra;
 
     newPoints.clear();
     tetrahedra.clear();
@@ -323,17 +335,17 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(float facet_angleP, fl
 
 
 //visualisation of the shape before mesh
-void MeshGenerationFromImplicitShape::draw(const sofa::core::visual::VisualParams* vparams) {
+void MeshGenerationFromImplicitShape::draw(const sofa::core::visual::VisualParams* vparams)
+{
+    auto& box = f_bbox.getValue();
+    vparams->drawTool()->drawBoundingBox(box.minBBox(), box.maxBBox()) ;
 
     if(m_componentstate != ComponentState::Valid)
         return;
 
-    auto& box = d_box.getValue();
-    vparams->drawTool()->drawBoundingBox(box.minBBox(), box.maxBBox()) ;
-
-    if(drawTetras.getValue()) {
-        sofa::helper::ReadAccessor< Data<VecCoord> > x = out_Points;
-        sofa::helper::ReadAccessor< Data<SeqTetrahedra> > tetrahedra = out_tetrahedra;
+    if(d_drawtetras.getValue()) {
+        sofa::helper::ReadAccessor< Data<VecCoord> > x = d_out_points;
+        sofa::helper::ReadAccessor< Data<SeqTetrahedra> > tetrahedra = d_out_tetrahedra;
         vparams->drawTool()->setLightingEnabled(false);
         std::vector<Coord> points[4];
         for(unsigned int i=0; i<tetrahedra.size(); ++i)
@@ -343,10 +355,10 @@ void MeshGenerationFromImplicitShape::draw(const sofa::core::visual::VisualParam
             int c = tetrahedra[i][2];
             int d = tetrahedra[i][3];
             Coord center = (x[a]+x[b]+x[c]+x[d])*0.125;
-            Coord pa = (x[a]+center)*(float)0.666667;
-            Coord pb = (x[b]+center)*(float)0.666667;
-            Coord pc = (x[c]+center)*(float)0.666667;
-            Coord pd = (x[d]+center)*(float)0.666667;
+            Coord pa = (x[a]+center)*(double)0.666667;
+            Coord pb = (x[b]+center)*(double)0.666667;
+            Coord pc = (x[c]+center)*(double)0.666667;
+            Coord pd = (x[d]+center)*(double)0.666667;
 
             points[0].push_back(pa);
             points[0].push_back(pb);
@@ -365,10 +377,10 @@ void MeshGenerationFromImplicitShape::draw(const sofa::core::visual::VisualParam
             points[3].push_back(pb);
         }
 
-        vparams->drawTool()->drawTriangles(points[0], sofa::defaulttype::Vec<4,float>(0.0,0.0,1.0,1.0));
-        vparams->drawTool()->drawTriangles(points[1], sofa::defaulttype::Vec<4,float>(0.0,0.5,1.0,1.0));
-        vparams->drawTool()->drawTriangles(points[2], sofa::defaulttype::Vec<4,float>(0.0,1.0,1.0,1.0));
-        vparams->drawTool()->drawTriangles(points[3], sofa::defaulttype::Vec<4,float>(0.5,1.0,1.0,1.0));
+        vparams->drawTool()->drawTriangles(points[0], sofa::defaulttype::Vec<4,double>(0.0,0.0,1.0,1.0));
+        vparams->drawTool()->drawTriangles(points[1], sofa::defaulttype::Vec<4,double>(0.0,0.5,1.0,1.0));
+        vparams->drawTool()->drawTriangles(points[2], sofa::defaulttype::Vec<4,double>(0.0,1.0,1.0,1.0));
+        vparams->drawTool()->drawTriangles(points[3], sofa::defaulttype::Vec<4,double>(0.5,1.0,1.0,1.0));
     }
 }
 

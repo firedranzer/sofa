@@ -27,8 +27,6 @@
 #ifndef SOFA_CGAL_MESHGENERATIONFROMIMPLICIT_H
 #define SOFA_CGAL_MESHGENERATIONFROMIMPLICIT_H
 
-#include <sofa/defaulttype/Vec.h>
-
 #include <CGALPlugin/config.h>
 #include <future>
 
@@ -44,10 +42,9 @@ namespace component
 {
 namespace engine
 {
-namespace _meshgenerationfromimplicit_
+namespace _surfacemeshgenerationfromimplicit_
 {
 
-using sofa::defaulttype::Vec3d ;
 using sofa::component::geometry::ScalarField ;
 typedef sofa::core::topology::BaseMeshTopology::SeqTetrahedra SeqTetrahedra;
 typedef sofa::core::topology::BaseMeshTopology::Tetra Tetra;
@@ -58,16 +55,14 @@ using namespace sofa::core;
 using namespace sofa::core::visual;
 using namespace sofa::core::objectmodel;
 
-class SOFA_CGALPLUGIN_API MeshGenerationFromImplicitShape : public BaseObject,
+class SOFA_CGALPLUGIN_API SurfaceMeshGenerationFromImplicitShape : public BaseObject,
         public ComponentTracker,
         public TrackedComponent
 {
 public:
-    SOFA_CLASS(MeshGenerationFromImplicitShape, BaseObject);
-    MeshGenerationFromImplicitShape() ;
-    virtual ~MeshGenerationFromImplicitShape() { }
-    int volumeMeshGeneration(double facet_angle, double facet_size, double facet_distance,
-                             double cell_size, double cell_radius_edge_ratio);
+    SOFA_CLASS(SurfaceMeshGenerationFromImplicitShape, BaseObject);
+    SurfaceMeshGenerationFromImplicitShape() ;
+    virtual ~SurfaceMeshGenerationFromImplicitShape() { }
 
     virtual void init() override ;
     virtual void reinit() override ;
@@ -77,36 +72,21 @@ public:
 
     virtual void update(bool forceUpdate=false) ;
 
+    Data<sofa::defaulttype::BoundingBox> d_box ;
+
 private:
     CGAL::Bbox_3 BoundingBox(double x_min, double y_min, double z_min,
                              double x_max, double y_max, double z_max);
 
-    /// Inputs and atritbutes
-    Data<double> d_facetangle;
-    Data<double> d_facetsize;
-    Data<double> d_facetdistance;
-    Data<double> d_cell_radiusedge_ratio;
-    Data<double> d_cellsize;
-
-    Data<double> d_radius ;
-    Data<Vec3d>  d_center ;
-
-    /// Display
-    Data<bool> d_drawtetras;
-
-    /// Output
-    Data<VecCoord> d_out_points;
-    Data<SeqTetrahedra> d_out_tetrahedra;
-
     /// Link
-    typedef SingleLink< MeshGenerationFromImplicitShape, ScalarField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> LinkGrid;
-    LinkGrid l_scalarfield;
+    typedef SingleLink< SurfaceMeshGenerationFromImplicitShape, ScalarField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> LinkGrid;
+    LinkGrid in_scalarfield;
 
     std::shared_future<unsigned int> m_com;
 };
 
 } /// namespace _meshgenerationfromimplicit_
-    using _meshgenerationfromimplicit_::MeshGenerationFromImplicitShape ;
+    using _surfacemeshgenerationfromimplicit_::SurfaceMeshGenerationFromImplicitShape ;
 } /// namespace engine
 } /// namespace component
 } /// namespace sofa

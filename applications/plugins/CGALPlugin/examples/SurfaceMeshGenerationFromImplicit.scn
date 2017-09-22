@@ -19,13 +19,13 @@
 	<!-- Mesh component -->
 
 
-<MeshGenerationFromImplicitShape name="mesh"
+        <SurfaceMeshGenerationFromImplicitShape name="mesh"
                         facet_size="1.0"
                         approximation="10.0"
                         cell_size="1.0"
                         scalarfield="@field1"
                         drawTetras="true"
-                        meshingzone_center="0.0 0.0 0.0" meshingzone_radius="5.0"/>
+                        xmin_box="-5.0" ymin_box="-5.0" zmin_box="-2.0" xmax_box="5.0" ymax_box="5.0" zmax_box="11.0"/>
 
 
         <PointCloudImplicitFieldVisualization field="@field1" box="-5 -5 -1 5 5 10" color="1.0 1.0 1.0"/>

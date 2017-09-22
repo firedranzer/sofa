@@ -87,6 +87,7 @@ void CustomField::handleEvent(sofa::core::objectmodel::Event *event)
 CustomField::CustomField() :
     d_function (initData(&d_function, (std::string)"", "function", "Use a python function to implement the implicit field.")),
     d_gradient (initData(&d_gradient, (std::string)"", "gradient", "Use a python function to implement the gradient field. If not provided returns gradient using finite difference.")),
+    d_glslFunction (initData(&d_function, (std::string)"", "glslFunction", "Use a python function to return glsl implicit field description.")),
     d_state (initData(&d_state, 0, "state", "This is a number indicating change in this component."))
 {
     m_sourcefile = new MyFileListener(this) ;
@@ -198,6 +199,33 @@ PyObject* CustomField::getPythonFunction(const std::string& attribname, const st
     return fct ;
 }
 
+void CustomField::updateGLSLCodeCacheFromPython()
+{
+    PythonEnvironment::gil lock {__func__} ;
+
+    msg_info() << "Search for glsl rendering map" ;
+    PyObject* glslFunction = getPythonFunction("function", d_glslFunction.getValue(), m_glslFunctionModule, true) ;
+    if(glslFunction==nullptr)
+    {
+        msg_error() << "Unable to find a required callable object from attribute 'function=\""<< d_glslFunction.getValue() <<"\"'" ;
+        m_glslcodes.clear() ;
+        return ;
+    }
+
+    //TODO(dmarchal) add here the call to the python code and the conversion from the dict to the
+    // right function.
+
+    m_glslcodes["VARIABLES"] = "pos0 = vec4(0,0,0,1); " ;
+    m_glslcodes["EVALFUNCTION"] = "return pos0*min(x,y); " ;
+    m_glslcodes["GRADFUNCTION"] = "return vec3(1.0,0.0,0.0)" ;
+}
+
+const std::map<std::string, std::string>& CustomField::getGLSLCode()
+{
+    updateGLSLCodeCacheFromPython();
+    return m_glslcodes ;
+}
+
 void CustomField::init()
 {
     setStatus(CStatus::Busy) ;
@@ -218,6 +246,7 @@ void CustomField::init()
         msg_info() << "No gradient function found from attribute 'gradient=\"" << d_gradient.getValue() <<"\"'. Falling back to finite difference implementation" ;
     }    
 
+    //TODO(dmarchal) N'importe quoi ! Codé en dure pour testé et ça reste !!!!Au cachot.
     PyObject* loadShape = getPythonFunction("function", "customfield.loadShape", m_functionModule, false) ;
     if (PyCallable_Check(loadShape)){
         Node* me = (Node*)getContext() ;
@@ -235,13 +264,11 @@ void CustomField::init()
         dmsg_warning() << "No loadShape function found. use evalFunction." ;
     }
 
-    msg_warning() << "Search for getCythonHook" ;
+    msg_info() << "Search for getCythonHook" ;
     getCythonHook(m_functionModule) ;
 
     m_componentstate = ComponentState::Valid ;
     d_state.setValue(d_state.getValue()+1);
-
-    dmsg_warning() << "UPDATED THE STATUS !! " ;
     setStatus(CStatus::Valid) ;
 }
 
