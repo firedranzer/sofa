@@ -5,11 +5,11 @@ add_subdirectory(../../extlibs/CImg extlibs/CImg)
 
 find_package(SofaFramework)
 
-sofa_add_plugin(SofaDistanceGrid SofaDistanceGrid)
-sofa_add_plugin(SofaImplicitField SofaImplicitField)
+sofa_add_plugin(SofaDistanceGrid SofaDistanceGrid ON)
+sofa_add_plugin(SofaImplicitField SofaImplicitField ON)
 sofa_add_plugin(image image)
 sofa_add_plugin(Compliant Compliant)
-sofa_add_plugin(CGALPlugin CGALPlugin) # Depends on image
+sofa_add_plugin(CGALPlugin CGALPlugin ON) # Depends on image
 sofa_add_plugin(Flexible Flexible)     # Depends on image
 sofa_add_plugin(Registration Registration) # Depends on image, SofaPython, SofaSimpleGUI and #SOFADISTANCEGRID
 sofa_add_plugin(BulletCollisionDetection BulletCollisionDetection) # Depends on Compliant

@@ -24,7 +24,14 @@ set(SOURCE_FILES
 set(README_FILES README.md
                  examples/MeshGenerationFromImage.scn
                  examples/MeshGenerationFromImageWithFeatures.scn
-                 examples/Refine2DMesh.scn)
+                 examples/MeshGenerationFromImplicit.scn
+                 examples/Refine2DMesh.scn
+                 examples/customfield.py
+                 examples/customfield2.py
+                 examples/dfgeom.pyx
+                 examples/minipsl.py
+                 examples/vector.h
+                 )
 
 find_package(SofaFramework REQUIRED)
 find_package(CGAL REQUIRED)

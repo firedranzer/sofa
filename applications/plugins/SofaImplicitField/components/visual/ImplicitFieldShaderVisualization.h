@@ -25,6 +25,7 @@
 #include <SofaImplicitField/config.h>
 
 #include <iostream>
+#include <fstream>
 
 #include <sofa/core/ObjectFactory.h>
 using sofa::core::RegisterObject;
@@ -46,6 +47,12 @@ using sofa::core::objectmodel::MouseEvent;
 
 using sofa::core::visual::VisualParams;
 
+#include <SofaImplicitField/components/geometry/CustomField.h>
+using sofa::component::geometry::CustomField;
+
+#include <sofa/core/DataEngine.h>
+using sofa::core::DataEngine ;
+using sofa::core::DataTracker ;
 
 namespace sofa
 {
@@ -82,7 +89,7 @@ public:
     virtual bool insertInNode( core::objectmodel::BaseNode* node ) { Inherit1::insertInNode(node); Inherit2::insertInNode(node); return true; }
     virtual bool removeInNode( core::objectmodel::BaseNode* node ) { Inherit1::removeInNode(node); Inherit2::removeInNode(node); return true; }
 
-    SingleLink<ImplicitFieldShaderVisualization,  BaseObject, BaseLink::FLAG_DOUBLELINK> l_xShape;
+    SingleLink<ImplicitFieldShaderVisualization,  CustomField, BaseLink::FLAG_DOUBLELINK> l_field;
     sofa::core::objectmodel::DataFileName d_vertFilename;
     sofa::core::objectmodel::DataFileName d_fragFilename;
 
@@ -93,6 +100,19 @@ protected:
 
     std::string generateFragmentShaderFrom();
     std::string generateVertexShaderFrom();
+
+
+    std::string uniformsAndConst();
+    std::string rotationFunction();
+    std::string implicitFunction();
+    std::string rayMarchingFunction();
+    std::string phongFunction();
+    std::string viewFunction();
+    std::string mainFragmenShaderFunction();
+
+private:
+    DataTracker m_datatracker ;
+
 
 };
 
