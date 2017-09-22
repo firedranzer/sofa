@@ -21,6 +21,8 @@ set(HEADER_FILES
     components/mapping/ImplicitSurfaceMapping.h
     components/mapping/ImplicitSurfaceMapping.inl
     components/visual/PointCloudImplicitFieldVisualization.h
+    components/visual/ImplicitFieldShaderVisualization.h
+    components/visual/ImplicitFieldShaderVisualization.inl
 )
 
 set(SOURCE_FILES
@@ -35,6 +37,8 @@ set(SOURCE_FILES
     components/geometry/SphericalField.cpp
     components/mapping/ImplicitSurfaceMapping.cpp
     components/visual/PointCloudImplicitFieldVisualization.cpp
+    components/visual/ImplicitFieldShaderVisualization.cpp
+
 )
 
 find_package(SofaPython QUIET)
