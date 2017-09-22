@@ -21,22 +21,14 @@
 
 <MeshGenerationFromImplicitShape name="mesh"
                         facet_size="1.0"
+			approximation="10.0"
                         cell_size="1.0"
                         scalarfield="@field1"
-<<<<<<< Updated upstream
                         drawTetras="true"
                         meshingzone_center="0.0 0.0 0.0" meshingzone_radius="5.0"/>
-=======
-                        drawTetras="true"/>
->>>>>>> Stashed changes
 
 
         <PointCloudImplicitFieldVisualization field="@field1" box="-5 -5 -1 5 5 10" color="1.0 1.0 1.0"/>
-
-
-
-        <OglModel fileMesh="mesh/floorFlat.obj" rotation="90 0 0" translation="20 20 0" scale="1 1 1"/>
-        <ImplicitFieldShaderVisualization field="@field1"/>
 
         <!--
         <Mesh position="@mesh.outputPoints" tetrahedra="@mesh.outputTetras" />
