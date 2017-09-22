@@ -129,7 +129,7 @@ CGAL::Bbox_3 SurfaceMeshGenerationFromImplicitShape::BoundingBox(double x_min, d
 
 SurfaceMeshGenerationFromImplicitShape::SurfaceMeshGenerationFromImplicitShape()
     : TrackedComponent(this)
-    , in_scalarfield(initLink("scalarfield", "The scalar field that defined the iso-function"))
+    , l_scalarfield(initLink("scalarfield", "The scalar field that defined the iso-function"))
     , d_box(initData(&d_box, sofa::defaulttype::BoundingBox(0,1,0,1,0,1), "box", "min - max coordinate of the grid where to sample the function. "))
 {
     f_listening.setValue(true);
@@ -137,42 +137,30 @@ SurfaceMeshGenerationFromImplicitShape::SurfaceMeshGenerationFromImplicitShape()
 
 void SurfaceMeshGenerationFromImplicitShape::init()
 {
-    if(in_scalarfield.empty())
+    /// Check if the in_scalarfield is given by the user.
+    if(l_scalarfield.empty())
     {
-        m_componentstate = ComponentState::Invalid ;
-        msg_error() << "Component non linked" ;
+        setStatus(CStatus::Invalid) ;
+        msg_error() << "Input ScalarField component is not linked. It can be provided with the 'scalarfield' attribute." ;
         return ;
     }
 
-    /// Start tracking the component
-    addComponent(in_scalarfield.get());
+    /// Start tracking the input component
+    addComponent(l_scalarfield.get());
 
-    if(in_scalarfield->getStatus() != CStatus::Valid) {
-        m_componentstate = ComponentState::Invalid;
-        msg_warning() << "Lazy Init()";
+    if( !l_scalarfield->isInStateValid() ) {
+        setStatus(CStatus::Invalid) ;
+        dmsg_info() << "The input ScalarField component is linked but it is not ready. We thus delay the initialisation";
         return ;
     }
 
-    /// std::cout << "LINK STATE " << in_scalarfield->findData("state") << std::endl ;
-    /// volumeMeshGeneration(in_facetsize.getValue(),in_approximation.getValue(),in_cellsize.getValue());
-
-    /// future from an async()
-    /*
-    m_com = std::async(std::launch::async, [this](){
-        unsigned int countervalue = this->in_scalarfield->getCounter() ;
-        this->volumeMeshGeneration(this->in_facetangle.getValue(),
-                                   this->in_facetsize.getValue(),
-                                   this->in_facetdistance.getValue(),
-                                   this->in_cellsize.getValue(),
-                                   this->in_cell_radiusedge_ratio.getValue());
-        return countervalue; });
-    */
+    update(true) ;
 }
 
 void SurfaceMeshGenerationFromImplicitShape::reinit()
 {
-    update(true) ;
     f_bbox = d_box.getValue() ;
+    update(true) ;
 }
 
 void SurfaceMeshGenerationFromImplicitShape::computeBBox(const ExecParams *, bool)
@@ -180,49 +168,34 @@ void SurfaceMeshGenerationFromImplicitShape::computeBBox(const ExecParams *, boo
     f_bbox = d_box.getValue() ;
 }
 
-
 void SurfaceMeshGenerationFromImplicitShape::handleEvent(sofa::core::objectmodel::Event *event)
 {
     if (dynamic_cast<sofa::core::objectmodel::IdleEvent *>(event))
         update() ;
     else
         BaseObject::handleEvent(event);
-
-
 }
 
 void SurfaceMeshGenerationFromImplicitShape::update(bool forceUpdate)
 {
-    /// The inputs have changed
-    if(  !m_com.valid() && hasChanged() || forceUpdate )
+    /// If we are not yet started and we can grab a read accessor to the scalar field
+    /// then fire a thread.
+    if( ! m_asyncTask.valid() && l_scalarfield->getReadAccessor(accessor) )
     {
-         /// The inputs are not valid
-        if(in_scalarfield->getStatus() != CStatus::Valid)
-            return ;
+        /// Here we have a pointer with a read access to the component.
 
-        /// The inputs are valid & we should grab them.
-        m_componentstate = ComponentState::Invalid ;
-        /*
-        m_com = std::async(std::launch::async, [this](){
-            unsigned int countervalue = this->in_scalarfield->getCounter() ;
-            this->volumeMeshGeneration(this->in_facetangle.getValue(),
-                                       this->in_facetsize.getValue(),
-                                       this->in_facetdistance.getValue(),
-                                       this->in_cellsize.getValue(),
-                                       this->in_cell_radiusedge_ratio.getValue());
-            return countervalue; });
-            */
-    }
+        /// Starts an asynchronous thread that computes the surface.
+        /// When the thread terminate a future is emited containing the state counter
+        /// at which the computation was done.
+        m_asyncTask = std::async(std::launch::async, [this, accessor](){
+            unsigned int countervalue = accessor->getState().counter ;
 
-    if( !m_com.valid() )
-        return ;
+            /// Do here some complex calculus that takes a lot of time.
+            /// ....
+            /// ....
 
-    if( m_com.wait_for(std::chrono::microseconds::zero()) == std::future_status::ready )
-    {
-        m_componentstate = ComponentState::Valid ;
-        updateCounterAt(m_com.get());
-        dmsg_warning() << "Update component from source at " << m_com.get() ;
-        m_com = std::future<unsigned int>() ;
+            return countervalue ;
+        });
     }
 }
 
@@ -230,8 +203,12 @@ void SurfaceMeshGenerationFromImplicitShape::update(bool forceUpdate)
 //visualisation of the shape before mesh
 void SurfaceMeshGenerationFromImplicitShape::draw(const sofa::core::visual::VisualParams* vparams)
 {
-    if(m_componentstate != ComponentState::Valid)
-        return;
+    if(m_state.state != CStatus::Invalid)
+    {
+        update() ;
+        if(m_state.state != CStatus::Valid)
+            return ;
+    }
 
     auto& box = d_box.getValue();
     vparams->drawTool()->drawBoundingBox(box.minBBox(), box.maxBBox()) ;

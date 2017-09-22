@@ -15,6 +15,8 @@ set(HEADER_FILES
     deprecated/ImplicitSurfaceContainer.h    # This is a backward compatibility file toward ScalarField
     deprecated/InterpolatedImplicitSurface.h # This is a backward compatibility file toward DiscreteridField
 
+    core/componenttracker.h
+
     components/geometry/DiscreteGridField.h
     components/geometry/SphericalField.h
     components/geometry/ScalarField.h

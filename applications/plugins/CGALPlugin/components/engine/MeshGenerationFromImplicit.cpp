@@ -110,21 +110,14 @@ struct Spherical_sizing_field
   typedef K::FT FT ;
   K::FT operator()(const K::Point_3& p, const int, const Index&) const
   {
-    return abs(cos(p.x()*10))+0.3;
+     double size = fabs(cos(p.x()*2)) / 4.0 + 0.01 ;
+     std::cout << "Query size at: "<< p.x() << "-> " << size << std::endl ;
+     return  size ;
   }
 };
 
-
 //factory register
 int MeshGenerationFromImplicitShapeClass = RegisterObject("This component mesh a domain defined from a scalar field.").add< MeshGenerationFromImplicitShape >();
-
-//create a bbox 3 for meshing in volume
-CGAL::Bbox_3 MeshGenerationFromImplicitShape::BoundingBox(double x_min, double y_min, double z_min, double x_max, double y_max, double z_max) {
-
-    CGAL::Bbox_3 bbox(x_min,y_min,z_min,x_max,y_max,z_max);
-    return bbox;
-
-}
 
 MeshGenerationFromImplicitShape::MeshGenerationFromImplicitShape()
     : TrackedComponent(this)
@@ -148,8 +141,7 @@ MeshGenerationFromImplicitShape::MeshGenerationFromImplicitShape()
                                                                   " Actually, it is an upper bound for the ratio between the circumradius of a mesh tetrahedron "
                                                                   "and its shortest edge. There is a theoretical bound for this parameter: the Delaunay refinement "
                                                                   "process is guaranteed to terminate for values of cell_radius_edge_ratio bigger than 2. (Default 2.1)"))
-    , d_center(initData(&d_center, Vec3d(0,0,0), "meshingzone_center", "The center of the sphere where the meshing is done. (Default = 0,0,0)"))
-    , d_radius(initData(&d_radius, (double)2.0,  "meshingzone_radius", "The radius of the sphere where the meshing is done. (Default = 2)"))
+    , d_box(initData(&d_box, sofa::defaulttype::BoundingBox(0,1,0,1,0,1), "box", "min - max coordinate of the grid where to sample the function. "))
     , d_drawtetras(initData(&d_drawtetras,false,"drawTetras","display generated tetra mesh"))
     , d_out_points(initData(&d_out_points, "outputPoints", "position coordinates from the tetrahedral generation"))
     , d_out_tetrahedra(initData(&d_out_tetrahedra, "outputTetras", "list of tetrahedra"))
@@ -170,7 +162,7 @@ void MeshGenerationFromImplicitShape::init()
     /// Start tracking the component
     addComponent(l_scalarfield.get());
 
-    if(l_scalarfield->getStatus() != CStatus::Valid) {
+    if( !l_scalarfield->isInStateValid() ) {
         m_componentstate = ComponentState::Invalid;
         msg_warning() << "Lazy Init()";
         return ;
@@ -181,7 +173,7 @@ void MeshGenerationFromImplicitShape::init()
 
     /// future from an async()
     m_com = std::async(std::launch::async, [this](){
-        unsigned int countervalue = this->l_scalarfield->getCounter() ;
+        unsigned int countervalue = this->l_scalarfield->getState().counter ;
         this->volumeMeshGeneration(this->d_facetangle.getValue(),
                                    this->d_facetsize.getValue(),
                                    this->d_facetdistance.getValue(),
@@ -193,16 +185,12 @@ void MeshGenerationFromImplicitShape::init()
 void MeshGenerationFromImplicitShape::reinit()
 {
     update(true) ;
-    computeBBox(ExecParams::defaultInstance(), false) ;
+    f_bbox = d_box.getValue() ;
 }
 
 void MeshGenerationFromImplicitShape::computeBBox(const ExecParams *, bool)
 {
-    const Vec3d& c = d_center.getValue() ;
-    const double r = d_radius.getValue() ;
-    f_bbox.setValue(sofa::defaulttype::BoundingBox(c.x()-r, c.x()+r,
-                                                   c.y()-r, c.y()+r,
-                                                   c.z()-r, c.z()+r)) ;
+    f_bbox = d_box.getValue() ;
 }
 
 
@@ -222,13 +210,13 @@ void MeshGenerationFromImplicitShape::update(bool forceUpdate)
     if(  !m_com.valid() && hasChanged() || forceUpdate )
     {
          /// The inputs are not valid
-        if(l_scalarfield->getStatus() != CStatus::Valid)
+        if(!l_scalarfield->isInStateValid())
             return ;
 
         /// The inputs are valid & we should grab them.
         m_componentstate = ComponentState::Invalid ;
         m_com = std::async(std::launch::async, [this](){
-            unsigned int countervalue = this->l_scalarfield->getCounter() ;
+            unsigned int countervalue = this->l_scalarfield->getState().counter ;
             this->volumeMeshGeneration(this->d_facetangle.getValue(),
                                        this->d_facetsize.getValue(),
                                        this->d_facetdistance.getValue(),
@@ -264,17 +252,18 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(double facet_angleP, d
     ImplicitFunction function(l_scalarfield);
     Function_vector v;
     v.push_back(function);
-    double dtmp=d_radius.getValue();
-    const Vec3d& ctmp = d_center.getValue() ;
-    domain = new Mesh_domain(v, K::Sphere_3(K::Point_3(ctmp.x(), ctmp.y(), ctmp.z()), dtmp*dtmp), 1e-3);
+    sofa::defaulttype::BoundingBox b = d_box.getValue();
+    Vec3d c = (b.maxBBox() + b.minBBox()) / 2.0 ;
+    double m=(b.maxBBox() - b.minBBox()).norm() /2.0 ;
+    domain = new Mesh_domain(v, K::Sphere_3(K::Point_3(c.x(), c.y(), c.z()), m*m), 1e-3);
 
     //Criteria
     Spherical_sizing_field fsize ;
     //Facet_criteria facet_criteria(30, facet_size2, approximation); // angle, size, approximation
     //Cell_criteria cell_criteria(2., cell_size=fsize); // radius-edge ratio, size
     ///Mesh_criteria criteria(facet_criteria, cell_criteria);
-    Mesh_criteria criteria(facet_angle=facet_angleP, facet_size=facet_sizeP, facet_distance=facet_distanceP,
-                           cell_radius_edge_ratio=cell_radius_edge_ratioP, cell_size=cell_sizeP);
+    Mesh_criteria criteria(facet_angle=facet_angleP, facet_size=fsize, facet_distance=facet_distanceP,
+                           cell_radius_edge_ratio=cell_radius_edge_ratioP, cell_size=fsize);
 
     //Mesh generation
     C3t3 c3t3 = CGAL::make_mesh_3<C3t3>(*domain, criteria, no_exude(), no_perturb());

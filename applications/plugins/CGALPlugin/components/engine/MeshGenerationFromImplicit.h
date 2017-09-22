@@ -78,8 +78,6 @@ public:
     virtual void update(bool forceUpdate=false) ;
 
 private:
-    CGAL::Bbox_3 BoundingBox(double x_min, double y_min, double z_min,
-                             double x_max, double y_max, double z_max);
 
     /// Inputs and atritbutes
     Data<double> d_facetangle;
@@ -88,8 +86,7 @@ private:
     Data<double> d_cell_radiusedge_ratio;
     Data<double> d_cellsize;
 
-    Data<double> d_radius ;
-    Data<Vec3d>  d_center ;
+    Data<sofa::defaulttype::BoundingBox>  d_box ;
 
     /// Display
     Data<bool> d_drawtetras;

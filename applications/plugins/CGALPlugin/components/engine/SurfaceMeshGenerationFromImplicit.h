@@ -80,9 +80,9 @@ private:
 
     /// Link
     typedef SingleLink< SurfaceMeshGenerationFromImplicitShape, ScalarField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> LinkGrid;
-    LinkGrid in_scalarfield;
+    LinkGrid l_scalarfield;
 
-    std::shared_future<unsigned int> m_com;
+    std::shared_future<unsigned int> m_asyncTask;
 };
 
 } /// namespace _meshgenerationfromimplicit_
