@@ -24,112 +24,14 @@
 #include <SofaImplicitField/config.h>
 
 #include <sofa/core/objectmodel/BaseObject.h>
+#include <SofaImplicitField/core/componenttracker.h>
 
 namespace sofa
 {
-namespace core
-{
-
-namespace objectmodel
-{
-
-    class BaseObject ;
-
-enum class CStatus
-{
-    Invalid,
-    Valid,
-    Busy,
-    Waiting,
-} ;
-
-class TrackedComponent
-{
-public:
-    TrackedComponent(BaseObject* baseobject)
-    {
-        m_counter = 0 ;
-        m_status = CStatus::Invalid ;
-        m_this = baseobject ;
-    }
-
-    void setStatus(CStatus status){
-        /// Mutex HERE .
-        m_status = status ;
-        m_counter++ ;
-    }
-
-    CStatus getStatus(){
-        /// Mutex HERE
-        return m_status ;
-    }
-
-    BaseObject* getPointer()
-    {
-        return  m_this ;
-    }
-
-    unsigned int getCounter()
-    {
-        return m_counter ;
-    }
-
-    BaseObject*  m_this ;
-    CStatus      m_status ;
-    unsigned int m_counter ;
-} ;
-
-class ComponentTracker
-{
-public:
-    std::vector<unsigned int> m_counters ;
-    std::vector<TrackedComponent*> m_components ;
-
-    void addComponent(TrackedComponent* t)
-    {
-        m_counters.push_back(t->getCounter());
-        m_components.push_back(t);
-    }
-
-    bool hasChanged(){
-        for(unsigned int i=0;i<m_components.size();i++)
-        {
-            if( m_counters[i] != m_components[i]->getCounter() )
-                return true ;
-        }
-        return false ;
-    }
-
-    void updateCounter()
-    {
-        for(unsigned int i=0;i<m_components.size();i++)
-        {
-            m_counters[i] = m_components[i]->getCounter() ;
-        }
-    }
-    void updateCounterAt(unsigned int countervalue)
-    {
-        for(unsigned int i=0;i<m_components.size();i++)
-        {
-            m_counters[i] = countervalue ;
-        }
-    }
-} ;
-
-}
-}
-}
-
-namespace sofa
-{
-
 namespace component
 {
-
-
 namespace geometry
 {
-
 namespace _scalarfield_
 {
 
