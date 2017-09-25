@@ -15,22 +15,11 @@
 
 import numpy
 import math
-import accordion
-import operator
 cimport numpy
 cimport cython
 cimport primitives
-cimport accordion
+cimpoort accordion
 
-cdef class Individual(accordion.TubeWithCavities):
+cdef class Individual(accordion.TubeWuthCavities):
+
     cdef double level
-
-    cpdef str display(self)
-
-cdef class Population:
-
-    cdef list pop
-
-    cpdef add_pop(self, Individual)
-    cpdef remove_pop(self, Individual)
-    cpdef update(self)

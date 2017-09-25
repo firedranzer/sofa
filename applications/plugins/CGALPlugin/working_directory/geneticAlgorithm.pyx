@@ -41,6 +41,10 @@ mutationAxisX="OFF"
 mutationAxisY="OFF"
 mutationAxisZ="OFF"
 
+cdef primitives.Shape shape_to_export
+
+cpdef primitives.Shape getShape_to_export():
+    return shape_to_export
 
 
 ## Indiviual
@@ -107,6 +111,37 @@ cpdef Individual copyInd (Individual individual):
     temp.listCavities=listCavities
     return temp
 
+cpdef tuple accordionFreeDimension(Individual ind):
+
+    cdef primitives.Shape shapePlus, shapeMinus
+
+    shapePlus=primitives.Cylinder("+",ind.radius,ind.radius,ind.heigth/2.0,0.0,0.0,primitives.Point(0.0,0.0,ind.heigth/2.0))
+
+    shapeMinus=primitives.Cylinder("+",ind.radius-ind.thickness,ind.radius-ind.thickness,ind.heigth/2.0-ind.thickness,0.0,0.0,primitives.Point(0.0,0.0,ind.heigth/2.0))
+
+    for cavity in ind.listCavities:
+
+        [heigth,type,axisX,axisY,axisZ]=cavity
+
+
+        if type=="ellipsoid":
+
+            shapePlus=primitives.Union(shapePlus,primitives.Ellipsoid("+",axisX,axisY,axisZ,0.0,0.0,primitives.Point(0.0,0.0,heigth)))
+            shapeMinus=primitives.Union(shapeMinus,primitives.Ellipsoid("+",axisX-ind.thickness,axisY-ind.thickness,axisZ-ind.thickness,0.0,0.0,primitives.Point(0.0,0.0,heigth)))
+
+        elif type=="cylinder":
+
+            shapePlus=primitives.Union(shapePlus,primitives.Cylinder("+",axisX,axisY,axisZ,0.0,0.0,primitives.Point(0.0,0.0,heigth)))
+            shapeMinus=primitives.Union(shapeMinus,primitives.Cylinder("+",axisX-ind.thickness,axisY-ind.thickness,axisZ-ind.thickness,0.0,0.0,primitives.Point(0.0,0.0,heigth)))
+
+        elif type=="frisbee":
+            shapePlus=primitives.Union(shapePlus,primitives.Frisbee("+",axisX,axisY,axisZ,0.0,0.0,primitives.Point(0.0,0.0,heigth)))
+            shapeMinus=primitives.Union(shapeMinus,primitives.Frisbee("+",axisX-ind.thickness,axisY-ind.thickness,axisZ-ind.thickness,0.0,0.0,primitives.Point(0.0,0.0,heigth)))
+
+    shape=primitives.Difference(shapePlus,shapeMinus)
+
+    return (shape,shapeMinus)
+
 
 cdef class Population:
 
@@ -132,7 +167,7 @@ cdef class Population:
 
 cdef Population POPULATION=Population()
 
-cpdef void getPOPULATION():
+cpdef Population getPOPULATION():
     return POPULATION
 
 
@@ -259,16 +294,6 @@ cpdef void mutation_Pop(int number_of_mutated_ind, int number_of_mutation_per_in
 
         POPULATION.add_pop(ind)
 
-cpdef void mutation_Pop(int number_of_crossing):
-
-    length_temp=len(POPULATION)
-
-    cdef int i,j,k
-
-    for i in range(number_of_mutated_ind):
-        j=random.randint(0,length_temp-1)
-        K=random.randint(0,length_temp-1)
-        crossing_ind=copyInd(POPULATION[j],POPULATION[k])
 
 ###
 ###CROSSING
@@ -289,8 +314,25 @@ cpdef void crossing_ind(Individual individual1, Individual individual2):
     POPULATION.add_pop(ind1)
     POPULATION.add_pop(ind2)
 
-#    return ind1,ind2
+cpdef void crossing_Pop(int number_of_crossing):
 
+    cdef int length_temp=len(POPULATION)
+
+    cdef int i,j,k
+
+    for i in range(number_of_crossing):
+        j=random.randint(0,length_temp-1)
+        k=random.randint(0,length_temp-1)
+        crossing_ind(POPULATION[j],POPULATION[k])
+
+
+cpdef void evaluation(Individual ind):
+
+    cdef primitives.Shape shape, shapeInt
+
+    (shape, shapeInt)=accordionFreeDimension(ind)
+
+    shape_to_export=shape
 
 
 

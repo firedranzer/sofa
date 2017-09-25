@@ -114,23 +114,31 @@ cpdef tuple accordionRecoveringGiven(double heigthTube,double radiusTube, double
     if not((len(listheigthsJoiningPoints)+1)==len(listAxesX) and len(listAxesX)==len(listAxesY)):
         raise ValueError, "the lists have to have coordinated length"
 
-    listheigthsJoiningPoints.insert(0,0.0)
+    listheigthsJoiningPoints.insert(0,0.5)
     listheigthsJoiningPoints.append(heigthTube)
     listheigthsJoiningPoints.sort()
 
-    if listheigthsJoiningPoints[0]<0.0 or listheigthsJoiningPoints[-1]>heigthTube:
+    if listheigthsJoiningPoints[0]<0.5 or listheigthsJoiningPoints[-1]>heigthTube:
         raise ValueError, "the extremal joining points do not belong to the tube"
 
 
     listCavities=[]
 
-    for i in range(len(listheigthsJoiningPoints)-1):
+    heigthCenter=(listheigthsJoiningPoints[0]+listheigthsJoiningPoints[1])/2.0
 
-        heigthCenter=(listheigthsJoiningPoints[i]+listheigthsJoiningPoints[i+1])/2.0
+    axisZ=(listheigthsJoiningPoints[1]-listheigthsJoiningPoints[0])/2.0
 
-        axisZ=(1.0+float(Zrecovering))*(listheigthsJoiningPoints[i+1]-listheigthsJoiningPoints[i])/2.0
+    listCavities.append([heigthCenter,typeCavities,listAxesX[0],listAxesY[0],axisZ])
 
-        listCavities.append([heigthCenter,typeCavities,listAxesX[i],listAxesY[i],axisZ])
+    if len(listheigthsJoiningPoints)>1:
+
+        for i in range(1,len(listheigthsJoiningPoints)-1):
+
+            heigthCenter=(listheigthsJoiningPoints[i]+listheigthsJoiningPoints[i+1])/2.0
+
+            axisZ=(1.0+float(Zrecovering))*(listheigthsJoiningPoints[i+1]-listheigthsJoiningPoints[i])/2.0
+
+            listCavities.append([heigthCenter,typeCavities,listAxesX[i],listAxesY[i],axisZ])
 
     return accordionFreeDimension(heigthTube,radiusTube,thickness,listCavities)
 
@@ -147,7 +155,7 @@ cpdef tuple accordionUniform(double heigthTube,double radiusTube, double thickne
     elif n==1:
         listheigthsJoiningPoints=[]
     else:
-        listheigthsJoiningPoints=[float(i)*heigthTube/float(n) for i in range(1,n)]
+        listheigthsJoiningPoints=[0.5+float(i)*(heigthTube-0.5)/float(n) for i in range(1,n)]
 
     listAxesX,listAxesY=[axisX for i in range(n)],[axisY for i in range(n)]
 
