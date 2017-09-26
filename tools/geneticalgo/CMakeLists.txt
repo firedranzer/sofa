@@ -11,17 +11,16 @@ set(SOURCE_FILES
 set(EXTRA_FILES
     shapegenerator.py
 
-    geneticalgo/display_shape.py
+    geneticalgo/shapewriter.py
     geneticalgo/generate_expression.py
-    geneticalgo/geneticAlgorithm.pxd
-    geneticalgo/geneticAlgorithm.pyx
+    geneticalgo/algorithm.py
     geneticalgo/primitives.pxd
     geneticalgo/primitives.pyx
     geneticalgo/setupBasic.py
     geneticalgo/setupLitteral.py
 
-    scenes/accordion/accordion.pxd
-    scenes/accordion/accordion.pyx
+    scenes/accordion/main.py
+    scenes/accordion/accordionutils.py
     scenes/accordion/SurfacePressureConstraint.pyscn
     scenes/accordion/controller.py
     scenes/accordion/customfield.py

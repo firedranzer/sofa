@@ -9,11 +9,29 @@
 ##     - thomas.morzadec@inria.fr
 ##
 ####################################################################################################
+import sys,os
+## Récupère le chemin absolu du réportoire courant et l'ajoute aux chemin où python cherche
+## les modules
+sys.path.append(os.getcwd())
+sys.path.append( os.path.dirname(os.getcwd())+"/sofalauncher" )
+print("SEARCH: " +os.path.dirname(os.getcwd())+"/sofalauncher")
+import sofalauncher
+print("ZZZZZZZZZZZZZZZZdddddddddddddddddd")
+#from sofalauncher import launcher
 
-# distutils: language=c++
-# cython: profile=True
+from geneticalgo import algorithm
+import scenes.test.rien
+from  scenes.accordion import main
 
 
-import geneticAlgorithm
 
-geneticAlgorithm.getStart(1)
+print("ICICIDDDDDDDDDDDDDDDDC")
+algo = algorithm.GeneticAlgorithm(2, 2, 2,2)
+algo.start(4,
+           main.generateFunc,
+           main.mutationFunc,
+           main.crossFunc,
+           main.evaluationFunc,
+           main.selectionFunc,
+           "tempdir"
+           )

@@ -10,12 +10,13 @@
 ##
 ####################################################################################################
 
-
-import accordion
-import primitives
-
+import os
 import math
 from math import sqrt
+import primitives
+
+def write(ind, filename):
+    f=open(filename, "w")
 
 
 def writeHeadLine(i):

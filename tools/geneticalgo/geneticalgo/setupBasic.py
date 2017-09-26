@@ -1,23 +1,19 @@
+####################################################################################################
+## Copyright 2017 INRIA
+##
+## This file is part of the ShapeGenerator project.
+##
+## Contributors:
+##     - thomas.morzadec@inria.fr
+##
+####################################################################################################
 from distutils.core import setup
 from Cython.Build import cythonize
 
 setup(
-    ext_modules = cythonize("primitives.pyx")#,
-#                             language="c++")
+    ext_modules = cythonize("primitives.pyx")
 )
 
 setup(
-    ext_modules = cythonize("geneticAlgorithm.pyx")#,
-##                             language="c++")
+    ext_modules = cythonize("algorithm.pyx")
 )
-
-#setup(
-#    ext_modules = cythonize("primitives.pxd")
-#)
-
-setup(
-    ext_modules = cythonize("accordion.pyx")#,
-#                             language="c++")
-)
-
-
