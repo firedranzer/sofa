@@ -272,6 +272,7 @@ if(SOFA_BUILD_TESTS)
     # Depends on SofaSimulation
     add_subdirectory(tools/SofaGTestMain)
 endif()
+add_subdirectory(tools/geneticalgo)
 add_subdirectory(${SOFA_KERNEL_SOURCE_DIR}/SofaBase)
 add_subdirectory(${SOFA_KERNEL_SOURCE_DIR}/SofaCommon)
 add_subdirectory(SofaGeneral)
