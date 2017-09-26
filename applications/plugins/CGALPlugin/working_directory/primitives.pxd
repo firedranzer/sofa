@@ -21,6 +21,8 @@ cimport cython
 
 cpdef getListAandB()
 
+cpdef getListDisplayAandB()
+
 cpdef getListPrimitives()
 
 cpdef getListgradientDxPrimitives()
@@ -36,6 +38,8 @@ cpdef getListgradientYTemp()
 cpdef getListgradientZTemp()
 
 cpdef getListSqrt()
+
+cpdef clearOut()
 
 cdef int i=0
 cdef int j=0

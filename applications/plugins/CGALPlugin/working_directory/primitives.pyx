@@ -30,9 +30,14 @@ listgradientXTemp=[]
 listgradientYTemp=[]
 listgradientZTemp=[]
 listSqrt=[]
+listDisplayA=[]
+listDisplayB=[]
 
 cpdef getListAandB():
     return listA, listB
+
+cpdef getListDisplayAandB():
+    return listDisplayA, listDisplayB
 
 cpdef getListPrimitives():
 
@@ -64,6 +69,25 @@ cpdef getListgradientZTemp():
 
 cpdef getListSqrt():
     return listSqrt
+
+cpdef clearOut():
+
+    global listA, listB, listPrimitives, listgradientDxPrimitives, listgradientDyPrimitives
+    global listgradientDzPrimitives, listgradientXTemp, listgradientYTemp, listgradientZTemp
+    global listSqrt, listDisplayA, listDisplayB
+
+    listA=[]
+    listB=[]
+    listPrimitives=[]
+    listgradientDxPrimitives=[]
+    listgradientDyPrimitives=[]
+    listgradientDzPrimitives=[]
+    listgradientXTemp=[]
+    listgradientYTemp=[]
+    listgradientZTemp=[]
+    listSqrt=[]
+    listDisplayA=[]
+    listDisplayB=[]
 
 cdef int i=0
 cdef int j=0
@@ -188,12 +212,16 @@ cdef class Union(Shape):
 
     cpdef tuple toString(self):
 
-        (expression1,(grad1X,grad1Y,grad1Z))=self.first.toString()
-        (expression2,(grad2X,grad2Y,grad2Z))=self.second.toString()
+        (expression1,(grad1X,grad1Y,grad1Z),display1)=self.first.toString()
+        (expression2,(grad2X,grad2Y,grad2Z),display2)=self.second.toString()
 
         index=generateNewIndex()
         listA.append("A"+index+"="+expression1)
         listB.append("B"+index+"="+expression2)
+
+        listDisplayA.append("DisplayA"+index+"="+display1)
+        listDisplayB.append("DisplayB"+index+"="+display2)
+
         listgradientXTemp.append("gradA"+index+"X="+grad1X)
         listgradientYTemp.append("gradA"+index+"Y="+grad1Y)
         listgradientZTemp.append("gradA"+index+"Z="+grad1Z)
@@ -203,12 +231,13 @@ cdef class Union(Shape):
         listgradientZTemp.append("gradB"+index+"Z="+grad2Z)
 
         expression="min(A"+index+",B"+index+")"
+        display="primitives.Union(DisplayA"+index+",DisplayB"+index+")"
 
         gradX="(1.0-ind(A"+index+",B"+index+"))*gradA"+index+"X"+"+"+"ind(A"+index+",B"+index+")*gradB"+index+"X"
         gradY="(1.0-ind(A"+index+",B"+index+"))*gradA"+index+"Y"+"+"+"ind(A"+index+",B"+index+")*gradB"+index+"Y"
         gradZ="(1.0-ind(A"+index+",B"+index+"))*gradA"+index+"Z"+"+"+"ind(A"+index+",B"+index+")*gradB"+index+"Z"
 
-        return (expression,(gradX,gradY,gradZ))
+        return (expression,(gradX,gradY,gradZ), display)
 
 
 cdef class Intersection(Shape):
@@ -222,12 +251,16 @@ cdef class Intersection(Shape):
 
     cpdef tuple toString(self):
 
-        (expression1,(grad1X,grad1Y,grad1Z))=self.first.toString()
-        (expression2,(grad2X,grad2Y,grad2Z))=self.second.toString()
+        (expression1,(grad1X,grad1Y,grad1Z), display1)=self.first.toString()
+        (expression2,(grad2X,grad2Y,grad2Z), display2)=self.second.toString()
 
         index=generateNewIndex()
         listA.append("A"+index+"="+expression1)
         listB.append("B"+index+"="+expression2)
+
+        listDisplayA.append("DisplayA"+index+"="+display1)
+        listDisplayB.append("DisplayB"+index+"="+display2)
+
         listgradientXTemp.append("gradA"+index+"X="+grad1X)
         listgradientYTemp.append("gradA"+index+"Y="+grad1Y)
         listgradientZTemp.append("gradA"+index+"Z="+grad1Z)
@@ -238,11 +271,13 @@ cdef class Intersection(Shape):
 
         expression="max(A"+index+",B"+index+")"
 
+        display="primitives.Intersection(DisplayA"+index+",DisplayB"+index+")"
+
         gradX="ind(A"+index+",B"+index+")*gradA"+index+"X"+"+"+"(1.0-ind(A"+index+",B"+index+"))*gradB"+index+"X"
         gradY="ind(A"+index+",B"+index+")*gradA"+index+"Y"+"+"+"(1.0-ind(A"+index+",B"+index+"))*gradB"+index+"Y"
         gradZ="ind(A"+index+",B"+index+")*gradA"+index+"Z"+"+"+"(1.0-ind(A"+index+",B"+index+"))*gradB"+index+"Z"
 
-        return (expression,(gradX,gradY,gradZ))
+        return (expression,(gradX,gradY,gradZ), display)
 
 cdef class Difference(Shape):
 
@@ -256,12 +291,16 @@ cdef class Difference(Shape):
 
     cpdef tuple toString(self):
 
-        (expression1,(grad1X,grad1Y,grad1Z))=self.first.toString()
-        (expression2,(grad2X,grad2Y,grad2Z))=self.second.toString()
+        (expression1,(grad1X,grad1Y,grad1Z), display1)=self.first.toString()
+        (expression2,(grad2X,grad2Y,grad2Z), display2)=self.second.toString()
 
         index=generateNewIndex()
         listA.append("A"+index+"="+expression1)
         listB.append("B"+index+"="+expression2)
+
+        listDisplayA.append("DisplayA"+index+"="+display1)
+        listDisplayB.append("DisplayB"+index+"="+display2)
+
         listgradientXTemp.append("gradA"+index+"X="+grad1X)
         listgradientYTemp.append("gradA"+index+"Y="+grad1Y)
         listgradientZTemp.append("gradA"+index+"Z="+grad1Z)
@@ -271,12 +310,13 @@ cdef class Difference(Shape):
         listgradientZTemp.append("gradB"+index+"Z="+grad2Z)
 
         expression="max(A"+index+",B"+index+")"
+        display="primitives.Difference(DisplayA"+index+",DisplayB"+index+")"
 
         gradX="ind(A"+index+",-B"+index+")*gradA"+index+"X"+"+"+"(1.0-ind(A"+index+",-B"+index+"))*(-gradB"+index+"X"+")"
         gradY="ind(A"+index+",-B"+index+")*gradA"+index+"Y"+"+"+"(1.0-ind(A"+index+",-B"+index+"))*(-gradB"+index+"Y"+")"
         gradZ="ind(A"+index+",-B"+index+")*gradA"+index+"Z"+"+"+"(1.0-ind(A"+index+",-B"+index+"))*(-gradB"+index+"Z"+")"
 
-        return (expression,(gradX,gradY,gradZ))
+        return (expression,(gradX,gradY,gradZ), display)
 
 
 cdef class Primitives(Shape):
@@ -300,7 +340,6 @@ cdef class Primitives(Shape):
         self.index=index
         self.type
         self.identifier
-
 
 #        cpdef translationRotationToString(self):
 
@@ -432,10 +471,13 @@ cdef class Ellipsoid(Primitives):
 
         expression="("+x+"/axis"+self.index+"X)*("+x+"/axis"+self.index+"X)"+"+"+"("+y+"/axis"+self.index+"Y)*("+y+"/axis"+self.index+"Y)"+"+"\
                   +"("+z+"/axis"+self.index+"Z)*("+z+"/axis"+self.index+"Z)-1.0"
+
+        display="ellipsoid"+self.index
+
 #        divide(x,self.axisX)+"*"+divide(x,self.axisX)+"+"+divide(y,self.axisY)+"*"+divide(y,self.axisY)+"+"+divide(z,self.axisZ)+"*"+\
 #        divide(z,self.axisZ)+"-1.0"
 
-        return (expression, grad)
+        return (expression, grad, display)
 
 cdef class Frisbee(Primitives):
 
@@ -483,7 +525,8 @@ cdef class Frisbee(Primitives):
         expression="abs("+z+"/axis"+self.index+"Z)"+"+"\
                     +"sqrt"+self.index+"-1.0"
 
-        return (expression, grad)
+        display="frisbee"+self.index
+        return (expression, grad, display)
 
 
 cdef class Cylinder(Primitives):
@@ -533,4 +576,6 @@ cdef class Cylinder(Primitives):
 
         expression="max(height"+self.index+",radial"+self.index+")"
 
-        return (expression, grad)
+        display="cylinder"+self.index
+
+        return (expression, grad, display)

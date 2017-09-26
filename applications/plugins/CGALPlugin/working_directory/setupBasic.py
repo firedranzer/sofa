@@ -8,7 +8,7 @@ setup(
 
 setup(
     ext_modules = cythonize("geneticAlgorithm.pyx")#,
-#                             language="c++")
+##                             language="c++")
 )
 
 #setup(

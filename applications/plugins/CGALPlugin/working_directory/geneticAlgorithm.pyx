@@ -19,6 +19,8 @@ import accordion
 import random
 import operator
 import copy
+import display_shape
+import primitives
 
 
 cimport numpy
@@ -41,10 +43,7 @@ mutationAxisX="OFF"
 mutationAxisY="OFF"
 mutationAxisZ="OFF"
 
-cdef primitives.Shape shape_to_export
-
-cpdef primitives.Shape getShape_to_export():
-    return shape_to_export
+cdef int I=0
 
 
 ## Indiviual
@@ -61,6 +60,7 @@ cdef class Individual(accordion.TubeWithCavities):
         self.level
 
     cpdef str display(self):
+
         cdef str temp="heigthTube="+str(self.heigth)+"\n"\
                      +"radiusTube="+str(self.radius)+"\n"\
                      +"thickness="+str(self.thickness)+"\n\n"\
@@ -148,6 +148,9 @@ cdef class Population:
     def __init__(self):
         self.pop = []
 
+    def __getitem__(self,i):
+        return self.pop[i]
+
     cpdef void add_pop(self, Individual ind):
         self.pop.append(ind)
 
@@ -164,6 +167,12 @@ cdef class Population:
     cpdef void update(self):
         self.pop.sort(key=key_func)
 
+    cpdef void deleteFrom(self, int rank):
+        del self.pop[rank:]
+
+cpdef int length(Population population):
+
+    return len(population.pop)
 
 cdef Population POPULATION=Population()
 
@@ -179,13 +188,11 @@ cpdef void generate_initPop(int n):
 
     for i in range(n):
         type=random.choice(TYPE)
-        individual=Individual(type)
+        individual=getNewInd(type)
         POPULATION.add_pop(individual)
 
 
 cpdef void popDisplay(Population population):
-
-    population.update()
 
     cdef Individual ind
 
@@ -233,7 +240,6 @@ cpdef void mutation_axisY(Individual ind):
 cpdef void mutation_axisZ(Individual ind):
 
     length=len(ind.listCavities)
-    print length
     if length<=1:
         raise ValueError, "their is no cavity to mutate, or don't touch the first cavity"
 
@@ -279,7 +285,7 @@ cpdef void mutation(Individual ind):
 
 cpdef void mutation_Pop(int number_of_mutated_ind, int number_of_mutation_per_ind):
 
-    length_temp=len(POPULATION)
+    length_temp=length(POPULATION)
 
     cdef int i,j,k
 
@@ -307,7 +313,6 @@ cpdef void crossing_ind(Individual individual1, Individual individual2):
     cdef int index=random.randint(0,number_of_cavities-1)
 
     temp=ind1.listCavities[index]
-    print temp
     ind1.listCavities[index]=ind2.listCavities[index]
     ind2.listCavities[index]=temp
 
@@ -316,7 +321,7 @@ cpdef void crossing_ind(Individual individual1, Individual individual2):
 
 cpdef void crossing_Pop(int number_of_crossing):
 
-    cdef int length_temp=len(POPULATION)
+    cdef int length_temp=length(POPULATION)
 
     cdef int i,j,k
 
@@ -328,11 +333,52 @@ cpdef void crossing_Pop(int number_of_crossing):
 
 cpdef void evaluation(Individual ind):
 
+    global I
+
     cdef primitives.Shape shape, shapeInt
 
     (shape, shapeInt)=accordionFreeDimension(ind)
 
-    shape_to_export=shape
+    display_shape.display(shape,I)
+
+    I+=1
+
+
+
+
+
+
+
+cpdef void getStart(int number_of_generations):
+
+    generate_initPop(9)
+    length0=length(POPULATION)
+
+    cdef int i
+
+    for i in range(length0):
+
+        evaluation(POPULATION[i])
+
+    for k in range(number_of_generations):
+
+        crossing_Pop(9)
+
+        mutation_Pop(27,10)
+
+        length1=length(POPULATION)
+
+        for i in range(length0, length1):
+
+            evaluation(POPULATION[i])
+
+        POPULATION.update()
+
+        POPULATION.deleteFrom(length0)
+
+        print "NOUVELLE GENERATION"
+
+        popDisplay(POPULATION)
 
 
 
