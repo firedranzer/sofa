@@ -95,7 +95,7 @@ public:
 
 
 protected:
-    int mouseX, mouseY;
+    int mouseX, mouseY, wheelDelta;
     sofa::helper::gl::GLSLShader* shader;
 
     std::string generateFragmentShaderFrom();
@@ -103,10 +103,9 @@ protected:
 
 
     std::string uniformsAndConst();
-    std::string rotationFunction();
     std::string implicitFunction();
     std::string rayMarchingFunction();
-    std::string phongFunction();
+    std::string renderFunction();
     std::string viewFunction();
     std::string mainFragmenShaderFunction();
 

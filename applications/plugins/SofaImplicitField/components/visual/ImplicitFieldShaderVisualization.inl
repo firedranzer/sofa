@@ -21,6 +21,17 @@
 ******************************************************************************/
 #include "ImplicitFieldShaderVisualization.h"
 
+#include <sofa/helper/ArgumentParser.h>
+#include <SofaSimulationCommon/common.h>
+#include <sofa/simulation/Node.h>
+#include <sofa/helper/system/PluginManager.h>
+#include <sofa/simulation/config.h> // #defines SOFA_HAVE_DAG (or not)
+#include <SofaSimulationCommon/init.h>
+#include <SofaSimulationTree/init.h>
+#include <SofaSimulationTree/TreeSimulation.h>
+
+using sofa::simulation::Simulation;
+
 namespace sofa
 {
 
@@ -107,16 +118,33 @@ void ImplicitFieldShaderVisualization::start()
 
         shader->SetFloat2(shader->GetVariable("resolution"), pixelSize[0], pixelSize[1]);
         shader->SetFloat2(shader->GetVariable("mouse"), mouseX, mouseY);
+        shader->SetFloat(shader->GetVariable("wheelDelta"), wheelDelta);
+
+
+        Simulation* simu = sofa::simulation::getSimulation();
+        simu->findData("");
 
         /// TODO se mettre d'accord sur le contenu des maps :/
+
         //        std::map<std::string, std::string> glslMap = l_field->getGLSLCode();
-        //        std::map<std::string, std::string>::iterator it = glslMap.iterator();
-        //        for (it = glslMap.begin(); it != glslMap.end(); ++it)
+        //        std::map<std::string, std::string>::iterator itFind = glslMap.find("uniforms");
+        //        if(itFind != glslMap.end())
         //        {
-        //            if ((std::string)(tmp->first).compare("eval") != 0)
+        //            std::vector<GLSLData> uniforms = itFind->second;
+        //            for( std::vector<GLSLData>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
         //            {
-        //                tmp.append("uniform ");
-        //                tmp.append(tmp->first);
+        //                if(*it->type.compare("float") == 0)
+        //                    shader->SetFloat(shader->GetVariable(*it->name), *it->value);
+        //                else if(*it->type.compare("float2") == 0)
+        //                {
+        //                    float[2] data = *it->value;
+        //                    shader->SetFloat2(shader->GetVariable(*it->name), data[0], data[1]);
+        //                }
+        //                else if(*it->type.compare("float3") == 0)
+        //                {
+        //                    float[3] data = *it->value;
+        //                    shader->SetFloat3(shader->GetVariable(*it->name), data[0], data[1], data[2]);
+        //                }
         //            }
         //        }
 
@@ -139,6 +167,10 @@ void ImplicitFieldShaderVisualization::handleEvent(core::objectmodel::Event * ev
             mouseX = ev->getPosX();
             mouseY = ev->getPosY();
         }
+        if (ev->getState() == MouseEvent::Wheel)
+        {
+            wheelDelta = ev->getWheelDelta();
+        }
     }
 }
 
@@ -159,54 +191,60 @@ std::string ImplicitFieldShaderVisualization::generateVertexShaderFrom()
     return vertexShaderText;
 }
 
-std::string ImplicitFieldShaderVisualization::rotationFunction()
-{
-    std::string tmp;
-    tmp.append(
-                "mat3 rotateX(float theta) {\n"
-                "    float c = cos(theta);\n"
-                "    float s = sin(theta);\n"
-                "    return mat3(\n"
-                "        vec3(1, 0, 0),\n"
-                "        vec3(0, c, -s),\n"
-                "        vec3(0, s, c)\n"
-                "    );\n"
-                "}\n"
-                "\n"
-                "mat3 rotateY(float theta) {\n"
-                "    float c = cos(theta);\n"
-                "    float s = sin(theta);\n"
-                "    return mat3(\n"
-                "        vec3(c, 0, s),\n"
-                "        vec3(0, 1, 0),\n"
-                "        vec3(-s, 0, c)\n"
-                "    );\n"
-                "}\n");
-    return tmp;
-}
-
 std::string ImplicitFieldShaderVisualization::implicitFunction()
 {
     std::map<std::string, std::string> glslMap = l_field->getGLSLCode();
     std::map<std::string, std::string>::iterator it = glslMap.find("eval");
-    std::string implicitFunction = "0.0";
+    std::string implicitFunction;
+    implicitFunction.append(
+                "    res = minVec2(\n"
+                "        vec2(sdPlane(pos), 1.0),\n"
+                "        vec2(sdSphere(pos-vec3( -.0, 0.75, 0.0), .5), 70.)\n"
+                "   );    \n";
+            ); /// Default value if eval is empty
+
     if(it != glslMap.end())
-        implicitFunction = it->second;
+    {
+        GLSLData data = *it->second;
+        implicitFunction.clear();
+        implicitFunction.append(
+                    "    res = minVec2(\n"
+                    "        vec2(sdPlane(pos), 1.0),\n"
+                    );
+        implicitFunction.append(data->value);
+        implicitFunction.append(
+                    "   );    \n";)
+    }
     std::string tmp;
     tmp.append(
-                "float sceneSDF(vec3 p) {\n"
-                "    p = rotateY(10.*mouse.x/resolution.x) * p;\n"
-                "    p = -rotateX(10.*mouse.y/resolution.y) * p;\n"
-                "    float x = p.x;\n"
-                "    float y = p.y;\n"
-                "    float z = p.z;\n"
-                "    float value = 0.0;\n"
-                "    vec3 h = vec3(1.0, 2.0, 1.0);\n"
-                "    vec3 q = abs(p);\n"
-                "    return ");
+                "float sdPlane( vec3 p )\n"
+                "{\n"
+                "   return p.y;\n"
+                "}\n"
+
+                "float sdSphere( vec3 p, float s )\n"
+                "{\n"
+                "   return length(p)-s;\n"
+                "}\n"
+
+                "vec2 minVec2( vec2 d1, vec2 d2 )\n"
+                "{\n"
+                "    return (d1.x<d2.x) ? d1 : d2;\n"
+                "}\n"
+                );
+
+    tmp.append(
+                "vec2 map( in vec3 pos )\n"
+                "{\n"
+                "   vec2 res;\n"
+                );
+
     tmp.append(implicitFunction);
-    tmp.append(";\n"
-               "}\n");
+
+    tmp.append(
+                "   return res;\n"
+                "}\n"
+                );
     return tmp;
 }
 
@@ -214,12 +252,13 @@ std::string ImplicitFieldShaderVisualization::viewFunction()
 {
     std::string tmp;
     tmp.append(
-                "mat3 viewMatrix(vec3 eye, vec3 center, vec3 up) {\n"
-                "    // Based on gluLookAt man page\n"
-                "    vec3 f = normalize(center - eye);\n"
-                "    vec3 s = normalize(cross(f, up));\n"
-                "    vec3 u = cross(s, f);\n"
-                "    return mat3(s, u, -f);\n"
+                "mat3 setCamera( in vec3 ro, in vec3 ta, float cr )\n"
+                "{\n"
+                "        vec3 cw = normalize(ta-ro);\n"
+                "        vec3 cp = vec3(sin(cr), cos(cr),0.0);\n"
+                "        vec3 cu = normalize( cross(cw,cp) );\n"
+                "        vec3 cv = normalize( cross(cu,cw) );\n"
+                "    return mat3( cu, cv, cw );\n"
                 "}\n"
                 );
     return tmp;
@@ -231,58 +270,76 @@ std::string ImplicitFieldShaderVisualization::mainFragmenShaderFunction()
     tmp.append(
                 "void main()\n"
                 "{\n"
-                "    vec3 viewDir = rayDirection(90.0, resolution, gl_FragCoord.xy);\n"
-                "    vec3 eye = vec3(1.0, 1.0 , 7.0);\n"
-                "     mat3 viewToWorld = viewMatrix(eye, vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0));\n"
-                "     vec3 worldDir = viewToWorld * viewDir;\n"
-                "     float dist = shortestDistanceToSurface(eye, worldDir, MIN_DIST, MAX_DIST);\n"
-                "     if (dist > MAX_DIST - EPSILON) {\n"
-                "         gl_FragColor = vec4(.0, 0.0, 0.0, 0.0);\n"
-                "         return;\n"
-                "     }\n"
-                "     vec3 p = eye + dist * worldDir;\n"
-                "     vec3 K_a = (estimateNormal(p) + vec3(1.0)) / 2.0;\n"
-                "     vec3 K_d = K_a;\n"
-                "     vec3 K_s = vec3(1.0, 1.0, 1.0);\n"
-                "     float shininess = 10.0;\n"
-                "     vec3 color = phongIllumination(K_a, K_d, K_s, shininess, p, eye);\n"
-                "     gl_FragColor = vec4(color, 1.0);\n"
+                "    vec2 mouseR = mouse.xy/resolution.xy;\n"
+                "    vec2 p = (-resolution.xy + 2.0*gl_FragCoord)/resolution.y;\n"
+                "    vec3 ro = vec3( -0.5+3.5*cos(7.0*mouseR.x), .0 + 4.0*mouseR.y, 0.5 + 4.0*sin(7.0*mouseR.x) );\n"
+                "    vec3 ta = vec3( 0.0, 0.0, 0.0 );\n"
+                "    mat3 ca = setCamera( ro, ta, 0.0 );\n"
+                "    vec3 rayDir = ca * normalize( vec3(p.xy, 2.0) );\n"
+                "    gl_FragColor = vec4( render( ro, rayDir ), 1.0 );\n"
                 "}\n"
                 );
     return tmp;
 }
 
-std::string ImplicitFieldShaderVisualization::phongFunction()
+std::string ImplicitFieldShaderVisualization::renderFunction()
 {
     std::string tmp;
     tmp.append(
-
-                "vec3 phongContribForLight(vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 eye, vec3 lightPos, vec3 lightIntensity) {\n"
-                "    vec3 N = estimateNormal(p);\n"
-                "    vec3 L = normalize(lightPos - p);\n"
-                "    vec3 V = normalize(eye - p);\n"
-                "    vec3 R = normalize(reflect(-L, N));\n"
-                "    float dotLN = dot(L, N);\n"
-                "    float dotRV = dot(R, V);\n"
-                "    if (dotLN < 0.0) {\n"
-                "        // Light not visible from this point on the surface\n"
-                "        return vec3(0.0, 0.0, 0.0);\n"
-                "    }\n"
-                "    if (dotRV < 0.0) {\n"
-                "        return lightIntensity * (k_d * dotLN);\n"
-                "    }\n"
-                "    return lightIntensity * (k_d * dotLN + k_s * pow(dotRV, alpha));\n"
+                "float res = 1.0;\n"
+                "float t = mint;\n"
+                "   for( int i=0; i<16; i++ )\n"
+                "   {\n"
+                "       float h = map( ro + rd*t ).x;\n"
+                "       res = min( res, 8.0*h/t );\n"
+                "       t += clamp( h, 0.02, 0.10 );\n"
+                "       if( h<0.001 || t>tmax ) break;\n"
+                "   }\n"
+                "return clamp( res, 0.0, 1.0 );\n"
                 "}\n"
-                "\n"
-                "vec3 phongIllumination(vec3 k_a, vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 eye) {\n"
-                "    const vec3 ambientLight = 0.5 * vec3(1.0, 1.0, 1.0);\n"
-                "    vec3 color = ambientLight * k_a;\n"
-                "    vec3 light1Pos = vec3(4.0, 2.0, 4.0);\n"
-                "    vec3 light1Intensity = vec3(0.4, 0.4, 0.4);\n"
-                "    color += phongContribForLight(k_d, k_s, alpha, p, eye,\n"
-                "    light1Pos,\n"
-                "    light1Intensity);\n"
-                "    return color;\n"
+
+
+                "vec3 estimateNormal(vec3 p) {\n"
+                "    return normalize(vec3(\n"
+                "        map(vec3(p.x + EPSILON, p.y, p.z)).x - map(vec3(p.x - EPSILON, p.y, p.z)).x,\n"
+                "        map(vec3(p.x, p.y + EPSILON, p.z)).x - map(vec3(p.x, p.y - EPSILON, p.z)).x,\n"
+                "        map(vec3(p.x, p.y, p.z  + EPSILON)).x - map(vec3(p.x, p.y, p.z - EPSILON)).x\n"
+                "    ));\n"
+                "}\n"
+
+                "vec3 render( in vec3 ro, in vec3 rd )\n"
+                "{\n"
+                "    vec3 col = vec3(1.0, 1.0, 1.0) + rd.y;\n"
+                "    vec2 res = castRay(ro,rd);\n"
+                "    float t = res.x;\n"
+                "    float m = res.y;\n"
+
+                "    vec3 pos = ro + t * rd;\n"
+                "    vec3 nor = estimateNormal( pos );\n"
+                "    vec3 ref = reflect( rd, nor );\n"
+
+                "    col = 0.45 + 0.35*sin( vec3(0.05,0.08,0.10)*(m-1.0) );\n"
+
+                "    vec3  lig = normalize( vec3(-0.4, 0.7, -0.6) );\n"
+                "    float amb = clamp( 0.5+0.5*nor.y, 0.0, 1.0 );\n"
+                "    float dif = clamp( dot( nor, lig ), 0.0, 1.0 );\n"
+                "    float bac = clamp( dot( nor, normalize(vec3(-lig.x,0.0,-lig.z))), 0.0, 1.0 )*clamp( 1.0-pos.y,0.0,1.0);\n"
+                "    float dom = smoothstep( -0.1, 0.1, ref.y );\n"
+                "    float fre = pow( clamp(1.0+dot(nor,rd),0.0,1.0), 2.0 );\n"
+                "    float spe = pow(clamp( dot( ref, lig ), 0.0, 1.0 ),16.0);\n"
+
+                "    dif *= softshadow( pos, lig, 0.02, 2.5 );\n"
+                "    dom *= softshadow( pos, ref, 0.02, 2.5 );\n"
+
+                "    vec3 lin = vec3(0.0);\n"
+                "    lin += 1.30*dif*vec3(1.00,0.80,0.55);\n"
+                "    lin += 2.00*spe*vec3(1.00,0.90,0.70)*dif;\n"
+                "    lin += 0.40*amb*vec3(0.40,0.60,1.00);\n"
+                "    lin += 0.50*dom*vec3(0.40,0.60,1.00);\n"
+                "    col = col*lin;\n"
+                "    col = mix( col, vec3(0.9,0.9,1.0), 1.0-exp( -0.0002*t*t*t ) );\n"
+
+                "    return vec3( clamp(col,0.0,1.0) );\n"
                 "}\n"
                 );
     return tmp;
@@ -293,34 +350,18 @@ std::string ImplicitFieldShaderVisualization::rayMarchingFunction()
     /// TODO replace gradient function by l_field gradient function from map
     std::string tmp;
     tmp.append(
-
-                "float shortestDistanceToSurface(vec3 eye, vec3 marchingDirection, float start, float end) {\n"
-                "    float depth = start;\n"
-                "    for (int i = 0; i < MAX_MARCHING_STEPS; i++) {\n"
-                "        float dist = sceneSDF(eye + depth * marchingDirection);\n"
-                "        if (dist < EPSILON) {\n"
-                "            return depth;\n"
-                "        }\n"
-                "        depth += dist;\n"
-                "        if (depth >= end) {\n"
-                "            return end;\n"
-                "        }\n"
+                "vec2 castRay( in vec3 ro, in vec3 rd )\n"
+                "{\n"
+                "    float depth = MIN_DIST;\n"
+                "    float m = -1.0;\n"
+                "    for( int i = 0; i < MAX_MARCHING_STEPS; i++ )\n"
+                "    {\n"
+                "            vec2 res = map( ro+rd*depth );\n"
+                "        if( res.x < EPSILON || depth > MAX_DIST ) break;\n"
+                "        depth += res.x;\n"
+                "            m = res.y;\n"
                 "    }\n"
-                "    return end;\n"
-                "}\n"
-
-                "vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {\n"
-                "    vec2 xy = fragCoord - size / 2.0;\n"
-                "    float z = size.y / tan(radians(fieldOfView) / 2.0);\n"
-                "    return normalize(vec3(xy, -z));\n"
-                "}\n"
-
-                "vec3 estimateNormal(vec3 p) {\n"
-                "    return normalize(vec3(\n"
-                "    sceneSDF(vec3(p.x + EPSILON, p.y, p.z)) - sceneSDF(vec3(p.x - EPSILON, p.y, p.z)),\n"
-                "    sceneSDF(vec3(p.x, p.y + EPSILON, p.z)) - sceneSDF(vec3(p.x, p.y - EPSILON, p.z)),\n"
-                "    sceneSDF(vec3(p.x, p.y, p.z  + EPSILON)) - sceneSDF(vec3(p.x, p.y, p.z - EPSILON))\n"
-                "    ));\n"
+                "    return vec2( depth, m );\n"
                 "}\n"
                 );
     return tmp;
@@ -328,30 +369,26 @@ std::string ImplicitFieldShaderVisualization::rayMarchingFunction()
 
 std::string ImplicitFieldShaderVisualization::uniformsAndConst()
 {
-    /// TODO fetch data from l_field map
-    ///
-    std::map<std::string, std::string> glslMap = l_field->getGLSLCode();
     std::string tmp;
     tmp.append(
                 "uniform vec2 resolution;\n"
                 "uniform vec2 mouse;\n"
+                "uniform float wheelDelta;\n"
 
                 "const int MAX_MARCHING_STEPS = 255;\n"
                 "const float MIN_DIST = 0.0;\n"
                 "const float MAX_DIST = 100.0;\n"
                 "const float EPSILON = 0.00001;\n"
                 );
-    std::map<std::string, std::string>::iterator it = glslMap.begin();
-
-    for (it = glslMap.begin(); it != glslMap.end(); ++it)
-    {
-        if (std::string(it->first).compare("eval") != 0)
-        {
-            tmp.append("uniform ");
-            tmp.append(it->first);
-            tmp.append(";\n");
-        }
-    }
+    /// TODO
+    //    std::map<std::string, std::string> glslMap = l_field->getGLSLCode();
+    //    std::map<std::string, std::string>::iterator itFind = glslMap.find("uniforms");
+    //    if(itFind != glslMap.end())
+    //    {
+    //        std::vector<GLSLData> uniforms = itFind->second;
+    //        for( std::vector<GLSLData>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
+    //            tmp.append(*it->variable + " " + *it->type + " " *it->name);
+    //    }
 
     return tmp;
 }
