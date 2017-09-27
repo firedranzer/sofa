@@ -16,10 +16,6 @@ import math
 from math import sqrt
 import primitives
 
-def write(ind, filename):
-    f=open(filename, "w")
-
-
 def writeHeadLine():
 
     temp="""#!/usr/bin/env python
@@ -44,16 +40,12 @@ cimport primitives
 
 """
 
-<<<<<<< HEAD
+
     return temp
-=======
+
+
 def toPythonString(shape):
     return "print('HELLO WORLD')"
-
-
-
-def display(shape,i):
->>>>>>> 94913164aab86547bbae6dfe9b8ffe56285a79a1
 
 
 def write(ind):
