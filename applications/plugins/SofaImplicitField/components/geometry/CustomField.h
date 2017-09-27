@@ -93,7 +93,7 @@ public:
     ///    map["eval"] = "return vec3(1.0,1.0,1.0)"
     /// when the map is empty means the component cannot makes a GLSL version of the
     /// distance function (eg no python function found)
-    const std::map<std::string, GLSLCodeFragment>& getGLSLCode() ;
+    const std::map<std::string, std::vector<GLSLCodeFragment>>& getGLSLCode() ;
 
     Data<std::string> d_function ;
     Data<std::string> d_glslFunction ;

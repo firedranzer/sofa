@@ -193,6 +193,8 @@ std::string ImplicitFieldShaderVisualization::generateVertexShaderFrom()
 
 std::string ImplicitFieldShaderVisualization::implicitFunction()
 {
+    std::string tmp;
+#if 0
     std::map<std::string, std::string> glslMap = l_field->getGLSLCode();
     std::map<std::string, std::string>::iterator it = glslMap.find("eval");
     std::string implicitFunction;
@@ -245,6 +247,7 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
                 "   return res;\n"
                 "}\n"
                 );
+#endif
     return tmp;
 }
 
