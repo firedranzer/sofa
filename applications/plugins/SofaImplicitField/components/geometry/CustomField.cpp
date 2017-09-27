@@ -87,7 +87,7 @@ void CustomField::handleEvent(sofa::core::objectmodel::Event *event)
 CustomField::CustomField() :
     d_function (initData(&d_function, (std::string)"", "function", "Use a python function to implement the implicit field.")),
     d_gradient (initData(&d_gradient, (std::string)"", "gradient", "Use a python function to implement the gradient field. If not provided returns gradient using finite difference.")),
-    d_glslFunction (initData(&d_function, (std::string)"", "glslFunction", "Use a python function to return glsl implicit field description.")),
+    d_glslFunction (initData(&d_glslFunction, (std::string)"", "glslFunction", "Use a python function to return glsl implicit field description.")),
     d_state (initData(&d_state, 0, "state", "This is a number indicating change in this component."))
 {
     m_sourcefile = new MyFileListener(this) ;

@@ -223,16 +223,18 @@ def evaluationFunc(pop):
 
         ### return (shape,shapeMinus)
         ###
-        f1 = "individualShape_"+str(ind.id)+".py"
-        f2 = "individualShapeMinus_"+str(ind.id)+".py"
-        shapewriter.write(shape, filename=f1)
-        shapewriter.write(shapeMinus, filename=f2)
+        #f1 = "individualShape_"+str(ind.id)+".py"
+        #f2 = "individualShapeMinus_"+str(ind.id)+".py"
+        #shapewriter.write(shape, filename=f1)
+        #shapewriter.write(shapeMinus, filename=f2)
+        f1 = shapewriter.toPythonString(shape)
+        f2 = shapewriter.toPythonString(shapeMinus)
 
         filename.append((f1,f2, ind))
 
     #################### EXAMPLE USING THE SEQUENTIAL LAUNCHER #################################
     ### List of filename that contains the simulation to run
-    scenefiles = ["scene.pyscn","controller.py"]
+    scenefiles = ["scene.pyscn","controller.py", "shape.py", "shapeinv.py"]
     filesandtemplates = []
     for scenefile in scenefiles:
         filesandtemplates.append( (open(basedir+"/"+scenefile).read(), scenefile) )
@@ -242,7 +244,7 @@ def evaluationFunc(pop):
         for f1,f2,ind in filename:
             runs.append( {"GENERATION": str(pop.id),
                           "INDIVIDUAL": str(ind.id),
-                          "SHAPEFILE": f1, "SHAPEINVFILE": f2, "nbIterations":1000 } )
+                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":1000 } )
 
     results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
 
