@@ -5,12 +5,9 @@ commentStartToken = //
 ### SCENE FILE AUTOMATICALLY GENERATED.
 ###
 ### $GENERATION
-### shape: $SHAPEFILE
-### shapeinv: $SHAPEINVFILE
 ###
 import Sofa
 import os
-import customfield
 
 def createScene(rootNode):
                 rootNode.createObject('RequiredPlugin', pluginName='SoftRobots')
@@ -25,7 +22,11 @@ def createScene(rootNode):
                 shape.createObject("EulerImplicitSolver", name="cg_odesolver",  printLog="0")
                 shape.createObject("CGLinearSolver", template="GraphScattered", name="linear solver",  iterations="25",  tolerance="1e-09", threshold="1e-09")
                 shape.createObject("SphericalField", name="sphere")
-                shape.createObject("CustomField", name="field1", function="customfield.evalField")
+
+                #### Loading the two shapes.
+                shape.createObject("CustomField", name="shape", function="shape.evalField")
+                shape.createObject("CustomField", name="shapeinv", function="shapeinv.evalField")
+
 
                 #Mesh component
                 mesh=shape.createObject("MeshGenerationFromImplicitShape", name="mesh", facet_size="0.5", cell_size="0.8", scalarfield="@field1", drawTetras="true")

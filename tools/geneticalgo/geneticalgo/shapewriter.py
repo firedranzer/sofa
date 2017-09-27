@@ -48,6 +48,11 @@ cimport primitives
         display.close()
 
 
+def toPythonString(shape):
+    return "print('HELLO WORLD')"
+
+
+
 def display(shape,i):
 
     writeHeadLine(i)
