@@ -1,10 +1,12 @@
 import geneticalgo
 import random
 import copy
+import os
 import accordionutils as accordion
 from geneticalgo import algorithm
 from geneticalgo import primitives
 from geneticalgo import shapewriter
+from sofalauncher import launcher
 
 individualId = 0
 heightTube = 10.0
@@ -212,6 +214,7 @@ def generateFunc(numgen, nbInd):
 ###
 def evaluationFunc(pop):
     print("Evaluation Function "+str(len(pop)))
+    basedir=os.path.dirname(__file__)
     bestscore = 0
 
     filename=[]
@@ -227,9 +230,33 @@ def evaluationFunc(pop):
 
         filename.append((f1,f2, ind))
 
-    ####
-    for f1,f2,ind in filename:
-        print("runSofa for "+str((f1,f2))+"...")
+    #################### EXAMPLE USING THE SEQUENTIAL LAUNCHER #################################
+    ### List of filename that contains the simulation to run
+    scenefiles = ["scene.pyscn","controller.py"]
+    filesandtemplates = []
+    for scenefile in scenefiles:
+        filesandtemplates.append( (open(basedir+"/"+scenefile).read(), scenefile) )
+
+    for f1, f2, ind in filename:
+        runs = []
+        for f1,f2,ind in filename:
+            runs.append( {"GENERATION": str(pop.id),
+                          "INDIVIDUAL": str(ind.id),
+                          "SHAPEFILE": f1, "SHAPEINVFILE": f2, "nbIterations":1000 } )
+
+    results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
+
+    for res in results:
+               print("Results: ")
+               print("    directory: "+res["directory"])
+               print("        scene: "+res["scene"])
+               print("      logfile: "+res["logfile"])
+               print("     duration: "+str(res["duration"])+" sec")
+
+    ### Associate the results to the individuals.
+    for i in range(len(filename)):
+        f1, f2, ind = filename[i]
+        ind.results = results[i]
 
     ## Wait here the results.
     for f1,f2,ind in filename:

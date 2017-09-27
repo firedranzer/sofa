@@ -65,6 +65,8 @@ class GeneticAlgorithm(object):
                 b.h1("Population "+str(gen.id))
                 b.p("Size:"+str(len(gen)))
                 b.p("Score: "+str(score))
+                for ind in gen.pop:
+                    a = b.p("Individual "+str(ind.id)+". Score: "+str(ind.level)).a(ind.results["directory"], href=ind.results["directory"])
 
         f=open("generation_"+str(gen.id)+".html", "w")
         f.write(str(h))
@@ -124,6 +126,7 @@ class GeneticAlgorithm(object):
             print("size: "+str(len(currgen)))
             print("score: "+str(currscore))
 
+            currgen.id = k
             self.saveHTMLGeneration(currgen, currscore, wdir)
 
         self.saveHTMLIndex(numGen, wdir)

@@ -1,9 +1,18 @@
+#compiler-settings
+commentStartToken = //
+#end compiler-settings
+
+### SCENE FILE AUTOMATICALLY GENERATED.
+###
+### $GENERATION
+### shape: $SHAPEFILE
+### shapeinv: $SHAPEINVFILE
+###
 import Sofa
 import os
 import customfield
 
 def createScene(rootNode):
-
                 rootNode.createObject('RequiredPlugin', pluginName='SoftRobots')
                 rootNode.createObject('VisualStyle', displayFlags='showVisualModels hideBehaviorModels showCollisionModels hideBoundingCollisionModels hideForceFields showInteractionForceFields hideWireframe')
 
@@ -12,20 +21,14 @@ def createScene(rootNode):
 
                 rootNode.createObject('PythonScriptController', filename="controller.py", classname="controller")
 
-
                 shape = rootNode.createChild("Shape")
                 shape.createObject("EulerImplicitSolver", name="cg_odesolver",  printLog="0")
                 shape.createObject("CGLinearSolver", template="GraphScattered", name="linear solver",  iterations="25",  tolerance="1e-09", threshold="1e-09")
                 shape.createObject("SphericalField", name="sphere")
                 shape.createObject("CustomField", name="field1", function="customfield.evalField")
 
-
-
-
                 #Mesh component
-
                 mesh=shape.createObject("MeshGenerationFromImplicitShape", name="mesh", facet_size="0.5", cell_size="0.8", scalarfield="@field1", drawTetras="true")
-
                 print mesh.findData("outputTetras")
 
                 #accordion"
@@ -46,8 +49,6 @@ def createScene(rootNode):
                 
                 accordion.createObject('SparseLDLSolver', name='preconditioner')
                 accordion.createObject('LinearSolverConstraintCorrection', solverName='preconditioner')
-                #accordion.createObject('UncoupledConstraintCorrection')
-
 
                 #accordion/cavity
                 cavity = accordion.createChild('cavity')
@@ -55,9 +56,8 @@ def createScene(rootNode):
                 cavity.createObject('Mesh', src='@loader', name='topo')
                 cavity.createObject('MechanicalObject', name='cavity')
                 cavity.createObject('SurfacePressureConstraint', triangles='@topo.triangles', value='30', valueType="1")
-                cavity.createObject('BarycentricMapping', name='mapping',  mapForces='false', mapMasses='false')
-                
-                
+                cavity.createObject('BarycentricMapping', name='mapping',  mapForces='false', mapMasses='false')                
+
                 #accordion/accordionVisu
                 accordionVisu = accordion.createChild('visu')
                 accordionVisu.createObject('TriangleSetTopologyContainer', name='container')
@@ -68,6 +68,5 @@ def createScene(rootNode):
                 
                 accordionVisu.createObject('OglModel', template='ExtVec3f', color='0.3 0.2 0.2 0.6')
                 accordionVisu.createObject('IdentityMapping')
-
 
                 return rootNode

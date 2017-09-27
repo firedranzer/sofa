@@ -7,26 +7,23 @@
 ##
 ## Contributors:
 ##     - thomas.morzadec@inria.fr
+##     - damien.marchal@univ-lille1.fr
 ##
 ####################################################################################################
-import sys,os
+import sys, os
+
 ## Récupère le chemin absolu du réportoire courant et l'ajoute aux chemin où python cherche
 ## les modules
 sys.path.append(os.getcwd())
-sys.path.append( os.path.dirname(os.getcwd())+"/sofalauncher" )
-print("SEARCH: " +os.path.dirname(os.getcwd())+"/sofalauncher")
-import sofalauncher
-print("ZZZZZZZZZZZZZZZZdddddddddddddddddd")
-#from sofalauncher import launcher
+
+## Ajoute le répertoire précédant ainsi on a accès à sofalauncher comme un module python
+## classique.
+sys.path.append( os.path.dirname(os.getcwd()) )
 
 from geneticalgo import algorithm
-import scenes.test.rien
 from  scenes.accordion import main
 
-
-
-print("ICICIDDDDDDDDDDDDDDDDC")
-algo = algorithm.GeneticAlgorithm(2, 2, 2,2)
+algo = algorithm.GeneticAlgorithm(4, 2, 2,2)
 algo.start(4,
            main.generateFunc,
            main.mutationFunc,

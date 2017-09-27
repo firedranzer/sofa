@@ -21,7 +21,7 @@ set(EXTRA_FILES
 
     scenes/accordion/main.py
     scenes/accordion/accordionutils.py
-    scenes/accordion/SurfacePressureConstraint.pyscn
+    scenes/accordion/scene.pyscn
     scenes/accordion/controller.py
     scenes/accordion/customfield.py
 
