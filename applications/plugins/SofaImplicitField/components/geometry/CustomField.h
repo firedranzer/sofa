@@ -58,6 +58,7 @@ using sofa::helper::system::FileEventListener ;
 
 class GLSLCodeFragment
 {
+public:
     std::string m_dataname ;  ///@/root/object1/sphere1.center
     std::string m_name ;      ///"evale"
     std::string m_type ;      ///"function"

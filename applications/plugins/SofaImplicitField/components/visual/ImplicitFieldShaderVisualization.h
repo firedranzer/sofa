@@ -26,6 +26,9 @@
 
 #include <iostream>
 #include <fstream>
+#include <iterator>
+#include <string>
+#include <regex>
 
 #include <sofa/core/ObjectFactory.h>
 using sofa::core::RegisterObject;
@@ -48,7 +51,8 @@ using sofa::core::objectmodel::MouseEvent;
 using sofa::core::visual::VisualParams;
 
 #include <SofaImplicitField/components/geometry/CustomField.h>
-using sofa::component::geometry::CustomField;
+using sofa::component::geometry::_customfield_::CustomField;
+using sofa::component::geometry::_customfield_::GLSLCodeFragment;
 
 #include <sofa/core/DataEngine.h>
 using sofa::core::DataEngine ;

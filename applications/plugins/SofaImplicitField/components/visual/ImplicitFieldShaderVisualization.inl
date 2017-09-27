@@ -126,27 +126,41 @@ void ImplicitFieldShaderVisualization::start()
 
         /// TODO se mettre d'accord sur le contenu des maps :/
 
-        //        std::map<std::string, std::string> glslMap = l_field->getGLSLCode();
-        //        std::map<std::string, std::string>::iterator itFind = glslMap.find("uniforms");
-        //        if(itFind != glslMap.end())
-        //        {
-        //            std::vector<GLSLData> uniforms = itFind->second;
-        //            for( std::vector<GLSLData>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
-        //            {
-        //                if(*it->type.compare("float") == 0)
-        //                    shader->SetFloat(shader->GetVariable(*it->name), *it->value);
-        //                else if(*it->type.compare("float2") == 0)
-        //                {
-        //                    float[2] data = *it->value;
-        //                    shader->SetFloat2(shader->GetVariable(*it->name), data[0], data[1]);
-        //                }
-        //                else if(*it->type.compare("float3") == 0)
-        //                {
-        //                    float[3] data = *it->value;
-        //                    shader->SetFloat3(shader->GetVariable(*it->name), data[0], data[1], data[2]);
-        //                }
-        //            }
-        //        }
+
+
+
+        std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
+        std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("variable");
+        if(itFind != glslMap.end())
+        {
+            std::vector<GLSLCodeFragment> uniforms = itFind->second;
+            for( std::vector<GLSLCodeFragment>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
+            {
+                GLSLCodeFragment tmpGLSLCode = *it;
+                std::string uniformType = tmpGLSLCode.m_type;
+                std::string uniformName = tmpGLSLCode.m_name;
+                std::string uniformValue = tmpGLSLCode.m_value;
+
+                std::regex rgx("\\s+");
+                std::sregex_token_iterator iter(uniformValue.begin(), uniformValue.end(), rgx, -1);
+                std::sregex_token_iterator end;
+                std::cout << *iter << std::endl;
+
+                /*
+                if(uniformType.compare("float") == 0)
+                    shader->SetFloat(shader->GetVariable(uniformName), std::atof((*iter).c_str()));
+                else if(uniformType.compare("float2") == 0)
+                {
+                    float[2] data = *it->value;
+                    shader->SetFloat2(shader->GetVariable(uniformName), *iter, *iter++);
+                }
+                else if(uniformType.compare("float3") == 0)
+                {
+                    float[3] data = *it->value;
+                    shader->SetFloat3(shader->GetVariable(uniformName), *iter, *iter++, *iter++);
+                }*/
+            }
+        }
 
         glClampColorARB(GL_CLAMP_VERTEX_COLOR, GL_TRUE);
         glEnable(GL_VERTEX_PROGRAM_TWO_SIDE);
@@ -194,30 +208,31 @@ std::string ImplicitFieldShaderVisualization::generateVertexShaderFrom()
 std::string ImplicitFieldShaderVisualization::implicitFunction()
 {
     std::string tmp;
-#if 0
-    std::map<std::string, std::string> glslMap = l_field->getGLSLCode();
-    std::map<std::string, std::string>::iterator it = glslMap.find("eval");
+
+    std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
+    std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("eval");
     std::string implicitFunction;
     implicitFunction.append(
                 "    res = minVec2(\n"
                 "        vec2(sdPlane(pos), 1.0),\n"
                 "        vec2(sdSphere(pos-vec3( -.0, 0.75, 0.0), .5), 70.)\n"
-                "   );    \n";
+                "   );    \n"
             ); /// Default value if eval is empty
 
-    if(it != glslMap.end())
+    if(itFind != glslMap.end())
     {
-        GLSLData data = *it->second;
+
+        std::vector<GLSLCodeFragment> uniforms = itFind->second;
+        std::vector<GLSLCodeFragment>::iterator it = uniforms.begin();
+        GLSLCodeFragment data = *it;
         implicitFunction.clear();
         implicitFunction.append(
                     "    res = minVec2(\n"
                     "        vec2(sdPlane(pos), 1.0),\n"
                     );
-        implicitFunction.append(data->value);
-        implicitFunction.append(
-                    "   );    \n";)
+        implicitFunction.append(data.m_value);
+        implicitFunction.append("   );    \n");
     }
-    std::string tmp;
     tmp.append(
                 "float sdPlane( vec3 p )\n"
                 "{\n"
@@ -247,7 +262,7 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
                 "   return res;\n"
                 "}\n"
                 );
-#endif
+
     return tmp;
 }
 
@@ -350,7 +365,6 @@ std::string ImplicitFieldShaderVisualization::renderFunction()
 
 std::string ImplicitFieldShaderVisualization::rayMarchingFunction()
 {
-    /// TODO replace gradient function by l_field gradient function from map
     std::string tmp;
     tmp.append(
                 "vec2 castRay( in vec3 ro, in vec3 rd )\n"
@@ -383,15 +397,18 @@ std::string ImplicitFieldShaderVisualization::uniformsAndConst()
                 "const float MAX_DIST = 100.0;\n"
                 "const float EPSILON = 0.00001;\n"
                 );
-    /// TODO
-    //    std::map<std::string, std::string> glslMap = l_field->getGLSLCode();
-    //    std::map<std::string, std::string>::iterator itFind = glslMap.find("uniforms");
-    //    if(itFind != glslMap.end())
-    //    {
-    //        std::vector<GLSLData> uniforms = itFind->second;
-    //        for( std::vector<GLSLData>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
-    //            tmp.append(*it->variable + " " + *it->type + " " *it->name);
-    //    }
+
+    std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
+    std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("variable");
+    if(itFind != glslMap.end())
+    {
+        std::vector<GLSLCodeFragment> uniforms = itFind->second;
+        for( std::vector<GLSLCodeFragment>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
+        {
+            GLSLCodeFragment tmpGLSLCode = *it;
+            tmp.append("uniform " + tmpGLSLCode.m_name + " " + tmpGLSLCode.m_dataname);
+        }
+    }
 
     return tmp;
 }
@@ -402,10 +419,8 @@ std::string ImplicitFieldShaderVisualization::generateFragmentShaderFrom()
     fragmentShaderText = std::string() + "";
 
     fragmentShaderText += uniformsAndConst();
-    fragmentShaderText += rotationFunction();
     fragmentShaderText += implicitFunction();
     fragmentShaderText += rayMarchingFunction();
-    fragmentShaderText += phongFunction();
     fragmentShaderText += viewFunction();
     fragmentShaderText += mainFragmenShaderFunction();
 

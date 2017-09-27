@@ -223,7 +223,7 @@ void CustomField::updateGLSLCodeCacheFromPython()
     //m_glslcodes["GRADFUNCTION"] = "return vec3(1.0,0.0,0.0)" ;
 }
 
-const std::map<std::__cxx11::string, std::vector<GLSLCodeFragment> > &CustomField::getGLSLCode()
+const std::map<std::string, std::vector<GLSLCodeFragment> > &CustomField::getGLSLCode()
 {
     updateGLSLCodeCacheFromPython();
     return m_glslcodes ;
