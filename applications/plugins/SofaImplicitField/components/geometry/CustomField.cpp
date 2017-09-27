@@ -215,12 +215,15 @@ void CustomField::updateGLSLCodeCacheFromPython()
     //TODO(dmarchal) add here the call to the python code and the conversion from the dict to the
     // right function.
 
-    m_glslcodes["VARIABLES"] = "pos0 = vec4(0,0,0,1); " ;
-    m_glslcodes["EVALFUNCTION"] = "return pos0*min(x,y); " ;
-    m_glslcodes["GRADFUNCTION"] = "return vec3(1.0,0.0,0.0)" ;
+    /// Nom, type, valeur.
+    //m_glslcodes["VARIABLES"] = "pos0 = vec4(0,0,0,1); " ;
+
+    ///
+    //m_glslcodes["EVALFUNCTION"] = "return pos0*min(x,y); " ;
+    //m_glslcodes["GRADFUNCTION"] = "return vec3(1.0,0.0,0.0)" ;
 }
 
-const std::map<std::string, std::string>& CustomField::getGLSLCode()
+const std::map<std::string, GLSLCodeFragment>& CustomField::getGLSLCode()
 {
     updateGLSLCodeCacheFromPython();
     return m_glslcodes ;

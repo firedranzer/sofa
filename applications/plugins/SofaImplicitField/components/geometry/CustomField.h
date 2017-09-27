@@ -56,7 +56,13 @@ using sofa::defaulttype::Vec3d ;
 using sofa::core::objectmodel::Data ;
 using sofa::helper::system::FileEventListener ;
 
-
+class GLSLCodeFragment
+{
+    std::string m_dataname ;  ///@/root/object1/sphere1.center
+    std::string m_name ;      ///"evale"
+    std::string m_type ;      ///"function"
+    std::string m_value ;     ///"return ... Vec4(0,0,0,0)"
+};
 
 
 //////////////////////////// CLASS DEFINITION //////////////////////////////////////////////////////
@@ -87,7 +93,7 @@ public:
     ///    map["eval"] = "return vec3(1.0,1.0,1.0)"
     /// when the map is empty means the component cannot makes a GLSL version of the
     /// distance function (eg no python function found)
-    const std::map<std::string, std::string>& getGLSLCode() ;
+    const std::map<std::string, GLSLCodeFragment>& getGLSLCode() ;
 
     Data<std::string> d_function ;
     Data<std::string> d_glslFunction ;
@@ -122,7 +128,7 @@ private:
 
     Data<int> d_state ;
 
-    std::map<std::string, std::string> m_glslcodes ;
+    std::map<std::string, std::vector<GLSLCodeFragment> > m_glslcodes ;
 };
 
 } /// namespace _scalarfield_
