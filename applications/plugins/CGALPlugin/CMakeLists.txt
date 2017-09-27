@@ -62,7 +62,6 @@ if(SofaImplicitField_FOUND)
     list(APPEND README_FILES
                      examples/MeshGenerationFromImplicit.scn
                      examples/SurfaceMeshGenerationFromImplicit.scn
-                     examples/customfield.py
                      examples/customfield2.py
                      examples/dfgeom.pyx
                      examples/minipsl.py
