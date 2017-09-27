@@ -19,37 +19,46 @@ from libc.math cimport sin, cos, acos, exp, sqrt, fabs, M_PI
 cimport numpy
 cimport cython
 
-cpdef getListAandB()
+cdef int i,j,k
 
-cpdef getListDisplayAandB()
+cdef class ListOfLitteralExpressions(object):
+    cdef public list listA
+    cdef public list listB
+    cdef public list listPrimitives
+    cdef public list listgradientDxPrimitives
+    cdef public list listgradientDyPrimitives
+    cdef public list listgradientDzPrimitives
+    cdef public list listgradientXTemp
+    cdef public list listgradientYTemp
+    cdef public list listgradientZTemp
+    cdef public list listSqrt
+    cdef public list listDisplayA
+    cdef public list listDisplayB
 
-cpdef getListPrimitives()
 
-cpdef getListgradientDxPrimitives()
+    cpdef ListOfLitteralExpressions plus(self, ListOfLitteralExpressions)
+    cpdef str generateNewIndex(self)
 
-cpdef getListgradientDyPrimitives()
+cdef class ListOfPrimitives(object):
 
-cpdef getListgradientDzPrimitives()
+    cdef public list listPrimitives
+    cdef public list listgradientDxPrimitives
+    cdef public list listgradientDyPrimitives
+    cdef public list listgradientDzPrimitives
 
-cpdef getListgradientXTemp()
 
-cpdef getListgradientYTemp()
+    cpdef ListOfPrimitives plus(self, ListOfPrimitives)
+    cpdef str generateNewJindex(self)
 
-cpdef getListgradientZTemp()
 
-cpdef getListSqrt()
+cdef class ListForWriting(object):
 
-cpdef clearOut()
+    cdef public list listWritingA
+    cdef public list listWritingB
 
-cdef int i=0
-cdef int j=0
-cdef int k=0
+    cpdef ListForWriting plus(self, ListForWriting)
+    cpdef str generateNewKindex(self)
 
-cpdef str generateNewIndex()
-
-cpdef str generateNewJindex()
-
-cpdef str generateNewKindex()
 
 cdef class Point(object):
 
@@ -59,9 +68,15 @@ cdef class Point(object):
 
 cdef class Shape(object):
 
+    cdef public ListOfPrimitives listOfPrimitives
+    cdef public ListForWriting listForWriting
+    cdef public ListOfLitteralExpressions listOfLitteralExpressions
+
     cpdef double eval(self, Point)
 
     cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
 
 cdef class Union(Shape):
 
@@ -70,6 +85,8 @@ cdef class Union(Shape):
     cpdef double eval(self,Point)
 
     cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
 
 
 cdef class Intersection(Shape):
@@ -80,6 +97,8 @@ cdef class Intersection(Shape):
 
     cpdef tuple toString(self)
 
+    cpdef str toWriting(self)
+
 cdef class Difference(Shape):
 
     cdef Shape first, second
@@ -87,6 +106,8 @@ cdef class Difference(Shape):
     cpdef double eval(self,Point)
 
     cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
 
 
 cdef class Primitives(Shape):
@@ -118,6 +139,8 @@ cdef class Ellipsoid(Primitives):
 
     cpdef tuple toString(self)
 
+    cpdef str toWriting(self)
+
 cdef class Frisbee(Primitives):
 
     cpdef double eval(self,Point)
@@ -131,6 +154,8 @@ cdef class Frisbee(Primitives):
 #    cpdef tuple grad(self)
 
     cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
 
 cdef class Cylinder(Primitives):
 
@@ -147,3 +172,10 @@ cdef class Cylinder(Primitives):
 #    cpdef tuple grad(self)
 
     cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
+
+
+
+
+

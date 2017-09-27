@@ -6,6 +6,7 @@
 ## This file is part of the ShapeGenerator project.
 ##
 ## Contributors:
+##     - damien.marchal@inria.fr
 ##     - thomas.morzadec@inria.fr
 ##
 ####################################################################################################
@@ -19,11 +20,9 @@ def write(ind, filename):
     f=open(filename, "w")
 
 
-def writeHeadLine(i):
+def writeHeadLine():
 
-    with open("display"+str(i)+".pyx", "w") as display:
-
-        temp="""#!/usr/bin/env python
+    temp="""#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ####################################################################################################
 ## Copyright 2017 INRIA
@@ -44,92 +43,122 @@ cimport primitives
 
 
 """
-        display.write(temp)
-        display.close()
+
+    return temp
 
 
-def display(shape,i):
+def write(ind):
 
-    writeHeadLine(i)
+    temp=writeHeadLine()
 
-    with open("display"+str(i)+".pyx", "a") as doc:
+    temp+="#LISTE DES PARAMETRES DES PRIMITIVES\n\n"
 
-        doc.write("#LISTE DES PARAMETRES DES PRIMITIVES\n\n")
+    listPrimitives=ind.listOfPrimitives.listPrimitives
 
-        listPrimitives=primitives.getListPrimitives()
-#        listPrimitives.sort()
+    for identifier in listPrimitives:
+        type=identifier[0]
+        index=identifier[-1]
 
-        for identifier in listPrimitives:
+        if type=="cylinder":
 
-            type=identifier[0]
-            index=identifier[-1]
+            [type,sign, axisX,axisY,axisZ,theta,phi,center,(x,y,z),radial,height,index]=identifier
 
-            if type=="cylinder":
+            prm="#############\n"+"##PRIMITIVE   "+str(index)+"\n"+"############\n\n\n"\
+                +"type"+str(index)+"='"+type+"'\n"\
+                +"sign"+str(index)+"='"+sign+"'\n"\
+                +"axis"+str(index)+"X="+str(axisX)+"\n"\
+                +"axis"+str(index)+"Y="+str(axisY)+"\n"\
+                +"axis"+str(index)+"Z="+str(axisZ)+"\n"\
+                +"theta"+str(index)+"="+str(theta)+"\n"\
+                +"phi"+str(index)+"="+str(phi)+"\n"\
+                +"(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z)="+str(center)+"\n\n"
 
-                [type,sign, axisX,axisY,axisZ,theta,phi,center,(x,y,z),radial,height,index]=identifier
+            prm=prm+"Cylinder"+index+"=primitives.Cylinder("+"sign,axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
+                   +str(index)+"Z,theta"+str(index)+",phi"+str(index)\
+                   +",(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
 
-                prm="#############\n"+"##PRIMITIVE   "+str(index)+"\n"+"############\n\n\n"\
-                    +"type"+str(index)+"='"+type+"'\n"\
-                    +"sign"+str(index)+"='"+sign+"'\n"\
-                    +"axis"+str(index)+"X="+str(axisX)+"\n"\
-                    +"axis"+str(index)+"Y="+str(axisY)+"\n"\
-                    +"axis"+str(index)+"Z="+str(axisZ)+"\n"\
-                    +"theta"+str(index)+"="+str(theta)+"\n"\
-                    +"phi"+str(index)+"="+str(phi)+"\n"\
-                    +"(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z)="+str(center)+"\n\n"
+        else:
 
-                prm=prm+"Cylinder"+index+"=primitives.Cylinder("+"sign,axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
-                                            +str(index)+"Z,theta"+str(index)+",phi"+str(index)\
-                                            +",(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
+            [type,sign, axisX,axisY,axisZ,theta,phi,center,(x,y,z),index]=identifier
 
-            else:
-
-                [type,sign, axisX,axisY,axisZ,theta,phi,center,(x,y,z),index]=identifier
-
-                prm="#############\n"+"##PRIMITIVE   "+str(index)+"\n"+"############\n\n\n"\
-                     +"type"+str(index)+"='"+type+"'\n"\
-                     +"sign"+str(index)+"='"+sign+"'\n"\
-                     +"axis"+str(index)+"X="+str(axisX)+"\n"\
-                     +"axis"+str(index)+"Y="+str(axisY)+"\n"\
-                     +"axis"+str(index)+"Z="+str(axisZ)+"\n"\
-                     +"theta"+str(index)+"="+str(theta)+"\n"\
-                     +"phi"+str(index)+"="+str(phi)+"\n"\
-                     +"(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z)="+str(center)+"\n\n"
+            prm="#############\n"+"##PRIMITIVE   "+str(index)+"\n"+"############\n\n\n"\
+            +"type"+str(index)+"='"+type+"'\n"\
+            +"sign"+str(index)+"='"+sign+"'\n"\
+            +"axis"+str(index)+"X="+str(axisX)+"\n"\
+            +"axis"+str(index)+"Y="+str(axisY)+"\n"\
+            +"axis"+str(index)+"Z="+str(axisZ)+"\n"\
+            +"theta"+str(index)+"="+str(theta)+"\n"\
+            +"phi"+str(index)+"="+str(phi)+"\n"\
+            +"(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z)="+str(center)+"\n\n"
 
 
-                if type=="ellipsoid":
+            if type=="ellipsoid":
 
-                    prm=prm+"Ellipsoid"+index+"=primitives.Ellipsoid("+"sign,axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
+                prm=prm+"Ellipsoid"+index+"=primitives.Ellipsoid("+"sign,axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
                         +str(index)+"Z,theta"+str(index)+",phi"+str(index)\
                         +",(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
 
-                elif type=="frisbee":
+            elif type=="frisbee":
 
-                    prm=prm+"Frisbee"+index+"=primitives.Frisbee("+"sign,axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
+                prm=prm+"Frisbee"+index+"=primitives.Frisbee("+"sign,axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
                             +str(index)+"Z,theta"+str(index)+",phi"+str(index)\
                             +",(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
 
 
 
-            doc.write(prm)
+        temp+=prm
 
 
-        doc.write("\n\n\n\n\n")
+    temp+="\n\n\n\n\n"
 
-        (expression,(gradX,gradY,gradZ), display)=shape.toString()
+    write=ind.toWriting()
 
 
-        doc.write("#LISTE DES EXPRESSIONS INTERMEDIAIRES\n\n")
+    temp+="#LISTE DES EXPRESSIONS INTERMEDIAIRES\n\n"
 
-        listDisplayA,listDisplayB=primitives.getListDisplayAandB()
+    listWritingA,listWritingB=ind.listForWriting.listWritingA, ind.listForWriting.listWritingB
 
-        length=len(listDisplayA)
+    length=len(listWritingA)
 
-        if len(listDisplayA)!=len(listDisplayB):
-            raise ValueError, "check something"
+    if len(listWritingA)!=len(listWritingB):
+        raise ValueError, "check something"
 
-        for j in range(length):
-            doc.write(listDisplayA[j]+"\n\n")
-            doc.write(listDisplayB[j]+"\n\n\n")
+    for j in range(length):
 
-        doc.write("#Expression  of the IMPLICIT FIELD is \n"+"expression="+display+"\n\n\n")
+        temp+=listWritingA[j]+"\n\n"
+        temp+=listWritingB[j]+"\n\n\n"
+
+    temp+="#Expression  of the IMPLICIT FIELD is \n"+"expression="+write+"\n\n\n"
+
+    return temp
+
+
+def writeInFile(ind, filename):
+
+    shapeWritten=write(ind)
+
+    with open(filename, "w") as litteral_expression:
+        litteral_expression.write(shapeWritten)
+        litteral_expression.close()
+
+
+
+################################################################################################################################################
+#
+#               TESTS
+#
+############################################################################################################################################
+
+
+ellipsoid1=primitives.Ellipsoid("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
+ellipsoid2=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(0.0,0.0,0.0))
+ellipsoid3=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(5.5,0.0,0.0))
+
+cylinder1=primitives.Cylinder("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
+cylinder2=primitives.Cylinder("+",1.0,2.0,2.0,0.0,0.0,primitives.Point(1.0,0.0,0.0))
+frisbee1=primitives.Frisbee("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
+
+
+ind=primitives.Difference(primitives.Intersection(primitives.Union(primitives.Union(primitives.Union(ellipsoid1,ellipsoid2), ellipsoid3), cylinder1), cylinder2), frisbee1)
+
+writeInFile(ind,"EssaiMaxime.pyx")

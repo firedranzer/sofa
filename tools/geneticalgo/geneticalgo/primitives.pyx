@@ -20,96 +20,99 @@ cimport numpy
 cimport cython
 cimport primitives
 
-listA=[]
-listB=[]
-listPrimitives=[]
-listgradientDxPrimitives=[]
-listgradientDyPrimitives=[]
-listgradientDzPrimitives=[]
-listgradientXTemp=[]
-listgradientYTemp=[]
-listgradientZTemp=[]
-listSqrt=[]
-listDisplayA=[]
-listDisplayB=[]
+cdef i=0
+cdef j=0
+cdef k=0
 
-cpdef getListAandB():
-    return listA, listB
+cpdef void clearOut():
+    global i, j, k
+    i=0
+    j=0
+    k=0
 
-cpdef getListDisplayAandB():
-    return listDisplayA, listDisplayB
+cdef class ListOfLitteralExpressions(object):
 
-cpdef getListPrimitives():
 
-    return listPrimitives
+    def __init__(self):
 
-cpdef getListgradientDxPrimitives():
+        self.listA=[]
+        self.listB=[]
 
-    return listgradientDxPrimitives
+        self.listgradientXTemp=[]
+        self.listgradientYTemp=[]
+        self.listgradientZTemp=[]
+        self.listSqrt=[]
 
-cpdef getListgradientDyPrimitives():
 
-    return listgradientDyPrimitives
+    cpdef ListOfLitteralExpressions plus(self, ListOfLitteralExpressions listOfLitteralExpressions):
 
-cpdef getListgradientDzPrimitives():
+        newList=ListOfLitteralExpressions()
+        newList.listA=self.listA + listOfLitteralExpressions.listA
+        newList.listB=self.listB + listOfLitteralExpressions.listB
 
-    return listgradientDzPrimitives
+        newList.listgradientXTemp=self.listgradientXTemp + listOfLitteralExpressions.listgradientXTemp
+        newList.listgradientYTemp=self.listgradientYTemp + listOfLitteralExpressions.listgradientYTemp
+        newList.listgradientZTemp=self.listgradientZTemp + listOfLitteralExpressions.listgradientZTemp
+        newList.listSqrt=self.listSqrt + listOfLitteralExpressions.listSqrt
 
-cpdef getListgradientXTemp():
+        return newList
 
-    return listgradientXTemp
+    cpdef str generateNewIndex(self):
+        global i
+        cdef str index=str(i)
+        i+=1
+        return index
 
-cpdef getListgradientYTemp():
+cdef class ListOfPrimitives(object):
 
-    return listgradientYTemp
+    def __init__(self):
 
-cpdef getListgradientZTemp():
+        self.listPrimitives=[]
+        self.listgradientDxPrimitives=[]
+        self.listgradientDyPrimitives=[]
+        self.listgradientDzPrimitives=[]
 
-    return listgradientZTemp
+    cpdef str generateNewJindex(self):
 
-cpdef getListSqrt():
-    return listSqrt
+        global j
+        cdef str index=str(j)
+        j+=1
+        return index
 
-cpdef clearOut():
+    cpdef ListOfPrimitives plus(self, ListOfPrimitives listOfPrimitives):
 
-    global listA, listB, listPrimitives, listgradientDxPrimitives, listgradientDyPrimitives
-    global listgradientDzPrimitives, listgradientXTemp, listgradientYTemp, listgradientZTemp
-    global listSqrt, listDisplayA, listDisplayB
+        newList=ListOfPrimitives()
+        newList.listPrimitives=self.listPrimitives + listOfPrimitives.listPrimitives
+        newList.listgradientDxPrimitives=self.listgradientDxPrimitives + listOfPrimitives.listgradientDxPrimitives
+        newList.listgradientDyPrimitives=self.listgradientDyPrimitives + listOfPrimitives.listgradientDyPrimitives
+        newList.listgradientDzPrimitives=self.listgradientDzPrimitives + listOfPrimitives.listgradientDzPrimitives
 
-    listA=[]
-    listB=[]
-    listPrimitives=[]
-    listgradientDxPrimitives=[]
-    listgradientDyPrimitives=[]
-    listgradientDzPrimitives=[]
-    listgradientXTemp=[]
-    listgradientYTemp=[]
-    listgradientZTemp=[]
-    listSqrt=[]
-    listDisplayA=[]
-    listDisplayB=[]
+        return newList
 
-cdef int i=0
-cdef int j=0
-cdef int k=0
+cdef class ListForWriting(object):
 
-cpdef str generateNewIndex():
-    global i
-    cdef str index=str(i)
-    i=i+1
-    return index
+    def __init__(self):
 
-cpdef str generateNewJindex():
-            global j
-            cdef str temp=str(j)
-            j+=1
-            return temp
+        self.listWritingA=[]
+        self.listWritingB=[]
 
-cpdef str generateNewKindex():
-            global k
-            cdef str temp=str(k)
-            k+=1
-            return temp
+    cpdef ListForWriting plus(self, ListForWriting listForWriting):
+
+            newList=ListForWriting()
+            newList.listWritingA=self.listWritingA + listForWriting.listWritingA
+            newList.listWritingB=self.listWritingB + listForWriting.listWritingB
+
+            return newList
+
+
+
+    cpdef str generateNewKindex(self):
+
+        global k
+        cdef str index=str(k)
+        k+=1
+        return index
+
 
 cpdef str ind():
 
@@ -194,17 +197,29 @@ cdef class Point(object):
 
 cdef class Shape(object):
 
+    def __init__(self):
+
+        self.listOfPrimitives=ListOfPrimitives()
+        self.listOfLitteralExpressions=ListOfLitteralExpressions()
+        self.listForWriting=ListForWriting()
+
     cpdef double eval(self, Point point):
         return self.eval(point)
 
     cpdef tuple toString(self):
         return self.toString()
 
+    cpdef str toWriting(self):
+        return self.toWriting()
+
 cdef class Union(Shape):
 
     def __init__(self, first, second):
+        Shape.__init__(self)
         self.first=first
         self.second=second
+        self.listOfPrimitives=first.listOfPrimitives.plus(second.listOfPrimitives)
+
 
     cpdef double eval(self,Point point):
         return min(self.first.eval(point),self.second.eval(point))
@@ -212,78 +227,110 @@ cdef class Union(Shape):
 
     cpdef tuple toString(self):
 
-        (expression1,(grad1X,grad1Y,grad1Z),display1)=self.first.toString()
-        (expression2,(grad2X,grad2Y,grad2Z),display2)=self.second.toString()
+        (expression1,(grad1X,grad1Y,grad1Z))=self.first.toString()
+        (expression2,(grad2X,grad2Y,grad2Z))=self.second.toString()
 
-        index=generateNewIndex()
-        listA.append("A"+index+"="+expression1)
-        listB.append("B"+index+"="+expression2)
+        self.listOfLitteralExpressions=self.first.listOfLitteralExpressions.plus(self.second.listOfLitteralExpressions)
+        index=self.listOfLitteralExpressions.generateNewIndex()
+        self.listOfLitteralExpressions.listA.append("A"+index+"="+expression1)
+        self.listOfLitteralExpressions.listB.append("B"+index+"="+expression2)
 
-        listDisplayA.append("DisplayA"+index+"="+display1)
-        listDisplayB.append("DisplayB"+index+"="+display2)
+        self.listOfLitteralExpressions.listgradientXTemp.append("gradA"+index+"X="+grad1X)
+        self.listOfLitteralExpressions.listgradientYTemp.append("gradA"+index+"Y="+grad1Y)
+        self.listOfLitteralExpressions.listgradientZTemp.append("gradA"+index+"Z="+grad1Z)
 
-        listgradientXTemp.append("gradA"+index+"X="+grad1X)
-        listgradientYTemp.append("gradA"+index+"Y="+grad1Y)
-        listgradientZTemp.append("gradA"+index+"Z="+grad1Z)
-
-        listgradientXTemp.append("gradB"+index+"X="+grad2X)
-        listgradientYTemp.append("gradB"+index+"Y="+grad2Y)
-        listgradientZTemp.append("gradB"+index+"Z="+grad2Z)
+        self.listOfLitteralExpressions.listgradientXTemp.append("gradB"+index+"X="+grad2X)
+        self.listOfLitteralExpressions.listgradientYTemp.append("gradB"+index+"Y="+grad2Y)
+        self.listOfLitteralExpressions.listgradientZTemp.append("gradB"+index+"Z="+grad2Z)
 
         expression="min(A"+index+",B"+index+")"
-        display="primitives.Union(DisplayA"+index+",DisplayB"+index+")"
 
         gradX="(1.0-ind(A"+index+",B"+index+"))*gradA"+index+"X"+"+"+"ind(A"+index+",B"+index+")*gradB"+index+"X"
         gradY="(1.0-ind(A"+index+",B"+index+"))*gradA"+index+"Y"+"+"+"ind(A"+index+",B"+index+")*gradB"+index+"Y"
         gradZ="(1.0-ind(A"+index+",B"+index+"))*gradA"+index+"Z"+"+"+"ind(A"+index+",B"+index+")*gradB"+index+"Z"
 
-        return (expression,(gradX,gradY,gradZ), display)
+        return (expression,(gradX,gradY,gradZ))
 
+
+    cpdef str toWriting(self):
+
+        writing1=self.first.toWriting()
+        writing2=self.second.toWriting()
+        self.listForWriting=self.first.listForWriting.plus(self.second.listForWriting)
+
+        index=self.listForWriting.generateNewKindex()
+
+        self.listForWriting.listWritingA.append("WritingA"+index+"="+writing1)
+        self.listForWriting.listWritingB.append("WritingB"+index+"="+writing2)
+
+        writing="primitives.Union(WritingA"+index+",WritingB"+index+")"
+
+        return writing
 
 cdef class Intersection(Shape):
 
     def __init__(self, first, second):
+        Shape.__init__(self)
         self.first=first
         self.second=second
+        self.listOfPrimitives=first.listOfPrimitives.plus(second.listOfPrimitives)
+
+
 
     cpdef double eval(self,Point point):
         return max(self.first.eval(point),self.second.eval(point))
 
     cpdef tuple toString(self):
 
-        (expression1,(grad1X,grad1Y,grad1Z), display1)=self.first.toString()
-        (expression2,(grad2X,grad2Y,grad2Z), display2)=self.second.toString()
+        (expression1,(grad1X,grad1Y,grad1Z))=self.first.toString()
+        (expression2,(grad2X,grad2Y,grad2Z))=self.second.toString()
 
-        index=generateNewIndex()
-        listA.append("A"+index+"="+expression1)
-        listB.append("B"+index+"="+expression2)
+        self.listOfLitteralExpressions=self.first.listOfLitteralExpressions.plus(self.second.listOfLitteralExpressions)
+        index=self.listOfLitteralExpressions.generateNewIndex()
+        self.listOfLitteralExpressions.listA.append("A"+index+"="+expression1)
+        self.listOfLitteralExpressions.listB.append("B"+index+"="+expression2)
 
-        listDisplayA.append("DisplayA"+index+"="+display1)
-        listDisplayB.append("DisplayB"+index+"="+display2)
+        self.listOfLitteralExpressions.listgradientXTemp.append("gradA"+index+"X="+grad1X)
+        self.listOfLitteralExpressions.listgradientYTemp.append("gradA"+index+"Y="+grad1Y)
+        self.listOfLitteralExpressions.listgradientZTemp.append("gradA"+index+"Z="+grad1Z)
 
-        listgradientXTemp.append("gradA"+index+"X="+grad1X)
-        listgradientYTemp.append("gradA"+index+"Y="+grad1Y)
-        listgradientZTemp.append("gradA"+index+"Z="+grad1Z)
-
-        listgradientXTemp.append("gradB"+index+"X="+grad2X)
-        listgradientYTemp.append("gradB"+index+"Y="+grad2Y)
-        listgradientZTemp.append("gradB"+index+"Z="+grad2Z)
+        self.listOfLitteralExpressions.listgradientXTemp.append("gradB"+index+"X="+grad2X)
+        self.listOfLitteralExpressions.listgradientYTemp.append("gradB"+index+"Y="+grad2Y)
+        self.listOfLitteralExpressions.listgradientZTemp.append("gradB"+index+"Z="+grad2Z)
 
         expression="max(A"+index+",B"+index+")"
-
-        display="primitives.Intersection(DisplayA"+index+",DisplayB"+index+")"
 
         gradX="ind(A"+index+",B"+index+")*gradA"+index+"X"+"+"+"(1.0-ind(A"+index+",B"+index+"))*gradB"+index+"X"
         gradY="ind(A"+index+",B"+index+")*gradA"+index+"Y"+"+"+"(1.0-ind(A"+index+",B"+index+"))*gradB"+index+"Y"
         gradZ="ind(A"+index+",B"+index+")*gradA"+index+"Z"+"+"+"(1.0-ind(A"+index+",B"+index+"))*gradB"+index+"Z"
 
-        return (expression,(gradX,gradY,gradZ), display)
+        return (expression,(gradX,gradY,gradZ))
+
+
+    cpdef str toWriting(self):
+
+        writing1=self.first.toWriting()
+        writing2=self.second.toWriting()
+
+        self.listForWriting=self.first.listForWriting.plus(self.second.listForWriting)
+
+        index=self.listForWriting.generateNewKindex()
+
+        self.listForWriting.listWritingA.append("WritingA"+index+"="+writing1)
+        self.listForWriting.listWritingB.append("WritingB"+index+"="+writing2)
+
+        writing="primitives.Intersection(WritingA"+index+",WritingB"+index+")"
+
+        return writing
 
 cdef class Difference(Shape):
 
     def __init__(self, first, second):
+        Shape.__init__(self)
         self.first=first
         self.second=second
+        self.listOfPrimitives=first.listOfPrimitives.plus(second.listOfPrimitives)
+
 
     cpdef double eval(self,Point point):
         return max(self.first.eval(point),-self.second.eval(point))
@@ -291,38 +338,52 @@ cdef class Difference(Shape):
 
     cpdef tuple toString(self):
 
-        (expression1,(grad1X,grad1Y,grad1Z), display1)=self.first.toString()
-        (expression2,(grad2X,grad2Y,grad2Z), display2)=self.second.toString()
+        (expression1,(grad1X,grad1Y,grad1Z))=self.first.toString()
+        (expression2,(grad2X,grad2Y,grad2Z))=self.second.toString()
 
-        index=generateNewIndex()
-        listA.append("A"+index+"="+expression1)
-        listB.append("B"+index+"="+expression2)
+        self.listOfLitteralExpressions=self.first.listOfLitteralExpressions.plus(self.second.listOfLitteralExpressions)
 
-        listDisplayA.append("DisplayA"+index+"="+display1)
-        listDisplayB.append("DisplayB"+index+"="+display2)
+        index= self.listOfLitteralExpressions.generateNewIndex()
+        self.listOfLitteralExpressions.listA.append("A"+index+"="+expression1)
+        self.listOfLitteralExpressions.listB.append("B"+index+"="+expression2)
 
-        listgradientXTemp.append("gradA"+index+"X="+grad1X)
-        listgradientYTemp.append("gradA"+index+"Y="+grad1Y)
-        listgradientZTemp.append("gradA"+index+"Z="+grad1Z)
+        self.listOfLitteralExpressions.listgradientXTemp.append("gradA"+index+"X="+grad1X)
+        self.listOfLitteralExpressions.listgradientYTemp.append("gradA"+index+"Y="+grad1Y)
+        self.listOfLitteralExpressions.listgradientZTemp.append("gradA"+index+"Z="+grad1Z)
 
-        listgradientXTemp.append("gradB"+index+"X="+grad2X)
-        listgradientYTemp.append("gradB"+index+"Y="+grad2Y)
-        listgradientZTemp.append("gradB"+index+"Z="+grad2Z)
+        self.listOfLitteralExpressions.listgradientXTemp.append("gradB"+index+"X="+grad2X)
+        self.listOfLitteralExpressions.listgradientYTemp.append("gradB"+index+"Y="+grad2Y)
+        self.listOfLitteralExpressions.listgradientZTemp.append("gradB"+index+"Z="+grad2Z)
 
         expression="max(A"+index+",B"+index+")"
-        display="primitives.Difference(DisplayA"+index+",DisplayB"+index+")"
 
         gradX="ind(A"+index+",-B"+index+")*gradA"+index+"X"+"+"+"(1.0-ind(A"+index+",-B"+index+"))*(-gradB"+index+"X"+")"
         gradY="ind(A"+index+",-B"+index+")*gradA"+index+"Y"+"+"+"(1.0-ind(A"+index+",-B"+index+"))*(-gradB"+index+"Y"+")"
         gradZ="ind(A"+index+",-B"+index+")*gradA"+index+"Z"+"+"+"(1.0-ind(A"+index+",-B"+index+"))*(-gradB"+index+"Z"+")"
 
-        return (expression,(gradX,gradY,gradZ), display)
+        return (expression,(gradX,gradY,gradZ))
 
+
+    cpdef str toWriting(self):
+
+        writing1=self.first.toWriting()
+        writing2=self.second.toWriting()
+
+        self.listForWriting=self.first.listForWriting.plus(self.second.listForWriting)
+
+        index=self.listForWriting.generateNewKindex()
+
+        self.listForWriting.listWritingA.append("WritingA"+index+"="+writing1)
+        self.listForWriting.listWritingB.append("WritingB"+index+"="+writing2)
+
+        writing="primitives.Difference(WritingA"+index+",WritingB"+index+")"
+
+        return writing
 
 cdef class Primitives(Shape):
 
     def __init__(self, sign, axisX, axisY, axisZ, double theta, double phi, center):
-
+        Shape.__init__(self)
         self.sign=sign
         self.axisX=axisX
         self.axisY=axisY
@@ -333,13 +394,13 @@ cdef class Primitives(Shape):
         self.cosTheta=cos(theta)
         self.sinTheta=sin(theta)
         self.cosPhi=cos(phi)
-
         self.sinPhi=sin(phi)
+
         self.center=center
-        index=generateNewJindex()
+        index=self.listOfPrimitives.generateNewJindex()
         self.index=index
         self.type
-        self.identifier
+        self.identifier=[]
 
 #        cpdef translationRotationToString(self):
 
@@ -386,21 +447,21 @@ cdef class Primitives(Shape):
         #        (dxX,dxY,dxZ)=(multiply(str(self.cosPhi),str(self.cosTheta)), str(self.sinTheta),multiply(str(self.sinPhi),str(self.cosTheta)))
         (dxX,dxY,dxZ)=("cosPhi"+self.index+"*"+"cosTheta"+self.index, "sinTheta"+self.index,"sinPhi"+self.index+"*"+"cosTheta"+self.index)
 
-        listgradientDxPrimitives.append("dxX"+self.index+"="+dxX+"\n"+"dxY"+self.index+"="+dxY+"\n"+"dxZ"+self.index+"="+dxZ+"\n\n\n")
+        self.listOfPrimitives.listgradientDxPrimitives.append("dxX"+self.index+"="+dxX+"\n"+"dxY"+self.index+"="+dxY+"\n"+"dxZ"+self.index+"="+dxZ+"\n\n\n")
 #            return ("dxX"+self.index,"dxY"+self.index,"dxZ"+self.index)
 
 #        cpdef gradYtranslationRotationToString(self):
 
         (dyX,dyY,dyZ)=("(-cosPhi"+self.index+")*sinTheta"+self.index, "cosTheta"+self.index,"-sinPhi"+self.index+"*"+"sinTheta"+self.index)
 
-        listgradientDyPrimitives.append("dyX"+self.index+"="+dyX+"\n"+"dyY"+self.index+"="+dyY+"\n"+"dyZ"+self.index+"="+dyZ+"\n\n\n")
+        self.listOfPrimitives.listgradientDyPrimitives.append("dyX"+self.index+"="+dyX+"\n"+"dyY"+self.index+"="+dyY+"\n"+"dyZ"+self.index+"="+dyZ+"\n\n\n")
 #            return ("dyX"+self.index,"dyY"+self.index,"dyZ"+self.index)
 
 #        cpdef gradZtranslationRotationToString(self):
 
         (dzX,dzY,dzZ)=("sinPhi"+self.index, str(0.0),"cosPhi"+self.index)
 
-        listgradientDzPrimitives.append("dzX"+self.index+"="+dzX+"\n"+"dzY"+self.index+"="+dzY+"\n"+"dzZ"+self.index+"="+dzZ+"\n\n\n")
+        self.listOfPrimitives.listgradientDzPrimitives.append("dzX"+self.index+"="+dzX+"\n"+"dzY"+self.index+"="+dzY+"\n"+"dzZ"+self.index+"="+dzZ+"\n\n\n")
 #            return ("dzX"+self.index,"dzY"+self.index,"dzZ"+self.index)
 
 
@@ -430,7 +491,7 @@ cdef class Ellipsoid(Primitives):
         self.type="ellipsoid"
         identifier=[self.type,self.sign, self.axisX,self.axisY,self.axisZ,self.theta,self.phi,(self.center.x,self.center.y,self.center.z),self.coord,self.index]
         self.identifier=identifier
-        listPrimitives.append(identifier)
+        self.listOfPrimitives.listPrimitives.append(identifier)
 
 
     cpdef double eval(self,Point point):
@@ -472,12 +533,15 @@ cdef class Ellipsoid(Primitives):
         expression="("+x+"/axis"+self.index+"X)*("+x+"/axis"+self.index+"X)"+"+"+"("+y+"/axis"+self.index+"Y)*("+y+"/axis"+self.index+"Y)"+"+"\
                   +"("+z+"/axis"+self.index+"Z)*("+z+"/axis"+self.index+"Z)-1.0"
 
-        display="ellipsoid"+self.index
 
 #        divide(x,self.axisX)+"*"+divide(x,self.axisX)+"+"+divide(y,self.axisY)+"*"+divide(y,self.axisY)+"+"+divide(z,self.axisZ)+"*"+\
 #        divide(z,self.axisZ)+"-1.0"
 
-        return (expression, grad, display)
+        return (expression, grad)
+
+    cpdef str toWriting(self):
+
+        return "Ellipsoid"+self.index
 
 cdef class Frisbee(Primitives):
 
@@ -486,7 +550,7 @@ cdef class Frisbee(Primitives):
         self.type="frisbee"
         identifier=[self.type,self.sign, self.axisX,self.axisY,self.axisZ,self.theta,self.phi,(self.center.x,self.center.y,self.center.z),self.coord,self.index]
         self.identifier=identifier
-        listPrimitives.append(identifier)
+        self.listOfPrimitives.listPrimitives.append(identifier)
 
     cpdef double eval(self,Point point):
 
@@ -500,10 +564,11 @@ cdef class Frisbee(Primitives):
         (x,y,z)=("x"+self.index,"y"+self.index,"z"+self.index)#self.translationRotationToString()
 
         sqrtTemp="sqrt(("+x+"/axis"+self.index+"X)"+"*"+"("+x+"/axis"+self.index+"X)"+"+"+"("+y+"/axis"+self.index+"Y)"+"*"+"("+y+"/axis"+self.index+"Y)"+")"
-        listSqrt.append("sqrt"+self.index+"="+sqrtTemp+"\n\n")
+        self.listOfLitteralExpressions.listSqrt.append("sqrt"+self.index+"="+sqrtTemp+"\n\n")
 
 
         (dxX,dxY,dxZ)=("dxX"+self.index,"dxY"+self.index,"dxZ"+self.index)#self.gradXtranslationRotationToString()
+
         gradX=dxX+"*("+x+"/sqrt"+self.index+")"\
               +"+"+dxY+"*("+y+"/sqrt"+self.index+")"\
               +"+"+dxZ+"*"+"sign("+z+")/axis"+self.index+"Z"
@@ -525,8 +590,12 @@ cdef class Frisbee(Primitives):
         expression="abs("+z+"/axis"+self.index+"Z)"+"+"\
                     +"sqrt"+self.index+"-1.0"
 
-        display="frisbee"+self.index
-        return (expression, grad, display)
+
+        return (expression, grad)
+
+    cpdef str toWriting(self):
+
+        return "Frisbee"+self.index
 
 
 cdef class Cylinder(Primitives):
@@ -541,7 +610,7 @@ cdef class Cylinder(Primitives):
         self.height="abs(z"+self.index+"-axis"+self.index+"Z)"
         identifier=[self.type,self.sign, self.axisX,self.axisY,self.axisZ,self.theta,self.phi,(self.center.x,self.center.y,self.center.z),self.coord,self.radial,self.height,self.index]
         self.identifier=identifier
-        listPrimitives.append(identifier)
+        self.listOfPrimitives.listPrimitives.append(identifier)
 
 
     cpdef double eval(self,Point point):
@@ -576,6 +645,8 @@ cdef class Cylinder(Primitives):
 
         expression="max(height"+self.index+",radial"+self.index+")"
 
-        display="cylinder"+self.index
+        return (expression, grad)
 
-        return (expression, grad, display)
+
+    cpdef str toWriting(self):
+        return "Cylinder"+self.index

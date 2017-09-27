@@ -6,21 +6,19 @@
 ## This file is part of the ShapeGenerator project.
 ##
 ## Contributors:
+##     - damien.marchal@inria.fr
 ##     - thomas.morzadec@inria.fr
 ##
 ####################################################################################################
 
-
-import accordion
 import primitives
 
 import math
 from math import sqrt
 
+def writeHeadLine(name):
 
-def writeHeadLine():
-
-    with open("litteral.pyx", "w") as litteral_expression:
+    with open(name, "w") as litteral_expression:
 
         temp="""#!/usr/bin/env python
 # -*- coding: utf-8 -*-
@@ -30,6 +28,7 @@ def writeHeadLine():
 ## This file is part of the ShapeGenerator project.
 ##
 ## Contributors:
+##     - damien.marchal@inria.fr
 ##     - thomas.morzadec@inria.fr
 ##
 ####################################################################################################
@@ -44,21 +43,16 @@ cimport numpy
 cimport cython
 cimport primitives
 
-cdef double x=1.0
-cdef double y=2.0
-cdef double z=3.0
-
-
 """
         litteral_expression.write(temp)
         litteral_expression.close()
 
 
-def litteralExpression(shape):
+def litteralExpression(ind, filename):
 
-    writeHeadLine()
+    writeHeadLine(filename)
 
-    with open("litteral.pyx", "a") as litteral_expression:
+    with open(filename, "a") as litteral_expression:
 
         litteral_expression.write(primitives.sign())
         litteral_expression.write(primitives.ind())
@@ -67,8 +61,7 @@ def litteralExpression(shape):
 
         litteral_expression.write("#LISTE DES PARAMETRES DES PRIMITIVES\n\n")
 
-        listPrimitives=primitives.getListPrimitives()
-#        listPrimitives.sort()
+        listPrimitives=ind.listOfPrimitives.listPrimitives
 
         for identifier in listPrimitives:
 
@@ -122,21 +115,24 @@ def litteralExpression(shape):
 
 
         litteral_expression.write("\n\n\n\n\n")
-        (expression,(gradX,gradY,gradZ))=shape.toString()
+
+
+
+        (expression,(gradX,gradY,gradZ))=ind.toString()
+
+
+
         litteral_expression.write("#LISTE DES CALCULS PRELIMINAIRES DE RACINES\n\n\n")
 
-        listSqrt=primitives.getListSqrt()
+        listSqrt=ind.listOfLitteralExpressions.listSqrt
 
         for sqrt in listSqrt:
             litteral_expression.write(sqrt)
 
         litteral_expression.write("#LISTE DES EXPRESSIONS INTERMEDIAIRES\n\n")
 
+        listA,listB=ind.listOfLitteralExpressions.listA, ind.listOfLitteralExpressions.listB
 
-
-        (expression,(gradX,gradY,gradZ))=shape.toString()
-
-        listA,listB=primitives.getListAandB()
         length=len(listA)
 
         if len(listA)!=len(listB):
@@ -148,13 +144,7 @@ def litteralExpression(shape):
 
         litteral_expression.write("#Litteral expression  of the IMPLICIT FIELD is \n"+"expression="+expression+"\n\n\n")
 
-
-
-
-
-
-
-        listgradientDxPrimitives=primitives.getListgradientDxPrimitives()
+        listgradientDxPrimitives=ind.listOfPrimitives.listgradientDxPrimitives
 
 #        listgradientDxPrimitives.sort()
 
@@ -164,7 +154,8 @@ def litteralExpression(shape):
             litteral_expression.write(gradx)
 
         litteral_expression.write("#LISTE DES GRADIENTS INTERMEDIAIRES SELON X\n\n\n")
-        listgradientXTemp=primitives.getListgradientXTemp()
+        listgradientXTemp=ind.listOfLitteralExpressions.listgradientXTemp
+
 #        listgradientXTemp.sort()
         for gradx in listgradientXTemp:
                 litteral_expression.write(gradx+"\n\n")
@@ -172,7 +163,7 @@ def litteralExpression(shape):
 
         litteral_expression.write("#Litteral expression  of the  GRADX is \n"+"gradX="+gradX+"\n\n\n")
 
-        listgradientDyPrimitives=primitives.getListgradientDyPrimitives()
+        listgradientDyPrimitives=ind.listOfPrimitives.listgradientDyPrimitives
 #        listgradientDyPrimitives.sort()
         litteral_expression.write("#LISTE DES GRADIENTS DES PRIMITIVES SELON Y\n\n\n")
 
@@ -180,7 +171,8 @@ def litteralExpression(shape):
             litteral_expression.write(grady)
 
         litteral_expression.write("#LISTE DES GRADIENTS INTERMEDIAIRES SELON Y\n\n\n")
-        listgradientYTemp=primitives.getListgradientYTemp()
+        listgradientYTemp=ind.listOfLitteralExpressions.listgradientYTemp
+
 #        listgradientYTemp.sort()
         for grady in listgradientYTemp:
             litteral_expression.write(grady+"\n\n")
@@ -188,7 +180,7 @@ def litteralExpression(shape):
         litteral_expression.write("#Litteral expression  of the  GRADY is gradY\n"+"gradY="+gradY+"\n\n\n")
 
 
-        listgradientDzPrimitives=primitives.getListgradientDzPrimitives()
+        listgradientDzPrimitives=ind.listOfPrimitives.listgradientDzPrimitives
 #        listgradientDzPrimitives.sort()
 
         litteral_expression.write("#LISTE DES GRADIENTS DES PRIMITIVES SELON Z\n\n\n")
@@ -198,7 +190,7 @@ def litteralExpression(shape):
 
         litteral_expression.write("#LISTE DES GRADIENTS INTERMEDIAIRES SELON Z\n\n\n")
 
-        listgradientZTemp=primitives.getListgradientZTemp()
+        listgradientZTemp=ind.listOfLitteralExpressions.listgradientZTemp
 #        listgradientZTemp.sort()
 
 
@@ -206,42 +198,25 @@ def litteralExpression(shape):
             litteral_expression.write(gradz+"\n\n")
 
         litteral_expression.write("#Litteral expression  of the  GRADZ is\n"+"gradZ="+gradZ+"\n\n\n")
-        litteral_expression.write("print 'expression='+str(expression)"+"\n")
-        litteral_expression.write("print 'gradX='+str(gradX)"+"\n")
-        litteral_expression.write("print 'gradY='+str(gradY)"+"\n")
-        litteral_expression.write("print 'gradZ='+str(gradZ)"+"\n")
-        litteral_expression.close()
 
 
+
+#
+#TEST
+#
 
 ellipsoid1=primitives.Ellipsoid("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
 ellipsoid2=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(0.0,0.0,0.0))
 ellipsoid3=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(5.5,0.0,0.0))
 
 cylinder1=primitives.Cylinder("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
-frisbee1=primitives.Cylinder("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
+cylinder2=primitives.Cylinder("+",1.0,2.0,2.0,0.0,0.0,primitives.Point(1.0,0.0,0.0))
+frisbee1=primitives.Frisbee("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
 
 
-union=primitives.Union(ellipsoid1,primitives.Intersection(ellipsoid2,cylinder1))
+ind=primitives.Difference(primitives.Intersection(primitives.Union(primitives.Union(primitives.Union(ellipsoid1,ellipsoid2), ellipsoid3), cylinder1), cylinder2), frisbee1)
 
-#expressionUnion=union.toString()
-
-
-#with open("litteral.pyx", "a") as litteral_expression:
-
-#    litteral_expression.write("#expressionUnion is "+expressionUnion+"\n\n\n")
-#    litteral_expression.write("#gradxUnion is "+gradxUnion+"\n\n\n")
-#    litteral_expression.write("#gradyUnion is "+gradyUnion+"\n\n\n")
-#    litteral_expression.write("#gradzUnion is "+gradzUnion+"\n\n\n")
-#    litteral_expression.close()
-
-
-
-
-niceaccordion=accordion.accordionUniform(10.0,2.0,0.1,"frisbee",10,4.0,4.0,4.5)
-
-litteralExpression(niceaccordion)
-
+litteralExpression(ind, "EssaiMaxime.pyx")
 
 
 
