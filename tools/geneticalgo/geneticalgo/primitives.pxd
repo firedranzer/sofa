@@ -178,6 +178,8 @@ cdef class Frisbee(Primitives):
 
     cpdef str toWriting(self)
 
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+
 
 cdef class Cylinder(Primitives):
 
