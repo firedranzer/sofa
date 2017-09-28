@@ -87,7 +87,7 @@ void CustomField::handleEvent(sofa::core::objectmodel::Event *event)
 CustomField::CustomField() :
     d_function (initData(&d_function, (std::string)"", "function", "Use a python function to implement the implicit field.")),
     d_gradient (initData(&d_gradient, (std::string)"", "gradient", "Use a python function to implement the gradient field. If not provided returns gradient using finite difference.")),
-    d_glslFunction (initData(&d_function, (std::string)"", "glslFunction", "Use a python function to return glsl implicit field description.")),
+    d_glslFunction (initData(&d_glslFunction, (std::string)"", "glslFunction", "Use a python function to return glsl implicit field description.")),
     d_state (initData(&d_state, 0, "state", "This is a number indicating change in this component."))
 {
     m_sourcefile = new MyFileListener(this) ;
@@ -225,7 +225,28 @@ void CustomField::updateGLSLCodeCacheFromPython()
 
 const std::map<std::string, std::vector<GLSLCodeFragment> > &CustomField::getGLSLCode()
 {
-    updateGLSLCodeCacheFromPython();
+//    updateGLSLCodeCacheFromPython();
+    m_glslcodes.clear();
+    std::vector<GLSLCodeFragment> evalList;
+    std::vector<GLSLCodeFragment> variableList;
+
+    GLSLCodeFragment eval1;
+    eval1.m_dataname = "anEval";
+    eval1.m_name = "anEval";
+    eval1.m_type = "anEval";
+    eval1.m_value = "vec2(sdSphere(pos-vec3( -.0, 0.75, 0.0), .5), 40.0)";
+
+    GLSLCodeFragment var1;
+    var1.m_dataname = "color";
+    var1.m_name = "color";
+    var1.m_type = "float";
+    var1.m_value = "70.0";
+
+    evalList.push_back(eval1);
+    variableList.push_back(var1);
+
+    m_glslcodes["eval"] = evalList;
+    m_glslcodes["variable"] = variableList;
     return m_glslcodes ;
 }
 

@@ -93,17 +93,19 @@ public:
     virtual bool insertInNode( core::objectmodel::BaseNode* node ) { Inherit1::insertInNode(node); Inherit2::insertInNode(node); return true; }
     virtual bool removeInNode( core::objectmodel::BaseNode* node ) { Inherit1::removeInNode(node); Inherit2::removeInNode(node); return true; }
 
-    SingleLink<ImplicitFieldShaderVisualization,  CustomField, BaseLink::FLAG_DOUBLELINK> l_field;
+    SingleLink<ImplicitFieldShaderVisualization,  CustomField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> l_field ;
+
     sofa::core::objectmodel::DataFileName d_vertFilename;
     sofa::core::objectmodel::DataFileName d_fragFilename;
 
 
 protected:
-    int mouseX, mouseY, wheelDelta;
+    int mouseX, mouseY;
+    float wheelDelta;
     sofa::helper::gl::GLSLShader* shader;
 
-    std::string generateFragmentShaderFrom();
-    std::string generateVertexShaderFrom();
+    std::string generateFragmentShader();
+    std::string generateVertexShader();
 
 
     std::string uniformsAndConst();

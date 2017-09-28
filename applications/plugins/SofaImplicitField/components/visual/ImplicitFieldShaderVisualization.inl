@@ -45,13 +45,12 @@ namespace _pointcloudimplicitfieldvisualization_
 {
 
 ImplicitFieldShaderVisualization::ImplicitFieldShaderVisualization() :
-    l_field(initLink("shape", "The shape to render.")),
+    l_field(initLink("field", "The field to render.")),
     d_vertFilename(initData(&d_vertFilename, std::string("shaders/implicitShape.vert"), "fileVertexShaders", "Set the vertex shader filename to load")),
     d_fragFilename(initData(&d_fragFilename, std::string("shaders/implicitShape.frag"), "fileFragmentShaders", "Set the fragment shader filename to load"))
 {
     f_listening.setValue(true);
-    mouseX = 0;
-    mouseY = 0;
+    wheelDelta = 0.5;
 }
 
 ImplicitFieldShaderVisualization::~ImplicitFieldShaderVisualization()
@@ -63,11 +62,25 @@ ImplicitFieldShaderVisualization::~ImplicitFieldShaderVisualization()
 
 void ImplicitFieldShaderVisualization::init()
 {
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    float pixelSize[2];
+    pixelSize[0] = viewport[2];
+    pixelSize[1] = viewport[3];
+    mouseX = pixelSize[0] /2.0;
+    mouseY = pixelSize[1] /2.0;
+
     shader = new sofa::helper::gl::GLSLShader();
 
     shader->SetVertexShaderFileName(d_vertFilename.getFullPath());
     shader->SetFragmentShaderFileName(d_fragFilename.getFullPath());
     m_datatracker.trackData(*l_field.get()->findData("state"));
+
+
+    std::ofstream myfile;
+    myfile.open (d_fragFilename.getFullPath());
+    myfile << generateFragmentShader();
+    myfile.close();
 }
 
 void ImplicitFieldShaderVisualization::reinit()
@@ -97,11 +110,15 @@ void ImplicitFieldShaderVisualization::stop()
 void ImplicitFieldShaderVisualization::start()
 {
 
+    std::cout << mouseX << " " << mouseY << std::endl;
+    std::cout << wheelDelta << std::endl;
+
+
     if(m_datatracker.isDirty())
     {
         std::ofstream myfile;
         myfile.open (d_fragFilename.getFullPath());
-        myfile << generateFragmentShaderFrom();
+        myfile << generateFragmentShader();
         myfile.close();
         m_datatracker.clean();
     }
@@ -121,46 +138,49 @@ void ImplicitFieldShaderVisualization::start()
         shader->SetFloat(shader->GetVariable("wheelDelta"), wheelDelta);
 
 
-        Simulation* simu = sofa::simulation::getSimulation();
-        simu->findData("");
+//        Simulation* simu = sofa::simulation::getSimulation();
+//        simu->findData("");
 
-        /// TODO se mettre d'accord sur le contenu des maps :/
-
-
+//        /// TODO se mettre d'accord sur le contenu des maps :/
 
 
-        std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
-        std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("variable");
-        if(itFind != glslMap.end())
-        {
-            std::vector<GLSLCodeFragment> uniforms = itFind->second;
-            for( std::vector<GLSLCodeFragment>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
-            {
-                GLSLCodeFragment tmpGLSLCode = *it;
-                std::string uniformType = tmpGLSLCode.m_type;
-                std::string uniformName = tmpGLSLCode.m_name;
-                std::string uniformValue = tmpGLSLCode.m_value;
+//        std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
+//        std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("variable");
+//        if(itFind != glslMap.end())
+//        {
+//            std::vector<GLSLCodeFragment> uniforms = itFind->second;
+//            for( std::vector<GLSLCodeFragment>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
+//            {
+//                GLSLCodeFragment tmpGLSLCode = *it;
+//                std::string uniformType = tmpGLSLCode.m_type;
+//                std::string uniformName = tmpGLSLCode.m_name;
+//                std::string uniformValue = tmpGLSLCode.m_value;
 
-                std::regex rgx("\\s+");
-                std::sregex_token_iterator iter(uniformValue.begin(), uniformValue.end(), rgx, -1);
-                std::sregex_token_iterator end;
-                std::cout << *iter << std::endl;
+//                std::regex rgx("\\s+");
+//                std::sregex_token_iterator iter(uniformValue.begin(), uniformValue.end(), rgx, -1);
+//                std::sregex_token_iterator end;
 
-                /*
-                if(uniformType.compare("float") == 0)
-                    shader->SetFloat(shader->GetVariable(uniformName), std::atof((*iter).c_str()));
-                else if(uniformType.compare("float2") == 0)
-                {
-                    float[2] data = *it->value;
-                    shader->SetFloat2(shader->GetVariable(uniformName), *iter, *iter++);
-                }
-                else if(uniformType.compare("float3") == 0)
-                {
-                    float[3] data = *it->value;
-                    shader->SetFloat3(shader->GetVariable(uniformName), *iter, *iter++, *iter++);
-                }*/
-            }
-        }
+//                std::cout << std::atof(std::string((*iter)).c_str()) << std::endl;
+
+//                if(uniformType.compare("float") == 0)
+//                    shader->SetFloat(shader->GetVariable(uniformName), std::atof(std::string((*iter)).c_str()));
+////                else if(uniformType.compare("float2") == 0)
+////                {
+////                    float[2] data;
+////                    data[0]= std::atof(std::string((*iter)).c_str());
+////                    data[1]= std::atof(std::string((++*iter)).c_str());
+////                    shader->SetFloat2(shader->GetVariable(uniformName), data[0], data[1]);
+////                }
+////                else if(uniformType.compare("float3") == 0)
+////                {
+////                    float[3] data;
+////                    data[0]= std::atof(std::string((*iter)).c_str());
+////                    data[1]= std::atof(std::string((++*iter)).c_str());
+////                    data[2]= std::atof(std::string((++*iter)).c_str());
+////                    shader->SetFloat3(shader->GetVariable(uniformName), data[0], data[1], data[2]);
+////                }
+//            }
+//        }
 
         glClampColorARB(GL_CLAMP_VERTEX_COLOR, GL_TRUE);
         glEnable(GL_VERTEX_PROGRAM_TWO_SIDE);
@@ -182,9 +202,7 @@ void ImplicitFieldShaderVisualization::handleEvent(core::objectmodel::Event * ev
             mouseY = ev->getPosY();
         }
         if (ev->getState() == MouseEvent::Wheel)
-        {
-            wheelDelta = ev->getWheelDelta();
-        }
+            wheelDelta += ev->getWheelDelta()/120 * 0.1;
     }
 }
 
@@ -193,7 +211,7 @@ bool ImplicitFieldShaderVisualization::drawScene(VisualParams* vp)
     return true;
 }
 
-std::string ImplicitFieldShaderVisualization::generateVertexShaderFrom()
+std::string ImplicitFieldShaderVisualization::generateVertexShader()
 {
     std::string vertexShaderText;
     vertexShaderText = std::string() +
@@ -215,7 +233,7 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
     implicitFunction.append(
                 "    res = minVec2(\n"
                 "        vec2(sdPlane(pos), 1.0),\n"
-                "        vec2(sdSphere(pos-vec3( -.0, 0.75, 0.0), .5), 70.)\n"
+                "        vec2(sdSphere(pos-vec3( -.0, 0.75, 0.0), .5), 20.)\n"
                 "   );    \n"
             ); /// Default value if eval is empty
 
@@ -230,6 +248,7 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
                     "    res = minVec2(\n"
                     "        vec2(sdPlane(pos), 1.0),\n"
                     );
+
         implicitFunction.append(data.m_value);
         implicitFunction.append("   );    \n");
     }
@@ -272,10 +291,10 @@ std::string ImplicitFieldShaderVisualization::viewFunction()
     tmp.append(
                 "mat3 setCamera( in vec3 ro, in vec3 ta, float cr )\n"
                 "{\n"
-                "        vec3 cw = normalize(ta-ro);\n"
-                "        vec3 cp = vec3(sin(cr), cos(cr),0.0);\n"
-                "        vec3 cu = normalize( cross(cw,cp) );\n"
-                "        vec3 cv = normalize( cross(cu,cw) );\n"
+                "    vec3 cw = normalize(ta-ro);\n"
+                "    vec3 cp = vec3(sin(cr), cos(cr),0.0);\n"
+                "    vec3 cu = normalize( cross(cw,cp) );\n"
+                "    vec3 cv = normalize( cross(cu,cw) );\n"
                 "    return mat3( cu, cv, cw );\n"
                 "}\n"
                 );
@@ -289,8 +308,8 @@ std::string ImplicitFieldShaderVisualization::mainFragmenShaderFunction()
                 "void main()\n"
                 "{\n"
                 "    vec2 mouseR = mouse.xy/resolution.xy;\n"
-                "    vec2 p = (-resolution.xy + 2.0*gl_FragCoord)/resolution.y;\n"
-                "    vec3 ro = vec3( -0.5+3.5*cos(7.0*mouseR.x), .0 + 4.0*mouseR.y, 0.5 + 4.0*sin(7.0*mouseR.x) );\n"
+                "    vec2 p = (-resolution.xy + 2.0*gl_FragCoord.xy)/resolution.y;\n"
+                "    vec3 ro = vec3( 4.0 * cos(7.0*mouseR.x) * (wheelDelta), 4.0*mouseR.y, 4.0*sin(7.0*mouseR.x) * (wheelDelta) );\n"
                 "    vec3 ta = vec3( 0.0, 0.0, 0.0 );\n"
                 "    mat3 ca = setCamera( ro, ta, 0.0 );\n"
                 "    vec3 rayDir = ca * normalize( vec3(p.xy, 2.0) );\n"
@@ -304,8 +323,10 @@ std::string ImplicitFieldShaderVisualization::renderFunction()
 {
     std::string tmp;
     tmp.append(
-                "float res = 1.0;\n"
-                "float t = mint;\n"
+                "float softshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax )\n"
+                "{\n"
+                "   float res = 1.0;\n"
+                "   float t = mint;\n"
                 "   for( int i=0; i<16; i++ )\n"
                 "   {\n"
                 "       float h = map( ro + rd*t ).x;\n"
@@ -313,9 +334,8 @@ std::string ImplicitFieldShaderVisualization::renderFunction()
                 "       t += clamp( h, 0.02, 0.10 );\n"
                 "       if( h<0.001 || t>tmax ) break;\n"
                 "   }\n"
-                "return clamp( res, 0.0, 1.0 );\n"
+                "   return clamp( res, 0.0, 1.0 );\n"
                 "}\n"
-
 
                 "vec3 estimateNormal(vec3 p) {\n"
                 "    return normalize(vec3(\n"
@@ -345,10 +365,8 @@ std::string ImplicitFieldShaderVisualization::renderFunction()
                 "    float dom = smoothstep( -0.1, 0.1, ref.y );\n"
                 "    float fre = pow( clamp(1.0+dot(nor,rd),0.0,1.0), 2.0 );\n"
                 "    float spe = pow(clamp( dot( ref, lig ), 0.0, 1.0 ),16.0);\n"
-
                 "    dif *= softshadow( pos, lig, 0.02, 2.5 );\n"
                 "    dom *= softshadow( pos, ref, 0.02, 2.5 );\n"
-
                 "    vec3 lin = vec3(0.0);\n"
                 "    lin += 1.30*dif*vec3(1.00,0.80,0.55);\n"
                 "    lin += 2.00*spe*vec3(1.00,0.90,0.70)*dif;\n"
@@ -356,7 +374,6 @@ std::string ImplicitFieldShaderVisualization::renderFunction()
                 "    lin += 0.50*dom*vec3(0.40,0.60,1.00);\n"
                 "    col = col*lin;\n"
                 "    col = mix( col, vec3(0.9,0.9,1.0), 1.0-exp( -0.0002*t*t*t ) );\n"
-
                 "    return vec3( clamp(col,0.0,1.0) );\n"
                 "}\n"
                 );
@@ -373,7 +390,7 @@ std::string ImplicitFieldShaderVisualization::rayMarchingFunction()
                 "    float m = -1.0;\n"
                 "    for( int i = 0; i < MAX_MARCHING_STEPS; i++ )\n"
                 "    {\n"
-                "            vec2 res = map( ro+rd*depth );\n"
+                "        vec2 res = map( ro+rd*depth );\n"
                 "        if( res.x < EPSILON || depth > MAX_DIST ) break;\n"
                 "        depth += res.x;\n"
                 "            m = res.y;\n"
@@ -406,14 +423,14 @@ std::string ImplicitFieldShaderVisualization::uniformsAndConst()
         for( std::vector<GLSLCodeFragment>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
         {
             GLSLCodeFragment tmpGLSLCode = *it;
-            tmp.append("uniform " + tmpGLSLCode.m_name + " " + tmpGLSLCode.m_dataname);
+            tmp.append("uniform " + tmpGLSLCode.m_type + " " + tmpGLSLCode.m_dataname + ";\n");
         }
     }
 
     return tmp;
 }
 
-std::string ImplicitFieldShaderVisualization::generateFragmentShaderFrom()
+std::string ImplicitFieldShaderVisualization::generateFragmentShader()
 {
     std::string fragmentShaderText;
     fragmentShaderText = std::string() + "";
@@ -421,6 +438,7 @@ std::string ImplicitFieldShaderVisualization::generateFragmentShaderFrom()
     fragmentShaderText += uniformsAndConst();
     fragmentShaderText += implicitFunction();
     fragmentShaderText += rayMarchingFunction();
+    fragmentShaderText += renderFunction();
     fragmentShaderText += viewFunction();
     fragmentShaderText += mainFragmenShaderFunction();
 
