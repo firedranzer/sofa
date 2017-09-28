@@ -190,9 +190,9 @@ def litteralExpression(shape):
         return temp
 
 
-def writeLitteralExpressionInFile(ind, filename):
+def writeLitteralExpressionInFile(shape, filename):
 
-    shapeLitteralExpression=litteralExpression(ind)
+    shapeLitteralExpression=litteralExpression(shape)
 
     with open(filename, "w") as litteral_expression:
         litteral_expression.write(shapeLitteralExpression)
