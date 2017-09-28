@@ -29,6 +29,8 @@
 #include <iterator>
 #include <string>
 #include <regex>
+#include <stdlib.h>
+
 
 #include <sofa/core/ObjectFactory.h>
 using sofa::core::RegisterObject;
@@ -94,6 +96,7 @@ public:
     virtual bool removeInNode( core::objectmodel::BaseNode* node ) { Inherit1::removeInNode(node); Inherit2::removeInNode(node); return true; }
 
     SingleLink<ImplicitFieldShaderVisualization,  CustomField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> l_field ;
+    void shaderGenerationCodeHasChanged();
 
     sofa::core::objectmodel::DataFileName d_vertFilename;
     sofa::core::objectmodel::DataFileName d_fragFilename;
