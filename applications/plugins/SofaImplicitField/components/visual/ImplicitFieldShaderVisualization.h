@@ -60,6 +60,8 @@ using sofa::component::geometry::_customfield_::GLSLCodeFragment;
 using sofa::core::DataEngine ;
 using sofa::core::DataTracker ;
 
+#include <sofa/helper/system/Locale.h>
+
 namespace sofa
 {
 

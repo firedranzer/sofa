@@ -21,17 +21,6 @@
 ******************************************************************************/
 #include "ImplicitFieldShaderVisualization.h"
 
-#include <sofa/helper/ArgumentParser.h>
-#include <SofaSimulationCommon/common.h>
-#include <sofa/simulation/Node.h>
-#include <sofa/helper/system/PluginManager.h>
-#include <sofa/simulation/config.h> // #defines SOFA_HAVE_DAG (or not)
-#include <SofaSimulationCommon/init.h>
-#include <SofaSimulationTree/init.h>
-#include <SofaSimulationTree/TreeSimulation.h>
-
-using sofa::simulation::Simulation;
-
 namespace sofa
 {
 
@@ -75,6 +64,7 @@ void ImplicitFieldShaderVisualization::init()
     shader->SetVertexShaderFileName(d_vertFilename.getFullPath());
     shader->SetFragmentShaderFileName(d_fragFilename.getFullPath());
     m_datatracker.trackData(*l_field.get()->findData("state"));
+    shaderGenerationCodeHasChanged();
 
 }
 
@@ -117,6 +107,8 @@ void ImplicitFieldShaderVisualization::shaderGenerationCodeHasChanged()
 
 void ImplicitFieldShaderVisualization::start()
 {
+    sofa::helper::system::TemporaryLocale locale(LC_CTYPE, "");
+
     if(m_datatracker.isDirty())
     {
         std::ofstream myfile;
@@ -141,10 +133,10 @@ void ImplicitFieldShaderVisualization::start()
         shader->SetFloat(shader->GetVariable("wheelDelta"), wheelDelta);
 
 
-//        Simulation* simu = sofa::simulation::getSimulation();
-//        simu->findData("");
+        //        Simulation* simu = sofa::simulation::getSimulation();
+        //        simu->findData("");
 
-//        /// TODO se mettre d'accord sur le contenu des maps :/
+        //        /// TODO se mettre d'accord sur le contenu des maps :/
 
 
         std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
@@ -233,30 +225,32 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
                 "        vec4(sdPlane(pos), vec3(0.45, 0.45, 0.45)),\n"
                 "        vec4(sdSphere(pos-vec3( -.0, 0.75, 0.0), .5), vec3(1.0, 1.0, 0.0))\n"
                 "   );    \n"
-            ); /// Default value if eval is empty
+                ); /// Default value if eval is empty
 
     std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
     std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("eval");
 
     if(itFind != glslMap.end())
     {
-
-        std::vector<GLSLCodeFragment> uniforms = itFind->second;
-        std::vector<GLSLCodeFragment>::iterator it = uniforms.begin();
-        GLSLCodeFragment data = *it;
         implicitFunction.clear();
-        implicitFunction.append(
-                    "    x = pos.x - evalPosition" + data.m_dataname + ".x;\n"
-                    "    y = pos.y - evalPosition" + data.m_dataname + ".y;\n"
-                    "    z = pos.z - evalPosition" + data.m_dataname + ".z;\n"
-                    );
-        implicitFunction.append(
-                    "    res = minVec4(\n"
-                    "        vec4(sdPlane(pos), vec3(0.45, 0.45, 0.45)),\n"
-                    );
+        std::vector<GLSLCodeFragment> evals = itFind->second;
+        for( std::vector<GLSLCodeFragment>::iterator it = evals.begin(); it != evals.end(); it++)
+        {
+            std::vector<GLSLCodeFragment> uniforms = itFind->second;
+            GLSLCodeFragment data = *it;
+            implicitFunction.append(
+                        "    x = pos.x - evalPosition" + data.m_dataname + ".x;\n"
+                                                                           "    y = pos.y - evalPosition" + data.m_dataname + ".y;\n"
+                                                                                                                              "    z = pos.z - evalPosition" + data.m_dataname + ".z;\n"
+                        );
+            implicitFunction.append(
+                        "    res = minVec4(\n"
+                        "        res,\n"
+                        );
 
-        implicitFunction.append("\t\tvec4(" + data.m_value + ", evalColor" + data.m_dataname + ")\n");
-        implicitFunction.append("   );    \n");
+            implicitFunction.append("\t\tvec4(" + data.m_value + ", evalColor" + data.m_dataname + ")\n");
+            implicitFunction.append("   );    \n");
+        }
     }
 
     tmp.append(
@@ -283,7 +277,7 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
                 "   float x = pos.x;\n"
                 "   float y = pos.y;\n"
                 "   float z = pos.z;\n"
-                "   vec4 res;\n"
+                "   vec4 res = vec4(sdPlane(pos), vec3(0.45, 0.45, 0.45));\n"
                 );
 
     tmp.append(implicitFunction);
