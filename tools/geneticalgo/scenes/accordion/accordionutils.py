@@ -10,6 +10,7 @@
 ##     - thomas.morzadec@inria.fr
 ##
 ####################################################################################################
+
 from geneticalgo import primitives
 
 def create(self, height, radius, thickness):
@@ -42,6 +43,8 @@ def addCavity(self, cavity):
 
 
 def accordionFreeDimension(height, radius, thickness, listCavities):
+
+
     """
      The Cavities have to be given as [height,"type",axisX,axisY,axisZ]
      The shape is given has the difference between ShapePlus and ShapeMinus

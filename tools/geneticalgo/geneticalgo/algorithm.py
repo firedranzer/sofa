@@ -130,5 +130,6 @@ class GeneticAlgorithm(object):
             self.saveHTMLGeneration(currgen, currscore, wdir)
 
         self.saveHTMLIndex(numGen, wdir)
-        print("FINI")
+        print("Experiment terminated.")
+        print("Results can be found in "+wdir+"/index.html")
 
