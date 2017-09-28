@@ -234,37 +234,64 @@ const std::map<std::string, std::vector<GLSLCodeFragment> > &CustomField::getGLS
     eval1.m_dataname = "Sphere1";
     eval1.m_name = "Sphere1";
     eval1.m_type = "anEval";
-    eval1.m_value = "sqrt(x*x+y*y+z*z) -1.0";
+    eval1.m_value = "min(sqrt(x*x+y*y+z*z) -1.0, sqrt((x+.5)*(x+0.5)+y*y+z*z) -1.0)";
+
+    GLSLCodeFragment eval2;
+    eval2.m_dataname = "Sphere2";
+    eval2.m_name = "Sphere2";
+    eval2.m_type = "anEval";
+    eval2.m_value = "sqrt(x*x+y*y+z*z) -1.0";
+
+    GLSLCodeFragment eval3;
+    eval3.m_dataname = "Sphere3";
+    eval3.m_name = "Sphere3";
+    eval3.m_type = "anEval";
+    eval3.m_value = "sqrt(x*x+y*y+z*z) -1.0";
 
     GLSLCodeFragment var1;
-    var1.m_dataname = "color";
-    var1.m_name = "color";
-    var1.m_type = "float";
-    var1.m_value = "20.0";
+    var1.m_dataname = "evalColorSphere1";
+    var1.m_name = "evalColorSphere1";
+    var1.m_type = "vec3";
+    var1.m_value = "1.0 0.0 0.0";
 
     GLSLCodeFragment var2;
-    var2.m_dataname = "blop";
-    var2.m_name = "blop";
-    var2.m_type = "vec2";
-    var2.m_value = "20.0 20.0";
+    var2.m_dataname = "evalPositionSphere1";
+    var2.m_name = "evalPositionSphere1";
+    var2.m_type = "vec3";
+    var2.m_value = "0.0 1.0 0.0";
 
     GLSLCodeFragment var3;
-    var3.m_dataname = "evalColorSphere1";
-    var3.m_name = "evalColorSphere1";
+    var3.m_dataname = "evalColorSphere2";
+    var3.m_name = "evalColorSphere2";
     var3.m_type = "vec3";
-    var3.m_value = "1.0 0.0 0.0";
+    var3.m_value = "0.0 1.0 0.0";
 
     GLSLCodeFragment var4;
-    var4.m_dataname = "evalPositionSphere1";
-    var4.m_name = "evalPositionSphere1";
+    var4.m_dataname = "evalPositionSphere2";
+    var4.m_name = "evalPositionSphere2";
     var4.m_type = "vec3";
-    var4.m_value = "0.0 1.5 0.0";
+    var4.m_value = "1.0 1.0 0.0";
+
+    GLSLCodeFragment var5;
+    var5.m_dataname = "evalColorSphere3";
+    var5.m_name = "evalColorSphere3";
+    var5.m_type = "vec3";
+    var5.m_value = "0.0 0.0 1.0";
+
+    GLSLCodeFragment var6;
+    var6.m_dataname = "evalPositionSphere3";
+    var6.m_name = "evalPositionSphere3";
+    var6.m_type = "vec3";
+    var6.m_value = "2.0 1.0 0.0";
 
     evalList.push_back(eval1);
+
     variableList.push_back(var1);
     variableList.push_back(var2);
     variableList.push_back(var3);
     variableList.push_back(var4);
+    variableList.push_back(var5);
+    variableList.push_back(var6);
 
     m_glslcodes["eval"] = evalList;
     m_glslcodes["variable"] = variableList;
