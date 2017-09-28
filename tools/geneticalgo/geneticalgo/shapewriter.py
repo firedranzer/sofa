@@ -12,8 +12,6 @@
 ####################################################################################################
 
 import os
-import math
-from math import sqrt
 import primitives
 
 def getDefaultHeader():
@@ -36,7 +34,8 @@ def toPythonString(shape):
     temp=getDefaultHeader()
     temp+="#LISTE DES PARAMETRES DES PRIMITIVES\n\n"
 
-    listPrimitives=shape.listOfPrimitives.listPrimitives
+    listPrimitives=shape.getListOfPrimitives().listPrimitives
+
 
     for identifier in listPrimitives:
         type=identifier[0]
@@ -93,12 +92,9 @@ def toPythonString(shape):
 
     temp+="\n\n\n\n\n"
 
-    write=shape.toWriting()
-
-
     temp+="#LISTE DES EXPRESSIONS INTERMEDIAIRES\n\n"
 
-    listWritingA,listWritingB=shape.listForWriting.listWritingA, shape.listForWriting.listWritingB
+    listWritingA,listWritingB=shape.getListForWriting().listWritingA, shape.getListForWriting().listWritingB
 
     length=len(listWritingA)
 
@@ -110,7 +106,8 @@ def toPythonString(shape):
         temp+=listWritingA[j]+"\n\n"
         temp+=listWritingB[j]+"\n\n\n"
 
-    temp+="#Expression  of the IMPLICIT FIELD is \n"+"expression="+write+"\n\n\n"
+
+    temp+="#Expression  of the IMPLICIT FIELD is \n"+"expression="+shape.toWriting()+"\n\n\n"
 
     return temp
 
@@ -131,6 +128,10 @@ def writeInFile(ind, filename):
 ############################################################################################################################################
 
 if __name__ == "__main__":
+
+    import math
+    from math import sqrt
+
     ellipsoid1=primitives.Ellipsoid("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
     ellipsoid2=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(0.0,0.0,0.0))
     ellipsoid3=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(5.5,0.0,0.0))
@@ -141,4 +142,4 @@ if __name__ == "__main__":
 
     ind=primitives.Difference(primitives.Intersection(primitives.Union(primitives.Union(primitives.Union(ellipsoid1,ellipsoid2), ellipsoid3), cylinder1), cylinder2), frisbee1)
 
-    writeInFile(ind,"EssaiMaxime.pyx")
+    writeInFile(ind,"essai.pyx")
