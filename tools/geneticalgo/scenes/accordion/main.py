@@ -223,12 +223,9 @@ def evaluationFunc(pop):
 
         ### return (shape,shapeMinus)
         ###
-        #f1 = "individualShape_"+str(ind.id)+".py"
-        #f2 = "individualShapeMinus_"+str(ind.id)+".py"
-        #shapewriter.write(shape, filename=f1)
-        #shapewriter.write(shapeMinus, filename=f2)
-        f1 = shapewriter.toPythonString(shape)
-        f2 = shapewriter.toPythonString(shapeMinus)
+        fend =  "def evalField(x,y,z): \n\treturn expression"
+        f1 = shapewriter.toPythonString(shape) + fend
+        f2 = shapewriter.toPythonString(shapeMinus) + fend
 
         filename.append((f1,f2, ind))
 

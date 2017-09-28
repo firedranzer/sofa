@@ -13,7 +13,3 @@ from Cython.Build import cythonize
 setup(
     ext_modules = cythonize("primitives.pyx")
 )
-
-#setup(
-#    ext_modules = cythonize("algorithm.pyx")
-#)

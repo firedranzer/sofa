@@ -23,7 +23,7 @@ sys.path.append( os.path.dirname(os.getcwd()) )
 from geneticalgo import algorithm
 from  scenes.accordion import main
 
-algo = algorithm.GeneticAlgorithm(4, 2, 2,2)
+algo = algorithm.GeneticAlgorithm(4, 2, 2, 2)
 algo.start(4,
            main.generateFunc,
            main.mutationFunc,

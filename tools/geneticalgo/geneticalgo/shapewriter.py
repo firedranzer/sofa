@@ -16,8 +16,7 @@ import math
 from math import sqrt
 import primitives
 
-def writeHeadLine():
-
+def getDefaultHeader():
     temp="""#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ####################################################################################################
@@ -27,34 +26,17 @@ def writeHeadLine():
 ##
 ## Contributors:
 ##     - thomas.morzadec@inria.fr
-##     - damien.marchal@inria.fr
+##     - damien.marchal@univ-lille1.fr
 ####################################################################################################
-# distutils: language=c++
-# cython: profile=True
-
 import primitives
-cimport numpy
-cimport cython
-cimport primitives
-
-
 """
-
-
     return temp
 
-
 def toPythonString(shape):
-    return "print('HELLO WORLD')"
-
-
-def write(ind):
-
-    temp=writeHeadLine()
-
+    temp=getDefaultHeader()
     temp+="#LISTE DES PARAMETRES DES PRIMITIVES\n\n"
 
-    listPrimitives=ind.listOfPrimitives.listPrimitives
+    listPrimitives=shape.listOfPrimitives.listPrimitives
 
     for identifier in listPrimitives:
         type=identifier[0]
@@ -109,15 +91,14 @@ def write(ind):
 
         temp+=prm
 
-
     temp+="\n\n\n\n\n"
 
-    write=ind.toWriting()
+    write=shape.toWriting()
 
 
     temp+="#LISTE DES EXPRESSIONS INTERMEDIAIRES\n\n"
 
-    listWritingA,listWritingB=ind.listForWriting.listWritingA, ind.listForWriting.listWritingB
+    listWritingA,listWritingB=shape.listForWriting.listWritingA, shape.listForWriting.listWritingB
 
     length=len(listWritingA)
 
@@ -135,8 +116,7 @@ def write(ind):
 
 
 def writeInFile(ind, filename):
-
-    shapeWritten=write(ind)
+    shapeWritten=toPythonString(ind)
 
     with open(filename, "w") as litteral_expression:
         litteral_expression.write(shapeWritten)
@@ -150,16 +130,15 @@ def writeInFile(ind, filename):
 #
 ############################################################################################################################################
 
+if __name__ == "__main__":
+    ellipsoid1=primitives.Ellipsoid("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
+    ellipsoid2=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(0.0,0.0,0.0))
+    ellipsoid3=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(5.5,0.0,0.0))
 
-ellipsoid1=primitives.Ellipsoid("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
-ellipsoid2=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(0.0,0.0,0.0))
-ellipsoid3=primitives.Ellipsoid("+",1.0,1.0,1.0,0.0,0.0,primitives.Point(5.5,0.0,0.0))
+    cylinder1=primitives.Cylinder("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
+    cylinder2=primitives.Cylinder("+",1.0,2.0,2.0,0.0,0.0,primitives.Point(1.0,0.0,0.0))
+    frisbee1=primitives.Frisbee("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
 
-cylinder1=primitives.Cylinder("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
-cylinder2=primitives.Cylinder("+",1.0,2.0,2.0,0.0,0.0,primitives.Point(1.0,0.0,0.0))
-frisbee1=primitives.Frisbee("+",1.0,2.0,2.0,math.pi/4.0,math.pi/2.0,primitives.Point(1.0,0.0,0.0))
+    ind=primitives.Difference(primitives.Intersection(primitives.Union(primitives.Union(primitives.Union(ellipsoid1,ellipsoid2), ellipsoid3), cylinder1), cylinder2), frisbee1)
 
-
-ind=primitives.Difference(primitives.Intersection(primitives.Union(primitives.Union(primitives.Union(ellipsoid1,ellipsoid2), ellipsoid3), cylinder1), cylinder2), frisbee1)
-
-writeInFile(ind,"EssaiMaxime.pyx")
+    writeInFile(ind,"EssaiMaxime.pyx")
