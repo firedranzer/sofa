@@ -19,7 +19,9 @@ from libc.math cimport sin, cos, acos, exp, sqrt, fabs, M_PI
 cimport numpy
 cimport cython
 
-cdef int i,j,k
+cdef int i
+
+cpdef str generateNewIndex()
 
 cdef class ListOfLitteralExpressions(object):
     cdef public list listA
@@ -35,9 +37,7 @@ cdef class ListOfLitteralExpressions(object):
     cdef public list listDisplayA
     cdef public list listDisplayB
 
-
     cpdef ListOfLitteralExpressions plus(self, ListOfLitteralExpressions)
-    cpdef str generateNewIndex(self)
 
 cdef class ListOfPrimitives(object):
 
@@ -48,7 +48,6 @@ cdef class ListOfPrimitives(object):
 
 
     cpdef ListOfPrimitives plus(self, ListOfPrimitives)
-    cpdef str generateNewJindex(self)
 
 
 cdef class ListForWriting(object):
@@ -57,8 +56,6 @@ cdef class ListForWriting(object):
     cdef public list listWritingB
 
     cpdef ListForWriting plus(self, ListForWriting)
-    cpdef str generateNewKindex(self)
-
 
 cdef class Point(object):
 
@@ -68,15 +65,19 @@ cdef class Point(object):
 
 cdef class Shape(object):
 
-    cdef public ListOfPrimitives listOfPrimitives
-    cdef public ListForWriting listForWriting
-    cdef public ListOfLitteralExpressions listOfLitteralExpressions
+    cdef str index
 
     cpdef double eval(self, Point)
 
     cpdef tuple toString(self)
 
     cpdef str toWriting(self)
+
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+
+    cpdef ListForWriting getListForWriting(self)
 
 cdef class Union(Shape):
 
@@ -87,6 +88,12 @@ cdef class Union(Shape):
     cpdef tuple toString(self)
 
     cpdef str toWriting(self)
+
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+
+    cpdef ListForWriting getListForWriting(self)
 
 
 cdef class Intersection(Shape):
@@ -99,6 +106,12 @@ cdef class Intersection(Shape):
 
     cpdef str toWriting(self)
 
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+
+    cpdef ListForWriting getListForWriting(self)
+
 cdef class Difference(Shape):
 
     cdef Shape first, second
@@ -109,15 +122,23 @@ cdef class Difference(Shape):
 
     cpdef str toWriting(self)
 
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+
+    cpdef ListForWriting getListForWriting(self)
+
 
 cdef class Primitives(Shape):
 
     cdef str sign, type
     cdef double axisX, axisY, axisZ, theta, phi, cosTheta, cosPhi, sinTheta, sinPhi
     cdef Point center
-    cdef str index
+
     cdef list identifier
     cdef tuple coord
+
+    cpdef ListOfPrimitives getListOfPrimitives(self)
 
     cdef translationRotation(self,Point)
 #    cpdef translationRotationToString(self)
@@ -157,6 +178,9 @@ cdef class Frisbee(Primitives):
 
     cpdef str toWriting(self)
 
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+
+
 cdef class Cylinder(Primitives):
 
     cdef str radial, height
@@ -174,8 +198,3 @@ cdef class Cylinder(Primitives):
     cpdef tuple toString(self)
 
     cpdef str toWriting(self)
-
-
-
-
-
