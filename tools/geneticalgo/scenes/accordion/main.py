@@ -50,7 +50,7 @@ class AccordionIndividual(algorithm.Individual):
 
 
 def getShapeFromInd(ind):
-    return accordion.accordionFreeDimension(ind.height, ind.radius, ind.thickness, ind.listCavities)
+    return ind.accordionFreeDimension(ind.height, ind.radius, ind.thickness, ind.listCavities)
 
 
 #def copyInd (individual):
@@ -72,7 +72,7 @@ def mutation_axisX(ind):
     index=random.randint(0,length-1)
     axisX=ind.listCavities[index][2]
     epsilon=random.uniform(-0.5,0.5)
-    axisX=max(4.0, axisX+epsilon)
+    axisX=max((4.0/3.0)*ind.radius), axisX+epsilon)
     ind.listCavities[index][2]=axisX
 
 def mutation_axisY(ind):
@@ -84,7 +84,7 @@ def mutation_axisY(ind):
     index=random.randint(0,length-1)
     axisY=ind.listCavities[index][3]
     epsilon=random.uniform(-0.5,0.5)
-    axisY=max(0.5, axisY+epsilon)
+    axisY=max(ind.thickness, axisY+epsilon)
     ind.listCavities[index][3]=axisY
 
 
@@ -96,7 +96,7 @@ def mutation_axisZ(ind):
     index=random.randint(1,length-1)
     axisZ=ind.listCavities[index][4]
     epsilon=random.uniform(-0.2,0.2)
-    axisZ=max(0.5,min(1.5, axisZ+epsilon))
+    axisZ=max(ind.thickness,min((heightTube-0.5)/(2*number_of_cavities), axisZ+epsilon))
     ind.listCavities[index][4]=axisZ
 
 
@@ -184,16 +184,16 @@ def generateIndividual(aType):
             height=0.5+i*(heightTube-0.5)/float(number_of_cavities)
 
             if generate_random=="ON":
-                axisX=random.uniform(4.0,7.0)
-                axisY=random.uniform(1.0,7.0)
-                axisZ=(heightTube-0.5)/(2*number_of_cavities)
+                axisX=random.uniform((4.0/3.0)*individual.radius,(7.0/3.0)*individual.radius)
+                axisY=random.uniform(2.0*individual.thickness,(7.0/3.0)*individual.radius)
+                axisZ=(individual.height-0.5)/float((2*number_of_cavities))
             else:
-                axisX=5.0
-                axisY=5.0
-                axisZ=(heightTube-0.5)/(2*number_of_cavities)
+                axisX=(5.0/3.0)*individual.radius
+                axisY=(5.0/3.0)*individual.radius
+                axisZ=(heightTube-0.5)/float((2*number_of_cavities))
 
             cavity=[height,aType,axisX,axisY,axisZ]
-            accordion.addCavity(individual, cavity)
+            individual.addCavity(cavity)
 
         individual.level=random.uniform(0.0,10.0)
 
@@ -272,5 +272,3 @@ def evaluationFunc(pop):
 def selectionFunc(pop):
     print("selectFunc "+str(pop))
     return pop
-
-
