@@ -15,8 +15,25 @@ import operator
 import copy
 import html
 import os
+import datetime
 import sofalauncher.launcher
 from html import HTML
+
+import contextlib
+import os
+
+@contextlib.contextmanager
+def inDirectory(path):
+    """A context manager which changes the working directory to the given
+    path, and then changes it back to its previous value on exit.
+    """
+    prev_cwd = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(prev_cwd)
+
 
 ## Indiviual
 class Individual(object):
@@ -95,41 +112,41 @@ class GeneticAlgorithm(object):
             if not os.path.exists(wdir):
                 os.makedirs(wdir)
 
-        os.chdir(wdir)
+        with inDirectory(wdir):
 
-        ## Create the intial population.
-        currgen =  generateFunc(0, self.initialPopulationSize)
+            ## Create the intial population.
+            currgen =  generateFunc(0, self.initialPopulationSize)
 
-        ## Evaluate the score for each individual in the population.
-        currscore = evalFunc(currgen)
-        print("=================== GENERATION "+str(0)+"==================")
-        print("size: "+str(len(currgen)))
-        print("score: "+str(currscore))
-
-        self.saveHTMLGeneration(currgen, currscore, wdir)
-        for k in range(1, numGen):
-            print("=================== GENERATION "+str(k)+"==================")
-            ## Pour chaque génération.
-            nextgen = crossFunc(currgen, self.crossSize)
-            nextgen = mutationFunc(nextgen, self.mutationSize1, self.mutationSize2)
-
-            ### Gives score to each individual in the population
-            evalFunc(nextgen)
-
-            ### Replace the current generation with a new one.
-            currgen = selectionFunc( (nextgen+currgen) )
-            currscore = 0
-            for ind in currgen:
-                if currscore < ind.level:
-                    currscore = ind.level
-
+            ## Evaluate the score for each individual in the population.
+            currscore = evalFunc(currgen)
+            print("=================== GENERATION "+str(0)+"==================")
             print("size: "+str(len(currgen)))
             print("score: "+str(currscore))
 
-            currgen.id = k
             self.saveHTMLGeneration(currgen, currscore, wdir)
+            for k in range(1, numGen):
+                print("=================== GENERATION "+str(k)+"==================")
+                ## Pour chaque génération.
+                nextgen = crossFunc(currgen, self.crossSize)
+                nextgen = mutationFunc(nextgen, self.mutationSize1, self.mutationSize2)
 
-        self.saveHTMLIndex(numGen, wdir)
-        print("Experiment terminated.")
-        print("Results can be found in "+wdir+"/index.html")
+                ### Gives score to each individual in the population
+                evalFunc(nextgen)
+
+                ### Replace the current generation with a new one.
+                currgen = selectionFunc( (nextgen+currgen) )
+                currscore = 0
+                for ind in currgen:
+                    if currscore < ind.level:
+                        currscore = ind.level
+
+                print("size: "+str(len(currgen)))
+                print("score: "+str(currscore))
+
+                currgen.id = k
+                self.saveHTMLGeneration(currgen, currscore, wdir)
+
+            self.saveHTMLIndex(numGen, wdir)
+            print("Experiment terminated.")
+            print("Results can be found in "+wdir+"/index.html")
 

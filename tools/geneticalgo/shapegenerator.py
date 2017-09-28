@@ -11,6 +11,7 @@
 ##
 ####################################################################################################
 import sys, os
+import webbrowser
 
 ## Récupère le chemin absolu du réportoire courant et l'ajoute aux chemin où python cherche
 ## les modules
@@ -23,6 +24,14 @@ sys.path.append( os.path.dirname(os.getcwd()) )
 from geneticalgo import algorithm
 from  scenes.accordion import main
 
+
+workdir="/tmp/sg"
+if len(sys.argv) !=2:
+    print("USAGE: ./shapegenerator.py <workdir>")
+    print("missing workdir, using: "+workdir)
+else:
+    workdir = sys.argv[1]
+print("Saving resulst in "+workdir)
 algo = algorithm.GeneticAlgorithm(4, 2, 2, 2)
 algo.start(4,
            main.generateFunc,
@@ -30,5 +39,10 @@ algo.start(4,
            main.crossFunc,
            main.evaluationFunc,
            main.selectionFunc,
-           "tempdir"
+           workdir
            )
+
+
+url = "file://"+os.path.abspath(workdir)+"/index.html"
+print(url)
+webbrowser.open_new(url)
