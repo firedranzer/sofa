@@ -50,7 +50,7 @@ class AccordionIndividual(algorithm.Individual):
 
 
 def getShapeFromInd(ind):
-    return ind.accordionFreeDimension(ind.height, ind.radius, ind.thickness, ind.listCavities)
+    return accordion.accordionFreeDimension(ind, ind.height, ind.radius, ind.thickness, ind.listCavities)
 
 
 #def copyInd (individual):
@@ -72,7 +72,7 @@ def mutation_axisX(ind):
     index=random.randint(0,length-1)
     axisX=ind.listCavities[index][2]
     epsilon=random.uniform(-0.5,0.5)
-    axisX=max((4.0/3.0)*ind.radius), axisX+epsilon)
+    axisX=max( (4.0/3.0)*ind.radius, axisX+epsilon )
     ind.listCavities[index][2]=axisX
 
 def mutation_axisY(ind):
@@ -193,7 +193,8 @@ def generateIndividual(aType):
                 axisZ=(heightTube-0.5)/float((2*number_of_cavities))
 
             cavity=[height,aType,axisX,axisY,axisZ]
-            individual.addCavity(cavity)
+            accordion.addCavity(individual,cavity)
+
 
         individual.level=random.uniform(0.0,10.0)
 

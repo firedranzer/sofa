@@ -49,14 +49,11 @@ def accordionFreeDimension(self, height, radius, thickness, listCavities):
      The shape is given has the difference between ShapePlus and ShapeMinus
     """
 
-    self.create(height, radius, thickness)
-
-    for cavity in listCavity:
-
-        self.addCavity(cavity)
+    create(self, height, radius, thickness)
+    for cavity in self.listCavities:
+        addCavity(self, cavity)
 
     shapePlus=primitives.Cylinder("+",self.radius,self.radius,self.height/2.0,0.0,0.0,primitives.Point(0.0,0.0,self.height/2.0))
-
     shapeMinus=primitives.Cylinder("+",self.radius-self.thickness,self.radius-self.thickness,self.height/2.0-self.thickness,0.0,0.0,primitives.Point(0.0,0.0,self.height/2.0))
 
     for cavity in self.listCavities:
