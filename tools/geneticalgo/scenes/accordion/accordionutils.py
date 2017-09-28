@@ -50,7 +50,7 @@ def accordionFreeDimension(self, height, radius, thickness, listCavities):
     """
 
     create(self, height, radius, thickness)
-    for cavity in self.listCavities:
+    for cavity in listCavities:
         addCavity(self, cavity)
 
     shapePlus=primitives.Cylinder("+",self.radius,self.radius,self.height/2.0,0.0,0.0,primitives.Point(0.0,0.0,self.height/2.0))

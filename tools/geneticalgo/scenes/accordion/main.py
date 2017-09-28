@@ -151,6 +151,8 @@ def crossing_ind(individual1, individual2):
     ind1=copy.deepcopy(individual1)
     ind2=copy.deepcopy(individual2)
 
+    print len(individual1.listCavities)
+    print len(ind1.listCavities)
     index=random.randint(0,number_of_cavities-1)
 
     temp=ind1.listCavities[index]
