@@ -76,11 +76,6 @@ void ImplicitFieldShaderVisualization::init()
     shader->SetFragmentShaderFileName(d_fragFilename.getFullPath());
     m_datatracker.trackData(*l_field.get()->findData("state"));
 
-
-    std::ofstream myfile;
-    myfile.open (d_fragFilename.getFullPath());
-    myfile << generateFragmentShader();
-    myfile.close();
 }
 
 void ImplicitFieldShaderVisualization::reinit()
@@ -105,6 +100,19 @@ void ImplicitFieldShaderVisualization::stop()
         glClampColorARB(GL_CLAMP_VERTEX_COLOR, GL_TRUE);
         shader->TurnOff();
     }
+}
+
+void ImplicitFieldShaderVisualization::shaderGenerationCodeHasChanged()
+{
+    std::ofstream myfile;
+    myfile.open (d_fragFilename.getFullPath());
+    myfile << generateFragmentShader();
+    myfile.close();
+
+    myfile;
+    myfile.open (d_vertFilename.getFullPath());
+    myfile << generateVertexShader();
+    myfile.close();
 }
 
 void ImplicitFieldShaderVisualization::start()
@@ -229,7 +237,7 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
 
     std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
     std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("eval");
-    int i = 0;
+
     if(itFind != glslMap.end())
     {
 
@@ -238,18 +246,17 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
         GLSLCodeFragment data = *it;
         implicitFunction.clear();
         implicitFunction.append(
-                    "    x = pos.x - evalPosition" + std::to_string(i) + ".x;\n"
-                    "    y = pos.y - evalPosition" + std::to_string(i) + ".y;\n"
-                    "    z = pos.z - evalPosition" + std::to_string(i) + ".z;\n"
+                    "    x = pos.x - evalPosition" + data.m_dataname + ".x;\n"
+                    "    y = pos.y - evalPosition" + data.m_dataname + ".y;\n"
+                    "    z = pos.z - evalPosition" + data.m_dataname + ".z;\n"
                     );
         implicitFunction.append(
                     "    res = minVec4(\n"
                     "        vec4(sdPlane(pos), vec3(0.45, 0.45, 0.45)),\n"
                     );
 
-        implicitFunction.append("\t\tvec4(" + data.m_value + ", evalColor" + std::to_string(i) + ")\n");
+        implicitFunction.append("\t\tvec4(" + data.m_value + ", evalColor" + data.m_dataname + ")\n");
         implicitFunction.append("   );    \n");
-        i++;
     }
 
     tmp.append(
