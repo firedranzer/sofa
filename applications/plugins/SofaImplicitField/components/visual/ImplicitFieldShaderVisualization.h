@@ -29,6 +29,8 @@
 #include <iterator>
 #include <string>
 #include <regex>
+#include <stdlib.h>
+
 
 #include <sofa/core/ObjectFactory.h>
 using sofa::core::RegisterObject;

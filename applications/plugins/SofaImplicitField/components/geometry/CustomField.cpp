@@ -234,16 +234,37 @@ const std::map<std::string, std::vector<GLSLCodeFragment> > &CustomField::getGLS
     eval1.m_dataname = "anEval";
     eval1.m_name = "anEval";
     eval1.m_type = "anEval";
-    eval1.m_value = "vec2(sdSphere(pos-vec3( -.0, 0.75, 0.0), .5), 40.0)";
+    eval1.m_value = "sqrt(x*x+y*y+z*z) -1.0";
 
     GLSLCodeFragment var1;
     var1.m_dataname = "color";
     var1.m_name = "color";
     var1.m_type = "float";
-    var1.m_value = "70.0";
+    var1.m_value = "20.0";
+
+    GLSLCodeFragment var2;
+    var2.m_dataname = "blop";
+    var2.m_name = "blop";
+    var2.m_type = "vec2";
+    var2.m_value = "20.0 20.0";
+
+    GLSLCodeFragment var3;
+    var3.m_dataname = "evalColor0";
+    var3.m_name = "evalColor0";
+    var3.m_type = "vec3";
+    var3.m_value = "1.0 0.0 0.0";
+
+    GLSLCodeFragment var4;
+    var4.m_dataname = "evalPosition0";
+    var4.m_name = "evalPosition0";
+    var4.m_type = "vec3";
+    var4.m_value = "0.0 1.5 0.0";
 
     evalList.push_back(eval1);
     variableList.push_back(var1);
+    variableList.push_back(var2);
+    variableList.push_back(var3);
+    variableList.push_back(var4);
 
     m_glslcodes["eval"] = evalList;
     m_glslcodes["variable"] = variableList;

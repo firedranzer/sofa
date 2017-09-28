@@ -109,11 +109,6 @@ void ImplicitFieldShaderVisualization::stop()
 
 void ImplicitFieldShaderVisualization::start()
 {
-
-    std::cout << mouseX << " " << mouseY << std::endl;
-    std::cout << wheelDelta << std::endl;
-
-
     if(m_datatracker.isDirty())
     {
         std::ofstream myfile;
@@ -144,43 +139,41 @@ void ImplicitFieldShaderVisualization::start()
 //        /// TODO se mettre d'accord sur le contenu des maps :/
 
 
-//        std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
-//        std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("variable");
-//        if(itFind != glslMap.end())
-//        {
-//            std::vector<GLSLCodeFragment> uniforms = itFind->second;
-//            for( std::vector<GLSLCodeFragment>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
-//            {
-//                GLSLCodeFragment tmpGLSLCode = *it;
-//                std::string uniformType = tmpGLSLCode.m_type;
-//                std::string uniformName = tmpGLSLCode.m_name;
-//                std::string uniformValue = tmpGLSLCode.m_value;
+        std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
+        std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("variable");
+        if(itFind != glslMap.end())
+        {
+            std::vector<GLSLCodeFragment> uniforms = itFind->second;
+            for( std::vector<GLSLCodeFragment>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
+            {
+                GLSLCodeFragment tmpGLSLCode = *it;
+                std::string uniformType = tmpGLSLCode.m_type;
+                std::string uniformName = tmpGLSLCode.m_name;
+                std::string uniformValue = tmpGLSLCode.m_value;
 
-//                std::regex rgx("\\s+");
-//                std::sregex_token_iterator iter(uniformValue.begin(), uniformValue.end(), rgx, -1);
-//                std::sregex_token_iterator end;
+                std::regex rgx("\\s+");
+                std::sregex_token_iterator iter(uniformValue.begin(), uniformValue.end(), rgx, -1);
+                std::sregex_token_iterator end;
 
-//                std::cout << std::atof(std::string((*iter)).c_str()) << std::endl;
-
-//                if(uniformType.compare("float") == 0)
-//                    shader->SetFloat(shader->GetVariable(uniformName), std::atof(std::string((*iter)).c_str()));
-////                else if(uniformType.compare("float2") == 0)
-////                {
-////                    float[2] data;
-////                    data[0]= std::atof(std::string((*iter)).c_str());
-////                    data[1]= std::atof(std::string((++*iter)).c_str());
-////                    shader->SetFloat2(shader->GetVariable(uniformName), data[0], data[1]);
-////                }
-////                else if(uniformType.compare("float3") == 0)
-////                {
-////                    float[3] data;
-////                    data[0]= std::atof(std::string((*iter)).c_str());
-////                    data[1]= std::atof(std::string((++*iter)).c_str());
-////                    data[2]= std::atof(std::string((++*iter)).c_str());
-////                    shader->SetFloat3(shader->GetVariable(uniformName), data[0], data[1], data[2]);
-////                }
-//            }
-//        }
+                if(uniformType.compare("float") == 0)
+                    shader->SetFloat(shader->GetVariable(uniformName), std::atof(std::string((*iter)).c_str()));
+                else if(uniformType.compare("vec2") == 0)
+                {
+                    float data[2];
+                    data[0] = std::atof(std::string((*iter)).c_str());
+                    data[1] = std::atof(std::string((*++iter)).c_str());
+                    shader->SetFloat2(shader->GetVariable(uniformName), data[0], data[1]);
+                }
+                else if(uniformType.compare("vec3") == 0)
+                {
+                    float data[3];
+                    data[0] = std::atof(std::string((*iter)).c_str());
+                    data[1] = std::atof(std::string((*++iter)).c_str());
+                    data[2] = std::atof(std::string((*++iter)).c_str());
+                    shader->SetFloat3(shader->GetVariable(uniformName), data[0], data[1], data[2]);
+                }
+            }
+        }
 
         glClampColorARB(GL_CLAMP_VERTEX_COLOR, GL_TRUE);
         glEnable(GL_VERTEX_PROGRAM_TWO_SIDE);
@@ -226,17 +219,17 @@ std::string ImplicitFieldShaderVisualization::generateVertexShader()
 std::string ImplicitFieldShaderVisualization::implicitFunction()
 {
     std::string tmp;
-
-    std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
-    std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("eval");
     std::string implicitFunction;
     implicitFunction.append(
-                "    res = minVec2(\n"
-                "        vec2(sdPlane(pos), 1.0),\n"
-                "        vec2(sdSphere(pos-vec3( -.0, 0.75, 0.0), .5), 20.)\n"
+                "    res = minVec4(\n"
+                "        vec4(sdPlane(pos), vec3(0.45, 0.45, 0.45)),\n"
+                "        vec4(sdSphere(pos-vec3( -.0, 0.75, 0.0), .5), vec3(1.0, 1.0, 0.0))\n"
                 "   );    \n"
             ); /// Default value if eval is empty
 
+    std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
+    std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("eval");
+    int i = 0;
     if(itFind != glslMap.end())
     {
 
@@ -245,34 +238,45 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
         GLSLCodeFragment data = *it;
         implicitFunction.clear();
         implicitFunction.append(
-                    "    res = minVec2(\n"
-                    "        vec2(sdPlane(pos), 1.0),\n"
+                    "    x = pos.x - evalPosition" + std::to_string(i) + ".x;\n"
+                    "    y = pos.y - evalPosition" + std::to_string(i) + ".y;\n"
+                    "    z = pos.z - evalPosition" + std::to_string(i) + ".z;\n"
+                    );
+        implicitFunction.append(
+                    "    res = minVec4(\n"
+                    "        vec4(sdPlane(pos), vec3(0.45, 0.45, 0.45)),\n"
                     );
 
-        implicitFunction.append(data.m_value);
+        implicitFunction.append("\t\tvec4(" + data.m_value + ", evalColor" + std::to_string(i) + ")\n");
         implicitFunction.append("   );    \n");
+        i++;
     }
+
     tmp.append(
                 "float sdPlane( vec3 p )\n"
                 "{\n"
                 "   return p.y;\n"
                 "}\n"
-
+                "\n"
                 "float sdSphere( vec3 p, float s )\n"
                 "{\n"
                 "   return length(p)-s;\n"
                 "}\n"
-
-                "vec2 minVec2( vec2 d1, vec2 d2 )\n"
+                "\n"
+                "vec4 minVec4( vec4 d1, vec4 d2 )\n"
                 "{\n"
                 "    return (d1.x<d2.x) ? d1 : d2;\n"
                 "}\n"
+                "\n"
                 );
 
     tmp.append(
-                "vec2 map( in vec3 pos )\n"
+                "vec4 map( in vec3 pos )\n"
                 "{\n"
-                "   vec2 res;\n"
+                "   float x = pos.x;\n"
+                "   float y = pos.y;\n"
+                "   float z = pos.z;\n"
+                "   vec4 res;\n"
                 );
 
     tmp.append(implicitFunction);
@@ -281,6 +285,7 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
                 "   return res;\n"
                 "}\n"
                 );
+    tmp.append("\n");
 
     return tmp;
 }
@@ -298,6 +303,7 @@ std::string ImplicitFieldShaderVisualization::viewFunction()
                 "    return mat3( cu, cv, cw );\n"
                 "}\n"
                 );
+    tmp.append("\n");
     return tmp;
 }
 
@@ -316,6 +322,7 @@ std::string ImplicitFieldShaderVisualization::mainFragmenShaderFunction()
                 "    gl_FragColor = vec4( render( ro, rayDir ), 1.0 );\n"
                 "}\n"
                 );
+    tmp.append("\n");
     return tmp;
 }
 
@@ -336,7 +343,7 @@ std::string ImplicitFieldShaderVisualization::renderFunction()
                 "   }\n"
                 "   return clamp( res, 0.0, 1.0 );\n"
                 "}\n"
-
+                "\n"
                 "vec3 estimateNormal(vec3 p) {\n"
                 "    return normalize(vec3(\n"
                 "        map(vec3(p.x + EPSILON, p.y, p.z)).x - map(vec3(p.x - EPSILON, p.y, p.z)).x,\n"
@@ -344,19 +351,19 @@ std::string ImplicitFieldShaderVisualization::renderFunction()
                 "        map(vec3(p.x, p.y, p.z  + EPSILON)).x - map(vec3(p.x, p.y, p.z - EPSILON)).x\n"
                 "    ));\n"
                 "}\n"
-
+                "\n"
                 "vec3 render( in vec3 ro, in vec3 rd )\n"
                 "{\n"
                 "    vec3 col = vec3(1.0, 1.0, 1.0) + rd.y;\n"
-                "    vec2 res = castRay(ro,rd);\n"
+                "    vec4 res = castRay(ro,rd);\n"
                 "    float t = res.x;\n"
-                "    float m = res.y;\n"
+                "    vec3 m = res.yzw;\n"
 
                 "    vec3 pos = ro + t * rd;\n"
                 "    vec3 nor = estimateNormal( pos );\n"
                 "    vec3 ref = reflect( rd, nor );\n"
 
-                "    col = 0.45 + 0.35*sin( vec3(0.05,0.08,0.10)*(m-1.0) );\n"
+                "    col = m;\n"
 
                 "    vec3  lig = normalize( vec3(-0.4, 0.7, -0.6) );\n"
                 "    float amb = clamp( 0.5+0.5*nor.y, 0.0, 1.0 );\n"
@@ -377,6 +384,7 @@ std::string ImplicitFieldShaderVisualization::renderFunction()
                 "    return vec3( clamp(col,0.0,1.0) );\n"
                 "}\n"
                 );
+    tmp.append("\n");
     return tmp;
 }
 
@@ -384,20 +392,21 @@ std::string ImplicitFieldShaderVisualization::rayMarchingFunction()
 {
     std::string tmp;
     tmp.append(
-                "vec2 castRay( in vec3 ro, in vec3 rd )\n"
+                "vec4 castRay( in vec3 ro, in vec3 rd )\n"
                 "{\n"
                 "    float depth = MIN_DIST;\n"
-                "    float m = -1.0;\n"
+                "    vec3 m = vec3(-1.0, -1.0, -1.0);\n"
                 "    for( int i = 0; i < MAX_MARCHING_STEPS; i++ )\n"
                 "    {\n"
-                "        vec2 res = map( ro+rd*depth );\n"
+                "        vec4 res = map( ro+rd*depth );\n"
                 "        if( res.x < EPSILON || depth > MAX_DIST ) break;\n"
                 "        depth += res.x;\n"
-                "            m = res.y;\n"
+                "            m = res.yzw;\n"
                 "    }\n"
-                "    return vec2( depth, m );\n"
+                "    return vec4( depth, m );\n"
                 "}\n"
                 );
+    tmp.append("\n");
     return tmp;
 }
 
@@ -426,6 +435,7 @@ std::string ImplicitFieldShaderVisualization::uniformsAndConst()
             tmp.append("uniform " + tmpGLSLCode.m_type + " " + tmpGLSLCode.m_dataname + ";\n");
         }
     }
+    tmp.append("\n");
 
     return tmp;
 }
