@@ -42,19 +42,21 @@ def addCavity(self, cavity):
         self.listCavities.append(cavity)
 
 
-def accordionFreeDimension(height, radius, thickness, listCavities):
-
+def accordionFreeDimension(self, height, radius, thickness, listCavities):
 
     """
      The Cavities have to be given as [height,"type",axisX,axisY,axisZ]
      The shape is given has the difference between ShapePlus and ShapeMinus
     """
 
-    shapePlus=primitives.Cylinder("+",radius,radius,height/2.0,0.0,0.0,primitives.Point(0.0,0.0,height/2.0))
-
-    shapeMinus=primitives.Cylinder("+",radius-thickness,radius-thickness,height/2.0-thickness,0.0,0.0,primitives.Point(0.0,0.0,height/2.0))
-
+    create(self, height, radius, thickness)
     for cavity in listCavities:
+        addCavity(self, cavity)
+
+    shapePlus=primitives.Cylinder("+",self.radius,self.radius,self.height/2.0,0.0,0.0,primitives.Point(0.0,0.0,self.height/2.0))
+    shapeMinus=primitives.Cylinder("+",self.radius-self.thickness,self.radius-self.thickness,self.height/2.0-self.thickness,0.0,0.0,primitives.Point(0.0,0.0,self.height/2.0))
+
+    for cavity in self.listCavities:
 
         [height,type,axisX,axisY,axisZ]=cavity
 
@@ -117,6 +119,7 @@ def accordionRecoveringGiven(heightTube,radiusTube, thickness, typeCavities,
     return accordionFreeDimension(heightTube,radiusTube,thickness,listCavities)
 
 def accordionUniform(heightTube,radiusTube, thickness, typeCavities, numberCavities, axisX, axisY, Zrecovering):
+
     """
      There is a unique type of cavities, a unique axisX and axisY. The Cavities are uniformly dispatched
     """
