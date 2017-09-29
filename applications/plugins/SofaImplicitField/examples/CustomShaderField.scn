@@ -1,0 +1,6 @@
+<Node>
+	<RequiredPlugin name="SofaImplicitField" /> 
+	<CustomField name="field" function="customfield.evalField"/>
+        <OglModel fileMesh="mesh/floorFlat.obj" rotation="90"/>
+        <ImplicitFieldShaderVisualization field="@field"/>
+</Node>
