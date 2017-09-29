@@ -37,22 +37,23 @@ using sofa::core::RegisterObject;
 
 #include <sofa/core/visual/VisualModel.h>
 #include <sofa/core/visual/Shader.h>
+using sofa::core::visual::VisualParams;
+
 #include <sofa/helper/gl/GLSLShader.h>
+#include <sofa/helper/system/Locale.h>
 
 #include <sofa/core/objectmodel/Base.h>
 #include <sofa/core/objectmodel/Link.h>
-
-#include <SofaImplicitField/components/geometry/ScalarField.h>
-using  sofa::component::geometry::ScalarField;
-
+#include <sofa/core/objectmodel/Data.h>
 #include <sofa/core/objectmodel/MouseEvent.h>
+#include <sofa/core/objectmodel/DataFileName.h>
+using sofa::core::objectmodel::Data;
+using sofa::core::objectmodel::BaseData;
 using sofa::core::objectmodel::MouseEvent;
 
-#include <sofa/core/objectmodel/DataFileName.h>
-
-using sofa::core::visual::VisualParams;
-
+#include <SofaImplicitField/components/geometry/ScalarField.h>
 #include <SofaImplicitField/components/geometry/CustomField.h>
+using  sofa::component::geometry::ScalarField;
 using sofa::component::geometry::_customfield_::CustomField;
 using sofa::component::geometry::_customfield_::GLSLCodeFragment;
 
@@ -60,7 +61,6 @@ using sofa::component::geometry::_customfield_::GLSLCodeFragment;
 using sofa::core::DataEngine ;
 using sofa::core::DataTracker ;
 
-#include <sofa/helper/system/Locale.h>
 
 namespace sofa
 {
@@ -107,11 +107,14 @@ public:
 protected:
     int mouseX, mouseY;
     float wheelDelta;
+    bool changedFromDataField;
+    std::vector<DataTracker*> m_datatrackerList;
     sofa::helper::gl::GLSLShader* shader;
 
     std::string generateFragmentShader();
     std::string generateVertexShader();
-
+    BaseData* fetchData(std::string argumentName);
+    void initComponentShaderValue();
 
     std::string uniformsAndConst();
     std::string implicitFunction();
@@ -122,7 +125,6 @@ protected:
 
 private:
     DataTracker m_datatracker ;
-
 
 };
 

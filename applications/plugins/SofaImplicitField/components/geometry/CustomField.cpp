@@ -285,6 +285,8 @@ const std::map<std::string, std::vector<GLSLCodeFragment> > &CustomField::getGLS
     var6.m_value = "2.0 1.0 0.0";
 
     evalList.push_back(eval1);
+    evalList.push_back(eval2);
+    evalList.push_back(eval3);
 
     variableList.push_back(var1);
     variableList.push_back(var2);

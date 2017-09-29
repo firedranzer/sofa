@@ -40,6 +40,7 @@ ImplicitFieldShaderVisualization::ImplicitFieldShaderVisualization() :
 {
     f_listening.setValue(true);
     wheelDelta = 0.5;
+    changedFromDataField = false;
 }
 
 ImplicitFieldShaderVisualization::~ImplicitFieldShaderVisualization()
@@ -90,10 +91,24 @@ void ImplicitFieldShaderVisualization::stop()
         glClampColorARB(GL_CLAMP_VERTEX_COLOR, GL_TRUE);
         shader->TurnOff();
     }
+    for(std::vector<DataTracker*>::iterator it = m_datatrackerList.begin(); it != m_datatrackerList.end(); it++)
+    {
+
+        DataTracker* tmp = *it;
+        if(tmp->isDirty())
+        {
+            changedFromDataField = true;
+            tmp->clean();
+            shaderGenerationCodeHasChanged();
+            return;
+        }
+    }
 }
 
 void ImplicitFieldShaderVisualization::shaderGenerationCodeHasChanged()
 {
+    if (!changedFromDataField)
+        initComponentShaderValue();
     std::ofstream myfile;
     myfile.open (d_fragFilename.getFullPath());
     myfile << generateFragmentShader();
@@ -103,6 +118,26 @@ void ImplicitFieldShaderVisualization::shaderGenerationCodeHasChanged()
     myfile.open (d_vertFilename.getFullPath());
     myfile << generateVertexShader();
     myfile.close();
+}
+
+void ImplicitFieldShaderVisualization::initComponentShaderValue()
+{
+    std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
+    for(std::map<std::string, std::vector<GLSLCodeFragment>>::iterator it = glslMap.begin(); it != glslMap.end(); it++)
+    {
+        std::vector<GLSLCodeFragment> GLSLCodeFragments = it->second;
+        for( std::vector<GLSLCodeFragment>::iterator itGLSLCode = GLSLCodeFragments.begin(); itGLSLCode != GLSLCodeFragments.end(); itGLSLCode++)
+        {
+            GLSLCodeFragment tmpGLSLCode = *itGLSLCode;
+            std::string uniformName = tmpGLSLCode.m_name;
+            std::string uniformValue = tmpGLSLCode.m_value;
+            BaseData* data = fetchData(uniformName);
+            data->read(uniformValue);
+            DataTracker* tmp = new DataTracker();
+            tmp->trackData(*data);
+            m_datatrackerList.push_back(tmp);
+        }
+    }
 }
 
 void ImplicitFieldShaderVisualization::start()
@@ -132,13 +167,6 @@ void ImplicitFieldShaderVisualization::start()
         shader->SetFloat2(shader->GetVariable("mouse"), mouseX, mouseY);
         shader->SetFloat(shader->GetVariable("wheelDelta"), wheelDelta);
 
-
-        //        Simulation* simu = sofa::simulation::getSimulation();
-        //        simu->findData("");
-
-        //        /// TODO se mettre d'accord sur le contenu des maps :/
-
-
         std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
         std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("variable");
         if(itFind != glslMap.end())
@@ -150,6 +178,9 @@ void ImplicitFieldShaderVisualization::start()
                 std::string uniformType = tmpGLSLCode.m_type;
                 std::string uniformName = tmpGLSLCode.m_name;
                 std::string uniformValue = tmpGLSLCode.m_value;
+
+                BaseData* data = fetchData(uniformName);
+                uniformValue = data->getValueString();
 
                 std::regex rgx("\\s+");
                 std::sregex_token_iterator iter(uniformValue.begin(), uniformValue.end(), rgx, -1);
@@ -178,6 +209,29 @@ void ImplicitFieldShaderVisualization::start()
         glClampColorARB(GL_CLAMP_VERTEX_COLOR, GL_TRUE);
         glEnable(GL_VERTEX_PROGRAM_TWO_SIDE);
     }
+}
+
+BaseData* ImplicitFieldShaderVisualization::fetchData(std::string argumentName)
+{
+    MapData dataMap = getDataAliases();
+    MapData::const_iterator itData = dataMap.find(argumentName);
+    BaseData* data;
+
+    if (itData == dataMap.end())
+    {
+        data = new sofa::core::objectmodel::Data<std::string>();
+        if (data == nullptr)
+            msg_warning() << " Something went wrong while creating data";
+        else
+        {
+            data->setName(argumentName);
+            data->setHelp("Auto generated help from ImplicitFieldShaderVisualization");
+            addData(data, argumentName);
+            msg_info(getName()) << " data field named : " << argumentName << " has been created";
+        }
+    } else
+        data = itData->second;
+    return data;
 }
 
 bool ImplicitFieldShaderVisualization::isActive()
@@ -236,22 +290,32 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
         std::vector<GLSLCodeFragment> evals = itFind->second;
         for( std::vector<GLSLCodeFragment>::iterator it = evals.begin(); it != evals.end(); it++)
         {
-            std::vector<GLSLCodeFragment> uniforms = itFind->second;
-            GLSLCodeFragment data = *it;
+            GLSLCodeFragment shaderCode = *it;
+            std::string name = shaderCode.m_name;
+            std::string dataName = shaderCode.m_dataname;
+            std::string value = shaderCode.m_value;
+
+            if (changedFromDataField)
+            {
+                BaseData* data = fetchData(name);
+                value = data->getValueString();
+            }
             implicitFunction.append(
-                        "    x = pos.x - evalPosition" + data.m_dataname + ".x;\n"
-                                                                           "    y = pos.y - evalPosition" + data.m_dataname + ".y;\n"
-                                                                                                                              "    z = pos.z - evalPosition" + data.m_dataname + ".z;\n"
+                        "    x = pos.x - evalPosition" + dataName + ".x;\n"
+                        "    y = pos.y - evalPosition" + dataName + ".y;\n"
+                        "    z = pos.z - evalPosition" + dataName + ".z;\n"
                         );
             implicitFunction.append(
                         "    res = minVec4(\n"
                         "        res,\n"
                         );
 
-            implicitFunction.append("\t\tvec4(" + data.m_value + ", evalColor" + data.m_dataname + ")\n");
+            implicitFunction.append("\t\tvec4(" + value + ", evalColor" + dataName + ")\n");
             implicitFunction.append("   );    \n");
         }
     }
+
+    changedFromDataField = false;
 
     tmp.append(
                 "float sdPlane( vec3 p )\n"
