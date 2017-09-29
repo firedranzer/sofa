@@ -1,0 +1,171 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+####################################################################################################
+## Copyright 2017 INRIA
+##
+## This file is part of the ShapeGenerator project.
+##
+## Contributors:
+##     - thomas.morzadec@inria.fr
+##
+####################################################################################################
+
+
+
+cdef int i
+
+cpdef str generateNewSubIndex()
+
+cpdef void clearOut()
+
+cdef class ListOfLitteralExpressions(object):
+    cdef public list listA
+    cdef public list listB
+
+    cdef public list listgradientXTemp
+    cdef public listgradientYTemp
+    cdef public listSqrt
+
+
+    cpdef ListOfLitteralExpressions plus(self, ListOfLitteralExpressions)
+
+cdef class ListOfPrimitives(object):
+
+    cdef public listPrimitives
+
+    cpdef ListOfPrimitives plus(self, ListOfPrimitives)
+
+cdef class ListForWriting(object):
+
+    cdef public listWritingA
+    cdef public listWritingB
+
+    cpdef ListForWriting plus(self, ListForWriting)
+
+
+cdef class Point2D(object):
+
+    cdef double x, y
+
+    cdef display(self)
+
+cdef Point2D translationRotation(double, double, Point2D, Point2D)
+
+cdef class Shape2D(object):
+
+    cdef str index, subIndex
+
+    cpdef double eval(self, Point2D)
+
+    cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
+
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+
+
+    cpdef ListForWriting getListForWriting(self)
+
+
+cdef class Union(Shape2D):
+
+    cdef Shape2D first, second
+
+    cpdef double eval(self,Point2D point)
+
+    cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
+
+
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+    cpdef ListForWriting getListForWriting(self)
+
+
+
+cdef class Intersection(Shape2D):
+
+    cdef Shape2D first, second
+
+    cpdef double eval(self,Point2D point)
+
+    cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
+
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+    cpdef ListForWriting getListForWriting(self)
+
+
+
+cdef class Difference(Shape2D):
+
+    cdef Shape2D first, second
+
+    cpdef double eval(self,Point2D point)
+
+    cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
+
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+    cpdef ListForWriting getListForWriting(self)
+
+
+
+cdef class Primitives2D(Shape2D):
+
+    cdef str type
+    cdef tuple identifier
+
+cpdef double eval(self,Point2D point)
+
+cpdef tuple toString(self)
+
+cpdef str toWriting(self)
+
+cpdef ListOfPrimitives getListOfPrimitives(self)
+cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+cpdef ListForWriting getListForWriting(self)
+
+
+cdef class Ellipse(Primitives2D):
+
+    cdef double axisX, axisY
+
+    cpdef double eval(self,Point2D point)
+
+    cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
+
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+    cpdef ListForWriting getListForWriting(self)
+
+
+cdef class HalfPlaneGivenByAnOrientedCoupleOfPoints(Primitives2D):
+
+    cdef Point2D first, second
+
+
+
+    cpdef double eval(self,Point2D point)
+
+    cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
+
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+    cpdef ListForWriting getListForWriting(self)
+
+
+cpdef list createPolygoalChain(list)
+
+cpdef Shape2D closedPolygonalChain(list, str)
