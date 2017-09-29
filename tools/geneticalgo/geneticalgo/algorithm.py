@@ -39,11 +39,21 @@ def inDirectory(path):
 class Individual(object):
     def __init__(self):
         self.level = None
+        self.id = None
+
+def key_level(ind):
+    return ind.level
+
+def key_index(ind):
+    return ind.id
 
 class Population(object):
     def __init__(self):
         self.id = 0
         self.pop = []
+
+    def key_pop(self):
+        return self.id
 
     def __getitem__(self,i):
         return self.pop[i]
@@ -65,14 +75,19 @@ class Population(object):
         p.pop = self.pop + right.pop
         return p
 
+    def sortAccordingToLevel(self):
+
+        self.pop.sort(key=key_level)
+
+    def sortAccordingToIndex(self):
+
+        self.pop.sort(key=key_index)
+
+
 class GeneticAlgorithm(object):
-    def __init__(self,initialSize=9, crossSize=9,
-                      mutationSize1=27, mutationSize2=10):
+    def __init__(self, params):
         self.populations = []
-        self.initialPopulationSize = initialSize
-        self.crossSize = crossSize
-        self.mutationSize1 = mutationSize1
-        self.mutationSize2 = mutationSize2
+        self.params = params
 
     def saveHTMLGeneration(self, gen, score, wdir):
         if wdir == None:
@@ -115,7 +130,7 @@ class GeneticAlgorithm(object):
         with inDirectory(wdir):
 
             ## Create the intial population.
-            currgen =  generateFunc(0, self.initialPopulationSize)
+            currgen =  generateFunc(0, self.params)
 
             ## Evaluate the score for each individual in the population.
             currscore = evalFunc(currgen)
@@ -127,14 +142,14 @@ class GeneticAlgorithm(object):
             for k in range(1, numGen):
                 print("=================== GENERATION "+str(k)+"==================")
                 ## Pour chaque génération.
-                nextgen = crossFunc(currgen, self.crossSize)
-                nextgen = mutationFunc(nextgen, self.mutationSize1, self.mutationSize2)
+                nextgen = crossFunc(currgen,self.params)
+                nextgen = mutationFunc(nextgen, self.params)
 
                 ### Gives score to each individual in the population
                 evalFunc(nextgen)
 
                 ### Replace the current generation with a new one.
-                currgen = selectionFunc( (nextgen+currgen) )
+                currgen = selectionFunc( (nextgen+currgen), self.params )
                 currscore = 0
                 for ind in currgen:
                     if currscore < ind.level:

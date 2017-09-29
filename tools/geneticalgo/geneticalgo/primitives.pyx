@@ -596,7 +596,7 @@ cdef class Frisbee(Primitives):
 
         (dyX,dyY,dyZ)=("dyX"+self.index,"dyY"+self.index,"dyZ"+self.index)#self.gradYtranslationRotationToString()
 
-        gradY=dyX+"*("+x+"/sqrt"+self.index+")"\
+        gradY=dyX+"*("+x+"/list"+self.index+")"\
               +"+"+dyY+"*("+y+"/sqrt"+self.index+")"\
               +"+"+dyZ+"*"+"sign("+z+")/axis"+self.index+"Z"
 
@@ -624,7 +624,8 @@ cdef class Frisbee(Primitives):
 
         (x,y,z)=("x"+self.index,"y"+self.index,"z"+self.index)
         sqrtTemp="sqrt(("+x+"/axis"+self.index+"X)"+"*"+"("+x+"/axis"+self.index+"X)"+"+"+"("+y+"/axis"+self.index+"Y)"+"*"+"("+y+"/axis"+self.index+"Y)"+")"
-        listOfLitteralExpressions.listSqrt.append("sqrt"+self.index+"="+sqrtTemp+"\n\n")
+        print "SqrtTemp="+sqrtTemp
+        listOfLitteralExpressions.listSqrt.append("sqrt"+self.index+"="+sqrtTemp)
 
         return listOfLitteralExpressions
 

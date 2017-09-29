@@ -28,6 +28,7 @@ def getNextId():
 
 
 class AccordionIndividual(algorithm.Individual):
+
     def __init__(self, height, radius, thickness):
         self.level=None
         self.id = getNextId()
@@ -48,6 +49,12 @@ class AccordionIndividual(algorithm.Individual):
                      +"axisZ="+str(axisZ)+"\n\n"
         return temp
 
+
+def newIndividualFrom(ind):
+    newInd=AccordionIndividual(ind.height, ind.radius, ind.thickness)
+    newInd.listCavities=copy.deepcopy(ind.listCavities)
+
+    return newInd
 
 def getShapeFromInd(ind):
     return accordion.accordionFreeDimension(ind, ind.height, ind.radius, ind.thickness, ind.listCavities)
@@ -130,12 +137,19 @@ def mutation(ind):
         mutation_type(ind)
 
 
-def mutationFunc(pop, number_of_mutated_ind, number_of_mutation_per_ind):
+def mutationFunc(pop, params):
+
+    number_of_mutated_ind=params["nbIndMutated"]
+    number_of_mutation_per_ind=params["nbMutationsPerInd"]
+
+    if not (isinstance(number_of_mutated_ind, int) and isinstance(number_of_mutation_per_ind, int)):
+        raise ValueError, "nbIndMutated and nbMutationsPerInd are not given or are not int"
+
     length_temp=len(pop)
 
     for i in range(number_of_mutated_ind):
         j=random.randint(0,length_temp-1)
-        ind=copy.deepcopy(pop[j])
+        ind=newIndividualFrom(pop[j])
 
         for k in range(number_of_mutation_per_ind):
             mutation(ind)
@@ -148,12 +162,16 @@ def mutationFunc(pop, number_of_mutated_ind, number_of_mutation_per_ind):
 ###CROSSING
 ###
 def crossing_ind(individual1, individual2):
-    ind1=copy.deepcopy(individual1)
-    ind2=copy.deepcopy(individual2)
 
-    print len(individual1.listCavities)
-    print len(ind1.listCavities)
-    index=random.randint(0,number_of_cavities-1)
+    length1=len(individual1.listCavities)
+
+    if length1!=len(individual2.listCavities):
+
+        raise ValueError, "they have not the same number of cavities"
+
+    ind1=newIndividualFrom(individual1)
+    ind2=newIndividualFrom(individual2)
+    index=random.randint(0,length1-1)
 
     temp=ind1.listCavities[index]
     ind1.listCavities[index]=ind2.listCavities[index]
@@ -162,7 +180,12 @@ def crossing_ind(individual1, individual2):
     return (ind1, ind2)
 
 
-def crossFunc(pop, number_of_crossing):
+def crossFunc(pop, params):
+
+    number_of_crossing=params["crossTx"]
+
+    if not isinstance(number_of_crossing, int):
+        raise ValueError, "crossTx is not given or is not an int"
     print("crossFunc "+str(pop))
 
     length_temp=len(pop)
@@ -203,7 +226,8 @@ def generateIndividual(aType):
         return individual
 
 
-def generateFunc(numgen, nbInd):
+def generateFunc(numgen, params):
+    nbInd = params["nbInd"]
     pop = algorithm.Population()
 
     for i in range(nbInd):
@@ -272,6 +296,14 @@ def evaluationFunc(pop):
 ####################################################################################################
 ### Select
 ###
-def selectionFunc(pop):
-    print("selectFunc "+str(pop))
+def selectionFunc(pop, params):
+
+    nbInd=params["nbInd"]
+
+    if not isinstance(nbInd, int):
+        raise ValueError, "nbInd is not given or not an int"
+    pop.sortAccordingToLevel()
+    pop.deleteFrom(params["nbInd"])
+    pop.sortAccordingToIndex()
+
     return pop

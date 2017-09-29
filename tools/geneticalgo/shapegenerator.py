@@ -32,7 +32,10 @@ if len(sys.argv) !=2:
 else:
     workdir = sys.argv[1]
 print("Saving resulst in "+workdir)
-algo = algorithm.GeneticAlgorithm(4, 2, 2, 2)
+algo = algorithm.GeneticAlgorithm({"nbInd":4,
+                                   "crossTx":2,
+                                   "nbIndMutated":4,
+                                   "nbMutationsPerInd":4})
 algo.start(4,
            main.generateFunc,
            main.mutationFunc,

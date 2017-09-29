@@ -25,6 +25,10 @@ def create(self, height, radius, thickness):
         self.thickness=thickness
         self.listCavities=[]
 
+def key_funcCavity(cavity):
+
+    return cavity[0]
+
 def addCavity(self, cavity):
         """
         The cavity as to be given as [height,"type",axisX,axisY,axisZ]
@@ -40,6 +44,7 @@ def addCavity(self, cavity):
 
 
         self.listCavities.append(cavity)
+        self.listCavities.sort(key=key_funcCavity)
 
 
 def accordionFreeDimension(self, height, radius, thickness, listCavities):
