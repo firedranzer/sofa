@@ -21,8 +21,8 @@ set(HEADER_FILES
     components/mapping/ImplicitSurfaceMapping.h
     components/mapping/ImplicitSurfaceMapping.inl
     components/visual/PointCloudImplicitFieldVisualization.h
-    #components/visual/ImplicitFieldShaderVisualization.h
-    #components/visual/ImplicitFieldShaderVisualization.inl
+    components/visual/ImplicitFieldShaderVisualization.h
+    components/visual/ImplicitFieldShaderVisualization.inl
 )
 
 set(SOURCE_FILES
@@ -37,7 +37,7 @@ set(SOURCE_FILES
     components/geometry/SphericalField.cpp
     components/mapping/ImplicitSurfaceMapping.cpp
     components/visual/PointCloudImplicitFieldVisualization.cpp
-    #components/visual/ImplicitFieldShaderVisualization.cpp
+    components/visual/ImplicitFieldShaderVisualization.cpp
 
 )
 
@@ -59,6 +59,7 @@ set(EXTRA_FILES
     README.md
     examples/README.md
     examples/CustomField.scn
+    examples/CustomShaderField.scn
     examples/customfield.py
     examples/cython/CustomField.scn
     examples/cython/customfield.py
