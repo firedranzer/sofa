@@ -10,6 +10,14 @@
 ##
 ####################################################################################################
 
+# distutils: language=c++
+# cython: profile=True
+
+import numpy
+import math
+from libc.math cimport sin, cos, acos, exp, sqrt, fabs, M_PI
+cimport numpy
+cimport cython
 
 
 cdef int i
@@ -19,6 +27,7 @@ cpdef str generateNewSubIndex()
 cpdef void clearOut()
 
 cdef class ListOfLitteralExpressions(object):
+
     cdef public list listA
     cdef public list listB
 
@@ -48,6 +57,16 @@ cdef class Point2D(object):
     cdef double x, y
 
     cdef display(self)
+
+cdef class Vector2D(object):
+
+       cdef Point2D first, second
+
+       cpdef double firstCoord(self)
+
+       cpdef double secondCoord(self)
+
+cpdef double Det(Vector2D u, Vector2D v)
 
 cdef Point2D translationRotation(double, double, Point2D, Point2D)
 
@@ -121,22 +140,7 @@ cdef class Difference(Shape2D):
 cdef class Primitives2D(Shape2D):
 
     cdef str type
-    cdef tuple identifier
-
-cpdef double eval(self,Point2D point)
-
-cpdef tuple toString(self)
-
-cpdef str toWriting(self)
-
-cpdef ListOfPrimitives getListOfPrimitives(self)
-cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
-cpdef ListForWriting getListForWriting(self)
-
-
-cdef class Ellipse(Primitives2D):
-
-    cdef double axisX, axisY
+    cdef list identifier
 
     cpdef double eval(self,Point2D point)
 
@@ -149,11 +153,31 @@ cdef class Ellipse(Primitives2D):
     cpdef ListForWriting getListForWriting(self)
 
 
-cdef class HalfPlaneGivenByAnOrientedCoupleOfPoints(Primitives2D):
-
-    cdef Point2D first, second
 
 
+
+cdef class Ellipse(Primitives2D):
+
+    cdef double axisX, axisY, theta, cosTheta, sinTheta
+    cdef Point2D center
+    cdef tuple coord
+
+
+    cpdef double eval(self,Point2D point)
+
+    cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
+
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+    cpdef ListForWriting getListForWriting(self)
+
+
+
+cdef class HalfPlaneGivenByAVector2D(Primitives2D):
+
+    cdef Vector2D vect
 
     cpdef double eval(self,Point2D point)
 
@@ -168,4 +192,4 @@ cdef class HalfPlaneGivenByAnOrientedCoupleOfPoints(Primitives2D):
 
 cpdef list createPolygoalChain(list)
 
-cpdef Shape2D closedPolygonalChain(list, str)
+cpdef Shape2D closedPolygonalChain(str, list)

@@ -13,6 +13,7 @@
 
 import os
 import primitives
+import primitives2D
 
 def getDefaultHeader():
     temp="""#!/usr/bin/env python
@@ -142,4 +143,53 @@ if __name__ == "__main__":
 
     ind=primitives.Difference(primitives.Intersection(primitives.Union(primitives.Union(primitives.Union(ellipsoid1,ellipsoid2), ellipsoid3), cylinder1), cylinder2), frisbee1)
 
-    writeInFile(ind,"essai.pyx")
+#    writeInFile(ind,"essai.pyx")
+
+
+
+
+import primitives2D
+
+
+
+
+square=primitives2D.closedPolygonalChain("0",[(0.0,0.0),(0.0,1.0),(1.0,1.0),(1.0,0.0)])
+
+print square.eval(primitives2D.Point2D(0.5,0.5))
+
+cube=primitives.ExtrusionOfShape2D(square,1.0, 0.0,0.0,primitives.Point(0.0,0.0,0.0))
+
+
+
+print ""+str(cube.eval(primitives.Point(0.5,0.5,0.5)))
+
+
+print ""+str(cube.eval(primitives.Point(1.5,0.5,0.5)))
+
+
+print ""+str(cube.eval(primitives.Point(1.0,0.5,0.5)))
+
+
+print ""+str(cube.eval(primitives.Point(0.7,0.7,0.2)))
+
+
+
+
+ellipse=primitives2D.Ellipse("0", 1.0,1.0)
+
+print ellipse.eval(primitives2D.Point2D(0.5,0.0))
+
+ellipsoid=primitives.ExtrusionOfShape2D(ellipse,1.0, 0.0,0.0,primitives.Point(0.0,0.0,0.0))
+
+print ellipsoid.eval(primitives.Point(0.5,0.0,0.5))
+
+print ""+str(ellipsoid.eval(primitives.Point(0.5,0.5,0.5)))
+
+
+print ""+str(ellipsoid.eval(primitives.Point(1.5,0.5,0.5)))
+
+
+print ""+str(ellipsoid.eval(primitives.Point(1.0,0.5,0.5)))
+
+
+print ""+str(ellipsoid.eval(primitives.Point(0.7,0.7,0.2)))

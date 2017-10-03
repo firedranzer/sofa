@@ -15,10 +15,12 @@
 
 import numpy
 import math
+import primitives2D
 from libc.math cimport sin, cos, acos, exp, sqrt, fabs, M_PI
 cimport numpy
 cimport cython
 cimport primitives
+cimport primitives2D
 
 cdef i=0
 
@@ -172,9 +174,15 @@ cdef class Point(object):
         self.y=y
         self.z=z
 
-    cdef display(self,):
+    cpdef display(self):
         print "("+str(self.x),str(self.y),str(self.z)+")"
         return
+
+    cdef primitives2D.Point2D projectTo2D(self):
+
+        cdef primitives2D.Point2D point2D=primitives2D.Point2D(self.x,self.y)
+
+        return point2D
 
 cdef class Shape(object):
 
@@ -200,6 +208,9 @@ cdef class Shape(object):
 
     cpdef ListForWriting getListForWriting(self):
         return self.getListForWriting()
+
+    def geometric_transformation(self, type, **kwargs):
+        self.geometric_transformation(type, kwargs)
 
 cdef class Union(Shape):
 
@@ -263,6 +274,10 @@ cdef class Union(Shape):
         listForWriting.listWritingB.append("WritingB"+self.index+"="+writing2)
 
         return listForWriting
+
+    def geometric_transformation(self, type, **kwargs):
+        self.first.geometric_transformation(type, kwargs)
+        self.second.geometric_transformation(type, kwargs)
 
 
 cdef class Intersection(Shape):
@@ -328,6 +343,10 @@ cdef class Intersection(Shape):
         return listForWriting
 
 
+    def geometric_transformation(self, type, **kwargs):
+        self.first.geometric_transformation(type, kwargs)
+        self.second.geometric_transformation(type, kwargs)
+
 cdef class Difference(Shape):
 
     def __init__(self, first, second):
@@ -392,10 +411,14 @@ cdef class Difference(Shape):
 
         return listForWriting
 
+    def geometric_transformation(self, type, **kwargs):
+        self.first.geometric_transformation(type, kwargs)
+        self.second.geometric_transformation(type, kwargs)
+
 
 cdef class Primitives(Shape):
 
-    def __init__(self, sign, axisX, axisY, axisZ, double theta, double phi, center):
+    def __init__(self, sign, axisX, axisY, axisZ, double theta, double phi, Point center):
         Shape.__init__(self)
         self.sign=sign
         self.axisX=axisX
@@ -429,8 +452,8 @@ cdef class Primitives(Shape):
 
         #        else:
 
-        x1="cosTheta"+self.index+"*(x-center"+self.index+"x)-sinTheta"+self.index+"*(y-center"+self.index+"y)"
-        y="sinTheta"+self.index+"*(x-center"+self.index+"x)+cosTheta"+self.index+"*(y-center"+self.index+"y)"
+        x1="cosTheta"+self.index+"*(x-center"+self.index+"x)+sinTheta"+self.index+"*(y-center"+self.index+"y)"
+        y="-sinTheta"+self.index+"*(x-center"+self.index+"x)+cosTheta"+self.index+"*(y-center"+self.index+"y)"
 
         #        if self.cosPhi==0.0:
 
@@ -444,8 +467,8 @@ cdef class Primitives(Shape):
 
         #        else:
 
-        x="cosPhi"+self.index+"*"+x1+"-sinPhi"+self.index+"*(z-center"+self.index+"z)"
-        z="sinPhi"+self.index+"*"+x1+"+cosPhi"+self.index+"*(z-center"+self.index+"z)"
+        x="cosPhi"+self.index+"*"+x1+"+sinPhi"+self.index+"*(z-center"+self.index+"z)"
+        z="-sinPhi"+self.index+"*"+x1+"+cosPhi"+self.index+"*(z-center"+self.index+"z)"
 
 #        listCoordPrimitives.append("x"+self.index+"="+x+"\n"+"y"+self.index+"="+y+"\n"+"z"+self.index+"="+z+"\n\n\n")
         #        print self.index+"      "+"("+x+","+y+","+z+")"
@@ -499,15 +522,55 @@ cdef class Primitives(Shape):
         cdef double y
         cdef double z
 
-        x=self.cosTheta*(point.x-self.center.x)-self.sinTheta*(point.y-self.center.y)
-        y=self.sinTheta*(point.x-self.center.x)+self.cosTheta*(point.y-self.center.y)
+        x=self.cosTheta*(point.x-self.center.x)+self.sinTheta*(point.y-self.center.y)
+        y=-self.sinTheta*(point.x-self.center.x)+self.cosTheta*(point.y-self.center.y)
 
-        x=self.cosPhi*point.x-self.sinPhi*(point.z-self.center.z)
-        z=self.sinPhi*point.x+self.cosPhi*(point.z-self.center.z)
+        x=self.cosPhi*point.x+self.sinPhi*(point.z-self.center.z)
+        z=-self.sinPhi*point.x+self.cosPhi*(point.z-self.center.z)
         point=Point(x,y,z)
         return point
 
+    def geometric_transformation(self, type, **kwargs):
 
+        if type=="translation":
+            (x,y,z)=kwargs.get("vect",None)
+            self.center.x+=x
+            self.center.y+=y
+            self.center.z+=z
+
+
+        elif type=="rotationAroundAxisZ":
+            centerRotation=kwargs.get("center", None)
+            theta=kwargs.get("theta", None)
+
+            x=centerRotation.x+(cos(theta)*(self.center.x-centerRotation.x)-sin(theta)*(self.center.y-centerRotation.y))
+            y=centerRotation.y+(sin(theta)*(self.center.x-centerRotation.x)+cos(theta)*(self.center.y-centerRotation.y))
+
+
+            self.center.x=x
+            self.center.y=y
+
+            self.theta+=theta
+
+
+        elif type=="rotationAroundXYPlane":
+
+            centerRotation=kwargs.get("center", None)
+            phi=kwargs.get("phi", None)
+
+            l=sqrt((self.center.x-centerRotation.x)**2+(self.center.y-centerRotation.y)**2)
+
+            cosTheta_temp=(self.center.x-centerRotation.x)/l
+            sinTheta_temp=(self.center.y-centerRotation.y)/l
+
+            X=cos(phi)*l-sin(phi)*(self.center.z-centerRotation.z)
+            z=sin(phi)*l+cos(phi)*(self.center.z-centerRotation.z)
+
+            self.center.x=centerRotation.x + X*cosTheta_temp
+            self.center.y=centerRotation.y + X*sinTheta_temp
+            self.center.z+=z
+
+            self.phi+=phi
 
 
 cdef class Ellipsoid(Primitives):
@@ -524,7 +587,7 @@ cdef class Ellipsoid(Primitives):
 
         point=self.translationRotation(point)
 
-        return (point.x/self.axisX)**2+(point.y/self.axisY)**2+(point.z/self.axisZ)**2-1
+        return (point.x/self.axisX)**2+(point.y/self.axisY)**2+(point.z/self.axisZ)**2-1.0
 
     cpdef tuple toString(self):
 
@@ -680,3 +743,132 @@ cdef class Cylinder(Primitives):
 
     cpdef str toWriting(self):
         return "Cylinder"+self.index
+
+
+cdef class ExtrusionOfShape2D(Shape):
+
+        def __init__(self, primitives2D.Shape2D shape2D, double heigth, double theta, double phi, Point center):
+            Shape.__init__(self)
+            self.shape2D=shape2D
+            self.heigth=heigth
+            self.theta=theta
+            self.phi=phi
+
+            self.cosTheta=cos(theta)
+            self.sinTheta=sin(theta)
+            self.cosPhi=cos(phi)
+            self.sinPhi=sin(phi)
+
+            self.center=center
+            self.type="extrusionOfShape2D"
+
+            identifier=[self.type, self.theta,self.phi,(self.center.x,self.center.y,self.center.z),self.index]
+            self.identifier=identifier
+
+
+            x1="cosTheta"+self.index+"*(x-center"+self.index+"x)-sinTheta"+self.index+"*(y-center"+self.index+"y)"
+            y="sinTheta"+self.index+"*(x-center"+self.index+"x)+cosTheta"+self.index+"*(y-center"+self.index+"y)"
+
+            x="cosPhi"+self.index+"*"+x1+"-sinPhi"+self.index+"*(z-center"+self.index+"z)"
+            z="sinPhi"+self.index+"*"+x1+"+cosPhi"+self.index+"*(z-center"+self.index+"z)"
+
+            self.coord=(x,y,z)
+
+
+        cpdef ListOfPrimitives getListOfPrimitives(self):
+
+            cdef ListOfPrimitives listOfPrimitives=ListOfPrimitives()
+
+            listOfPrimitives.listPrimitives.append(self.identifier)
+
+            (dxX,dxY,dxZ)=("cosPhi"+self.index+"*"+"cosTheta"+self.index, "sinTheta"+self.index,"sinPhi"+self.index+"*"+"cosTheta"+self.index)
+
+            listOfPrimitives.listgradientDxPrimitives.append("dxX"+self.index+"="+dxX+"\n"+"dxY"+self.index+"="+dxY+"\n"+"dxZ"+self.index+"="+dxZ+"\n\n\n")
+
+            (dyX,dyY,dyZ)=("(-cosPhi"+self.index+")*sinTheta"+self.index, "cosTheta"+self.index,"-sinPhi"+self.index+"*"+"sinTheta"+self.index)
+
+            listOfPrimitives.listgradientDyPrimitives.append("dyX"+self.index+"="+dyX+"\n"+"dyY"+self.index+"="+dyY+"\n"+"dyZ"+self.index+"="+dyZ+"\n\n\n")
+
+            (dzX,dzY,dzZ)=("sinPhi"+self.index, str(0.0),"cosPhi"+self.index)
+
+            listOfPrimitives.listgradientDzPrimitives.append("dzX"+self.index+"="+dzX+"\n"+"dzY"+self.index+"="+dzY+"\n"+"dzZ"+self.index+"="+dzZ+"\n\n\n")
+
+            return listOfPrimitives
+
+
+
+        cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self):
+
+            cdef ListOfLitteralExpressions listOfLitteralExpressions=ListOfLitteralExpressions()
+
+            return listOfLitteralExpressions
+
+        cpdef ListForWriting getListForWriting(self):
+
+            cdef ListForWriting listForWriting=ListForWriting()
+
+            return listForWriting
+
+        cdef translationRotation(self,Point point):
+
+            cdef double x
+            cdef double y
+            cdef double z
+
+            x=self.cosTheta*(point.x-self.center.x)-self.sinTheta*(point.y-self.center.y)
+            y=self.sinTheta*(point.x-self.center.x)+self.cosTheta*(point.y-self.center.y)
+
+            x=self.cosPhi*point.x-self.sinPhi*(point.z-self.center.z)
+            z=self.sinPhi*point.x+self.cosPhi*(point.z-self.center.z)
+            point=Point(x,y,z)
+            return point
+
+
+        cpdef double eval(self,Point point):
+
+            point=self.translationRotation(point)
+
+            return max(abs(point.z-self.heigth/2.0)-self.heigth/2.0,self.shape2D.eval(point.projectTo2D()))
+
+
+        def geometric_transformation(self, type, **kwargs):
+
+            if type=="translation":
+                (x,y,z)=kwargs.get("vect",None)
+                self.center.x+=x
+                self.center.y+=y
+                self.center.z+=z
+
+
+            elif type=="rotationAroundAxisZ":
+                centerRotation=kwargs.get("center", None)
+                theta=kwargs.get("theta", None)
+
+                x=centerRotation.x+(cos(theta)*(self.center.x-centerRotation.x)-sin(theta)*(self.center.y-centerRotation.y))
+                y=centerRotation.y+(sin(theta)*(self.center.x-centerRotation.x)+cos(theta)*(self.center.y-centerRotation.y))
+
+
+                self.center.x=x
+                self.center.y=y
+
+                self.theta+=theta
+
+
+            elif type=="rotationAroundXYPlane":
+
+                centerRotation=kwargs.get("center", None)
+                phi=kwargs.get("phi", None)
+
+                l=sqrt((self.center.x-centerRotation.x)**2+(self.center.y-centerRotation.y)**2)
+
+                cosTheta_temp=(self.center.x-centerRotation.x)/l
+                sinTheta_temp=(self.center.y-centerRotation.y)/l
+
+                X=cos(phi)*l-sin(phi)*(self.center.z-centerRotation.z)
+                z=sin(phi)*l+cos(phi)*(self.center.z-centerRotation.z)
+
+                self.center.x=centerRotation.x + X*cosTheta_temp
+                self.center.y=centerRotation.y + X*sinTheta_temp
+                self.center.z+=z
+
+                self.phi+=phi

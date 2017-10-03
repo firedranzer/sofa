@@ -18,6 +18,8 @@ import math
 from libc.math cimport sin, cos, acos, exp, sqrt, fabs, M_PI
 cimport numpy
 cimport cython
+cimport primitives2D
+import primitives2D
 
 cdef int i
 
@@ -61,7 +63,9 @@ cdef class Point(object):
 
     cdef double x, y, z
 
-    cdef display(self,)
+    cpdef display(self)
+
+    cdef primitives2D.Point2D projectTo2D(self)
 
 cdef class Shape(object):
 
@@ -131,9 +135,9 @@ cdef class Difference(Shape):
 
 cdef class Primitives(Shape):
 
-    cdef str sign, type
-    cdef double axisX, axisY, axisZ, theta, phi, cosTheta, cosPhi, sinTheta, sinPhi
-    cdef Point center
+    cdef public str sign, type
+    cdef public double axisX, axisY, axisZ, theta, phi, cosTheta, cosPhi, sinTheta, sinPhi
+    cdef public Point center
 
     cdef list identifier
     cdef tuple coord
@@ -198,3 +202,23 @@ cdef class Cylinder(Primitives):
     cpdef tuple toString(self)
 
     cpdef str toWriting(self)
+
+
+cdef class ExtrusionOfShape2D(Shape):
+
+    cdef primitives2D.Shape2D shape2D
+    cdef public double heigth, theta, phi, cosTheta, sinTheta, cosPhi, sinPhi
+    cdef public Point center
+    cdef public str type
+    cdef  list identifier
+    cdef tuple coord
+
+    cpdef ListOfPrimitives getListOfPrimitives(self)
+
+    cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
+
+    cpdef ListForWriting getListForWriting(self)
+
+    cdef translationRotation(self,Point point)
+
+    cpdef double eval(self,Point point)
