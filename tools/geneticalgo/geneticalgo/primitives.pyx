@@ -174,9 +174,9 @@ cdef class Point(object):
         self.y=y
         self.z=z
 
+
     cpdef display(self):
         print "("+str(self.x),str(self.y),str(self.z)+")"
-        return
 
     cdef primitives2D.Point2D projectTo2D(self):
 
@@ -522,55 +522,67 @@ cdef class Primitives(Shape):
         cdef double y
         cdef double z
 
-        x=self.cosTheta*(point.x-self.center.x)+self.sinTheta*(point.y-self.center.y)
+        x1=self.cosTheta*(point.x-self.center.x)+self.sinTheta*(point.y-self.center.y)
         y=-self.sinTheta*(point.x-self.center.x)+self.cosTheta*(point.y-self.center.y)
 
-        x=self.cosPhi*point.x+self.sinPhi*(point.z-self.center.z)
-        z=-self.sinPhi*point.x+self.cosPhi*(point.z-self.center.z)
+        x=self.cosPhi*x1+self.sinPhi*(point.z-self.center.z)
+        z=-self.sinPhi*x1+self.cosPhi*(point.z-self.center.z)
         point=Point(x,y,z)
         return point
 
     def geometric_transformation(self, type, **kwargs):
 
         if type=="translation":
-            (x,y,z)=kwargs.get("vect",None)
+
+            (x,y,z)=kwargs.get("vect")
             self.center.x+=x
             self.center.y+=y
             self.center.z+=z
 
-
         elif type=="rotationAroundAxisZ":
-            centerRotation=kwargs.get("center", None)
-            theta=kwargs.get("theta", None)
 
-            x=centerRotation.x+(cos(theta)*(self.center.x-centerRotation.x)-sin(theta)*(self.center.y-centerRotation.y))
-            y=centerRotation.y+(sin(theta)*(self.center.x-centerRotation.x)+cos(theta)*(self.center.y-centerRotation.y))
+            centerRotation=kwargs.get("center")
+            theta0=self.theta
+            DeltaTheta=kwargs.get("theta")
+
+            x=centerRotation.x+(math.cos(DeltaTheta)*(self.center.x-centerRotation.x)-math.sin(DeltaTheta)*(self.center.y-centerRotation.y))
+            y=centerRotation.y+(math.sin(DeltaTheta)*(self.center.x-centerRotation.x)+math.cos(DeltaTheta)*(self.center.y-centerRotation.y))
 
 
             self.center.x=x
             self.center.y=y
 
-            self.theta+=theta
+            self.theta=self.theta+DeltaTheta
+            self.cosTheta=math.cos(self.theta)
+            self.sinTheta=math.sin(self.theta)
 
 
         elif type=="rotationAroundXYPlane":
 
-            centerRotation=kwargs.get("center", None)
-            phi=kwargs.get("phi", None)
+            centerRotation=kwargs.get("center")
+            DeltaPhi=kwargs.get("phi")
 
-            l=sqrt((self.center.x-centerRotation.x)**2+(self.center.y-centerRotation.y)**2)
+            l=math.sqrt((self.center.x-centerRotation.x)**2+(self.center.y-centerRotation.y)**2)
 
-            cosTheta_temp=(self.center.x-centerRotation.x)/l
-            sinTheta_temp=(self.center.y-centerRotation.y)/l
+            if l>0.0:
 
-            X=cos(phi)*l-sin(phi)*(self.center.z-centerRotation.z)
-            z=sin(phi)*l+cos(phi)*(self.center.z-centerRotation.z)
+                cosTheta_temp=(self.center.x-centerRotation.x)/l
+                sinTheta_temp=(self.center.y-centerRotation.y)/l
 
-            self.center.x=centerRotation.x + X*cosTheta_temp
-            self.center.y=centerRotation.y + X*sinTheta_temp
-            self.center.z+=z
+                X=math.cos(DeltaPhi)*l-math.sin(DeltaPhi)*(self.center.z-centerRotation.z)
+                z=math.sin(DeltaPhi)*l+math.cos(DeltaPhi)*(self.center.z-centerRotation.z)
 
-            self.phi+=phi
+                self.center.x=centerRotation.x + X*cosTheta_temp
+                self.center.y=centerRotation.y + X*sinTheta_temp
+                self.center.z=centerRotation.z+z
+
+            self.phi=self.phi+DeltaPhi
+            self.cosPhi=math.cos(self.phi)
+            self.sinPhi=math.sin(self.phi)
+
+        else:
+
+            raise ValueError, type+ "is not a type of geometric transformation "
 
 
 cdef class Ellipsoid(Primitives):
@@ -815,11 +827,11 @@ cdef class ExtrusionOfShape2D(Shape):
             cdef double y
             cdef double z
 
-            x=self.cosTheta*(point.x-self.center.x)-self.sinTheta*(point.y-self.center.y)
-            y=self.sinTheta*(point.x-self.center.x)+self.cosTheta*(point.y-self.center.y)
+            x1=self.cosTheta*(point.x-self.center.x)+self.sinTheta*(point.y-self.center.y)
+            y=-self.sinTheta*(point.x-self.center.x)+self.cosTheta*(point.y-self.center.y)
 
-            x=self.cosPhi*point.x-self.sinPhi*(point.z-self.center.z)
-            z=self.sinPhi*point.x+self.cosPhi*(point.z-self.center.z)
+            x=self.cosPhi*x1+self.sinPhi*(point.z-self.center.z)
+            z=-self.sinPhi*x1+self.cosPhi*(point.z-self.center.z)
             point=Point(x,y,z)
             return point
 
@@ -834,41 +846,53 @@ cdef class ExtrusionOfShape2D(Shape):
         def geometric_transformation(self, type, **kwargs):
 
             if type=="translation":
-                (x,y,z)=kwargs.get("vect",None)
+
+                (x,y,z)=kwargs.get("vect")
                 self.center.x+=x
                 self.center.y+=y
                 self.center.z+=z
 
-
             elif type=="rotationAroundAxisZ":
-                centerRotation=kwargs.get("center", None)
-                theta=kwargs.get("theta", None)
 
-                x=centerRotation.x+(cos(theta)*(self.center.x-centerRotation.x)-sin(theta)*(self.center.y-centerRotation.y))
-                y=centerRotation.y+(sin(theta)*(self.center.x-centerRotation.x)+cos(theta)*(self.center.y-centerRotation.y))
+                centerRotation=kwargs.get("center")
+                theta0=self.theta
+                DeltaTheta=kwargs.get("theta")
+
+                x=centerRotation.x+(math.cos(DeltaTheta)*(self.center.x-centerRotation.x)-math.sin(DeltaTheta)*(self.center.y-centerRotation.y))
+                y=centerRotation.y+(math.sin(DeltaTheta)*(self.center.x-centerRotation.x)+math.cos(DeltaTheta)*(self.center.y-centerRotation.y))
 
 
                 self.center.x=x
                 self.center.y=y
 
-                self.theta+=theta
+                self.theta=self.theta+DeltaTheta
+                self.cosTheta=math.cos(self.theta)
+                self.sinTheta=math.sin(self.theta)
 
 
             elif type=="rotationAroundXYPlane":
 
-                centerRotation=kwargs.get("center", None)
-                phi=kwargs.get("phi", None)
+                centerRotation=kwargs.get("center")
+                DeltaPhi=kwargs.get("phi")
 
-                l=sqrt((self.center.x-centerRotation.x)**2+(self.center.y-centerRotation.y)**2)
+                l=math.sqrt((self.center.x-centerRotation.x)**2+(self.center.y-centerRotation.y)**2)
 
-                cosTheta_temp=(self.center.x-centerRotation.x)/l
-                sinTheta_temp=(self.center.y-centerRotation.y)/l
+                if l>0.0:
 
-                X=cos(phi)*l-sin(phi)*(self.center.z-centerRotation.z)
-                z=sin(phi)*l+cos(phi)*(self.center.z-centerRotation.z)
+                    cosTheta_temp=(self.center.x-centerRotation.x)/l
+                    sinTheta_temp=(self.center.y-centerRotation.y)/l
 
-                self.center.x=centerRotation.x + X*cosTheta_temp
-                self.center.y=centerRotation.y + X*sinTheta_temp
-                self.center.z+=z
+                    X=math.cos(DeltaPhi)*l-math.sin(DeltaPhi)*(self.center.z-centerRotation.z)
+                    z=math.sin(DeltaPhi)*l+math.cos(DeltaPhi)*(self.center.z-centerRotation.z)
 
-                self.phi+=phi
+                    self.center.x=centerRotation.x + X*cosTheta_temp
+                    self.center.y=centerRotation.y + X*sinTheta_temp
+                    self.center.z=centerRotation.z+z
+
+                self.phi=self.phi+DeltaPhi
+                self.cosPhi=math.cos(self.phi)
+                self.sinPhi=math.sin(self.phi)
+
+            else:
+
+                raise ValueError, type+ "is not a type of geometric transformation "

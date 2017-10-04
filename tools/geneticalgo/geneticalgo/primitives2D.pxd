@@ -54,7 +54,7 @@ cdef class ListForWriting(object):
 
 cdef class Point2D(object):
 
-    cdef double x, y
+    cdef public double x, y
 
     cdef display(self)
 

@@ -386,7 +386,7 @@ cdef class Primitives2D(Shape2D):
 
 cdef class Ellipse(Primitives2D):
 
-    def __init__(self, index, axisX, axisY, theta, center):
+    def __init__(self, index, axisX, axisY, theta=0.0, center=Point2D(0.0,0.0)):
 
         Primitives2D.__init__(self, index)
         self.type="ellipse"
@@ -458,8 +458,8 @@ cdef class HalfPlaneGivenByAVector2D(Primitives2D):
 
         cdef Point2D center=self.vect.first
 
-        cdef double l=math.sqrt(self.vect.firstCoord()*self.vect.firstCoord()\
-                               +self.vect.secondCoord()*self.vect.secondCoord())
+        cdef double l=sqrt(self.vect.firstCoord()*self.vect.firstCoord()\
+                     +self.vect.secondCoord()*self.vect.secondCoord())
 
         cdef double sinTheta=self.vect.secondCoord()/l
         cdef double cosTheta=self.vect.firstCoord()/l
@@ -491,10 +491,12 @@ cpdef list createPolygoalChain(list listOfCouplesxy):
     cdef int i
     cdef Vector2D u
 
-    if not n>1:
+    if n<2:
         raise ValueError, "I need at least two points!"
 
-    for i in range(n-1):
+    listOfCouplesxy.append(listOfCouplesxy[0])
+
+    for i in range(n):
         point1=Point2D(listOfCouplesxy[i][0],listOfCouplesxy[i][1])
         point2=Point2D(listOfCouplesxy[i+1][0],listOfCouplesxy[i+1][1])
 
@@ -514,7 +516,7 @@ cpdef Shape2D closedPolygonalChain(str index, list listOfCouplesxy):
 
     length=len(listOfVectors2D)
 
-    if length<=2:
+    if length<1:
 
         raise ValueError, "I need more than two points!!"
 
@@ -530,7 +532,7 @@ cpdef Shape2D closedPolygonalChain(str index, list listOfCouplesxy):
 
         v=listOfVectors2D[i]
 
-        if Det(u,v)<0.0:
+        if Det(u,v)<=0.0:
 
             newShape=Intersection(index, newShape, HalfPlaneGivenByAVector2D(index, v))
         else:
