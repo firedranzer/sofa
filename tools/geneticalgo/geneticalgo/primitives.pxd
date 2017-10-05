@@ -85,9 +85,14 @@ cdef class Shape(object):
 
     cpdef ListForWriting getListForWriting(self)
 
+
+    cpdef duplicate(self)
+
 cdef class Union(Shape):
 
     cdef Shape first, second
+
+    cpdef duplicate(self)
 
     cpdef double eval(self,Point)
 
@@ -106,6 +111,8 @@ cdef class Intersection(Shape):
 
     cdef Shape first, second
 
+    cpdef duplicate(self)
+
     cpdef double eval(self,Point)
 
     cpdef tuple toString(self)
@@ -121,6 +128,8 @@ cdef class Intersection(Shape):
 cdef class Difference(Shape):
 
     cdef Shape first, second
+
+    cpdef duplicate(self)
 
     cpdef double eval(self,Point)
 
@@ -144,6 +153,8 @@ cdef class Primitives(Shape):
     cdef list identifier
     cdef tuple coord
 
+    cpdef duplicate(self)
+
     cpdef ListOfPrimitives getListOfPrimitives(self)
 
     cdef translationRotation(self,Point)
@@ -154,21 +165,17 @@ cdef class Primitives(Shape):
 
 cdef class Ellipsoid(Primitives):
 
+    cpdef duplicate(self)
+
     cpdef double eval(self,Point)
-
-#    cpdef str gradX(self)
-
-#    cpdef str gradY(self)
-
-#    cpdef str gradZ(self)
-
-#    cpdef tuple grad(self)
 
     cpdef tuple toString(self)
 
     cpdef str toWriting(self)
 
 cdef class Frisbee(Primitives):
+
+    cpdef  duplicate(self)
 
     cpdef double eval(self,Point)
 
@@ -190,6 +197,8 @@ cdef class Frisbee(Primitives):
 cdef class Cylinder(Primitives):
 
     cdef str radial, height
+
+    cpdef duplicate(self)
 
     cpdef double eval(self,Point)
 
@@ -215,6 +224,8 @@ cdef class ExtrusionOfShape2D(Shape):
     cdef  list identifier
     cdef tuple coord
 
+    cpdef duplicate(self)
+
     cpdef ListOfPrimitives getListOfPrimitives(self)
 
     cpdef ListOfLitteralExpressions getListOfLitteralExpressions(self)
@@ -224,3 +235,57 @@ cdef class ExtrusionOfShape2D(Shape):
     cdef translationRotation(self,Point point)
 
     cpdef double eval(self,Point point)
+
+
+cdef class Parallepiped(Primitives):
+
+    cpdef duplicate(self)
+
+    cpdef double eval(self,Point)
+
+    cpdef tuple toString(self)
+
+    cpdef str toWriting(self)
+
+cdef class Torus(Shape):
+
+    cdef double R, r, theta, cosTheta, sinTheta, phi, cosPhi, sinPhi
+    cdef str type
+    cdef Point center
+
+    cdef list identifier
+    cdef tuple coord
+
+    cpdef duplicate(self)
+
+    cdef translationRotation(self,Point point)
+    cpdef double eval(self,Point point)
+    cpdef tuple toString(self)
+
+
+cdef class Twist(Shape):
+
+    cdef Shape shape
+    cdef double theta, phi, rate, cosTheta, sinTheta, cosPhi, sinPhi
+    cdef Point center
+    cdef str type
+    cdef list identifier
+
+    cpdef duplicate(self)
+
+    cdef translationRotation(self,Point point)
+
+    cpdef double eval(self, Point point)
+
+cdef class Geometric_Transformation(Shape):
+
+    cdef Shape shape
+    cdef double theta, phi, cosTheta, sinTheta, cosPhi, sinPhi
+    cdef Point center
+
+    cpdef duplicate(self)
+
+    cdef translationRotation(self,Point point)
+
+    cpdef double eval(self, Point point)
+

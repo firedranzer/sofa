@@ -1,11 +1,19 @@
 import pyximport; pyximport.install()
-import dfgeom
-from dfgeom import *
-import math
+#import accordionutils
 
-import accordion
+import os, sys
+import math
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath("geneticalgo/geneticalgo"))))
+
+#import dfgeom
+#from dfgeom import *
+
+
+
 import primitives
-import geneticAlgorithm
+import primitives2D
+
+#import geneticAlgorithm
 
 
 
@@ -13,9 +21,12 @@ import geneticAlgorithm
 #shape=geneticAlgorithm.getShape_to_export()
 
 
+square=primitives2D.closedPolygonalChain([(0.0,0.0),(0,1.0),(1.0,1.0),(1.0,0.0)])
+cube=primitives.ExtrusionOfShape2D(square,1.0, 0.0,0.0,primitives.Point(0.0,0.0,0.0))
+
 def evalField(x, y, z):
     point=primitives.Point(x,y,z)
-    return shape.eval(point) #dfgeom.evalField(d, x, y, z)
+    return cube.eval(point) #dfgeom.evalField(d, x, y, z)
 
 
 
