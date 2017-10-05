@@ -15,8 +15,18 @@ set(SOURCE_FILES
     initSofaDenseSolver.cpp
 )
 
-############################## COMPONENTS HERE ARE THE FULL-SET ####################################
-if(SOFA_BUILD_FULLSETCOMPONENTS)
+############################## COMPONENTS HERE ARE THE LIGHT-SET ###################################
+if(SOFA_BUILD_COMPONENTSET_LIGHT)
+    list(APPEND HEADER_FILES
+
+        )
+    list(APPEND SOURCE_FILES
+
+        )
+endif()
+
+############################## COMPONENTS HERE ARE THE STANDARD-SET ################################
+if(SOFA_BUILD_COMPONENTSET_STANDARD)
     list(APPEND HEADER_FILES
         LULinearSolver.h
         )
@@ -33,16 +43,10 @@ if(SOFA_BUILD_FULLSETCOMPONENTS)
             NewMatCholeskySolver.cpp
             )
     endif()
-    message(STATUS "SofaDenseSolver: build all maintained sofa components.")
-else()
-    message(STATUS "SofaDenseSolver: build with only the minimal set of components.")
 endif()
 
 ############################### COMPONENTS HERE ARE DEPRECATED ####################################
-if(SOFA_BUILD_DEPRECATEDCOMPONENTS)
-    message(STATUS "SofaDenseSolver: build with deprecated components.")
-else()
-    message(STATUS "SofaDenseSolver: build without deprecated components.")
+if(SOFA_BUILD_COMPONENTSET_FULL)
 endif()
 
 

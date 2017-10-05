@@ -15,8 +15,18 @@ set(SOURCE_FILES
     initLMConstraint.cpp
     )
 
+############################## COMPONENTS HERE ARE THE LIGHT-SET ###################################
+if(SOFA_BUILD_COMPONENTSET_LIGHT)
+    list(APPEND HEADER_FILES
+
+        )
+    list(APPEND SOURCE_FILES
+
+        )
+endif()
+
 ############################## COMPONENTS HERE ARE THE FULL-SET ####################################
-if(SOFA_BUILD_FULLSETCOMPONENTS)
+if(SOFA_BUILD_COMPONENTSET_STANDARD)
     list(APPEND HEADER_FILES
         BarycentricDistanceLMConstraintContact.h
         BarycentricDistanceLMConstraintContact.inl
@@ -42,21 +52,15 @@ if(SOFA_BUILD_FULLSETCOMPONENTS)
         LMConstraintDirectSolver.cpp
         #TetrahedronBarycentricDistanceLMConstraintContact.cpp
         )
-    #message(STATUS "SofaLMConstraint: build all maintained sofa components.")
 
     if(SOFA_HAVE_MINIFLOWVR)
         list(APPEND SOURCE_FILES BarycentricDistanceLMConstraintContact_DistanceGrid.cpp)
     endif()
-
-else()
-    #message(STATUS "SofaLMConstraint: build with only the minimal set of components.")
 endif()
 
 ############################### COMPONENTS HERE ARE DEPRECATED ####################################
-if(SOFA_BUILD_DEPRECATEDCOMPONENTS)
-    #message(STATUS "   With deprecated components.")
-else()
-    #message(STATUS "   Without deprecated components.")
+if(SOFA_BUILD_COMPONENTSET_FULL)
+
 endif()
 
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
