@@ -217,9 +217,6 @@ cdef class Shape(object):
     cpdef ListForWriting getListForWriting(self):
         return self.getListForWriting()
 
-    def geometric_transformation(self, type, **kwargs):
-        self.geometric_transformation(type, kwargs)
-
 cdef class Union(Shape):
 
     def __init__(self, first, second):
@@ -288,10 +285,6 @@ cdef class Union(Shape):
         listForWriting.listWritingB.append("WritingB"+self.index+"="+writing2)
 
         return listForWriting
-
-    def geometric_transformation(self, type, **kwargs):
-        self.first.geometric_transformation(type, kwargs)
-        self.second.geometric_transformation(type, kwargs)
 
 
 cdef class Intersection(Shape):
@@ -363,10 +356,6 @@ cdef class Intersection(Shape):
         return listForWriting
 
 
-    def geometric_transformation(self, type, **kwargs):
-        self.first.geometric_transformation(type, kwargs)
-        self.second.geometric_transformation(type, kwargs)
-
 cdef class Difference(Shape):
 
     def __init__(self, first, second):
@@ -437,10 +426,6 @@ cdef class Difference(Shape):
         listForWriting.listWritingB.append("WritingB"+self.index+"="+writing2)
 
         return listForWriting
-
-    def geometric_transformation(self, type, **kwargs):
-        self.first.geometric_transformation(type, kwargs)
-        self.second.geometric_transformation(type, kwargs)
 
 
 cdef class Primitives(Shape):
@@ -559,61 +544,6 @@ cdef class Primitives(Shape):
         cdef Point newpoint=Point(x,y,z)
 
         return newpoint
-
-    def geometric_transformation(self, type, **kwargs):
-
-        if type=="translation":
-
-            (x,y,z)=kwargs.get("vect")
-            self.center.x+=x
-            self.center.y+=y
-            self.center.z+=z
-
-        elif type=="rotationAroundAxisZ":
-
-            centerRotation=kwargs.get("center")
-            theta0=self.theta
-            DeltaTheta=kwargs.get("theta")
-
-            x=centerRotation.x+(math.cos(DeltaTheta)*(self.center.x-centerRotation.x)-math.sin(DeltaTheta)*(self.center.y-centerRotation.y))
-            y=centerRotation.y+(math.sin(DeltaTheta)*(self.center.x-centerRotation.x)+math.cos(DeltaTheta)*(self.center.y-centerRotation.y))
-
-
-            self.center.x=x
-            self.center.y=y
-
-            self.theta=self.theta+DeltaTheta
-            self.cosTheta=math.cos(self.theta)
-            self.sinTheta=math.sin(self.theta)
-
-
-        elif type=="rotationAroundXYPlane":
-
-            centerRotation=kwargs.get("center")
-            DeltaPhi=kwargs.get("phi")
-
-            l=math.sqrt((self.center.x-centerRotation.x)**2+(self.center.y-centerRotation.y)**2)
-
-            if l>0.0:
-
-                cosTheta_temp=(self.center.x-centerRotation.x)/l
-                sinTheta_temp=(self.center.y-centerRotation.y)/l
-
-                X=math.cos(DeltaPhi)*l-math.sin(DeltaPhi)*(self.center.z-centerRotation.z)
-                z=math.sin(DeltaPhi)*l+math.cos(DeltaPhi)*(self.center.z-centerRotation.z)
-
-                self.center.x=centerRotation.x + X*cosTheta_temp
-                self.center.y=centerRotation.y + X*sinTheta_temp
-                self.center.z=centerRotation.z+z
-
-            self.phi=self.phi+DeltaPhi
-            self.cosPhi=math.cos(self.phi)
-            self.sinPhi=math.sin(self.phi)
-
-        else:
-
-            raise ValueError, type+ "is not a type of geometric transformation "
-
 
 cdef class Ellipsoid(Primitives):
 
@@ -897,61 +827,6 @@ cdef class ExtrusionOfShape2D(Shape):
             cdef double eval = max(fabs(newpoint.z-self.heigth/2.0)-self.heigth/2.0,self.shape2D.eval(newpoint.projectTo2D()))
 
             return eval
-
-
-        def geometric_transformation(self, type, **kwargs):
-
-            if type=="translation":
-
-                (x,y,z)=kwargs.get("vect")
-                self.center.x+=x
-                self.center.y+=y
-                self.center.z+=z
-
-            elif type=="rotationAroundAxisZ":
-
-                centerRotation=kwargs.get("center")
-                theta0=self.theta
-                DeltaTheta=kwargs.get("theta")
-
-                x=centerRotation.x+(math.cos(DeltaTheta)*(self.center.x-centerRotation.x)-math.sin(DeltaTheta)*(self.center.y-centerRotation.y))
-                y=centerRotation.y+(math.sin(DeltaTheta)*(self.center.x-centerRotation.x)+math.cos(DeltaTheta)*(self.center.y-centerRotation.y))
-
-
-                self.center.x=x
-                self.center.y=y
-
-                self.theta=self.theta+DeltaTheta
-                self.cosTheta=math.cos(self.theta)
-                self.sinTheta=math.sin(self.theta)
-
-
-            elif type=="rotationAroundXYPlane":
-
-                centerRotation=kwargs.get("center")
-                DeltaPhi=kwargs.get("phi")
-
-                l=math.sqrt((self.center.x-centerRotation.x)**2+(self.center.y-centerRotation.y)**2)
-
-                if l>0.0:
-
-                    cosTheta_temp=(self.center.x-centerRotation.x)/l
-                    sinTheta_temp=(self.center.y-centerRotation.y)/l
-
-                    X=math.cos(DeltaPhi)*l-math.sin(DeltaPhi)*(self.center.z-centerRotation.z)
-                    z=math.sin(DeltaPhi)*l+math.cos(DeltaPhi)*(self.center.z-centerRotation.z)
-
-                    self.center.x=centerRotation.x + X*cosTheta_temp
-                    self.center.y=centerRotation.y + X*sinTheta_temp
-                    self.center.z=centerRotation.z+z
-
-                self.phi=self.phi+DeltaPhi
-                self.cosPhi=math.cos(self.phi)
-                self.sinPhi=math.sin(self.phi)
-
-            else:
-
-                raise ValueError, type+ "is not a type of geometric transformation "
 
 
 cdef class Parallepiped(Primitives):
