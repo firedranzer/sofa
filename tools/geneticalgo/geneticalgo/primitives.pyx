@@ -6,6 +6,7 @@
 ## This file is part of the ShapeGenerator project.
 ##
 ## Contributors:
+##     - damien.marchal@inria.fr
 ##     - thomas.morzadec@inria.fr
 ##
 ####################################################################################################
@@ -175,8 +176,10 @@ cdef class Point(object):
         self.z=z
 
 
-    cpdef display(self):
-        print "("+str(self.x),str(self.y),str(self.z)+")"
+    cpdef str display(self):
+
+        cdef str temp="("+str(self.x)+","+str(self.y)+","+str(self.z)+")"
+        return temp
 
     cdef primitives2D.Point2D projectTo2D(self):
 
@@ -193,8 +196,10 @@ cdef class Shape(object):
     cpdef duplicate(self):
         return self.duplicate()
 
-    cpdef double eval(self, Point point):
-        return self.eval(point)
+    cpdef double eval(self,  Point point):
+
+        cdef double eval = self.eval(point)
+        return eval
 
     cpdef tuple toString(self):
         return self.toString()
@@ -226,8 +231,10 @@ cdef class Union(Shape):
 
         return Union(self.first.duplicate(),self.second.duplicate())
 
-    cpdef double eval(self,Point point):
-        return min(self.first.eval(point),self.second.eval(point))
+    cpdef double eval(self,  Point point):
+
+        cdef double eval = min(self.first.eval(point),self.second.eval(point))
+        return eval
 
 
     cpdef tuple toString(self):
@@ -298,8 +305,10 @@ cdef class Intersection(Shape):
 
         return Intersection(self.first.duplicate(),self.second.duplicate())
 
-    cpdef double eval(self,Point point):
-        return max(self.first.eval(point),self.second.eval(point))
+    cpdef double eval(self,  Point point):
+
+        cdef double eval = max(self.first.eval(point),self.second.eval(point))
+        return eval
 
     cpdef tuple toString(self):
 
@@ -370,8 +379,10 @@ cdef class Difference(Shape):
 
         return Difference(self.first.duplicate(),self.second.duplicate())
 
-    cpdef double eval(self,Point point):
-        return max(self.first.eval(point),-self.second.eval(point))
+    cpdef double eval(self,  Point point):
+
+        cdef double eval = max(self.first.eval(point),-self.second.eval(point))
+        return eval
 
 
     cpdef tuple toString(self):
@@ -533,7 +544,7 @@ cdef class Primitives(Shape):
 
         return listForWriting
 
-    cdef translationRotation(self,Point point):
+    cdef Point translationRotation(self,  Point point):
 
         cdef double x
         cdef double y
@@ -544,8 +555,10 @@ cdef class Primitives(Shape):
 
         x=self.cosPhi*x1+self.sinPhi*(point.z-self.center.z)
         z=-self.sinPhi*x1+self.cosPhi*(point.z-self.center.z)
-        point=Point(x,y,z)
-        return point
+
+        cdef Point newpoint=Point(x,y,z)
+
+        return newpoint
 
     def geometric_transformation(self, type, **kwargs):
 
@@ -617,11 +630,13 @@ cdef class Ellipsoid(Primitives):
         cdef Ellipsoid newEllipsoid=Ellipsoid(self.sign, self.axisX, self.axisY, self.axisZ, self.theta, self.phi, self.center)
         return newEllipsoid
 
-    cpdef double eval(self,Point point):
+    cpdef double eval(self,  Point point):
 
-        point=self.translationRotation(point)
+        newpoint=self.translationRotation(point)
 
-        return (point.x/self.axisX)**2+(point.y/self.axisY)**2+(point.z/self.axisZ)**2-1.0
+        cdef double eval = (newpoint.x/self.axisX)**2+(newpoint.y/self.axisY)**2+(newpoint.z/self.axisZ)**2-1.0
+
+        return eval
 
     cpdef tuple toString(self):
 
@@ -679,12 +694,13 @@ cdef class Frisbee(Primitives):
         cdef Frisbee newFrisbee=Frisbee(self.sign, self.axisX, self.axisY, self.axisZ, self.theta, self.phi, self.center)
         return newFrisbee
 
-    cpdef double eval(self,Point point):
+    cpdef double eval(self,  Point point):
 
-        point=self.translationRotation(point)
+        newpoint=self.translationRotation(point)
 
-        return fabs(point.z/self.axisZ)+math.sqrt((point.x/self.axisX)**2+(point.y/self.axisY)**2)-1
+        cdef double eval = fabs(newpoint.z/self.axisZ)+math.sqrt((newpoint.x/self.axisX)**2+(newpoint.y/self.axisY)**2)-1.0
 
+        return eval
 
     cpdef tuple toString(self):
 
@@ -751,11 +767,11 @@ cdef class Cylinder(Primitives):
         cdef Cylinder newCylinder=Cylinder(self.sign, self.axisX, self.axisY, self.axisZ, self.theta, self.phi, self.center)
         return newCylinder
 
-    cpdef double eval(self,Point point):
-        point=self.translationRotation(point)
+    cpdef double eval(self,  Point point):
+        newpoint=self.translationRotation(point)
 
-        return max(fabs(point.z)-self.axisZ,(point.x/self.axisX)**2+(point.y/self.axisY)**2-1)
-
+        cdef double eval = max(fabs(newpoint.z)-self.axisZ,(newpoint.x/self.axisX)**2+(newpoint.y/self.axisY)**2-1.0)
+        return eval
 
     cpdef tuple toString(self):
 
@@ -859,7 +875,7 @@ cdef class ExtrusionOfShape2D(Shape):
 
             return listForWriting
 
-        cdef translationRotation(self,Point point):
+        cdef Point translationRotation(self,  Point point):
 
             cdef double x
             cdef double y
@@ -870,15 +886,17 @@ cdef class ExtrusionOfShape2D(Shape):
 
             x=self.cosPhi*x1+self.sinPhi*(point.z-self.center.z)
             z=-self.sinPhi*x1+self.cosPhi*(point.z-self.center.z)
-            point=Point(x,y,z)
-            return point
+            cdef Point newpoint=Point(x,y,z)
+            return newpoint
 
 
-        cpdef double eval(self,Point point):
+        cpdef double eval(self,  Point point):
 
-            point=self.translationRotation(point)
+            newpoint=self.translationRotation(point)
 
-            return max(fabs(point.z-self.heigth/2.0)-self.heigth/2.0,self.shape2D.eval(point.projectTo2D()))
+            cdef double eval = max(fabs(newpoint.z-self.heigth/2.0)-self.heigth/2.0,self.shape2D.eval(newpoint.projectTo2D()))
+
+            return eval
 
 
         def geometric_transformation(self, type, **kwargs):
@@ -952,11 +970,12 @@ cdef class Parallepiped(Primitives):
         cdef Parallepiped newParallepiped=Parallepiped(self.sign, self.axisX, self.axisY, self.axisZ, self.theta, self.phi, self.center)
         return newParallepiped
 
-    cpdef double eval(self,Point point):
+    cpdef double eval(self,  Point point):
 
-        point=self.translationRotation(point)
+        newpoint=self.translationRotation(point)
 
-        return max(max(fabs(point.x)-self.axisX/2.0, fabs(point.y)-self.axisY/2.0), fabs(point.z)-self.axisZ/2.0)
+        cdef double eval = max(max(fabs(newpoint.x)-self.axisX/2.0, fabs(newpoint.y)-self.axisY/2.0), fabs(newpoint.z)-self.axisZ/2.0)
+        return eval
 
     cpdef tuple toString(self):
 
@@ -1001,6 +1020,10 @@ cdef class Torus(Shape):
 
     def __init__(self,R,r,theta,phi,center):
 
+        if r<=0.0 or R<r:
+            raise ValueError, "wrong values of r or R"
+
+
         Shape.__init__(self)
         self.type="torus"
 
@@ -1025,7 +1048,7 @@ cdef class Torus(Shape):
 
 
 
-    cdef translationRotation(self,Point point):
+    cdef Point translationRotation(self, Point point):
 
         cdef double x
         cdef double y
@@ -1036,22 +1059,21 @@ cdef class Torus(Shape):
 
         x=self.cosPhi*x1+self.sinPhi*(point.z-self.center.z)
         z=-self.sinPhi*x1+self.cosPhi*(point.z-self.center.z)
-        point=Point(x,y,z)
+        cdef Point newpoint=Point(x,y,z)
 
-        return point
+        return newpoint
 
-    cpdef double eval(self,Point point):
+    cpdef double eval(self,  Point point):
 
-        if self.r<=0.0 or self.r>=self.R:
-            raise ValueError, "wrong valors of r or R"
+        newpoint=self.translationRotation(point)
 
-        point=self.translationRotation(point)
-
-        cdef double x = sqrt(point.x*point.x+point.y*point.y)
+        cdef double x = sqrt(newpoint.x*newpoint.x+newpoint.y*newpoint.y)
         cdef double y = 0.0
-        cdef double z = point.z
+        cdef double z = newpoint.z
 
-        return (x-self.R)*(x-self.R)+z*z-self.r*self.r
+        cdef double eval = (x-self.R)*(x-self.R)+z*z-self.r*self.r
+
+        return eval
 
     cpdef tuple toString(self):
 
@@ -1091,7 +1113,7 @@ cdef class Twist(Shape):
         cdef Twist newTwist=Twist(self.shape,self.theta, self.phi, self.center, self.rate)
         return newTwist
 
-    cdef translationRotation(self,Point point):
+    cdef Point translationRotation(self,  Point point):
 
         cdef double x
         cdef double y
@@ -1102,23 +1124,25 @@ cdef class Twist(Shape):
 
         x=self.cosPhi*x1+self.sinPhi*(point.z-self.center.z)
         z=-self.sinPhi*x1+self.cosPhi*(point.z-self.center.z)
-        point=Point(x,y,z)
+        cdef Point newpoint=Point(x,y,z)
 
-        return point
+        return newpoint
 
-    cpdef double eval(self, Point point):
+    cpdef double eval(self,  Point point):
 
-        point=self.translationRotation(point)
+        newpoint=self.translationRotation(point)
 
         cdef double theta_twist = 2*math.pi*self.rate*point.z
 
-        cdef double x = cos(theta_twist)*point.x-sin(theta_twist)*point.y
-        cdef double y = sin(theta_twist)*point.x+cos(theta_twist)*point.y
-        cdef double z = point.z
+        cdef double x = cos(theta_twist)*newpoint.x-sin(theta_twist)*newpoint.y
+        cdef double y = sin(theta_twist)*newpoint.x+cos(theta_twist)*newpoint.y
+        cdef double z = newpoint.z
 
-        point =Point(x, y, z)
+        newpoint =Point(x, y, z)
 
-        return self.shape.eval(point)
+        cdef double eval = self.shape.eval(newpoint)
+
+        return eval
 
 cdef class Geometric_Transformation(Shape):
 
@@ -1145,7 +1169,7 @@ cdef class Geometric_Transformation(Shape):
         cdef Geometric_Transformation newGeometric_Transformation=Geometric_Transformation(self.shape,self.theta, self.phi, self.center, self.rate)
         return newGeometric_Transformation
 
-    cdef translationRotation(self,Point point):
+    cdef Point translationRotation(self,  Point point):
 
         cdef double x
         cdef double y
@@ -1156,13 +1180,14 @@ cdef class Geometric_Transformation(Shape):
 
         x=self.cosPhi*x1+self.sinPhi*(point.z-self.center.z)
         z=-self.sinPhi*x1+self.cosPhi*(point.z-self.center.z)
-        point=Point(x,y,z)
+        cdef Point newpoint=Point(x,y,z)
 
-        return point
+        return newpoint
 
-    cpdef double eval(self, Point point):
+    cpdef double eval(self,  Point point):
 
-        point=self.translationRotation(point)
+        newpoint=self.translationRotation(point)
 
-        return self.shape.eval(point)
+        cdef double eval = self.shape.eval(newpoint)
 
+        return eval

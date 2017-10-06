@@ -6,6 +6,7 @@
 ## This file is part of the ShapeGenerator project.
 ##
 ## Contributors:
+##     - damien.marchal@inria.fr
 ##     - thomas.morzadec@inria.fr
 ##
 ####################################################################################################
@@ -134,7 +135,9 @@ cdef class Shape2D(object):
         self.subIndex=generateNewSubIndex()
 
     cpdef double eval(self, Point2D point):
-        return self.eval(point)
+
+        cdef double eval = self.eval(point)
+        return eval
 
     cpdef tuple toString(self):
         return self.toString()
@@ -161,7 +164,9 @@ cdef class Union(Shape2D):
         self.second=second
 
     cpdef double eval(self,Point2D point):
-        return min(self.first.eval(point),self.second.eval(point))
+
+        cdef double eval = min(self.first.eval(point),self.second.eval(point))
+        return eval
 
 
     cpdef tuple toString(self):
@@ -223,7 +228,9 @@ cdef class Intersection(Shape2D):
         self.second=second
 
     cpdef double eval(self,Point2D point):
-        return max(self.first.eval(point),self.second.eval(point))
+
+        cdef double eval = max(self.first.eval(point),self.second.eval(point))
+        return eval
 
     cpdef tuple toString(self):
 
@@ -282,7 +289,9 @@ cdef class Difference(Shape2D):
         self.second=second
 
     cpdef double eval(self,Point2D point):
-        return max(self.first.eval(point),-self.second.eval(point))
+
+        cdef double eval = max(self.first.eval(point),-self.second.eval(point))
+        return eval
 
 
     cpdef tuple toString(self):
@@ -412,7 +421,9 @@ cdef class Ellipse(Primitives2D):
 
         cdef Point2D point_temp=translationRotation(self.sinTheta, self.cosTheta, self.center, point)
 
-        return (point_temp.x/self.axisX)**2+(point_temp.y/self.axisY)**2-1.0
+        cdef double eval = (point_temp.x/self.axisX)**2+(point_temp.y/self.axisY)**2-1.0
+
+        return eval
 
     cpdef tuple toString(self):
 

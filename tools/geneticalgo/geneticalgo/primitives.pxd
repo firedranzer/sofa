@@ -65,7 +65,7 @@ cdef class Point(object):
     cdef public double y
     cdef public double z
 
-    cpdef display(self)
+    cpdef str display(self)
 
     cdef primitives2D.Point2D projectTo2D(self)
 
@@ -157,7 +157,7 @@ cdef class Primitives(Shape):
 
     cpdef ListOfPrimitives getListOfPrimitives(self)
 
-    cdef translationRotation(self,Point)
+    cdef Point translationRotation(self,Point)
 #    cpdef translationRotationToString(self)
 #    cpdef gradXtranslationRotationToString(self)
 #    cpdef gradYtranslationRotationToString(self)
@@ -232,7 +232,7 @@ cdef class ExtrusionOfShape2D(Shape):
 
     cpdef ListForWriting getListForWriting(self)
 
-    cdef translationRotation(self,Point point)
+    cdef Point translationRotation(self,Point point)
 
     cpdef double eval(self,Point point)
 
@@ -258,7 +258,7 @@ cdef class Torus(Shape):
 
     cpdef duplicate(self)
 
-    cdef translationRotation(self,Point point)
+    cdef Point translationRotation(self,Point point)
     cpdef double eval(self,Point point)
     cpdef tuple toString(self)
 
@@ -273,9 +273,9 @@ cdef class Twist(Shape):
 
     cpdef duplicate(self)
 
-    cdef translationRotation(self,Point point)
+    cdef Point translationRotation(self,Point point)
 
-    cpdef double eval(self, Point point)
+    cpdef double eval(self, Point)
 
 cdef class Geometric_Transformation(Shape):
 
@@ -285,7 +285,7 @@ cdef class Geometric_Transformation(Shape):
 
     cpdef duplicate(self)
 
-    cdef translationRotation(self,Point point)
+    cdef Point translationRotation(self,Point point)
 
-    cpdef double eval(self, Point point)
+    cpdef double eval(self, Point)
 
