@@ -451,7 +451,7 @@ cdef class Ellipse(Primitives2D):
 
         return "Ellipse"+self.index+"_"+self.subIndex
 
-cdef class HalfPlaneGivenByAVector2D(Primitives2D):
+cdef class HalfPlaneGivenByAVector2D(Shape2D):
 
     """
     The half_plane will be on the right of the vector
@@ -459,7 +459,7 @@ cdef class HalfPlaneGivenByAVector2D(Primitives2D):
 
     def __init__(self, index,Vector2D vect):
 
-        Primitives2D.__init__(self, index)
+        Shape2D.__init__(self, index)
         self.type="half-plane"
         self.vect=vect
         self.identifier=[self.type, self.vect, self.index, self.subIndex]

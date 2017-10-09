@@ -71,7 +71,7 @@ cdef class Point(object):
 
 cdef class Shape(object):
 
-    cdef str index
+    cdef public str index
 
     cpdef double eval(self, Point)
 
@@ -90,7 +90,7 @@ cdef class Shape(object):
 
 cdef class Union(Shape):
 
-    cdef Shape first, second
+    cdef public Shape first, second
 
     cpdef duplicate(self)
 
@@ -109,7 +109,7 @@ cdef class Union(Shape):
 
 cdef class Intersection(Shape):
 
-    cdef Shape first, second
+    cdef public Shape first, second
 
     cpdef duplicate(self)
 
@@ -127,7 +127,7 @@ cdef class Intersection(Shape):
 
 cdef class Difference(Shape):
 
-    cdef Shape first, second
+    cdef public Shape first, second
 
     cpdef duplicate(self)
 
@@ -150,8 +150,8 @@ cdef class Primitives(Shape):
     cdef public double axisX, axisY, axisZ, theta, phi, cosTheta, cosPhi, sinTheta, sinPhi
     cdef public Point center
 
-    cdef list identifier
-    cdef tuple coord
+    cdef public list identifier
+    cdef public tuple coord
 
     cpdef duplicate(self)
 
@@ -196,7 +196,7 @@ cdef class Frisbee(Primitives):
 
 cdef class Cylinder(Primitives):
 
-    cdef str radial, height
+    cdef public str radial, height
 
     cpdef duplicate(self)
 
@@ -217,12 +217,12 @@ cdef class Cylinder(Primitives):
 
 cdef class ExtrusionOfShape2D(Shape):
 
-    cdef primitives2D.Shape2D shape2D
+    cdef public primitives2D.Shape2D shape2D
     cdef public double heigth, theta, phi, cosTheta, sinTheta, cosPhi, sinPhi
     cdef public Point center
     cdef public str type
-    cdef  list identifier
-    cdef tuple coord
+    cdef public list identifier
+    cdef public tuple coord
 
     cpdef duplicate(self)
 
@@ -249,12 +249,12 @@ cdef class Parallepiped(Primitives):
 
 cdef class Torus(Shape):
 
-    cdef double R, r, theta, cosTheta, sinTheta, phi, cosPhi, sinPhi
-    cdef str type
-    cdef Point center
+    cdef public double R, r, theta, cosTheta, sinTheta, phi, cosPhi, sinPhi
+    cdef public str type
+    cdef public Point center
 
-    cdef list identifier
-    cdef tuple coord
+    cdef public list identifier
+    cdef public tuple coord
 
     cpdef duplicate(self)
 
@@ -265,11 +265,11 @@ cdef class Torus(Shape):
 
 cdef class Twist(Shape):
 
-    cdef Shape shape
-    cdef double theta, phi, rate, cosTheta, sinTheta, cosPhi, sinPhi
-    cdef Point center
-    cdef str type
-    cdef list identifier
+    cdef public Shape shape
+    cdef public double theta, phi, rate, cosTheta, sinTheta, cosPhi, sinPhi
+    cdef public Point center
+    cdef public str type
+    cdef public list identifier
 
     cpdef duplicate(self)
 
@@ -279,9 +279,9 @@ cdef class Twist(Shape):
 
 cdef class Geometric_Transformation(Shape):
 
-    cdef Shape shape
-    cdef double theta, phi, cosTheta, sinTheta, cosPhi, sinPhi
-    cdef Point center
+    cdef public Shape shape
+    cdef public double theta, phi, cosTheta, sinTheta, cosPhi, sinPhi
+    cdef public Point center
 
     cpdef duplicate(self)
 

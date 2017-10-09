@@ -60,7 +60,7 @@ cdef class Point2D(object):
 
 cdef class Vector2D(object):
 
-       cdef Point2D first, second
+       cdef public Point2D first, second
 
        cpdef double firstCoord(self)
 
@@ -90,7 +90,7 @@ cdef class Shape2D(object):
 
 cdef class Union(Shape2D):
 
-    cdef Shape2D first, second
+    cdef public Shape2D first, second
 
     cpdef double eval(self,Point2D point)
 
@@ -107,7 +107,7 @@ cdef class Union(Shape2D):
 
 cdef class Intersection(Shape2D):
 
-    cdef Shape2D first, second
+    cdef public Shape2D first, second
 
     cpdef double eval(self,Point2D point)
 
@@ -123,7 +123,7 @@ cdef class Intersection(Shape2D):
 
 cdef class Difference(Shape2D):
 
-    cdef Shape2D first, second
+    cdef public Shape2D first, second
 
     cpdef double eval(self,Point2D point)
 
@@ -158,9 +158,9 @@ cdef class Primitives2D(Shape2D):
 
 cdef class Ellipse(Primitives2D):
 
-    cdef double axisX, axisY, theta, cosTheta, sinTheta
-    cdef Point2D center
-    cdef tuple coord
+    cdef public double axisX, axisY, theta, cosTheta, sinTheta
+    cdef public Point2D center
+    cdef public tuple coord
 
 
     cpdef double eval(self,Point2D point)
@@ -175,9 +175,11 @@ cdef class Ellipse(Primitives2D):
 
 
 
-cdef class HalfPlaneGivenByAVector2D(Primitives2D):
+cdef class HalfPlaneGivenByAVector2D(Shape2D):
 
-    cdef Vector2D vect
+    cdef public Vector2D vect
+    cdef public str type
+    cdef public list identifier
 
     cpdef double eval(self,Point2D point)
 
