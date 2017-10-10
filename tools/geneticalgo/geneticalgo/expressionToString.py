@@ -19,43 +19,92 @@ import primitives
 import expression2D
 import expression
 
+i=0
+
+def getIndex():
+    global i
+    temp= str(i)
+    i+=1
+    return temp
+
+def value(expressionTest):
+
+    if not isinstance(expressionTest, expression.Expression):
+        raise TypeError, "I need a expression of type expression.Expression!"
+
+    if isinstance(expressionTest, expression.ExpressionBinary):
+
+        return (expressionTest.type, value(expressionTest.left), value(expressionTest.right))
+
+    elif isinstance(expressionTest, expression.ExpressionUnary):
+
+        return (expressionTest.type, value(expressionTest.middle))
+
+    elif isinstance(expressionTest, expression.ExpressionConst):
+        return expressionTest.const
 
 
-def expressionToString(expressionTest):
+def expressionToString(expressionTest, dict):
 
 
     if not isinstance(expressionTest, expression.Expression):
         raise TypeError, "I need a expression of type expression.Expression"
 
-    temp = ""
+    if value(expressionTest) in dict:
+        return ""
 
-    if isinstance(expressionTest, expression.ExpressionBinary):
-        if expressionTest.type == "max" or expressionTest.type == "min":
+    else:
 
-            temp = expressionToString(expressionTest.left)+  '\n'\
-                 + expressionToString(expressionTest.right)+ "\n"
+        index =getIndex()
 
-            return temp + "\n" + "double  A"+expressionTest.index+" = "+expressionTest.type+"(A"+expressionTest.left.index+", A"+expressionTest.right.index+");"
+        dict[value(expressionTest)]="A"+index
 
-
-        else:
-            temp = expressionToString(expressionTest.left)+  '\n'\
-                 +  expressionToString(expressionTest.right)+ "\n"
-
-            return temp + "\n" "double  A"+expressionTest.index+" = A"+expressionTest.left.index+expressionTest.type+ "A"+expressionTest.right.index+";"
-
-    elif isinstance(expressionTest, expression.ExpressionUnary):
-        temp = expressionToString(expressionTest.middle)+  '\n'
-
-        return temp + "\n" + "double  A"+expressionTest.index+" = "+expressionTest.type+"(A"+expressionTest.middle.index+");"
-
-    elif isinstance(expressionTest, expression.ExpressionConst):
-        return "double  A"+expressionTest.index+" = "+str(expressionTest.const)+";"
+        if isinstance(expressionTest, expression.ExpressionBinary):
 
 
+            if expressionTest.type == "max" or expressionTest.type == "min":
+
+                temp = expressionToString(expressionTest.left, dict)+  '\n'\
+                     + expressionToString(expressionTest.right, dict)+ "\n"
+
+                return temp + "float  A"+index+" = "+str(expressionTest.type)+"("+dict[value(expressionTest.left)]+","+dict[value(expressionTest.right)]+");"
+
+            else:
+
+                temp = expressionToString(expressionTest.left, dict)+  '\n'\
+                     +  expressionToString(expressionTest.right, dict)+ "\n"
+
+                return temp + "float  A"+index+" = "+dict[value(expressionTest.left)]+str(expressionTest.type) + dict[value(expressionTest.right)]+";"
+
+
+        elif isinstance(expressionTest, expression.ExpressionUnary):
+
+            temp = expressionToString(expressionTest.middle, dict)+ '\n'
+
+            return temp + "float  A"+index+" = "+str(expressionTest.type)+"("+dict[value(expressionTest.middle)]+");"
+
+        elif isinstance(expressionTest, expression.ExpressionConst):
+                return "float  A"+index+" = "+str(expressionTest.const)+";"
+
+
+
+def expressionWriting(expressionTest):
+
+    global i
+
+    i=0
+
+    dict={}
+
+    temp = expressionToString(expressionTest, dict)
+
+    temp = temp + "\n\n\n"+"return " + dict[value(expressionTest)]+";"
+
+    return temp
 
 def expressionToFile(expressionTest, filename):
-    tempString=expressionToString(expressionTest)
+
+    tempString=expressionWriting(expressionTest)
 
     with open(filename, "w") as litteral_expression:
         litteral_expression.write(tempString)

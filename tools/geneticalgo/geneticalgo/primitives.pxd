@@ -265,7 +265,7 @@ cdef class Torus(Shape):
 
 cdef class Twist(Shape):
 
-    cdef public Shape shape
+    cdef public Shape shapeIn
     cdef public double theta, phi, rate, cosTheta, sinTheta, cosPhi, sinPhi
     cdef public Point center
     cdef public str type
@@ -279,7 +279,7 @@ cdef class Twist(Shape):
 
 cdef class Geometric_Transformation(Shape):
 
-    cdef public Shape shape
+    cdef public Shape shapeIn
     cdef public double theta, phi, cosTheta, sinTheta, cosPhi, sinPhi
     cdef public Point center
 

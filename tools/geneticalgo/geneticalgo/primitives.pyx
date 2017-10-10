@@ -962,13 +962,13 @@ cdef class Torus(Shape):
 
 cdef class Twist(Shape):
 
-    def __init__(self, shape, theta, phi, center, rate):
+    def __init__(self, shapeIn, theta, phi, center, rate):
 
         Shape.__init__(self)
 
         self.index=generateNewIndex()
 
-        self.shape=shape
+        self.shapeIn=shapeIn
 
         self.theta=theta
         self.phi=phi
@@ -985,7 +985,7 @@ cdef class Twist(Shape):
 
     cpdef duplicate(self):
 
-        cdef Twist newTwist=Twist(self.shape,self.theta, self.phi, self.center, self.rate)
+        cdef Twist newTwist=Twist(self.shapeIn,self.theta, self.phi, self.center, self.rate)
         return newTwist
 
     cdef Point translationRotation(self,  Point point):
@@ -1015,19 +1015,19 @@ cdef class Twist(Shape):
 
         newpoint =Point(x, y, z)
 
-        cdef double eval = self.shape.eval(newpoint)
+        cdef double eval = self.shapeIn.eval(newpoint)
 
         return eval
 
 cdef class Geometric_Transformation(Shape):
 
-    def __init__(self, shape, theta, phi, center):
+    def __init__(self, shapeIn, theta, phi, center):
 
         Shape.__init__(self)
 
         self.index=generateNewIndex()
 
-        self.shape=shape
+        self.shapeIn=shapeIn
 
         self.theta=theta
         self.phi=phi
@@ -1041,7 +1041,7 @@ cdef class Geometric_Transformation(Shape):
 
     cpdef duplicate(self):
 
-        cdef Geometric_Transformation newGeometric_Transformation=Geometric_Transformation(self.shape,self.theta, self.phi, self.center, self.rate)
+        cdef Geometric_Transformation newGeometric_Transformation=Geometric_Transformation(self.shapeIn,self.theta, self.phi, self.center, self.rate)
         return newGeometric_Transformation
 
     cdef Point translationRotation(self,  Point point):
@@ -1063,6 +1063,6 @@ cdef class Geometric_Transformation(Shape):
 
         newpoint=self.translationRotation(point)
 
-        cdef double eval = self.shape.eval(newpoint)
+        cdef double eval = self.shapeIn.eval(newpoint)
 
         return eval

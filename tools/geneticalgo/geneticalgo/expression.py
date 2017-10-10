@@ -92,7 +92,7 @@ def getXYZ(theta, phi, center):
 
 
     A = ExpressionBinary("*",\
-        ExpressionUnary("-", ExpressionUnary("cos", ExpressionConst("paramTheta", theta))),\
+        ExpressionUnary("-", ExpressionUnary("sin", ExpressionConst("paramTheta", theta))),\
         ExpressionBinary("-",  ExpressionConst("var", "x"), ExpressionConst("paramCenterX", center.x)))
 
     B = ExpressionBinary("*",\
@@ -125,7 +125,7 @@ def getXYZ(theta, phi, center):
 
     z = ExpressionBinary("+", A, B)
 
-    return x, y, z
+    return (x, y, z)
 
 
 
@@ -138,7 +138,7 @@ def expressionPrimitive(shape):
     phi = shape.phi
     center = shape.center
 
-    x, y, z = getXYZ(theta, phi, center)
+    (x, y, z) = getXYZ(theta, phi, center)
 
     axisX=ExpressionConst("paramAxisX", shape.axisX)
     axisY=ExpressionConst("paramAxisY", shape.axisY)
@@ -201,20 +201,20 @@ def expressionPrimitive(shape):
 
 def expressionTorus(shape):
 
-    if not isinstance(primitives, primitives.Torus):
+    if not isinstance(shape, primitives.Torus):
         raise TypeError, "I need a shape of type primitives.Torus!"
 
     theta = shape.theta
     phi = shape.phi
     center = shape.center
 
-    x, y, z = getXYZ(theta, phi, center)
+    (x, y, z) = getXYZ(theta, phi, center)
 
     r = ExpressionConst("paramr", shape.r)
 
     R = ExpressionConst("paramR", shape.R)
 
-    A = ExpressionBinary("*", ExpressionBinary("-", x, R), ExppressionBinary("-, x, R"))
+    A = ExpressionBinary("*", ExpressionBinary("-", x, R), ExpressionBinary("-", x, R))
 
     B = ExpressionBinary("*", z, z)
 
@@ -225,12 +225,12 @@ def expressionTorus(shape):
 
 def expressionTwist(expressionShape, theta, phi, center, rate):
 
-    x, y, z = getXYZ(theta, phi, center)
+    (x, y, z) = getXYZ(theta, phi, center)
 
-    rate=ExpressionConst("paramRate", rate)
+    Erate=ExpressionConst("paramRate", rate)
 
     theta_twist = ExpressionBinary("*", ExpressionBinary("*", ExpressionBinary("*",\
-                  ExpressionConst("nbre", 2.0), ExpressionConst("nbr", math.pi)),rate), z)
+                  ExpressionConst("nbr", 2.0), ExpressionConst("nbr", math.pi)),Erate), z)
 
 
     X = ExpressionBinary("-", ExpressionBinary("*", ExpressionUnary("cos", theta_twist), x), ExpressionBinary("*", ExpressionUnary("sin", theta_twist), y))
@@ -248,19 +248,19 @@ def expressionTwist(expressionShape, theta, phi, center, rate):
 
     elif isinstance(expressionShape, ExpressionConst) and expressionShape.type=="var":
 
-        if expressionShape.type == "x":
+        if expressionShape.const == "x":
             expressionShape = X
 
-        elif expressionShape.type == "y":
+        elif expressionShape.const == "y":
             expressionShape = Y
 
-        elif expressionShape.type == "z":
+        elif expressionShape.const == "z":
                 expressionShape = Z
 
     return expressionShape
 
 
-def expressionShapeTwist(shape):
+def expressionTwistShape(shape):
 
     if not isinstance(shape, primitives.Twist):
         raise TypeError, "I need a shape of type primitives.Twist!"
@@ -269,7 +269,9 @@ def expressionShapeTwist(shape):
     phi = shape.phi
     center = shape.center
 
-    expressionShape = expression(shape)
+    shapeTemp=shape.shapeIn
+
+    expressionShape = expression(shapeTemp)
 
     rate=shape.rate
 
@@ -278,7 +280,7 @@ def expressionShapeTwist(shape):
 
 def expressionGeometric_Transformation(expressionShape, theta, phi, center):
 
-    x, y, z = getXYZ(theta, phi, center)
+    (x, y, z) = getXYZ(theta, phi, center)
 
     if isinstance(expressionShape, ExpressionBinary):
         expressionShape.left =  expressionGeometric_Transformation(expressionShape.left, theta, phi, center)
@@ -287,15 +289,15 @@ def expressionGeometric_Transformation(expressionShape, theta, phi, center):
     elif isinstance(expressionShape, ExpressionUnary):
         expressionShape.middle =  expressionGeometric_Transformation(expressionShape.middle, theta, phi, center)
 
-    elif isinstance(expressionShape, ExpressionConst) and expressionShape.type=="var":
+    elif isinstance(expressionShape, ExpressionConst) and (expressionShape.const == "x" or expressionShape.const == "y" or expressionShape.const == "z"):
 
-        if expressionShape.type == "x":
+        if expressionShape.const == "x":
             expressionShape = x
 
-        elif expressionShape.type == "y":
+        elif expressionShape.const == "y":
             expressionShape = y
 
-        elif expressionShape.type == "z":
+        elif expressionShape.const == "z":
                 expressionShape = z
 
 
@@ -304,11 +306,15 @@ def expressionGeometric_Transformation(expressionShape, theta, phi, center):
 
 def expressionGeometric_TransformationShape(shape):
 
+    shapeTemp=shape.shapeIn
+
     theta = shape.theta
+
     phi = shape.phi
+
     center = shape.center
 
-    expressionShape = expression(shape)
+    expressionShape = expression(shapeTemp)
 
     return expressionGeometric_Transformation(expressionShape, theta, phi, center)
 
