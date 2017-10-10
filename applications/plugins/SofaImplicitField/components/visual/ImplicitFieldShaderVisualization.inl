@@ -324,11 +324,6 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
     /// THOMAS TEST
     implicitFunction.clear();
     implicitFunction.append(
-                "    x = pos.x - evalPositionSphere1.x;\n"
-                "    y = pos.y - evalPositionSphere1.y;\n"
-                "    z = pos.z - evalPositionSphere1.z;\n"
-                );
-    implicitFunction.append(
                 "    res = minVec4(\n"
                 "        res,\n"
                 );
@@ -345,17 +340,24 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
                 "{\n"
                 "   return p.y;\n"
                 "}\n"
+                "float sdSphere( vec3 p, float s )\n"
+                "{\n"
+                "   return length(p)-s;\n"
+                "}\n"
+                "\n"
                 "float thomasFunc( vec3 p )\n"
                 "{\n"
                 "   float x = p.x;\n"
                 "   float y = p.y;\n"
-                "   float z = p.z;\n\n"
-                "   return 0.0;\n"
-                "}\n"
-                "\n"
-                "float sdSphere( vec3 p, float s )\n"
-                "{\n"
-                "   return length(p)-s;\n"
+                "   float z = p.z;\n\n");
+    /// :S only for thomas dev ... we need to remove it later
+    std::string file = sofa::helper::system::SetDirectory::GetCurrentDir() + "/../../../../tools/geneticalgo/geneticalgo/erwan.txt";
+    std::cout << file << std::endl;
+    std::ifstream ifs(file);
+    std::string content( (std::istreambuf_iterator<char>(ifs) ),
+                         (std::istreambuf_iterator<char>()    ) );
+    tmp.append(content);
+    tmp.append(
                 "}\n"
                 "\n"
                 "vec4 minVec4( vec4 d1, vec4 d2 )\n"
@@ -449,33 +451,27 @@ std::string ImplicitFieldShaderVisualization::renderFunction()
                 "\n"
                 "vec3 render( in vec3 ro, in vec3 rd )\n"
                 "{\n"
-                "    vec3 col = vec3(1.0, 1.0, 1.0) + rd.y;\n"
                 "    vec4 res = castRay(ro,rd);\n"
-                "    float t = res.x;\n"
-                "    vec3 m = res.yzw;\n"
-
-                "    vec3 pos = ro + t * rd;\n"
+                "    float dist = res.x;\n"
+                "    vec3 col = res.yzw;\n"
+                "    vec3 pos = ro + dist * rd;\n"
                 "    vec3 nor = estimateNormal( pos );\n"
-                "    vec3 ref = reflect( rd, nor );\n"
-
-                "    col = m;\n"
+                "    vec3 ref = reflect( rd, nor );\n\n"
 
                 "    vec3  lig = normalize( vec3(-0.4, 0.7, -0.6) );\n"
                 "    float amb = clamp( 0.5+0.5*nor.y, 0.0, 1.0 );\n"
                 "    float dif = clamp( dot( nor, lig ), 0.0, 1.0 );\n"
-                "    float bac = clamp( dot( nor, normalize(vec3(-lig.x,0.0,-lig.z))), 0.0, 1.0 )*clamp( 1.0-pos.y,0.0,1.0);\n"
                 "    float dom = smoothstep( -0.1, 0.1, ref.y );\n"
-                "    float fre = pow( clamp(1.0+dot(nor,rd),0.0,1.0), 2.0 );\n"
                 "    float spe = pow(clamp( dot( ref, lig ), 0.0, 1.0 ),16.0);\n"
                 "    dif *= softshadow( pos, lig, 0.02, 2.5 );\n"
-                "    dom *= softshadow( pos, ref, 0.02, 2.5 );\n"
+                "    dom *= softshadow( pos, ref, 0.02, 2.5 );\n\n"
                 "    vec3 lin = vec3(0.0);\n"
                 "    lin += 1.30*dif*vec3(1.00,0.80,0.55);\n"
                 "    lin += 2.00*spe*vec3(1.00,0.90,0.70)*dif;\n"
                 "    lin += 0.40*amb*vec3(0.40,0.60,1.00);\n"
-                "    lin += 0.50*dom*vec3(0.40,0.60,1.00);\n"
+                "    lin += 0.50*dom*vec3(0.40,0.60,1.00);\n\n"
                 "    col = col*lin;\n"
-                "    col = mix( col, vec3(0.9,0.9,1.0), 1.0-exp( -0.0002*t*t*t ) );\n"
+                "    col = mix( col, vec3(0.9,0.9,1.0), 1.0-exp( -0.0001*dist*dist*dist ) );\n"
                 "    return vec3( clamp(col,0.0,1.0) );\n"
                 "}\n"
                 );
@@ -495,7 +491,7 @@ std::string ImplicitFieldShaderVisualization::rayMarchingFunction()
                 "    {\n"
                 "        vec4 res = map( ro+rd*depth );\n"
                 "        if( res.x < EPSILON || depth > MAX_DIST ) break;\n"
-                "        depth += res.x;\n"
+                "        depth += res.x*0.2;\n" /// TODO OPTIMIZATION :s crappy stuff here
                 "            m = res.yzw;\n"
                 "    }\n"
                 "    return vec4( depth, m );\n"
