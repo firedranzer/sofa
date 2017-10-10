@@ -142,7 +142,11 @@ void ImplicitFieldShaderVisualization::initComponentShaderValue()
 
 void ImplicitFieldShaderVisualization::start()
 {
-    sofa::helper::system::TemporaryLocale locale(LC_CTYPE, "");
+
+    // Temporarily set the numeric formatting locale to ensure that
+    // floating-point values are interpreted correctly by tinyXML. (I.e. the
+    // decimal separator is a dot '.').
+    helper::system::TemporaryLocale locale(LC_NUMERIC, "C");
 
     if(m_datatracker.isDirty())
     {

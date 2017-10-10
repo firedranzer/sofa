@@ -211,7 +211,9 @@ void CustomField::updateGLSLCodeCacheFromPython()
         m_glslcodes.clear() ;
         return ;
     }
-
+    std::cout << glslFunction << std::endl;
+    std::cout << glslFunction->ob_type << std::endl;
+    std::cout << glslFunction->ob_refcnt << std::endl;
     //TODO(dmarchal) add here the call to the python code and the conversion from the dict to the
     // right function.
 
