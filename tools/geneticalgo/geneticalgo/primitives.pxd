@@ -72,6 +72,7 @@ cdef class Point(object):
 cdef class Shape(object):
 
     cdef public str index
+    cdef public str type
 
     cpdef double eval(self, Point)
 
@@ -89,6 +90,8 @@ cdef class Shape(object):
     cpdef duplicate(self)
 
 cdef class Union(Shape):
+
+
 
     cdef public Shape first, second
 
@@ -109,7 +112,9 @@ cdef class Union(Shape):
 
 cdef class Intersection(Shape):
 
+
     cdef public Shape first, second
+
 
     cpdef duplicate(self)
 
@@ -129,6 +134,7 @@ cdef class Difference(Shape):
 
     cdef public Shape first, second
 
+
     cpdef duplicate(self)
 
     cpdef double eval(self,Point)
@@ -146,7 +152,7 @@ cdef class Difference(Shape):
 
 cdef class Primitives(Shape):
 
-    cdef public str sign, type
+    cdef public str sign
     cdef public double axisX, axisY, axisZ, theta, phi, cosTheta, cosPhi, sinTheta, sinPhi
     cdef public Point center
 
@@ -220,9 +226,10 @@ cdef class ExtrusionOfShape2D(Shape):
     cdef public primitives2D.Shape2D shape2D
     cdef public double heigth, theta, phi, cosTheta, sinTheta, cosPhi, sinPhi
     cdef public Point center
-    cdef public str type
+
     cdef public list identifier
     cdef public tuple coord
+
 
     cpdef duplicate(self)
 
@@ -250,7 +257,7 @@ cdef class Parallepiped(Primitives):
 cdef class Torus(Shape):
 
     cdef public double R, r, theta, cosTheta, sinTheta, phi, cosPhi, sinPhi
-    cdef public str type
+
     cdef public Point center
 
     cdef public list identifier
@@ -268,7 +275,7 @@ cdef class Twist(Shape):
     cdef public Shape shapeIn
     cdef public double theta, phi, rate, cosTheta, sinTheta, cosPhi, sinPhi
     cdef public Point center
-    cdef public str type
+
     cdef public list identifier
 
     cpdef duplicate(self)

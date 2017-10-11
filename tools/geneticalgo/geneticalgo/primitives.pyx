@@ -192,6 +192,7 @@ cdef class Shape(object):
     def __init__(self):
 
         self.index=generateNewIndex()
+        self.type
 
     cpdef duplicate(self):
         return self.duplicate()
@@ -223,6 +224,8 @@ cdef class Union(Shape):
         Shape.__init__(self)
         self.first=first
         self.second=second
+        self.type="Union"
+
 
     cpdef duplicate(self):
 
@@ -293,6 +296,7 @@ cdef class Intersection(Shape):
         Shape.__init__(self)
         self.first=first
         self.second=second
+        self.type=Intersection
 
     cpdef duplicate(self):
 
@@ -362,6 +366,7 @@ cdef class Difference(Shape):
         Shape.__init__(self)
         self.first=first
         self.second=second
+        self.type="Difference"
 
 
     cpdef duplicate(self):
@@ -983,6 +988,8 @@ cdef class Twist(Shape):
         self.identifier=[]
         self.rate=rate
 
+        self.type = "Twist"
+
     cpdef duplicate(self):
 
         cdef Twist newTwist=Twist(self.shapeIn,self.theta, self.phi, self.center, self.rate)
@@ -1024,7 +1031,7 @@ cdef class Geometric_Transformation(Shape):
     def __init__(self, shapeIn, theta, phi, center):
 
         Shape.__init__(self)
-
+        self.type = "Geometric_Transformation"
         self.index=generateNewIndex()
 
         self.shapeIn=shapeIn
