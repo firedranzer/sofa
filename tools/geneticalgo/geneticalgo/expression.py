@@ -38,28 +38,46 @@ def getListOfExpressionIndices(expression):
 
     listTemp=[expression.index]
 
-    if isinstance(expressionShape, ExpressionBinary):
+    if isinstance(expression, ExpressionBinary):
         listTemp.append(getListOfExpressionIndices(expression.left))
         listTemp.append(getListOfExpressionIndices(expression.right))
 
-    elif isinstance(expressionShape, ExpressionUnary):
+    elif isinstance(expression, ExpressionUnary):
         listTemp.append(getListOfExpressionIndices(expression.middle))
 
     return listTemp
 
 def IsSubExpressionsInList(expression, listTemp):
 
-    if expression.index in lisTemp:
+    if expression.index in listTemp:
 
-        return true
+        return True
 
     if isinstance(expression, ExpressionBinary):
         return IsSubExpressionsInList(expression.left, listTemp) or IsSubExpressionsInList(expression.right, listTemp)
 
     elif isinstance(expression, ExpressionUnary):
-        return IsSubExpressionsInList(expression.left, listTemp) or IsSubExpressionsInList(expression.right, listTemp)
+        return IsSubExpressionsInList(expression.middle, listTemp)
 
-    elif isinstance(expression, ExpressionConst) and expression.type=="var":
+    return False
+
+def IsTree(expression):
+
+    if isinstance(expression, ExpressionBinary):
+
+        listTemp=getListOfExpressionIndices(expression.right)
+
+        if IsSubExpressionsInList(expression.left, listTemp):
+            raise Error, "the expression is not a tree, it has loops"
+
+        return IsTree(expression.left) and IsTree(expression.right)
+
+    elif isinstance(expression, ExpressionUnary):
+        return IsTree(expression.middle)
+
+    else:
+
+        return True
 
 class Expression(object):
 
@@ -71,10 +89,20 @@ class Expression(object):
 
        return self.display()
 
-def clone(expression):
+def duplicate(expression):
 
-    newExpression=copy.deepcopy(expression)
-    new
+    if isinstance(expression, ExpressionBinary):
+        return ExpressionBinary(expression.type, duplicate(expression.left), duplicate(expression.right))
+
+    elif isinstance(expression, ExpressionUnary):
+        return ExpressionUnary(expression.type, duplicate(expression.middle))
+
+    elif isinstance(expression, ExpressionConst):
+        return ExpressionConst(expression.type, copy.deepcopy(expression.const))
+
+
+
+
 
 class ExpressionBinary(Expression):
 
@@ -203,15 +231,15 @@ def expressionPrimitive(shape):
 
         coordX = ExpressionBinary("/", x, axisX)
 
-        X = ExpressionBinary("*", coordX, copy.deepcopy(coordX))
+        X = ExpressionBinary("*", duplicate(coordX), duplicate(coordX))
 
         coordY= ExpressionBinary("/", y, axisY)
 
-        Y = ExpressionBinary("*", coordY, copy.deepcopy(coordY))
+        Y = ExpressionBinary("*", duplicate(coordY), duplicate(coordY))
 
         coordZ= ExpressionBinary("/", z, axisZ)
 
-        Z = ExpressionBinary("*", coordZ, copy.deepcopy(coordZ))
+        Z = ExpressionBinary("*", duplicate(coordZ), duplicate(coordZ))
 
 
         return ExpressionBinary("-",\
@@ -225,13 +253,13 @@ def expressionPrimitive(shape):
 
         coordX = ExpressionBinary("/", x, axisX)
 
-        X = ExpressionBinary("*", coordX, copy.deepcopy(coordX))
+        X = ExpressionBinary("*", duplicate(coordX), duplicate(coordX))
 
         coordY= ExpressionBinary("/", y, axisY)
 
-        Y = ExpressionBinary("*", coordY, copy.deepcopy(coordY))
+        Y = ExpressionBinary("*", duplicate(coordY), duplicate(coordY))
 
-        Z = ExpressionBinary("/", z, axisZ)
+        Z = ExpressionBinary("/", duplicate(z), duplicate(axisZ))
 
         return ExpressionBinary("-",ExpressionBinary("+", ExpressionUnary("abs", Z),\
                                     ExpressionUnary("sqrt", ExpressionBinary("+", X, Y))),\
@@ -243,15 +271,15 @@ def expressionPrimitive(shape):
 
         coordX = ExpressionBinary("/", x, axisX)
 
-        X = ExpressionBinary("*", coordX, copy.deepcopy(coordX))
+        X = ExpressionBinary("*", duplicate(coordX), duplicate(coordX))
 
         coordY= ExpressionBinary("/", y, axisY)
 
-        Y = ExpressionBinary("*", coordY, copy.deepcopy(coordY))
+        Y = ExpressionBinary("*", duplicate(coordY), duplicate(coordY))
 
         radial =ExpressionBinary("-", ExpressionBinary("+", X, Y), ExpressionConst("nbr", 1.0))
 
-        height = ExpressionBinary("-", ExpressionUnary("abs", z), axisZ)
+        height = ExpressionBinary("-", ExpressionUnary("abs", duplicate(z)), duplicate(axisZ))
 
         return ExpressionBinary("max", height, radial)
 
@@ -279,7 +307,7 @@ def expressionTorus(shape):
     type = shape.type
     (x, y, z) = getXYZ(theta, phi, center, type, index)
 
-    X = ExpressionUnary("sqrt", ExpressionBinary("+", ExpressionBinary("*", x, copy.deepcopy(x)), ExpressionBinary("*", y, copy.deepcopy(y))))
+    X = ExpressionUnary("sqrt", ExpressionBinary("+", ExpressionBinary("*", duplicate(x), duplicate(x)), ExpressionBinary("*", duplicate(y), duplicate(y))))
 
     Z = z
 
@@ -287,11 +315,11 @@ def expressionTorus(shape):
 
     R = ExpressionConst("paramR_" + type + "_"+index, shape.R)
 
-    A = ExpressionBinary("*", ExpressionBinary("-", X, R), ExpressionBinary("-", X, R))
+    A = ExpressionBinary("*", ExpressionBinary("-", X, R), ExpressionBinary("-", duplicate(X), duplicate(R)))
 
-    B = ExpressionBinary("*", Z, Z)
+    B = ExpressionBinary("*", Z, duplicate(Z))
 
-    C = ExpressionBinary("*", r, r)
+    C = ExpressionBinary("*", r, duplicate(r))
 
     return ExpressionBinary("-", ExpressionBinary("+", A, B), C)
 
@@ -320,7 +348,7 @@ def expressionTwist(expressionShape, theta, phi, center, rate, type, index):
 
         X = ExpressionBinary("-", ExpressionBinary("*", ExpressionUnary("cos", theta_twist), x), ExpressionBinary("*", ExpressionUnary("sin", theta_twist), y))
 
-        Y = ExpressionBinary("+", ExpressionBinary("*", ExpressionUnary("sin", theta_twist), display), ExpressionBinary("*", ExpressionUnary("cos", theta_twist), copy.deepcopy(y)))
+        Y = ExpressionBinary("+", ExpressionBinary("*", ExpressionUnary("sin", theta_twist), x), ExpressionBinary("*", ExpressionUnary("cos", theta_twist), duplicate(y)))
 
         Z = z
 

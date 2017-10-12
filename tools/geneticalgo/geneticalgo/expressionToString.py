@@ -142,12 +142,19 @@ def expressionWriting(expressionTest):
 
     dict={}
 
-    temp = expressionToPython(expressionTest, dict)
+    temp = expressionToString(expressionTest, dict)
 
     temp = temp + "\n\n\n"+"return " + dict[value(expressionTest)]+";"
 
     return temp
 
+def expressionToFile(expressionTest, filename):
+
+    tempString=expressionWriting(expressionTest)
+
+    with open(filename, "w") as litteral_expression:
+        litteral_expression.write(tempString)
+        litteral_expression.close()
 
 def expressionWritingPython(expressionTest):
 

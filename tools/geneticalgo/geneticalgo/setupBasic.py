@@ -1,34 +1,61 @@
-####################################################################################################
-## Copyright 2017 INRIA
-##
-## This file is part of the ShapeGenerator project.
-##
-## Contributors:
-##     - thomas.morzadec@inria.fr
-##
-####################################################################################################
-
-
-
-
-
 from distutils.core import setup
+from Cython.Build import cythonize
 from distutils.extension import Extension
-from Cython.Distutils import build_ext
 
-ext = Extension("primitives", sources=["primitives.pyx"])
+extensions = [Extension("*", ["primitives/*.pyx"])]
 
-setup(ext_modules=[ext],
-      cmdclass={'build_ext': build_ext})
-
-
-
-ext = Extension("primitives2D", sources=["primitives2D.pyx"])
-
-setup(ext_modules=[ext],
-      cmdclass={'build_ext': build_ext})
+setup(
+    ext_modules = cythonize(extensions)
+)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#####################################################################################################
+### Copyright 2017 INRIA
+###
+### This file is part of the ShapeGenerator project.
+###
+### Contributors:
+###     - thomas.morzadec@inria.fr
+###
+#####################################################################################################
+
+
+
+
+
+#from distutils.core import setup
+#from distutils.extension import Extension
+#from Cython.Distutils import build_ext
+
+#ext = Extension("primitives", sources=["primitives.pyx"])
+
+#setup(ext_modules=[ext],
+#      cmdclass={'build_ext': build_ext})
+
+#ext = Extension("primitives2D", sources=["primitives2D.pyx"])
+
+#setup(ext_modules=[ext],
+#      cmdclass={'build_ext': build_ext})
 
 
 
