@@ -16,7 +16,7 @@
 
 import numpy
 import math
-import primitives2D
+#import primitives2D
 
 
 cdef i=0
