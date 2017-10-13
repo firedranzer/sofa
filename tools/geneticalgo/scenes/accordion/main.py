@@ -18,7 +18,7 @@ type=["ellipsoid","frisbee"]
 
 mutationType="ON"
 mutationAxisX="OFF"
-mutationAxisY="OFF"
+mutaimporttionAxisY="OFF"
 mutationAxisZ="OFF"
 
 def getNextId():
