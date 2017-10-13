@@ -1,19 +1,14 @@
 from distutils.core import setup
 from Cython.Build import cythonize
-from distutils.extension import Extension
+#from distutils.extension import Extension
 
-extensions = [Extension("*", ["primitives/*.pyx"])]
+#extensions = [Extension("*", ["primitives/*.pyx"])]
 
-setup(
-    ext_modules = cythonize(extensions)
+setup( name = "geneticalgo",
+       packages = ["geneticalgo", "geneticalgo.primitives"],
+
+    ext_modules = cythonize("**/*.pyx"),
 )
-
-
-
-
-
-
-
 
 
 
