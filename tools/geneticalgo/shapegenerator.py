@@ -10,8 +10,10 @@
 ##     - damien.marchal@univ-lille1.fr
 ##
 ####################################################################################################
+
 import sys, os
 import webbrowser
+
 
 ## Récupère le chemin absolu du réportoire courant et l'ajoute aux chemin où python cherche
 ## les modules
@@ -21,8 +23,9 @@ sys.path.append(os.getcwd())
 ## classique.
 sys.path.append( os.path.dirname(os.getcwd()) )
 
-from geneticalgo import algorithm
-from  scenes.accordion import main
+import geneticalgo.algorithm
+
+import  scenes.accordion.main
 
 
 workdir="/tmp/sg"
@@ -31,17 +34,17 @@ if len(sys.argv) !=2:
     print("missing workdir, using: "+workdir)
 else:
     workdir = sys.argv[1]
-print("Saving resulst in "+workdir)
-algo = algorithm.GeneticAlgorithm({"nbInd":4,
+print("Saving results in "+workdir)
+algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":4,
                                    "crossTx":2,
                                    "nbIndMutated":4,
                                    "nbMutationsPerInd":4})
 algo.start(4,
-           main.generateFunc,
-           main.mutationFunc,
-           main.crossFunc,
-           main.evaluationFunc,
-           main.selectionFunc,
+           scenes.accordion.main.generateFunc,
+           scenes.accordion.main.mutationFunc,
+           scenes.accordion.main.crossFunc,
+           scenes.accordion.main.evaluationFunc,
+           scenes.accordion.main.selectionFunc,
            workdir
            )
 

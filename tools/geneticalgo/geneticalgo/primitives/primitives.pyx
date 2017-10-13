@@ -17,11 +17,7 @@
 import numpy
 import math
 import primitives2D
-from libc.math cimport sin, cos, acos, exp, sqrt, fabs, M_PI
-cimport numpy
-cimport cython
-cimport primitives
-cimport primitives2D
+
 
 cdef i=0
 

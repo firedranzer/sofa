@@ -18,6 +18,7 @@ cimport numpy
 cimport cython
 cimport primitives2D
 
+
 cdef int i
 
 cpdef str generateNewIndex()

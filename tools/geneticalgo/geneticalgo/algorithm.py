@@ -6,9 +6,11 @@
 ## This file is part of the ShapeGenerator project.
 ##
 ## Contributors:
+##     - damien.marchal@inria.fr
 ##     - thomas.morzadec@inria.fr
 ##
 ####################################################################################################
+import primitives2D
 import primitives
 import random
 import operator
