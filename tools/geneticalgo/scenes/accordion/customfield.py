@@ -1,35 +1,27 @@
-import pyximport; pyximport.install()
-#import accordionutils
+
+import main
 
 import os, sys
-import math
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath("geneticalgo/geneticalgo"))))
-
-#import dfgeom
-#from dfgeom import *
-
-
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../")
 
 import primitives
-import primitives2D
 
-#import geneticAlgorithm
+accordionIndividual = main.generateIndividual("ellipsoid")
 
+(shape, shapeinv) = main.getShapeFromInd(accordionIndividual)
 
+def shape.evalField(x, y, z):
 
-(shape,shapeInt)=accordion.accordionUniform(15.0,3.0,1.0, "frisbee",1,10.0,10.0,1.0)
-#shape=geneticAlgorithm.getShape_to_export()
-
-
-square=primitives2D.closedPolygonalChain([(0.0,0.0),(0,1.0),(1.0,1.0),(1.0,0.0)])
-cube=primitives.ExtrusionOfShape2D(square,1.0, 0.0,0.0,primitives.Point(0.0,0.0,0.0))
-
-def evalField(x, y, z):
     point=primitives.Point(x,y,z)
-    return cube.eval(point) #dfgeom.evalField(d, x, y, z)
+
+    return shape.eval(point)
 
 
+def shapeinv.evalField(x, y, z):
 
+    point=primitives.Point(x,y,z)
+
+    return shapeinv.eval(point)
 
 
 #class Difference2(PythonShape):

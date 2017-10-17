@@ -11,7 +11,11 @@
 ##
 ####################################################################################################
 
-from geneticalgo import primitives
+import sys, os
+
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../")
+
+import primitives
 
 def create(self, height, radius, thickness):
         if thickness > radius:
@@ -36,10 +40,10 @@ def addCavity(self, cavity):
    
         [height,type,axisX,axisY,axisZ]=cavity
 
-        if height>(self.height) or height<0.0:
-            raise ValueError, "the height of the center of the cavity has to be between "+str(self.height)+ " and "+"0.0"+ " to ensure connectidness"
+        if height>(self.height) or height<0.5:
+            raise ValueError, "the height of the center of the cavity has to be between "+str(self.height)+ " and "+"0.5"+ " to ensure connectidness and flat base"
 
-        elif max(axisX,axisY)<self.radius:
+        elif axisX**2+axisY**2 < self.radius**2:
             raise ValueError, "the max dimension in the horizontal plane has to be bigger than the radius"
 
 

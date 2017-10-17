@@ -564,6 +564,12 @@ cdef class Ellipsoid(Primitives):
 
     cpdef double eval(self,  Point point):
 
+        if self.axisX==0.0:
+            raise ValueError, "axisX is zero"
+        if self.axisY==0.0:
+            raise ValueError, "axisY is zero"
+        if self.axisZ==0.0:
+            raise ValueError, "axisZ is zero"
         newpoint=self.translationRotation(point)
 
         cdef double eval = (newpoint.x/self.axisX)**2+(newpoint.y/self.axisY)**2+(newpoint.z/self.axisZ)**2-1.0
@@ -629,6 +635,13 @@ cdef class Frisbee(Primitives):
     cpdef double eval(self,  Point point):
 
         newpoint=self.translationRotation(point)
+
+        if self.axisX==0.0:
+            raise ValueError, "axisX is zero"
+        if self.axisY==0.0:
+            raise ValueError, "axisY is zero"
+        if self.axisZ==0.0:
+            raise ValueError, "axisZ is zero"
 
         cdef double eval = fabs(newpoint.z/self.axisZ)+math.sqrt((newpoint.x/self.axisX)**2+(newpoint.y/self.axisY)**2)-1.0
 

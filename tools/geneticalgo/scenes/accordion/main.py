@@ -1,7 +1,8 @@
-import geneticalgo
+#import geneticalgo
 import random
 import copy
 import os
+import math
 import accordionutils as accordion
 from geneticalgo import algorithm
 from geneticalgo import primitives
@@ -9,17 +10,18 @@ from geneticalgo import shapewriter
 from sofalauncher import launcher
 
 individualId = 0
-heightTube = 10.0
+heightTube = 15.0
 radiusTube = 3.0
 thickness = 0.5
-number_of_cavities=2
+number_of_cavities = 7
 generate_random="OFF"
 type=["ellipsoid","frisbee"]
 
-mutationType="ON"
+mutationType="OFF"
 mutationAxisX="OFF"
-mutaimporttionAxisY="OFF"
+mutationAxisY="OFF"
 mutationAxisZ="OFF"
+mutationRotation="OFF"
 
 def getNextId():
     global individualId
@@ -29,10 +31,12 @@ def getNextId():
 
 class AccordionIndividual(algorithm.Individual):
 
-    def __init__(self, height, radius, thickness):
+    def __init__(self):
         self.level=None
         self.id = getNextId()
-        accordion.create(self, height, radius, thickness)
+        global heightTube, radiusTube, thickness
+
+        accordion.create(self, heightTube, radiusTube, thickness)
         
     def display(self):
         temp="heightTube="+str(self.height)+"\n"\
@@ -51,7 +55,7 @@ class AccordionIndividual(algorithm.Individual):
 
 
 def newIndividualFrom(ind):
-    newInd=AccordionIndividual(ind.height, ind.radius, ind.thickness)
+    newInd=AccordionIndividual()
     newInd.listCavities=copy.deepcopy(ind.listCavities)
 
     return newInd
@@ -79,7 +83,8 @@ def mutation_axisX(ind):
     index=random.randint(0,length-1)
     axisX=ind.listCavities[index][2]
     epsilon=random.uniform(-0.5,0.5)
-    axisX=max( (4.0/3.0)*ind.radius, axisX+epsilon )
+    axisX=max(max((4.0/3.0)*ind.radius, ind.thickness+0.25), min(axisX+epsilon, (15.0/3.0)*ind.radius))
+
     ind.listCavities[index][2]=axisX
 
 def mutation_axisY(ind):
@@ -91,20 +96,38 @@ def mutation_axisY(ind):
     index=random.randint(0,length-1)
     axisY=ind.listCavities[index][3]
     epsilon=random.uniform(-0.5,0.5)
-    axisY=max(ind.thickness, axisY+epsilon)
+    axisY=max(ind.thickness+0.25, min(axisY+epsilon, (15.0/3.0)*ind.radius))
     ind.listCavities[index][3]=axisY
 
 
 def mutation_axisZ(ind):
     length=len(ind.listCavities)
     if length<=1:
-        raise ValueError, "their is no cavity to mutate, or don't touch the first cavity"
+        raise ValueError, "their is no cavity to mutate, or don't touch the first cavity along Z"
 
     index=random.randint(1,length-1)
     axisZ=ind.listCavities[index][4]
     epsilon=random.uniform(-0.2,0.2)
-    axisZ=max(ind.thickness,min((heightTube-0.5)/(2*number_of_cavities), axisZ+epsilon))
+    axisZ=max(ind.thickness+0.25, min(3.0*(heightTube-0.5)/(2*number_of_cavities), axisZ+epsilon))
     ind.listCavities[index][4]=axisZ
+
+def mutation_rotation(ind):
+    length=len(ind.listCavities)
+
+    if length==0:
+        raise ValueError, "their is no cavity to mutate"
+
+    index=random.randint(0,length-1)
+
+    axisX = ind.listCavities[index][2]
+    axisY = ind.listCavities[index][3]
+    theta = random.uniform(-math.pi/8.0,math.pi/8.0)
+
+    axisX, axisY = math.cos(theta)*axisX-math.sin(theta)*axisY, math.sin(theta)*axisX+math.cos(theta)*axisY
+
+    ind.listCavities[index][2]=axisX
+    ind.listCavities[index][3]=axisY
+
 
 
 
@@ -136,6 +159,8 @@ def mutation(ind):
     if mutationType=="ON":
         mutation_type(ind)
 
+    if mutationRotation=="ON":
+        mutation_rotation(ind)
 
 def mutationFunc(pop, params):
 
@@ -173,9 +198,11 @@ def crossing_ind(individual1, individual2):
     ind2=newIndividualFrom(individual2)
     index=random.randint(0,length1-1)
 
-    temp=ind1.listCavities[index]
-    ind1.listCavities[index]=ind2.listCavities[index]
-    ind2.listCavities[index]=temp
+    temp1 = ind1.listCavities[index]
+    temp2 = ind2.listCavities[index]
+
+    ind1.listCavities[index]=temp2
+    ind2.listCavities[index]=temp1
 
     return (ind1, ind2)
 
@@ -194,7 +221,7 @@ def crossFunc(pop, params):
     for i in range(number_of_crossing):
         j=random.randint(0, length_temp-1)
         k=random.randint(0, length_temp-1)
-        a,b=crossing_ind(pop[j], pop[k])
+        (a,b)=crossing_ind(pop[j], pop[k])
         newpop.append(a)
         newpop.append(b)
     return newpop
@@ -203,25 +230,38 @@ def crossFunc(pop, params):
 ### Generate
 ###
 def generateIndividual(aType):
-        individual=AccordionIndividual(heightTube, radiusTube, thickness)
+        individual=AccordionIndividual()
 
         for i in range(1,number_of_cavities+1):
             height=0.5+i*(heightTube-0.5)/float(number_of_cavities)
 
-            if generate_random=="ON":
-                axisX=random.uniform((4.0/3.0)*individual.radius,(7.0/3.0)*individual.radius)
-                axisY=random.uniform(2.0*individual.thickness,(7.0/3.0)*individual.radius)
-                axisZ=(individual.height-0.5)/float((2*number_of_cavities))
+            if aType=="ellipsoid":
+                if generate_random=="ON":
+                    axisX=max(individual.thickness+0.25, random.uniform((4.0/3.0)*individual.radius,(15.0/3.0)*individual.radius))
+                    axisY=max(individual.thickness+0.25, random.uniform(2.0*individual.thickness,(15.0/3.0)*individual.radius))
+                    axisZ=max(individual.thickness+0.25, (individual.height-0.5)/float((2*number_of_cavities)))
+
+                else:
+                    axisX=max(individual.thickness+0.25, (11.0/3.0)*individual.radius)
+                    axisY=max(individual.thickness+0.25, (11.0/3.0)*individual.radius)
+                    axisZ=max(individual.thickness+0.25, (individual.height-0.5)/float((2*number_of_cavities)))
+
             else:
-                axisX=(5.0/3.0)*individual.radius
-                axisY=(5.0/3.0)*individual.radius
-                axisZ=(heightTube-0.5)/float((2*number_of_cavities))
+                if generate_random=="ON":
+                    axisX=max(individual.thickness+0.25, random.uniform((4.0/3.0)*individual.radius,(15.0/3.0)*individual.radius))
+                    axisY=max(individual.thickness+0.25, random.uniform(2.0*individual.thickness,(15.0/3.0)*individual.radius))
+                    axisZ=max(individual.thickness+0.25, 2.0*(individual.height-0.5)/float((2*number_of_cavities)))
+
+                else:
+                    axisX=max(individual.thickness+0.25, (11.0/3.0)*individual.radius)
+                    axisY=max(individual.thickness+0.25, (11.0/3.0)*individual.radius)
+                    axisZ=max(individual.thickness+0.25, 2.0*(individual.height-0.5)/float((2*number_of_cavities)))
 
             cavity=[height,aType,axisX,axisY,axisZ]
             accordion.addCavity(individual,cavity)
 
 
-        individual.level=random.uniform(0.0,10.0)
+        individual.level=None
 
         return individual
 
@@ -304,6 +344,6 @@ def selectionFunc(pop, params):
         raise ValueError, "nbInd is not given or not an int"
     pop.sortAccordingToLevel()
     pop.deleteFrom(params["nbInd"])
-    pop.sortAccordingToIndex()
+#    pop.sortAccordingToIndex()
 
     return pop

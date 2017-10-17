@@ -18,6 +18,8 @@ import copy
 import html
 import os
 import datetime
+import sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../")
 import sofalauncher.launcher
 from html import HTML
 

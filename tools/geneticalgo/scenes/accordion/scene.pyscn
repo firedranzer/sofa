@@ -51,15 +51,15 @@ def createScene(rootNode):
                 accordion.createObject('SparseLDLSolver', name='preconditioner')
                 accordion.createObject('LinearSolverConstraintCorrection', solverName='preconditioner')
 
-                #accordion/cavity
-                #cavity = accordion.createChild('cavity')
-                #cavity.createObject('MeshSTLLoader', name='loader', filename='cylinder.stl')
-                #cavity.createObject('Mesh', src='@loader', name='topo')
-                #cavity.createObject('MechanicalObject', name='cavity')
-                #cavity.createObject('SurfacePressureConstraint', triangles='@topo.triangles', value='30', valueType="1")
-                #cavity.createObject('BarycentricMapping', name='mapping',  mapForces='false', mapMasses='false')
+#                accordion/cavity
+#               cavity = accordion.createChild('cavity')
+#               cavity.createObject('MeshSTLLoader', name='loader', filename='cylinder.stl')
+#               cavity.createObject('Mesh', src='@loader', name='topo')
+#               cavity.createObject('MechanicalObject', name='cavity')
+#               cavity.createObject('SurfacePressureConstraint', name="pressure", triangles='@topo.triangles', value='30', valueType="1")
+#               cavity.createObject('BarycentricMapping', name='mapping',  mapForces='false', mapMasses='false')
 
-                #accordion/accordionVisu
+#                accordion/accordionVisu
                 accordionVisu = accordion.createChild('visu')
                 accordionVisu.createObject('TriangleSetTopologyContainer', name='container')
                 accordionVisu.createObject('TriangleSetTopologyModifier')
