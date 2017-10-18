@@ -4,9 +4,9 @@ all:
 clean:
 	make clean -C geneticalgo
 	
-xp:
+xp: xp-clean
 	python shapegenerator.py
 
-clean-xp:
+xp-clean:
 	rm -rf /tmp/sofa-launcher*
 

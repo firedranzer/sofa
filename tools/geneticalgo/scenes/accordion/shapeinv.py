@@ -1,3 +1,8 @@
+## normal comment
+#compiler-settings
+commentStartToken = //
+#end compiler-settings
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ####################################################################################################
@@ -9,6 +14,8 @@
 ##     - thomas.morzadec@inria.fr
 ##     - damien.marchal@univ-lille1.fr
 ####################################################################################################
+
 import sys
-sys.path.append($LIBRARYPATH)
+sys.path.append("$LIBRARYPATH")
+
 $SHAPEINVCONTENT
