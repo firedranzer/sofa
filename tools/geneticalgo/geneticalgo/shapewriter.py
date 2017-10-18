@@ -16,20 +16,7 @@ import primitives
 import primitives2D
 
 def getDefaultHeader():
-    temp="""#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-####################################################################################################
-## Copyright 2017 INRIA
-##
-## This file is part of the ShapeGenerator project.
-##
-## Contributors:
-##     - thomas.morzadec@inria.fr
-##     - damien.marchal@univ-lille1.fr
-####################################################################################################
-import primitives
-"""
-    return temp
+    return "import primitives"
 
 def toPythonString(shape):
     temp=getDefaultHeader()
@@ -58,7 +45,7 @@ def toPythonString(shape):
 
             prm=prm+"Cylinder"+index+"=primitives.Cylinder(sign"+str(index)+",axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
                    +str(index)+"Z,theta"+str(index)+",phi"+str(index)\
-                   +", primitives.Point(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
+                   +",primitive.Point(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
 
         else:
 
@@ -79,13 +66,13 @@ def toPythonString(shape):
 
                 prm=prm+"Ellipsoid"+index+"=primitives.Ellipsoid("+"sign"+str(index)+",axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
                         +str(index)+"Z,theta"+str(index)+",phi"+str(index)\
-                        +",  primitives.Point(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
+                        +",primitive.Point(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
 
             elif type=="frisbee":
 
                 prm=prm+"Frisbee"+index+"=primitives.Frisbee("+"sign"+str(index)+",axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
                             +str(index)+"Z,theta"+str(index)+",phi"+str(index)\
-                            +",  primitives.Point(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
+                            +",primitive.Point(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
 
 
 
