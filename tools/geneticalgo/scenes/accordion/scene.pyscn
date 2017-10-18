@@ -21,7 +21,6 @@ def createScene(rootNode):
                 shape = rootNode.createChild("Shape")
                 shape.createObject("EulerImplicitSolver", name="cg_odesolver",  printLog="0")
                 shape.createObject("CGLinearSolver", template="GraphScattered", name="linear solver",  iterations="25",  tolerance="1e-09", threshold="1e-09")
-                shape.createObject("SphericalField", name="sphere")
 
                 #### Loading the two shapes.
                 shape.createObject("CustomField", name="shape", function="shape.evalField")

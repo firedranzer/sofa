@@ -308,7 +308,8 @@ def evaluationFunc(pop):
         for f1,f2,ind in filename:
             runs.append( {"GENERATION": str(pop.id),
                           "INDIVIDUAL": str(ind.id),
-                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":1000 } )
+                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":1000,
+                          "LIBRARYPATH" : os.getcwd()} )
 
     results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
 
