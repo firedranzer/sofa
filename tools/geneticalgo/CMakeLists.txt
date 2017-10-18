@@ -5,19 +5,18 @@ project(GeneticAlgo)
 set(HEADER_FILES)
 
 set(SOURCE_FILES
-	main.cpp
-	)
+	main.cpp)
 
 set(EXTRA_FILES
     shapegenerator.py
 
+    Makefile
     geneticalgo/shapewriter.py
     geneticalgo/generate_expression.py
     geneticalgo/algorithm.py
-    geneticalgo/primitives.pxd
-    geneticalgo/primitives.pyx
-    geneticalgo/setupBasic.py
-    geneticalgo/setupLitteral.py
+    geneticalgo/pyxsrc/primitives.pyx
+    geneticalgo/pyxsrc/primitives.pxd
+    geneticalgo/setup.py
 
     scenes/accordion/main.py
     scenes/accordion/accordionutils.py

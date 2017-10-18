@@ -1,7 +1,8 @@
 all:
-	python geneticalgo/setup.py build_ext --inplace
+	python setup.py build_ext --inplace
+	cp *.so ../
 
 clean:
 	rm -f *.so 
-	rm -rf geneticalgo/*.pyc geneticalgo/*.so build geneticalgo/*.c
-	rm geneticalgo/pyxsrc/*.cpp 
+	rm -rf *.pyc *.so build *.c
+	rm pyxsrc/*.cpp 
