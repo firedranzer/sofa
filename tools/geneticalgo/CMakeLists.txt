@@ -23,6 +23,8 @@ set(EXTRA_FILES
     scenes/accordion/scene.pyscn
     scenes/accordion/controller.py
     scenes/accordion/customfield.py
+    scenes/accordion/shape.py
+    scenes/accordion/shapeinv.py
 
     utils/script.sh
     utils/script.py
