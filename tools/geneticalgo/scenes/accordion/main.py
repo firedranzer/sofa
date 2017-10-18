@@ -1,4 +1,4 @@
-#import geneticalgo
+import geneticalgo
 import random
 import copy
 import os
@@ -12,8 +12,8 @@ from sofalauncher import launcher
 individualId = 0
 heightTube = 15.0
 radiusTube = 3.0
-thickness = 0.5
-number_of_cavities = 7
+thickness = 1.0
+number_of_cavities = 3
 generate_random="OFF"
 type=["ellipsoid","frisbee"]
 
@@ -280,6 +280,7 @@ def generateFunc(numgen, params):
 ### Eval
 ###
 def evaluationFunc(pop):
+    global thickness
     print("Evaluation Function "+str(len(pop)))
     basedir=os.path.dirname(__file__)
     bestscore = 0
@@ -290,7 +291,7 @@ def evaluationFunc(pop):
 
         ### return (shape,shapeMinus)
         ###
-        fend =  "def evalField(x,y,z): \n\treturn expression"
+        fend =  "def evalField(x,y,z): \n\treturn expression.eval(primitives.Point(x,y,z))"
         f1 = shapewriter.toPythonString(shape) + fend
         f2 = shapewriter.toPythonString(shapeMinus) + fend
 
@@ -308,7 +309,10 @@ def evaluationFunc(pop):
         for f1,f2,ind in filename:
             runs.append( {"GENERATION": str(pop.id),
                           "INDIVIDUAL": str(ind.id),
-                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":1000 } )
+                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":1000,
+                          "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__),
+                          "THICKNESS" : thickness*0.25
+                          } )
 
     results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
 

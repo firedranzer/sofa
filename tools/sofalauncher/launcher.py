@@ -204,7 +204,7 @@ def startSofa(parameters, filesandtemplates, launcher):
                         t = Template(template, searchList=param)
                         theFile.write(str(t))
                         i+=1
-                        
+                        theFile.close()
                 tasks.append((param["nbIterations"], tempdir, param["FILE0"], tempdir+"/output.log")) 
         
         return launcher.start(tasks)                        

@@ -180,14 +180,14 @@ void MeshGenerationFromImplicitShape::init()
     /// volumeMeshGeneration(in_facetsize.getValue(),in_approximation.getValue(),in_cellsize.getValue());
 
     /// future from an async()
-    m_com = std::async(std::launch::async, [this](){
-        unsigned int countervalue = this->l_scalarfield->getCounter() ;
+    //    m_com = std::async(std::launch::async, [this](){
+    //unsigned int countervalue = this->l_scalarfield->getCounter() ;
         this->volumeMeshGeneration(this->d_facetangle.getValue(),
                                    this->d_facetsize.getValue(),
                                    this->d_facetdistance.getValue(),
                                    this->d_cellsize.getValue(),
                                    this->d_cell_radiusedge_ratio.getValue());
-        return countervalue; });
+    //  return countervalue; });
 }
 
 void MeshGenerationFromImplicitShape::reinit()
@@ -226,15 +226,15 @@ void MeshGenerationFromImplicitShape::update(bool forceUpdate)
             return ;
 
         /// The inputs are valid & we should grab them.
-        m_componentstate = ComponentState::Invalid ;
-        m_com = std::async(std::launch::async, [this](){
-            unsigned int countervalue = this->l_scalarfield->getCounter() ;
+        //m_componentstate = ComponentState::Invalid ;
+        //m_com = std::async(std::launch::async, [this](){
+        //    unsigned int countervalue = this->l_scalarfield->getCounter() ;
             this->volumeMeshGeneration(this->d_facetangle.getValue(),
                                        this->d_facetsize.getValue(),
                                        this->d_facetdistance.getValue(),
                                        this->d_cellsize.getValue(),
                                        this->d_cell_radiusedge_ratio.getValue());
-            return countervalue; });
+        //    return countervalue; });
     }
 
     if( !m_com.valid() )

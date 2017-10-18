@@ -1,7 +1,12 @@
 all:
-	python geneticalgo/setup.py build_ext --inplace
-
+	make -C geneticalgo
+	
 clean:
-	rm -f *.so 
-	rm -rf geneticalgo/*.pyc geneticalgo/*.so build geneticalgo/*.c
-	rm geneticalgo/pyxsrc/*.cpp 
+	make clean -C geneticalgo
+	
+xp: xp-clean
+	python shapegenerator.py
+
+xp-clean:
+	rm -rf /tmp/sofa-launcher*
+
