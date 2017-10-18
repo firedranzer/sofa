@@ -58,7 +58,7 @@ def toPythonString(shape):
 
             prm=prm+"Cylinder"+index+"=primitives.Cylinder(sign"+str(index)+",axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
                    +str(index)+"Z,theta"+str(index)+",phi"+str(index)\
-                   +",(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
+                   +", primitives.Point(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
 
         else:
 
@@ -79,13 +79,13 @@ def toPythonString(shape):
 
                 prm=prm+"Ellipsoid"+index+"=primitives.Ellipsoid("+"sign"+str(index)+",axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
                         +str(index)+"Z,theta"+str(index)+",phi"+str(index)\
-                        +",(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
+                        +",  primitives.Point(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
 
             elif type=="frisbee":
 
                 prm=prm+"Frisbee"+index+"=primitives.Frisbee("+"sign"+str(index)+",axis"+str(index)+"X,axis"+str(index)+"Y,axis"\
                             +str(index)+"Z,theta"+str(index)+",phi"+str(index)\
-                            +",(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
+                            +",  primitives.Point(center"+str(index)+"x,center"+str(index)+"y,center"+str(index)+"z))\n\n\n"
 
 
 
