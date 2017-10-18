@@ -5,7 +5,7 @@ project(GeneticAlgo)
 set(HEADER_FILES)
 
 set(SOURCE_FILES
-	main.cpp
+        scenes/accordion/main.cpp
 	)
 
 set(EXTRA_FILES
@@ -14,9 +14,11 @@ set(EXTRA_FILES
     geneticalgo/shapewriter.py
     geneticalgo/generate_expression.py
     geneticalgo/algorithm.py
-    geneticalgo/primitives.pxd
-    geneticalgo/primitives.pyx
-    geneticalgo/setupBasic.py
+    geneticalgo/pyxsrc/primitives.pxd
+    geneticalgo/pyxsrc/primitives.pyx
+    geneticalgo/pyxsrc/primitives2D.pxd
+    geneticalgo/pyxsrc/primitives2D.pyx
+    geneticalgo/setup.py
     geneticalgo/setupLitteral.py
 
     scenes/accordion/main.py
