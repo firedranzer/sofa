@@ -6,7 +6,7 @@ set(HEADER_FILES)
 
 set(SOURCE_FILES
 
-        main.cpp)
+        scenes/accordion/main.cpp)
 
 set(EXTRA_FILES
     shapegenerator.py
@@ -18,6 +18,8 @@ set(EXTRA_FILES
 
     geneticalgo/pyxsrc/primitives.pyx
     geneticalgo/pyxsrc/primitives.pxd
+    geneticalgo/pyxsrc/primitives2D.pyx
+    geneticalgo/pyxsrc/primitives2D.pxd
     geneticalgo/setup.py
 
     scenes/accordion/main.py
