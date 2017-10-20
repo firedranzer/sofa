@@ -44,7 +44,7 @@ def value(expressionTest):
         return (expressionTest.type, expressionTest.const)
 
 
-def expressionToString(expressionTest, dict):
+def expressionToShader(expressionTest, dict):
 
 
     if not isinstance(expressionTest, expression.Expression):
@@ -64,22 +64,22 @@ def expressionToString(expressionTest, dict):
 
             if expressionTest.type == "max" or expressionTest.type == "min":
 
-                temp = expressionToString(expressionTest.left, dict)+  '\n'\
-                     + expressionToString(expressionTest.right, dict)+ "\n"
+                temp = expressionToShader(expressionTest.left, dict)+  '\n'\
+                     + expressionToShader(expressionTest.right, dict)+ "\n"
 
                 return temp + "float  A"+index+" = "+str(expressionTest.type)+"("+dict[value(expressionTest.left)]+","+dict[value(expressionTest.right)]+");"
 
             else:
 
-                temp = expressionToString(expressionTest.left, dict)+  '\n'\
-                     +  expressionToString(expressionTest.right, dict)+ "\n"
+                temp = expressionToShader(expressionTest.left, dict)+  '\n'\
+                     +  expressionToShader(expressionTest.right, dict)+ "\n"
 
                 return temp + "float  A"+index+" = "+dict[value(expressionTest.left)]+str(expressionTest.type) + dict[value(expressionTest.right)]+";"
 
 
         elif isinstance(expressionTest, expression.ExpressionUnary):
 
-            temp = expressionToString(expressionTest.middle, dict)+ '\n'
+            temp = expressionToShader(expressionTest.middle, dict)+ '\n'
 
             return temp + "float  A"+index+" = "+str(expressionTest.type)+"("+dict[value(expressionTest.middle)]+");"
 
@@ -131,10 +131,7 @@ def expressionToPython(expressionTest, dict):
                 return "    A"+index+" = "+str(expressionTest.const)+"   ## "+ expressionTest.type
 
 
-
-
-
-def expressionWriting(expressionTest):
+def expressionWritingShader(expressionTest):
 
     global i
 
@@ -142,15 +139,15 @@ def expressionWriting(expressionTest):
 
     dict={}
 
-    temp = expressionToString(expressionTest, dict)
+    temp = expressionToShader(expressionTest, dict)
 
     temp = temp + "\n\n\n"+"return " + dict[value(expressionTest)]+";"
 
     return temp
 
-def expressionToFile(expressionTest, filename):
+def expressionToFileShader(expressionTest, filename):
 
-    tempString=expressionWriting(expressionTest)
+    tempString=expressionWritingShader(expressionTest)
 
     with open(filename, "w") as litteral_expression:
         litteral_expression.write(tempString)

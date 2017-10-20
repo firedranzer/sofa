@@ -14,14 +14,14 @@ heightTube = 15.0
 radiusTube = 3.0
 thickness = 1.0
 number_of_cavities = 3
-generate_random="OFF"
-type=["ellipsoid","frisbee"]
+generate_random="ON"
+type=["ellipsoid"]#,"frisbee"
 
 mutationType="OFF"
-mutationAxisX="OFF"
-mutationAxisY="OFF"
-mutationAxisZ="OFF"
-mutationRotation="OFF"
+mutationAxisX="ON"
+mutationAxisY="ON"
+mutationAxisZ="ON"
+mutationRotation="ON"
 
 def getNextId():
     global individualId
@@ -237,24 +237,24 @@ def generateIndividual(aType):
 
             if aType=="ellipsoid":
                 if generate_random=="ON":
-                    axisX=max(individual.thickness+0.25, random.uniform((4.0/3.0)*individual.radius,(15.0/3.0)*individual.radius))
-                    axisY=max(individual.thickness+0.25, random.uniform(2.0*individual.thickness,(15.0/3.0)*individual.radius))
+                    axisX=max(individual.thickness+0.25, random.uniform((4.0/3.0)*individual.radius,(10.0/3.0)*individual.radius))
+                    axisY=max(individual.thickness+0.25, random.uniform(2.0*individual.thickness,(10.0/3.0)*individual.radius))
                     axisZ=max(individual.thickness+0.25, (individual.height-0.5)/float((2*number_of_cavities)))
 
                 else:
-                    axisX=max(individual.thickness+0.25, (11.0/3.0)*individual.radius)
-                    axisY=max(individual.thickness+0.25, (11.0/3.0)*individual.radius)
+                    axisX=max(individual.thickness+0.25, (7.0/3.0)*individual.radius)
+                    axisY=max(individual.thickness+0.25, (7.0/3.0)*individual.radius)
                     axisZ=max(individual.thickness+0.25, (individual.height-0.5)/float((2*number_of_cavities)))
 
             else:
                 if generate_random=="ON":
-                    axisX=max(individual.thickness+0.25, random.uniform((4.0/3.0)*individual.radius,(15.0/3.0)*individual.radius))
-                    axisY=max(individual.thickness+0.25, random.uniform(2.0*individual.thickness,(15.0/3.0)*individual.radius))
+                    axisX=max(individual.thickness+0.25, random.uniform((4.0/3.0)*individual.radius,(10.0/3.0)*individual.radius))
+                    axisY=max(individual.thickness+0.25, random.uniform(2.0*individual.thickness,(10.0/3.0)*individual.radius))
                     axisZ=max(individual.thickness+0.25, 2.0*(individual.height-0.5)/float((2*number_of_cavities)))
 
                 else:
-                    axisX=max(individual.thickness+0.25, (11.0/3.0)*individual.radius)
-                    axisY=max(individual.thickness+0.25, (11.0/3.0)*individual.radius)
+                    axisX=max(individual.thickness+0.25, (7.0/3.0)*individual.radius)
+                    axisY=max(individual.thickness+0.25, (7.0/3.0)*individual.radius)
                     axisZ=max(individual.thickness+0.25, 2.0*(individual.height-0.5)/float((2*number_of_cavities)))
 
             cavity=[height,aType,axisX,axisY,axisZ]
