@@ -2,12 +2,14 @@ import geneticalgo
 import random
 import copy
 import os
+import json
 import math
 import accordionutils as accordion
 from geneticalgo import algorithm
 from geneticalgo import primitives
 from geneticalgo import shapewriter
 from sofalauncher import launcher
+
 
 individualId = 0
 heightTube = 15.0
@@ -27,6 +29,19 @@ def getNextId():
     global individualId
     individualId+=1
     return individualId
+
+def getJSONFragmentFrom(file):
+
+    with open(file, "r") as source:
+        for line in source:
+            if "JSON : " in line:
+                print line
+                data = json.loads(line[7:])
+                return data
+
+
+
+
 
 
 class AccordionIndividual(algorithm.Individual):
@@ -239,12 +254,12 @@ def generateIndividual(aType):
                 if generate_random=="ON":
                     axisX=max(individual.thickness+0.25, random.uniform((4.0/3.0)*individual.radius,(10.0/3.0)*individual.radius))
                     axisY=max(individual.thickness+0.25, random.uniform(2.0*individual.thickness,(10.0/3.0)*individual.radius))
-                    axisZ=max(individual.thickness+0.25, (individual.height-0.5)/float((2*number_of_cavities)))
+                    axisZ=max(individual.thickness+0.25, 1.5*(individual.height-0.5)/float((2*number_of_cavities)))
 
                 else:
                     axisX=max(individual.thickness+0.25, (7.0/3.0)*individual.radius)
                     axisY=max(individual.thickness+0.25, (7.0/3.0)*individual.radius)
-                    axisZ=max(individual.thickness+0.25, (individual.height-0.5)/float((2*number_of_cavities)))
+                    axisZ=max(individual.thickness+0.25, 1.5*(individual.height-0.5)/float((2*number_of_cavities)))
 
             else:
                 if generate_random=="ON":
@@ -283,7 +298,7 @@ def evaluationFunc(pop):
     global thickness
     print("Evaluation Function "+str(len(pop)))
     basedir=os.path.dirname(__file__)
-    bestscore = 0
+    bestscore = -100000000000000000000000000000000000000000000000000000000000000
 
     filename=[]
     for ind in pop:
@@ -311,12 +326,13 @@ def evaluationFunc(pop):
                           "INDIVIDUAL": str(ind.id),
                           "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":1000,
                           "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__),
-                          "THICKNESS" : thickness*0.25
+                          "THICKNESS" : thickness
                           } )
 
     results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
 
     for res in results:
+
                print("Results: ")
                print("    directory: "+res["directory"])
                print("        scene: "+res["scene"])
@@ -327,10 +343,16 @@ def evaluationFunc(pop):
     for i in range(len(filename)):
         f1, f2, ind = filename[i]
         ind.results = results[i]
+        data = getJSONFragmentFrom( ind.results["logfile"] )
+        Z0 = data["Z0"]
+        Zmax = data["Zmax"]
+        V0 = data["V0"]
+        ind.level=Zmax/max(1.0,Z0)-V0
+
+
 
     ## Wait here the results.
     for f1,f2,ind in filename:
-        ind.level = random.uniform(0,random.uniform(0,5))
         if ind.level > bestscore:
             bestscore = ind.level
 

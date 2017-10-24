@@ -97,6 +97,8 @@ class GeneticAlgorithm(object):
         if wdir == None:
             return
         with HTML() as h:
+            with h.head as he:
+                he.meta("metaName", "content-type", "text/html; charset=ISO-8859-1")
             with h.body as b:
                 b.h1("Population "+str(gen.id))
                 b.p("Size:"+str(len(gen)))

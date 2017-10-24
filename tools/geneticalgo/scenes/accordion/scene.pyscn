@@ -16,7 +16,7 @@ def createScene(rootNode):
                 rootNode.createObject('FreeMotionAnimationLoop')
                 rootNode.createObject('GenericConstraintSolver', maxIterations='100', printLog='1', tolerance = '0.0000001')
 
-#                rootNode.createObject('PythonScriptController', filename="controller.py", classname="controller")
+                rootNode.createObject('PythonScriptController', filename="controller.py", classname="controller")
 
                 shape = rootNode.createChild("Shape")
                 shape.createObject("EulerImplicitSolver", name="cg_odesolver",  printLog="0")
@@ -27,7 +27,7 @@ def createScene(rootNode):
                 shape.createObject("CustomField", name="shapeinv", function="shapeinv.evalField")
 
                 #Mesh component
-                mesh=shape.createObject("MeshGenerationFromImplicitShape", meshing_center="0 0 $THICKNESS", meshing_radius="30", name="mesh", facet_size="0.8", cell_size="1.4", scalarfield="@shape", drawTetras="true")
+                mesh=shape.createObject("MeshGenerationFromImplicitShape", meshingzone_center="0 0 $THICKNESS", meshingzone_radius="30", name="mesh", facet_size="0.8", cell_size="1.4", scalarfield="@shape", drawTetras="true")
                 #shape.createObject("PointCloudImplicitFieldVisualization", field="@shape", box="-10 -10 -2 10 10 20")
 
                 #accordion"
@@ -41,8 +41,7 @@ def createScene(rootNode):
                 
                 accordion.createObject('MechanicalObject', name='tetras', src="@container", template='Vec3d', showIndices='false', showIndicesScale='4e-5', rx='0', dz='0')
                 accordion.createObject('UniformMass', totalmass='0.5')
-                accordion.createObject('TetrahedronFEMForceField', template='Vec3d', name='FEM', method='large', poissonRatio='0.3',  youngModulus='18000')
-		  
+                accordion.createObject('TetrahedronFEMForceField', template='Vec3d', name='FEM', method='large', poissonRatio='0.3',  youngModulus='18000')  
                 accordion.createObject('BoxROI', name='boxROI', box='-10 -10 0  10 10 0.5', drawBoxes='true', position="@tetras.rest_position", tetrahedra="@container.tetrahedra")
                 accordion.createObject('RestShapeSpringsForceField', points='@boxROI.indices', stiffness='1e12')
                 
@@ -50,12 +49,12 @@ def createScene(rootNode):
                 accordion.createObject('LinearSolverConstraintCorrection', solverName='preconditioner')
 
 #                accordion/cavity
-#               cavity = accordion.createChild('cavity')
-#               cavity.createObject('MeshSTLLoader', name='loader', filename='cylinder.stl')
-#               cavity.createObject('Mesh', src='@loader', name='topo')
-#               cavity.createObject('MechanicalObject', name='cavity')
-#               cavity.createObject('SurfacePressureConstraint', name="pressure", triangles='@topo.triangles', value='30', valueType="1")
-#               cavity.createObject('BarycentricMapping', name='mapping',  mapForces='false', mapMasses='false')
+                cavity = accordion.createChild('cavity')
+                cavity.createObject('MeshSTLLoader', name='loader', filename='cylinder.stl')
+                cavity.createObject('Mesh', src='@loader', name='topo')
+                cavity.createObject('MechanicalObject', name='cavity')
+                cavity.createObject('SurfacePressureConstraint', name="pressure", triangles='@topo.triangles', value='30', valueType="1")
+                cavity.createObject('BarycentricMapping', name='mapping',  mapForces='false', mapMasses='false')
 
 #                accordion/accordionVisu
                 accordionVisu = accordion.createChild('visu')
