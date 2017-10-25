@@ -3,6 +3,7 @@ import random
 import copy
 import os
 import json
+import sys
 import math
 import accordionutils as accordion
 from geneticalgo import algorithm
@@ -41,7 +42,7 @@ def getJSONFragmentFrom(file):
                 data = json.loads(line[7:])
                 return data
 
-
+    return None
 
 
 
@@ -300,7 +301,7 @@ def evaluationFunc(pop):
     global thickness
     print("Evaluation Function "+str(len(pop)))
     basedir=os.path.dirname(__file__)
-    bestscore = -100000000000000000000000000000000000000000000000000000000000000
+    bestscore = -float(sys.maxint)
 
     filename=[]
     for ind in pop:
@@ -346,10 +347,18 @@ def evaluationFunc(pop):
         f1, f2, ind = filename[i]
         ind.results = results[i]
         data = getJSONFragmentFrom( ind.results["logfile"] )
-        Z0 = data["Z0"]
-        Zmax = data["Zmax"]
-        V0 = data["V0"]
-        ind.level=Zmax/max(1.0,Z0)-V0/max(1.0,Vref)
+
+
+        if data == None:
+            print "SOFA CRASHED DOWN!!  TRY TO LAUNCH MANUALLY scene.pyscn"
+            ind.level = - float(sys.maxint)
+        else:
+
+            Z0 = data["Z0"]
+            Zmax = data["Zmax"]
+            V0 = data["V0"]
+            ind.level=Zmax/max(1.0,Z0)-V0/max(1.0,Vref)
+
 
 
 

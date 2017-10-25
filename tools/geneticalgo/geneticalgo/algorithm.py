@@ -156,7 +156,7 @@ class GeneticAlgorithm(object):
 
                 ### Replace the current generation with a new one.
                 currgen = selectionFunc( (nextgen+currgen), self.params )
-                currscore = -10000000000000000000000
+                currscore = -sys.maxint
                 for ind in currgen:
                     if currscore < ind.level:
                         currscore = ind.level
