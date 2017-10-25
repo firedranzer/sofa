@@ -26,6 +26,9 @@ from html import HTML
 import contextlib
 import os
 
+import expression
+import expressionToString
+
 @contextlib.contextmanager
 def inDirectory(path):
     """A context manager which changes the working directory to the given
@@ -93,15 +96,42 @@ class GeneticAlgorithm(object):
         self.populations = []
         self.params = params
 
+    def fragmentCode(self, shapeExpression):
+        data = ""
+        with open('fragmentCodePartOne', 'r') as myfile:
+            data+=myfile.read().replace("SHAPEID", id)
+        data += shapeExpression
+        with open('fragmentCodePartTwo', 'r') as myfile:
+            data+=myfile.read().replace("SHAPEID", id)
+        return data
+
+    def vertexCode(self):
+        return "attribute vec2 position;void main(void){gl_Position = vec4(position, 1.0, 1.0);}"
+
+    def webGLJSCode(self):
+        with open('webGLJSCode', 'r') as myfile:
+            data=myfile.read()
+        return data
+
+
     def saveHTMLGeneration(self, gen, score, wdir):
         if wdir == None:
             return
-        with HTML() as h:
-            with h.body as b:
+        with HTML().html as h:
+            with h.head as head:
+                for ind in gen.pop:
+                    shape, shapeMinus = getShapeFromInd(ind)
+                    shaderShape = expressionToString.expressionWritingShader(expression.expression(shape))
+                    with head.script(id="shader-fscanvas"+str(ind.id), type="x-shader/x-fragment") as scriptFragment :
+                        scriptFragment.text(self.fragmentCode(shaderShape), False)
+                head.script(self.vertexCode(), id="shader-vs", type="x-shader/x-vertex")
+                head.script(self.webGLJSCode(), type="text/javascript")
+            with h.body(onload="webGLStart();") as b:
                 b.h1("Population "+str(gen.id))
                 b.p("Size:"+str(len(gen)))
                 b.p("Score: "+str(score))
                 for ind in gen.pop:
+                    b.canvas("", id="canvas"+str(ind.id), style="border: none;", width="425", height="330")
                     a = b.p("Individual "+str(ind.id)+". Score: "+str(ind.level)).a(ind.results["directory"], href=ind.results["directory"])
 
         f=open("generation_"+str(gen.id)+".html", "w")

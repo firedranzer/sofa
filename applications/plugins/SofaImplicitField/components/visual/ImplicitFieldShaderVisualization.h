@@ -61,6 +61,8 @@ using sofa::component::geometry::_customfield_::GLSLCodeFragment;
 using sofa::core::DataEngine ;
 using sofa::core::DataTracker ;
 
+#include <SofaBaseVisual/InteractiveCamera.h>
+using sofa::component::visualmodel::InteractiveCamera;
 
 namespace sofa
 {

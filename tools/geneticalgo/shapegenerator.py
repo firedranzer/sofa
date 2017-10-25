@@ -13,6 +13,8 @@
 
 import sys, os
 import webbrowser
+from shutil import copyfile
+
 
 
 ## Récupère le chemin absolu du réportoire courant et l'ajoute aux chemin où python cherche
@@ -35,11 +37,11 @@ if len(sys.argv) !=2:
 else:
     workdir = sys.argv[1]
 print("Saving results in "+workdir)
-algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":4,
+algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":1,
                                    "crossTx":2,
                                    "nbIndMutated":4,
                                    "nbMutationsPerInd":4})
-algo.start(4,
+algo.start(1,
            scenes.accordion.main.generateFunc,
            scenes.accordion.main.mutationFunc,
            scenes.accordion.main.crossFunc,

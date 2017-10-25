@@ -16,7 +16,7 @@ import primitives
 import primitives2D
 
 def getDefaultHeader():
-    return "import primitives"
+    return "import primitives\nimport expression\nimport expressionToString"
 
 def toPythonString(shape):
     temp=getDefaultHeader()
@@ -95,7 +95,7 @@ def toPythonString(shape):
         temp+=listWritingB[j]+"\n\n\n"
 
 
-    temp+="#Expression  of the IMPLICIT FIELD is \n"+"expression="+shape.toWriting()+"\n\n\n"
+    temp+="#Expression  of the IMPLICIT FIELD is \n"+"shape = "+shape.toWriting()+"\n\n\n"
 
     return temp
 
@@ -131,4 +131,3 @@ if __name__ == "__main__":
     ind=primitives.Difference(primitives.Intersection(primitives.Union(primitives.Union(primitives.Union(ellipsoid1,ellipsoid2), ellipsoid3), cylinder1), cylinder2), frisbee1)
 
 #    writeInFile(ind,"essai.pyx")
-
