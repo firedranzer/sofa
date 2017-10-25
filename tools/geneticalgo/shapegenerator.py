@@ -37,11 +37,11 @@ if len(sys.argv) !=2:
 else:
     workdir = sys.argv[1]
 print("Saving results in "+workdir)
-algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":1,
-                                   "crossTx":2,
-                                   "nbIndMutated":4,
-                                   "nbMutationsPerInd":4})
-algo.start(1,
+algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":2,
+                                   "crossTx":1,
+                                   "nbIndMutated":1,
+                                   "nbMutationsPerInd":1})
+algo.start(20,
            scenes.accordion.main.generateFunc,
            scenes.accordion.main.mutationFunc,
            scenes.accordion.main.crossFunc,

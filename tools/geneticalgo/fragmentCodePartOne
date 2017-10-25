@@ -1,0 +1,15 @@
+  precision mediump float;
+
+            uniform vec2 resolution;
+            uniform float time;
+
+            const int MAX_MARCHING_STEPS = 255;
+            const float MIN_DIST = 0.0;
+            const float MAX_DIST = 100.0;
+            const float EPSILON = 0.00001;
+
+            vec4 map( in vec3 pos )
+            {
+                float x = pos.x;
+                float y = pos.y;
+                float z = pos.z;

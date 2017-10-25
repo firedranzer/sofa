@@ -26,8 +26,12 @@ from html import HTML
 import contextlib
 import os
 
-import expression
-import expressionToString
+import expression, expressionToString
+
+import scenes.accordion.accordionutils as accordion
+
+def getShapeFromInd(ind):
+    return accordion.accordionFreeDimension(ind, ind.height, ind.radius, ind.thickness, ind.listCavities)
 
 @contextlib.contextmanager
 def inDirectory(path):
@@ -49,7 +53,7 @@ class Individual(object):
         self.id = None
 
 def key_level(ind):
-    return ind.level
+    return - ind.level
 
 def key_index(ind):
     return ind.id
@@ -119,8 +123,11 @@ class GeneticAlgorithm(object):
             return
         with HTML().html as h:
             with h.head as head:
+                print("################################")
                 for ind in gen.pop:
+                    print ind
                     shape, shapeMinus = getShapeFromInd(ind)
+                    print shape
                     shaderShape = expressionToString.expressionWritingShader(expression.expression(shape))
                     with head.script(id="shader-fscanvas"+str(ind.id), type="x-shader/x-fragment") as scriptFragment :
                         scriptFragment.text(self.fragmentCode(shaderShape), False)
@@ -184,7 +191,7 @@ class GeneticAlgorithm(object):
 
                 ### Replace the current generation with a new one.
                 currgen = selectionFunc( (nextgen+currgen), self.params )
-                currscore = 0
+                currscore = -sys.maxint
                 for ind in currgen:
                     if currscore < ind.level:
                         currscore = ind.level

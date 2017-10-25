@@ -45,7 +45,7 @@ class SerialLauncher(Launcher):
                         logfile.write(astdout)
                         logfile.write("========= STDERR-LOG============\n")
                         logfile.write(astderr) 
-                        
+                        logfile.close()
                         results.append({
                                 "directory" : directory,
                                 "scene" : scene,
@@ -91,7 +91,7 @@ class ParallelLauncher(Launcher):
                         logfile.write(astdout)
                         logfile.write("========= STDERR-LOG============\n")
                         logfile.write(astderr) 
-                        
+                        logfile.close()
                         #logfile.write("========== MATCH-LOG ===========\n")
                         #logfile.write(str(filtering(astdout)))                        
                                                 
@@ -155,9 +155,9 @@ class SSHLauncher(Launcher):
                         logfile.write(astdout)
                         logfile.write("========= STDERR-LOG============\n")
                         logfile.write(astderr) 
-                        
+
                         logfile.write("========== MATCH-LOG ===========\n")
-                                                
+                        logfile.close()
                         self.pendingtask.task_done()
                         
                                 
