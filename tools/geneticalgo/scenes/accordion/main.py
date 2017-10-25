@@ -19,6 +19,8 @@ number_of_cavities = 3
 generate_random="ON"
 type=["ellipsoid"]#,"frisbee"
 
+Vref = 35.0
+
 mutationType="OFF"
 mutationAxisX="ON"
 mutationAxisY="ON"
@@ -35,7 +37,7 @@ def getJSONFragmentFrom(file):
     with open(file, "r") as source:
         for line in source:
             if "JSON : " in line:
-                print line
+                print line[7:]
                 data = json.loads(line[7:])
                 return data
 
@@ -306,7 +308,7 @@ def evaluationFunc(pop):
 
         ### return (shape,shapeMinus)
         ###
-        fend =  "def evalField(x,y,z): \n\treturn expression.eval(primitives.Point(x,y,z))"
+        fend =  "def evalField(x,y,z): \n\treturn shape.eval(primitives.Point(x,y,z))"
         f1 = shapewriter.toPythonString(shape) + fend
         f2 = shapewriter.toPythonString(shapeMinus) + fend
 
@@ -324,7 +326,7 @@ def evaluationFunc(pop):
         for f1,f2,ind in filename:
             runs.append( {"GENERATION": str(pop.id),
                           "INDIVIDUAL": str(ind.id),
-                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":1000,
+                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":10,
                           "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__),
                           "THICKNESS" : thickness
                           } )
@@ -347,7 +349,7 @@ def evaluationFunc(pop):
         Z0 = data["Z0"]
         Zmax = data["Zmax"]
         V0 = data["V0"]
-        ind.level=Zmax/max(1.0,Z0)-V0
+        ind.level=Zmax/max(1.0,Z0)-V0/max(1.0,Vref)
 
 
 

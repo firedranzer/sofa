@@ -46,7 +46,7 @@ class Individual(object):
         self.id = None
 
 def key_level(ind):
-    return ind.level
+    return - ind.level
 
 def key_index(ind):
     return ind.id
@@ -156,7 +156,7 @@ class GeneticAlgorithm(object):
 
                 ### Replace the current generation with a new one.
                 currgen = selectionFunc( (nextgen+currgen), self.params )
-                currscore = 0
+                currscore = -10000000000000000000000
                 for ind in currgen:
                     if currscore < ind.level:
                         currscore = ind.level

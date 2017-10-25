@@ -16,7 +16,7 @@ import primitives
 import primitives2D
 
 def getDefaultHeader():
-    return "import primitives"
+    return "import primitives\nimport expression\nimport expressionToString"
 
 def toPythonString(shape):
     temp=getDefaultHeader()
@@ -95,7 +95,9 @@ def toPythonString(shape):
         temp+=listWritingB[j]+"\n\n\n"
 
 
-    temp+="#Expression  of the IMPLICIT FIELD is \n"+"expression="+shape.toWriting()+"\n\n\n"
+    temp+="#Expression  of the IMPLICIT FIELD is \n"+"shape = "+shape.toWriting()+"\n\n\n"
+
+    temp+= "expressionToShader = expressionToString.expressionWritingShader(expression.expression(shape))\n\n\n"
 
     return temp
 
