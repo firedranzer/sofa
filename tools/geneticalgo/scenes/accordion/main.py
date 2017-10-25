@@ -12,6 +12,7 @@ from geneticalgo import shapewriter
 from sofalauncher import launcher
 
 
+
 individualId = 0
 heightTube = 15.0
 radiusTube = 3.0
@@ -38,7 +39,6 @@ def getJSONFragmentFrom(file):
     with open(file, "r") as source:
         for line in source:
             if "JSON : " in line:
-                print line[7:]
                 data = json.loads(line[7:])
                 return data
 

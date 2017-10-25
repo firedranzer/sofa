@@ -12,10 +12,13 @@
 ####################################################################################################
 
 import sys, os
-
+import geneticalgo.expression as expression
+import geneticalgo.expressionToString as expressionToString
+import geneticalgo.primitives as primitives
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../")
 
-import primitives
+#import primitives
+
 
 def create(self, height, radius, thickness):
         if thickness > radius:
@@ -84,9 +87,10 @@ def accordionFreeDimension(self, height, radius, thickness, listCavities):
             shapePlus=primitives.Union(shapePlus,primitives.Frisbee("+",axisX,axisY,axisZ,0.0,0.0,primitives.Point(0.0,0.0,height)))
             shapeMinus=primitives.Union(shapeMinus,primitives.Frisbee("+",axisX-thickness,axisY-thickness,axisZ-thickness,0.0,0.0,primitives.Point(0.0,0.0,height)))
 
-    shape=primitives.Difference(shapePlus,shapeMinus)
 
-    return (shape,shapeMinus)
+    shape = primitives.Difference(shapePlus,shapeMinus)
+
+    return shape, shapeMinus
 
 
 def accordionRecoveringGiven(heightTube,radiusTube, thickness, typeCavities,
@@ -144,3 +148,4 @@ def accordionUniform(heightTube,radiusTube, thickness, typeCavities, numberCavit
 
 
     return accordionRecoveringGiven(heightTube,radiusTube,thickness,typeCavities,listheightsJoiningPoints,listAxesX,listAxesY,Zrecovering)
+

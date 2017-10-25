@@ -30,8 +30,16 @@ import expression, expressionToString
 
 import scenes.accordion.accordionutils as accordion
 
-def getShapeFromInd(ind):
-    return accordion.accordionFreeDimension(ind, ind.height, ind.radius, ind.thickness, ind.listCavities)
+def shaderInd(ind):
+
+    shape, shapeMinus = accordion.accordionFreeDimension(ind, ind.height, ind.radius, ind.thickness, ind.listCavities)
+
+    expressionTest = expression.expression(shape)
+
+    shaderShape = expressionToString.expressionWritingShader(expressionTest)
+
+    return shaderShape
+
 
 @contextlib.contextmanager
 def inDirectory(path):
@@ -100,13 +108,13 @@ class GeneticAlgorithm(object):
         self.populations = []
         self.params = params
 
-    def fragmentCode(self, shapeExpression):
+    def fragmentCode(self, shapeExpression, id):
         data = ""
         with open('fragmentCodePartOne', 'r') as myfile:
-            data+=myfile.read().replace("SHAPEID", id)
+            data+=myfile.read().replace("SHAPEID", str(id))
         data += shapeExpression
         with open('fragmentCodePartTwo', 'r') as myfile:
-            data+=myfile.read().replace("SHAPEID", id)
+            data+=myfile.read().replace("SHAPEID", str(id))
         return data
 
     def vertexCode(self):
@@ -125,12 +133,9 @@ class GeneticAlgorithm(object):
             with h.head as head:
                 print("################################")
                 for ind in gen.pop:
-                    print ind
-                    shape, shapeMinus = getShapeFromInd(ind)
-                    print shape
-                    shaderShape = expressionToString.expressionWritingShader(expression.expression(shape))
+                    shaderShape = shaderInd(ind)
                     with head.script(id="shader-fscanvas"+str(ind.id), type="x-shader/x-fragment") as scriptFragment :
-                        scriptFragment.text(self.fragmentCode(shaderShape), False)
+                        scriptFragment.text(self.fragmentCode(shaderShape, str(ind.id)), False)
                 head.script(self.vertexCode(), id="shader-vs", type="x-shader/x-vertex")
                 head.script(self.webGLJSCode(), type="text/javascript")
             with h.body(onload="webGLStart();") as b:
