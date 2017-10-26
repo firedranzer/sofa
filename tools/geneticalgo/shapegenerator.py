@@ -49,7 +49,7 @@ algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":2,
                                    "crossTx":1,
                                    "nbIndMutated":1,
                                    "nbMutationsPerInd":1})
-algo.start(20,
+algo.start(2,
            scenes.accordion.main.generateFunc,
            scenes.accordion.main.mutationFunc,
            scenes.accordion.main.crossFunc,

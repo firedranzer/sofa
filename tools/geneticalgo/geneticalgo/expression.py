@@ -110,6 +110,7 @@ class ExpressionBinary(Expression):
 
         if not (isinstance(left, Expression) and isinstance(right, Expression)):
             print "left"+type(left)
+            print "right"+type(right)
             raise TypeError, "not an Expression"
         if left == right:
             raise ValueError, "the two sides are equal, you would not get a tree!"
@@ -159,7 +160,6 @@ def getXYZ(theta, phi, center, type, index):
 
     global j
     j+=1
-    print j
 
 
     A = ExpressionBinary("*",\
@@ -384,9 +384,6 @@ def expressionTwistShape(shape):
 
 def expressionGeometric_Transformation(expressionShape, theta, phi, center, type, index, spacing = ""):
 
-
-    print spacing + "Transformation "+ str(expressionShape)
-
     if isinstance(expressionShape, ExpressionBinary):
         expressionShape.left =  expressionGeometric_Transformation(expressionShape.left, theta, phi, center, type, index, spacing+" ")
         expressionShape.right = expressionGeometric_Transformation(expressionShape.right, theta, phi, center, type, index, spacing+" ")
@@ -400,16 +397,12 @@ def expressionGeometric_Transformation(expressionShape, theta, phi, center, type
 
         if expressionShape.const == "x":
 
-            print spacing+"x"
-
             expressionShape = x
 
         elif expressionShape.const == "y":
-            print spacing+"y"
             expressionShape = y
 
         elif expressionShape.const == "z":
-            print spacing+"z"
             expressionShape = z
 
 
@@ -424,8 +417,6 @@ def expressionGeometric_TransformationShape(shape):
 
 
     expressionShape = expression(shapeTemp)
-    print "TShape1 "+ expressionShape.display()
-    print "TShape2 "+ str(shape)
     return expressionGeometric_Transformation(expressionShape, shape.theta, shape.phi, shape.center, shape.type, shape.index)
 
 
@@ -459,8 +450,6 @@ def expressionExtrusionOfShape2D(shape):
 
 
 def expression(shape):
-
-    print "Expression "+ str(shape)
 
     if not isinstance(shape, primitives.Shape):
         raise TypeError, "I need a shape of type primtives.Shape"
