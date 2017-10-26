@@ -44,11 +44,12 @@ namespace engine
 {
 namespace _surfacemeshgenerationfromimplicit_
 {
-
+using sofa::defaulttype::Vec4f ;
 using sofa::component::geometry::ScalarField ;
-typedef sofa::core::topology::BaseMeshTopology::SeqTetrahedra SeqTetrahedra;
-typedef sofa::core::topology::BaseMeshTopology::Tetra Tetra;
+typedef sofa::core::topology::BaseMeshTopology::SeqTriangles SeqTriangles;
+typedef sofa::core::topology::BaseMeshTopology::Triangle Triangle;
 typedef sofa::defaulttype::Vector3 Coord;
+typedef sofa::defaulttype::Vector3 Vector3;
 typedef sofa::helper::vector<Coord> VecCoord;
 
 using namespace sofa::core;
@@ -71,6 +72,7 @@ public:
     virtual void computeBBox(const ExecParams *, bool) override ;
 
     virtual void update(bool forceUpdate=false) ;
+    void generateSurfaceMesh() ;
 
     Data<sofa::defaulttype::BoundingBox> d_box ;
 
@@ -80,7 +82,18 @@ private:
 
     /// Link
     typedef SingleLink< SurfaceMeshGenerationFromImplicitShape, ScalarField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> LinkGrid;
-    LinkGrid in_scalarfield;
+    LinkGrid l_in_scalarfield;
+
+    /// Output
+    Data<VecCoord>      d_out_points;
+    Data<SeqTriangles>  d_out_triangles;
+
+    Data<double> d_facetangle;
+    Data<double> d_facetsize;
+    Data<double> d_facetdistance;
+
+    Data<double> d_radius ;
+    Data<sofa::defaulttype::Vec3d>  d_center ;
 
     std::shared_future<unsigned int> m_com;
 };
