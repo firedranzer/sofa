@@ -37,6 +37,14 @@ if len(sys.argv) !=2:
 else:
     workdir = sys.argv[1]
 print("Saving results in "+workdir)
+
+copyfile(os.getcwd() + "/fragmentCodePartOne", workdir + "/fragmentCodePartOne")
+print("copied: " + os.getcwd() + "/fragmentCodePartOne to: " + workdir + "/fragmentCodePartOne")
+copyfile(os.getcwd() + "/fragmentCodePartTwo", workdir + "/fragmentCodePartTwo")
+print("copied: " + os.getcwd() + "/fragmentCodePartTwo to: " + workdir + "/fragmentCodePartTwo")
+copyfile(os.getcwd() + "/webGLJSCode", workdir + "/webGLJSCode")
+print("copied: " + os.getcwd() + "/webGLJSCode to: " + workdir + "/webGLJSCode")
+
 algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":2,
                                    "crossTx":1,
                                    "nbIndMutated":1,

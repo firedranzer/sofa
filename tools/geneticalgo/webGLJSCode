@@ -134,5 +134,5 @@
 			var aCanvas = {name: canvas[i].getAttribute('id'), g:gl, sh: shaderProgram, vp: vertexPositionBuffer};
 			canvasList.push(aCanvas);
 		}
-		render()
+                render();
 	}

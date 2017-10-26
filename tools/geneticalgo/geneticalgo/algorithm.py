@@ -131,8 +131,10 @@ class GeneticAlgorithm(object):
                     shaderShape = expressionToString.expressionWritingShader(expression.expression(shape))
                     with head.script(id="shader-fscanvas"+str(ind.id), type="x-shader/x-fragment") as scriptFragment :
                         scriptFragment.text(self.fragmentCode(shaderShape), False)
-                head.script(self.vertexCode(), id="shader-vs", type="x-shader/x-vertex")
-                head.script(self.webGLJSCode(), type="text/javascript")
+                    with head.script(id="shader-vs", type="x-shader/x-vertex") as scriptVertex :
+                        scriptVertex.text(self.vertexCode(), False)
+                    with head.script(type="text/javascript") as scriptWebGL :
+                        scriptWebGL.text(self.webGLJSCode(), False)
             with h.body(onload="webGLStart();") as b:
                 b.h1("Population "+str(gen.id))
                 b.p("Size:"+str(len(gen)))
