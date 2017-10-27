@@ -61,7 +61,7 @@ SurfaceMeshGenerationFromScalarField::SurfaceMeshGenerationFromScalarField()
       mGridMax(initData(&mGridMax, Vec3d(1,1,1),"max","Grid Max"))
       , d_out_points(initData(&d_out_points, "outputPoints", "position of the tiangles vertex"))
       , d_out_triangles(initData(&d_out_triangles, "outputTriangles", "list of triangles"))
-
+      , d_visuCavity(initData(&d_visuCavity,true, "visuCavity","Allows to display the cavity surface"))
 {
 }
 
@@ -81,10 +81,17 @@ static bool inited = false ;
 
 void SurfaceMeshGenerationFromScalarField::draw(const VisualParams* vparams)
 {
+
+
     if(!inited){
         //if( l_field.get() != 0 ){
             generateSurfaceMesh();
         //}
+    }
+
+    if(!d_visuCavity.getValue())
+    {
+        return;
     }
 
     //auto& box = d_box.getValue();

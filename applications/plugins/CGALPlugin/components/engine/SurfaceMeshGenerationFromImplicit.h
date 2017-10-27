@@ -94,6 +94,7 @@ private:
 
     Data<double> d_radius ;
     Data<sofa::defaulttype::Vec3d>  d_center ;
+    Data<bool> d_visuCavity;
 
     std::shared_future<unsigned int> m_com;
 };

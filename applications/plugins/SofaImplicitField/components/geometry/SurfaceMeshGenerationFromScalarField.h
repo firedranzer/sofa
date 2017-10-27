@@ -125,6 +125,7 @@ protected:
     /// Output
     Data<VecCoord>      d_out_points;
     Data<SeqTriangles>  d_out_triangles;
+    Data<bool> d_visuCavity;
 
     Data < sofa::helper::vector<CubeData> > planes;
     typename sofa::helper::vector<CubeData>::iterator P0; /// Pointer to first plane

@@ -87,8 +87,8 @@
             void main()
             {
                 vec3 viewDir = rayDirection(45.0, resolution.xy, gl_FragCoord.xy);
-                mat3 viewToWorld = viewMatrix(vec3(sin(time) * 3.0, sin(time)*2.0, -5.0 ), vec3(0.0), vec3(0.0, 1.0, 0.0));
+                mat3 viewToWorld = viewMatrix(vec3(sin(time) * 3.0, sin(time)*2.0, -15.0 ), vec3(0.0), vec3(0.0, 1.0, 0.0));
                 vec3 worldDir = viewToWorld * viewDir;
-                gl_FragColor = vec4( render( vec3(sin(time) * 3.0, sin(time)*2.0, -5.0 ), worldDir ), 1.0 );
+                gl_FragColor = vec4( render( vec3(sin(time) * 3.0, sin(time)*2.0, -15.0 ), worldDir ), 1.0 );
 
             }

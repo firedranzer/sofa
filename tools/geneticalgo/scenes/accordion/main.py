@@ -21,7 +21,7 @@ number_of_cavities = 3
 generate_random="ON"
 type=["ellipsoid"]#,"frisbee"
 
-Vref = 35.0
+Vref = 1160.0
 
 mutationType="OFF"
 mutationAxisX="ON"
@@ -327,7 +327,7 @@ def evaluationFunc(pop):
         for f1,f2,ind in filename:
             runs.append( {"GENERATION": str(pop.id),
                           "INDIVIDUAL": str(ind.id),
-                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":10,
+                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":50,
                           "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__),
                           "THICKNESS" : thickness
                           } )

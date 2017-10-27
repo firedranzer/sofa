@@ -189,6 +189,7 @@ SurfaceMeshGenerationFromImplicitShape::SurfaceMeshGenerationFromImplicitShape()
                                "of a surface Delaunay ball of this facet. (Default 1.0)"))
     , d_center(initData(&d_center, Vec3d(0,0,0), "meshingzone_center", "The center of the sphere where the meshing is done. (Default = 0,0,0)"))
     , d_radius(initData(&d_radius, (double)2.0,  "meshingzone_radius", "The radius of the sphere where the meshing is done. (Default = 2)"))
+    , d_visuCavity(initData(&d_visuCavity,true, "visuCavity","Allows to display the cavity surface"))
 {
     f_listening.setValue(true);
 }
@@ -359,6 +360,11 @@ void SurfaceMeshGenerationFromImplicitShape::draw(const sofa::core::visual::Visu
     if(m_componentstate != ComponentState::Valid)
     {
         update();
+        return;
+    }
+
+    if(!d_visuCavity.getValue())
+    {
         return;
     }
 

@@ -135,7 +135,7 @@ class GeneticAlgorithm(object):
                 for ind in gen.pop:
                     shaderShape = shaderInd(ind)
                     with head.script(id="shader-fscanvas"+str(ind.id), type="x-shader/x-fragment") as scriptFragment :
-                        scriptFragment.text(self.fragmentCode(shaderShape), False)
+                        scriptFragment.text(self.fragmentCode(shaderShape, str(ind.id)), False)
                     with head.script(id="shader-vs", type="x-shader/x-vertex") as scriptVertex :
                         scriptVertex.text(self.vertexCode(), False)
                     with head.script(type="text/javascript") as scriptWebGL :

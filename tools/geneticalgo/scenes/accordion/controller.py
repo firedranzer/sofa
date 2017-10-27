@@ -20,7 +20,6 @@ class controller(Sofa.PythonScriptController):
     def initGraph(self, node):
         self.node=node
         self.compteur=0
-        self.node.findData('animate').value=1
 
     def onBeginAnimationStep(self,dt):
         print "onEndAnimationStep"
