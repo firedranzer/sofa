@@ -8,12 +8,12 @@ def createScene(rootNode):
                 rootNode.createObject('BackgroundSetting', color="1 1 1")
                 rootNode.createObject('FreeMotionAnimationLoop')
                 rootNode.createObject('GenericConstraintSolver', maxIterations='100', printLog='1', tolerance = '0.0000001')
-
+                rootNode.findData('gravity').value='0 0 -9.810'
                 rootNode.createObject('PythonScriptController', filename="controller.py", classname="controller")
 
                 shape = rootNode.createChild("Shape")
-                shape.createObject("EulerImplicitSolver", name="cg_odesolver",  printLog="0")
-                shape.createObject("CGLinearSolver", template="GraphScattered", name="linear solver",  iterations="25",  tolerance="1e-09", threshold="1e-09")
+                #shape.createObject("EulerImplicitSolver", name="cg_odesolver",  printLog="0", rayleighMass="0.1", rayleighStiffness="0.1")
+                #shape.createObject("CGLinearSolver", template="GraphScattered", name="linear solver",  iterations="25",  tolerance="1e-09", threshold="1e-09")
 
                 shape.createObject("CustomField", name="shape", function="shape.evalField")
                 shape.createObject("CustomField", name="shapeinv",  function="shapeinv.evalField")
@@ -26,7 +26,7 @@ def createScene(rootNode):
                 if True:
                    #accordion"
                     accordion = rootNode.createChild('accordion')
-                    accordion.createObject('EulerImplicit', name='odesolver')
+                    accordion.createObject('EulerImplicit', name='odesolver', rayleighMass="0.1", rayleighStiffness="0.1")
                     accordion.createObject('ShewchukPCGLinearSolver', iterations='15', name='linearsolver', tolerance='1e-5', preconditioners='preconditioner', use_precond='true', update_step='1')
                     accordion.createObject('TetrahedronSetTopologyContainer', position='@../Shape/mesh.outputPoints', tetrahedra='@../Shape/mesh.outputTetras', name='container')
                     accordion.createObject('TetrahedronSetTopologyModifier')
@@ -49,7 +49,7 @@ def createScene(rootNode):
                     cavity.createObject('Mesh', position='@../../Shape/Mesh.outputPoints', triangles='@../../Shape/Mesh.outputTriangles', name='topo')
 
                     cavity.createObject('MechanicalObject', name='cavity')
-                    cavity.createObject('SurfacePressureConstraint', name="pressure", triangles='@topo.triangles', value='900', valueType="1")
+                    cavity.createObject('SurfacePressureConstraint', name="pressure", triangles='@topo.triangles', value='15', valueType="pressure", flipNormal="true")
                     cavity.createObject('BarycentricMapping', name='mapping',  mapForces='true', mapMasses='true')
 
     #                accordion/accordionVisu

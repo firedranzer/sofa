@@ -45,11 +45,11 @@ print("copied: " + os.getcwd() + "/fragmentCodePartTwo to: " + workdir + "/fragm
 copyfile(os.getcwd() + "/webGLJSCode", workdir + "/webGLJSCode")
 print("copied: " + os.getcwd() + "/webGLJSCode to: " + workdir + "/webGLJSCode")
 
-algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":2,
-                                   "crossTx":1,
-                                   "nbIndMutated":1,
-                                   "nbMutationsPerInd":1})
-algo.start(2,
+algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":10,
+                                   "crossTx":10,
+                                   "nbIndMutated":20,
+                                   "nbMutationsPerInd":50})
+algo.start(20,
            scenes.accordion.main.generateFunc,
            scenes.accordion.main.mutationFunc,
            scenes.accordion.main.crossFunc,

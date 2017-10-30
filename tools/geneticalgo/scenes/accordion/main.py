@@ -17,11 +17,11 @@ individualId = 0
 heightTube = 15.0
 radiusTube = 3.0
 thickness = 1.0
-number_of_cavities = 3
+number_of_cavities = 4
 generate_random="ON"
 type=["ellipsoid"]#,"frisbee"
 
-Vref = 1160.0
+Vref = 540.0
 
 mutationType="OFF"
 mutationAxisX="ON"
