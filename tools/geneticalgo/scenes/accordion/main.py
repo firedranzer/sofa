@@ -18,12 +18,12 @@ heightTube = 15.0
 radiusTube = 3.0
 thickness = 1.0
 number_of_cavities = 4
-generate_random="ON"
-type=["ellipsoid"]#,"frisbee"
+generate_random="OFF"
+type=[ "frisbee","ellipsoid"]#
 
-Vref = 540.0
+Vref = 1033.0
 
-mutationType="OFF"
+mutationType="ON"
 mutationAxisX="ON"
 mutationAxisY="ON"
 mutationAxisZ="ON"
@@ -357,7 +357,7 @@ def evaluationFunc(pop):
             Z0 = data["Z0"]
             Zmax = data["Zmax"]
             V0 = data["V0"]
-            ind.level=Zmax/max(1.0,Z0)-V0/max(1.0,Vref)
+            ind.level=Zmax/max(1.0,Z0)-0.00001*abs(V0-Vref)
 
 
 
