@@ -13,9 +13,7 @@
 
 import sys, os
 import webbrowser
-from shutil import copyfile
-
-
+from shutil import copy2
 
 ## Récupère le chemin absolu du réportoire courant et l'ajoute aux chemin où python cherche
 ## les modules
@@ -26,7 +24,6 @@ sys.path.append(os.getcwd())
 sys.path.append( os.path.dirname(os.getcwd()) )
 
 import geneticalgo.algorithm
-
 import  scenes.accordion.main
 
 
@@ -38,14 +35,17 @@ else:
     workdir = sys.argv[1]
 print("Saving results in "+workdir)
 
-copyfile(os.getcwd() + "/fragmentCodePartOne", workdir + "/fragmentCodePartOne")
+if not os.path.exists(workdir):
+    os.mkdir(workdir)
+
+copy2(os.getcwd() + "/fragmentCodePartOne", workdir + "/fragmentCodePartOne")
 print("copied: " + os.getcwd() + "/fragmentCodePartOne to: " + workdir + "/fragmentCodePartOne")
-copyfile(os.getcwd() + "/fragmentCodePartTwo", workdir + "/fragmentCodePartTwo")
+copy2(os.getcwd() + "/fragmentCodePartTwo", workdir + "/fragmentCodePartTwo")
 print("copied: " + os.getcwd() + "/fragmentCodePartTwo to: " + workdir + "/fragmentCodePartTwo")
-copyfile(os.getcwd() + "/webGLJSCode", workdir + "/webGLJSCode")
+copy2(os.getcwd() + "/webGLJSCode", workdir + "/webGLJSCode")
 print("copied: " + os.getcwd() + "/webGLJSCode to: " + workdir + "/webGLJSCode")
 
-algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":2,
+algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":3,
                                    "crossTx":1,
                                    "nbIndMutated":1,
                                    "nbMutationsPerInd":1})

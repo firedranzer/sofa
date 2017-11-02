@@ -1,4 +1,8 @@
 
+	var mouseDown = false;
+	var lastMouseX = null;
+	var lastMouseY = null;
+	var mouseWheel = -10;
 	function initGL(canvas) {
 		var gl;
 		try {
@@ -91,6 +95,7 @@
 	var canvasList =[];
 	function drawScene(gl, vertexPositionBuffer, shaderProgram)
 	{
+
 		timer += 0.01;
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -98,28 +103,50 @@
 		var position;
 		var resolution;
 		var time;
+		var mouse;
 
 		position = gl.getAttribLocation(shaderProgram, "position");
 		gl.enableVertexAttribArray(position);
 		resolution = gl.getUniformLocation(shaderProgram, "resolution");
 		time = gl.getUniformLocation(shaderProgram, "time");
+		mouse = gl.getUniformLocation(shaderProgram, "mouse");
+		mouseWheelLocation = gl.getUniformLocation(shaderProgram, "mouseWheel");
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
 		gl.vertexAttribPointer(position, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		gl.uniform2f(resolution, gl.viewportWidth, gl.viewportHeight);
+		gl.uniform3f(mouse, lastMouseX, lastMouseY, mouseWheel);
 		gl.uniform1f(time, timer);
-
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 	}
 
 	function render()
 	{
 		for (var i=0; i < canvasList.length; i++)
-		{
-			console.log(canvasList[i].name)
+                {
 			drawScene(canvasList[i].g, canvasList[i].vp, canvasList[i].sh);
 		}	
 		window.setTimeout(render, 1000 / 30);
+	}
+
+	function handleMouseMove(event) {
+		if (mouseDown)
+		{
+			lastMouseX = event.clientX;
+			lastMouseY = event.clientY;
+		}
+	}
+
+	function handleMouseDown(event) {
+		mouseDown = true;
+	}
+
+	function handleMouseUp(event) {
+		mouseDown = false;
+	}
+
+	function handleMouseWheel(event) {
+		mouseWheel += (Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail))));
 	}
 
 	function webGLStart(id)
@@ -133,6 +160,10 @@
 			gl.clearColor(0.0, 0.0, 0.0, 1.0);
 			var aCanvas = {name: canvas[i].getAttribute('id'), g:gl, sh: shaderProgram, vp: vertexPositionBuffer};
 			canvasList.push(aCanvas);
+    			canvas[i].addEventListener("mousedown", function(){handleMouseDown(event)});
+    			canvas[i].addEventListener("mouseup", function(){handleMouseUp(event)});
+    			canvas[i].addEventListener("mousemove", function(){handleMouseMove(event)});
+    			canvas[i].addEventListener("mousewheel", function(){handleMouseWheel(event)});
 		}
                 render();
 	}

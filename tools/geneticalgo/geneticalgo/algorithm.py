@@ -126,27 +126,47 @@ class GeneticAlgorithm(object):
         return data
 
 
-    def saveHTMLGeneration(self, gen, score, wdir):
+    def saveHTMLIndividual(self, gen, ind, wdir ):
         if wdir == None:
             return
         with HTML().html as h:
             with h.head as head:
-                print("################################")
-                for ind in gen.pop:
-                    shaderShape = shaderInd(ind)
-                    with head.script(id="shader-fscanvas"+str(ind.id), type="x-shader/x-fragment") as scriptFragment :
-                        scriptFragment.text(self.fragmentCode(shaderShape), False)
-                    with head.script(id="shader-vs", type="x-shader/x-vertex") as scriptVertex :
-                        scriptVertex.text(self.vertexCode(), False)
-                    with head.script(type="text/javascript") as scriptWebGL :
-                        scriptWebGL.text(self.webGLJSCode(), False)
+                shaderShape = shaderInd(ind)
+                with head.script(id="shader-fscanvas"+str(ind.id), type="x-shader/x-fragment") as scriptFragment :
+                    scriptFragment.text(self.fragmentCode(shaderShape, str(ind.id)), False)
+                with head.script(id="shader-vs", type="x-shader/x-vertex") as scriptVertex :
+                    scriptVertex.text(self.vertexCode(), False)
+                with head.script(type="text/javascript") as scriptWebGL :
+                    scriptWebGL.text(self.webGLJSCode(), False)
             with h.body(onload="webGLStart();") as b:
+                b.h1("Population "+str(gen.id)+" Individual: "+str(ind.id))
+                b.canvas("", id="canvas"+str(ind.id), style="border: none;", width="800", height="600")
+                b.p("Score: "+str(ind.level))
+                b.a("Files: " +str(ind.results["directory"]), href=ind.results["directory"], title="Files: " +str(ind.results["directory"]))
+        f=open(ind.results["directory"]+str("/index.html"), "w")
+        f.write(str(h))
+
+
+    def saveHTMLGeneration(self, gen, score, wdir):
+        if wdir == None:
+            return
+        with HTML().html as h:
+            with h.head() as he:
+                with he.style() as s:
+                    s.text("table{border-collapse: collapse;}td, th{border: 1px solid black;}", False)
+            with h.body() as b:
                 b.h1("Population "+str(gen.id))
                 b.p("Size:"+str(len(gen)))
                 b.p("Score: "+str(score))
-                for ind in gen.pop:
-                    b.canvas("", id="canvas"+str(ind.id), style="border: none;", width="425", height="330")
-                    a = b.p("Individual "+str(ind.id)+". Score: "+str(ind.level)).a(ind.results["directory"], href=ind.results["directory"])
+                with h.table() as t:
+                    t.text("<tr><td><b>INDIVIDUALS</b></td><td><b>SCORE</b></td><td><b>LINK</b></td></td>", False)
+                    for ind in gen.pop:
+                        with t.tr() as tr:
+                            tr.td(str(ind.id))
+                            tr.td(str(ind.level))
+                            tr.td("").a(ind.results["directory"], href=ind.results["directory"]+str("/index.html"))
+                            self.saveHTMLIndividual(gen, ind, ind.results["directory"])
+
 
         f=open("generation_"+str(gen.id)+".html", "w")
         f.write(str(h))
