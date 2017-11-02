@@ -106,12 +106,12 @@ typedef Mesh_criteria::Cell_criteria Cell_criteria;
 // Sizing field
 struct Spherical_sizing_field
 {
-  typedef Mesh_domain::Index Index;
-  typedef K::FT FT ;
-  K::FT operator()(const K::Point_3& p, const int, const Index&) const
-  {
-    return abs(cos(p.x()*10))+0.3;
-  }
+    typedef Mesh_domain::Index Index;
+    typedef K::FT FT ;
+    K::FT operator()(const K::Point_3& p, const int, const Index&) const
+    {
+        return abs(cos(p.x()*10))+0.3;
+    }
 };
 
 
@@ -129,25 +129,25 @@ CGAL::Bbox_3 MeshGenerationFromImplicitShape::BoundingBox(double x_min, double y
 MeshGenerationFromImplicitShape::MeshGenerationFromImplicitShape()
     : TrackedComponent(this)
     , d_facetangle(initData(&d_facetangle,(double)30.0,"facet_angle",
-                                                          "This parameter controls the shape of surface facets. Actually, "
-                                                          "it is a lower bound for the angle (in degree) of surface facets.(Default 30.0)"))
+                            "This parameter controls the shape of surface facets. Actually, "
+                            "it is a lower bound for the angle (in degree) of surface facets.(Default 30.0)"))
     , d_facetsize(initData(&d_facetsize,(double)1.0, "facet_size",
-                                                       "This parameter controls the size of surface facets. Actually, each "
-                                                       "surface facet has a surface Delaunay ball which is a ball circumscribing "
-                                                       "the surface facet and centered on the surface patch. (Default 1.0)"))
+                           "This parameter controls the size of surface facets. Actually, each "
+                           "surface facet has a surface Delaunay ball which is a ball circumscribing "
+                           "the surface facet and centered on the surface patch. (Default 1.0)"))
     , d_facetdistance(initData(&d_facetdistance,(double)1.0,"facet_distance",
-                                                                   "This parameter controls the approximation error of boundary and subdivision surfaces. "
-                                                                   "Actually, it is either a constant or a spatially variable scalar field. It provides an "
-                                                                   "upper bound for the distance between the circumcenter of a surface facet and the center "
-                                                                   "of a surface Delaunay ball of this facet. (Default 1.0)"))
+                               "This parameter controls the approximation error of boundary and subdivision surfaces. "
+                               "Actually, it is either a constant or a spatially variable scalar field. It provides an "
+                               "upper bound for the distance between the circumcenter of a surface facet and the center "
+                               "of a surface Delaunay ball of this facet. (Default 1.0)"))
     , d_cellsize(initData(&d_cellsize, (double)1.0, "cell_size",
-                                                    "This parameter controls the size of mesh tetrahedra. It is either a scalar or a spatially "
-                                                    "variable scalar field. It provides an upper bound on the circumradii of the mesh tetrahedra. (Default 1.0)"))
+                          "This parameter controls the size of mesh tetrahedra. It is either a scalar or a spatially "
+                          "variable scalar field. It provides an upper bound on the circumradii of the mesh tetrahedra. (Default 1.0)"))
     , d_cell_radiusedge_ratio(initData(&d_cell_radiusedge_ratio, (double)2.1, "cell_radius_edge_ratio",
-                                                                  "This parameter controls the shape of mesh cells (but can't filter slivers, as we discussed earlier)."
-                                                                  " Actually, it is an upper bound for the ratio between the circumradius of a mesh tetrahedron "
-                                                                  "and its shortest edge. There is a theoretical bound for this parameter: the Delaunay refinement "
-                                                                  "process is guaranteed to terminate for values of cell_radius_edge_ratio bigger than 2. (Default 2.1)"))
+                                       "This parameter controls the shape of mesh cells (but can't filter slivers, as we discussed earlier)."
+                                       " Actually, it is an upper bound for the ratio between the circumradius of a mesh tetrahedron "
+                                       "and its shortest edge. There is a theoretical bound for this parameter: the Delaunay refinement "
+                                       "process is guaranteed to terminate for values of cell_radius_edge_ratio bigger than 2. (Default 2.1)"))
     , d_center(initData(&d_center, Vec3d(0,0,0), "meshingzone_center", "The center of the sphere where the meshing is done. (Default = 0,0,0)"))
     , d_radius(initData(&d_radius, (double)2.0,  "meshingzone_radius", "The radius of the sphere where the meshing is done. (Default = 2)"))
     , d_drawtetras(initData(&d_drawtetras,false,"drawTetras","display generated tetra mesh"))
@@ -180,14 +180,14 @@ void MeshGenerationFromImplicitShape::init()
     /// volumeMeshGeneration(in_facetsize.getValue(),in_approximation.getValue(),in_cellsize.getValue());
 
     /// future from an async()
-    //    m_com = std::async(std::launch::async, [this](){
-    //unsigned int countervalue = this->l_scalarfield->getCounter() ;
+//    m_com = std::async(std::launch::async, [this](){
+        unsigned int countervalue = this->l_scalarfield->getCounter() ;
         this->volumeMeshGeneration(this->d_facetangle.getValue(),
                                    this->d_facetsize.getValue(),
                                    this->d_facetdistance.getValue(),
                                    this->d_cellsize.getValue(),
                                    this->d_cell_radiusedge_ratio.getValue());
-    //  return countervalue; });
+//        return countervalue; });
 }
 
 void MeshGenerationFromImplicitShape::reinit()
@@ -212,8 +212,6 @@ void MeshGenerationFromImplicitShape::handleEvent(sofa::core::objectmodel::Event
         update() ;
     else
         BaseObject::handleEvent(event);
-
-
 }
 
 void MeshGenerationFromImplicitShape::update(bool forceUpdate)
@@ -221,20 +219,20 @@ void MeshGenerationFromImplicitShape::update(bool forceUpdate)
     /// The inputs have changed
     if(  !m_com.valid() && hasChanged() || forceUpdate )
     {
-         /// The inputs are not valid
+        /// The inputs are not valid
         if(l_scalarfield->getStatus() != CStatus::Valid)
             return ;
 
         /// The inputs are valid & we should grab them.
-        //m_componentstate = ComponentState::Invalid ;
-        //m_com = std::async(std::launch::async, [this](){
-        //    unsigned int countervalue = this->l_scalarfield->getCounter() ;
+        m_componentstate = ComponentState::Invalid ;
+//        m_com = std::async(std::launch::async, [this](){
+            unsigned int countervalue = this->l_scalarfield->getCounter() ;
             this->volumeMeshGeneration(this->d_facetangle.getValue(),
                                        this->d_facetsize.getValue(),
                                        this->d_facetdistance.getValue(),
                                        this->d_cellsize.getValue(),
                                        this->d_cell_radiusedge_ratio.getValue());
-        //    return countervalue; });
+//            return countervalue; });
     }
 
     if( !m_com.valid() )
@@ -383,10 +381,6 @@ void MeshGenerationFromImplicitShape::draw(const sofa::core::visual::VisualParam
         vparams->drawTool()->drawTriangles(points[3], sofa::defaulttype::Vec<4,double>(0.5,1.0,1.0,1.0));
     }
 }
-
-
-SOFA_DECL_CLASS(MeshGenerationFromImplicitShape)
-SOFA_LINK_CLASS(MeshGenerationFromImplicitShape)
 
 } /// namespace _meshgenerationfromimplicit_
 } /// namespace engine

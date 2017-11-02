@@ -14,18 +14,18 @@
         		
 	<SphericalField name="sphere" />
 
-        <CustomField name="field1" function="customfield.evalField"/>
+        <CustomField name="field1" function="customfield2.evalField"/>
 
 	<!-- Mesh component -->
 
 
-<MeshGenerationFromImplicitShape name="mesh"
+<!--MeshGenerationFromImplicitShape name="mesh"
                         facet_size="1.0"
 			approximation="10.0"
                         cell_size="1.0"
                         scalarfield="@field1"
                         drawTetras="true"
-                        meshingzone_center="0.0 0.0 0.0" meshingzone_radius="5.0"/>
+                        meshingzone_center="0.0 0.0 0.0" meshingzone_radius="5.0"/-->
 
 
         <PointCloudImplicitFieldVisualization field="@field1" box="-5 -5 -1 5 5 10" color="1.0 1.0 1.0"/>
