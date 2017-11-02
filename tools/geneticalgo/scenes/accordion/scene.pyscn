@@ -49,7 +49,7 @@ def createScene(rootNode):
                     cavity.createObject('Mesh', position='@../../Shape/Mesh.outputPoints', triangles='@../../Shape/Mesh.outputTriangles', name='topo')
 
                     cavity.createObject('MechanicalObject', name='cavity')
-                    cavity.createObject('SurfacePressureConstraint', name="pressure", triangles='@topo.triangles', value='5', valueType="pressure", flipNormal="true")
+                    cavity.createObject('SurfacePressureConstraint', name="pressure", triangles='@topo.triangles', value='500', valueType="volumeGrowth", flipNormal="true")
                     cavity.createObject('BarycentricMapping', name='mapping',  mapForces='true', mapMasses='true')
 
     #                accordion/accordionVisu
