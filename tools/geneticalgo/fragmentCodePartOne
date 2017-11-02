@@ -3,6 +3,7 @@
 
         uniform vec2 resolution;
         uniform float time;
+        uniform vec3 mouse;
 
         const int MAX_MARCHING_STEPS = 255;
         const float MIN_DIST = 0.0;
