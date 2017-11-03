@@ -38,6 +38,8 @@ def createScene(rootNode):
                     accordion.createObject('TetrahedronFEMForceField', template='Vec3d', name='FEM', method='large', poissonRatio='0.49',  youngModulus='18000')
                     accordion.createObject('BoxROI', name='boxROI', box='-10 -10 0  10 10 0.5', drawBoxes='true', position="@tetras.rest_position", tetrahedra="@container.tetrahedra")
                     accordion.createObject('RestShapeSpringsForceField', points='@boxROI.indices', stiffness='1e12')
+                    accordion.createObject('BoxROI', name='boxROI2', box='-10 -10 15  10 10 15.5', drawBoxes='true', position="@tetras.rest_position", tetrahedra="@container.tetrahedra")
+                    accordion.createObject('RestShapeSpringsForceField', points='@boxROI2.indices', stiffness='1000')
 
                     accordion.createObject('SparseLDLSolver', name='preconditioner')
                     accordion.createObject('LinearSolverConstraintCorrection', solverName='preconditioner')

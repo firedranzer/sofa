@@ -17,7 +17,7 @@ individualId = 0
 heightTube = 15.0
 radiusTube = 3.0
 thickness = 1.0
-number_of_cavities = 4
+number_of_cavities = 3
 generate_random="OFF"
 type=[ "frisbee","ellipsoid"]#
 
@@ -93,12 +93,13 @@ def getShapeFromInd(ind):
 ### MUTATION
 ###
 def mutation_axisX(ind):
+
     length=len(ind.listCavities)
+    if length < 2:
+        raise ValueError, "don't touch the bottom and the top!"
 
-    if length==0:
-        raise ValueError, "their is no cavity to mutate"
+    index=random.randint(1,length-2)
 
-    index=random.randint(0,length-1)
     axisX=ind.listCavities[index][2]
     epsilon=random.uniform(-0.5,0.5)
     axisX=max(max((4.0/3.0)*ind.radius, ind.thickness+0.5), min(axisX+epsilon, (15.0/3.0)*ind.radius))
@@ -106,12 +107,12 @@ def mutation_axisX(ind):
     ind.listCavities[index][2]=axisX
 
 def mutation_axisY(ind):
+
     length=len(ind.listCavities)
+    if length < 2:
+        raise ValueError, "don't touch the bottom and the top!"
 
-    if length==0:
-        raise ValueError, "their is no cavity to mutate"
-
-    index=random.randint(0,length-1)
+    index=random.randint(1,length-2)
     axisY=ind.listCavities[index][3]
     epsilon=random.uniform(-0.5,0.5)
     axisY=max(ind.thickness+0.5, min(axisY+epsilon, (15.0/3.0)*ind.radius))
@@ -120,22 +121,26 @@ def mutation_axisY(ind):
 
 def mutation_axisZ(ind):
     length=len(ind.listCavities)
-    if length<=1:
-        raise ValueError, "their is no cavity to mutate, or don't touch the first cavity along Z"
+    if length < 2:
+        raise ValueError, "don't touch the bottom and the top!"
 
-    index=random.randint(1,length-1)
+    index=random.randint(1,length-2)
     axisZ=ind.listCavities[index][4]
-    epsilon=random.uniform(-0.2,0.2)
-    axisZ=max(ind.thickness+0.5, min(3.0*(heightTube-0.5)/(2*number_of_cavities), axisZ+epsilon))
+    cavity = ind.listCavities[index]
+    epsilon=random.uniform(-0.5,0.5)
+    axisZ=max(ind.thickness+0.5, min(3.0*(ind.height-1.5)/(2*number_of_cavities), axisZ+epsilon))
+    axisZ=min(axisZ, (ind.height-cavity[0]))
+    axisZ=min(axisZ, cavity[0]-0.5)
+    axisZ=max(ind.thickness+0.5, axisZ)
     ind.listCavities[index][4]=axisZ
 
 def mutation_rotation(ind):
+
     length=len(ind.listCavities)
+    if length < 2:
+        raise ValueError, "don't touch the bottom and the top!"
 
-    if length==0:
-        raise ValueError, "their is no cavity to mutate"
-
-    index=random.randint(0,length-1)
+    index=random.randint(1,length-2)
 
     axisX = ind.listCavities[index][2]
     axisY = ind.listCavities[index][3]
@@ -150,12 +155,13 @@ def mutation_rotation(ind):
 
 
 def mutation_type(ind):
+
     length=len(ind.listCavities)
+    if length < 2:
+        raise ValueError, "don't touch the bottom and the top!"
 
-    if length==0:
-        raise ValueError, "their is no cavity to mutate"
+    index=random.randint(1,length-2)
 
-    index=random.randint(0,length-1)
     type=ind.listCavities[index][1]
 
     if type=="ellipsoid":
@@ -251,33 +257,37 @@ def generateIndividual(aType):
         individual=AccordionIndividual()
 
         for i in range(1,number_of_cavities+1):
-            height=0.5+i*(heightTube-0.5)/float(number_of_cavities)
+            height=1.0+i*(individual.height-1.0)/float(number_of_cavities+1)
 
             if aType=="ellipsoid":
                 if generate_random=="ON":
                     axisX=max(individual.thickness+0.5, random.uniform((4.0/3.0)*individual.radius,(10.0/3.0)*individual.radius))
                     axisY=max(individual.thickness+0.5, random.uniform(2.0*individual.thickness,(10.0/3.0)*individual.radius))
-                    axisZ=max(individual.thickness+0.5, 1.5*(individual.height-0.5)/float((2*number_of_cavities)))
+                    axisZ=max(individual.thickness+0.5, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
 
                 else:
                     axisX=max(individual.thickness+0.5, (7.0/3.0)*individual.radius)
                     axisY=max(individual.thickness+0.5, (7.0/3.0)*individual.radius)
-                    axisZ=max(individual.thickness+0.5, 1.5*(individual.height-0.5)/float((2*number_of_cavities)))
+                    axisZ=max(individual.thickness+0.5, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
 
             else:
                 if generate_random=="ON":
                     axisX=max(individual.thickness+0.5, random.uniform((4.0/3.0)*individual.radius,(10.0/3.0)*individual.radius))
                     axisY=max(individual.thickness+0.5, random.uniform(2.0*individual.thickness,(10.0/3.0)*individual.radius))
-                    axisZ=max(individual.thickness+0.5, 2.0*(individual.height-0.5)/float((2*number_of_cavities)))
-
+                    axisZ=max(individual.thickness+0.5, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
                 else:
                     axisX=max(individual.thickness+0.5, (7.0/3.0)*individual.radius)
                     axisY=max(individual.thickness+0.5, (7.0/3.0)*individual.radius)
-                    axisZ=max(individual.thickness+0.5, 2.0*(individual.height-0.5)/float((2*number_of_cavities)))
+                    axisZ=max(individual.thickness+0.5, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
 
             cavity=[height,aType,axisX,axisY,axisZ]
             accordion.addCavity(individual,cavity)
 
+        cavityBottom=[0.5,"cylinder",5.0*individual.radius/3.0,5.0*individual.radius/3.0,0.75]
+        cavityTop=[individual.height,"cylinder",5.0*individual.radius/3.0,5.0*individual.radius/3.0,0.75]
+
+        accordion.addCavity(individual,cavityBottom)
+        accordion.addCavity(individual,cavityTop)
 
         individual.level=None
 
@@ -327,7 +337,7 @@ def evaluationFunc(pop):
         for f1,f2,ind in filename:
             runs.append( {"GENERATION": str(pop.id),
                           "INDIVIDUAL": str(ind.id),
-                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":20,
+                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":10,
                           "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__),
                           "THICKNESS" : thickness
                           } )
@@ -358,14 +368,14 @@ def evaluationFunc(pop):
             Zmax = data["Zmax"]
             V0 = data["V0"]
 
-            level =  Zmax/max(1.0,Z0)-0.00001*abs(V0-Vref)
+            level =(Zmax-Z0)
 
-            if level >10.0:
+
+            if level > 10.0:
                 print "a scene is ill defined, excessive result"
                 ind.level = - float(sys.maxint)
             else:
                 ind.level = level
-
 
 
 
