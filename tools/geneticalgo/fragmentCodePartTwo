@@ -14,7 +14,7 @@
                 {
                     vec4 res = map( ro+rd*depth );
                     if( res.x < EPSILON || depth > MAX_DIST ) break;
-                    depth += res.x*0.2;
+                    depth += res.x;
                     m = res.yzw;
                 }
                 return vec4( depth, m );
