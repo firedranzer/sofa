@@ -214,7 +214,7 @@ class GeneticAlgorithm(object):
                 nextgen = mutationFunc(nextgen, self.params)
 
                 ### Gives score to each individual in the population
-                evalFunc(nextgen)
+                evalFunc(nextgen, self.params)
 
                 ### Replace the current generation with a new one.
                 currgen = selectionFunc( (nextgen+currgen), self.params )

@@ -297,7 +297,7 @@ def generateFunc(numgen, params):
 ####################################################################################################
 ### Eval
 ###
-def evaluationFunc(pop):
+def evaluationFunc(pop, params):
     global thickness
     print("Evaluation Function "+str(len(pop)))
     basedir=os.path.dirname(__file__)
@@ -317,7 +317,11 @@ def evaluationFunc(pop):
 
     #################### EXAMPLE USING THE SEQUENTIAL LAUNCHER #################################
     ### List of filename that contains the simulation to run
+
     scenefiles = ["scene.pyscn","controller.py", "shape.py", "shapeinv.py"]
+    if "sceneName" in params:
+        scenefiles = [params["sceneName"],"controller.py", "shape.py", "shapeinv.py"]
+
     filesandtemplates = []
     for scenefile in scenefiles:
         filesandtemplates.append( (open(basedir+"/"+scenefile).read(), scenefile) )

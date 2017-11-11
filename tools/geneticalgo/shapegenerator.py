@@ -28,12 +28,17 @@ import  scenes.accordion.main
 
 
 workdir="/tmp/sg"
-if len(sys.argv) !=2:
-    print("USAGE: ./shapegenerator.py <workdir>")
-    print("missing workdir, using: "+workdir)
+params = {}
+if len(sys.argv) not in [2,3]:
+    print("USAGE: ./shapegenerator.py <workdir> <sceneparams>")
 else:
-    workdir = sys.argv[1]
+    if len(sys.argv) => 2 :
+        workdir = sys.argv[1]
+    if len(sys.argv) == 3 :
+        params = eval(sys.argv())
+
 print("Saving results in "+workdir)
+print("Custom scene params: "+str(params))
 
 if not os.path.exists(workdir):
     os.mkdir(workdir)
@@ -45,10 +50,13 @@ print("copied: " + os.getcwd() + "/fragmentCodePartTwo to: " + workdir + "/fragm
 copy2(os.getcwd() + "/webGLJSCode", workdir + "/webGLJSCode")
 print("copied: " + os.getcwd() + "/webGLJSCode to: " + workdir + "/webGLJSCode")
 
-algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":5,
-                                   "crossTx":1,
-                                   "nbIndMutated":1,
-                                   "nbMutationsPerInd":5})
+params["nbInd"] = 5
+params["crossTx"] = 1
+params["nbIndMutated"] = 1
+params["nbMutationsPerInd"] = 5
+
+algo =geneticalgo.algorithm.GeneticAlgorithm(params)
+
 algo.start(5,
            scenes.accordion.main.generateFunc,
            scenes.accordion.main.mutationFunc,
