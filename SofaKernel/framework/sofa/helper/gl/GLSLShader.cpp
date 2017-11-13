@@ -53,7 +53,6 @@ public:
         /// We are recompiling & re-initializing all the shaders...
         /// If this become a bottleneck we can do finer grain updates to
         /// speed up the thing.
-        std::cout << "changement filelistener" << std::endl;
         m_glslshader->forceReloadShaderFromFile(filename);
         m_glslshader->InitShaders() ;
     }
