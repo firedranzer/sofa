@@ -187,9 +187,9 @@ void ImplicitFieldShaderVisualization::start()
                                   currentCamera->getLookAt().at(2));
                 shader->SetFloat4(shader->GetVariable("rotation"),
                                   currentCamera->getOrientation()[0],
-                                  currentCamera->getOrientation()[1],
-                                  currentCamera->getOrientation()[2],
-                                  currentCamera->getOrientation()[3]);
+                        currentCamera->getOrientation()[1],
+                        currentCamera->getOrientation()[2],
+                        currentCamera->getOrientation()[3]);
                 shader->SetFloat(shader->GetVariable("fov"), currentCamera->getFieldOfView());
             } else
             {
@@ -367,52 +367,39 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
                 "   );    \n"
                 ); /// Default value if eval is empty
 
-    ///CORRECT VERSION
-    //    std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
-    //    std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("eval");
+    std::map<std::string, std::vector<GLSLCodeFragment>> glslMap = l_field->getGLSLCode();
+    std::map<std::string, std::vector<GLSLCodeFragment>>::iterator itFind = glslMap.find("eval");
 
-    //    if(itFind != glslMap.end())
-    //    {
-    //        implicitFunction.clear();
-    //        std::vector<GLSLCodeFragment> evals = itFind->second;
-    //        for( std::vector<GLSLCodeFragment>::iterator it = evals.begin(); it != evals.end(); it++)
-    //        {
-    //            GLSLCodeFragment shaderCode = *it;
-    //            std::string name = shaderCode.m_name;
-    //            std::string dataName = shaderCode.m_dataname;
-    //            std::string value = shaderCode.m_value;
+    if(itFind != glslMap.end())
+    {
+        implicitFunction.clear();
+        std::vector<GLSLCodeFragment> evals = itFind->second;
+        for( std::vector<GLSLCodeFragment>::iterator it = evals.begin(); it != evals.end(); it++)
+        {
+            GLSLCodeFragment shaderCode = *it;
+            std::string name = shaderCode.m_name;
+            std::string dataName = shaderCode.m_dataname;
+            std::string value = shaderCode.m_value;
 
-    //            if (changedFromDataField)
-    //            {
-    //                BaseData* data = fetchData(name);
-    //                value = data->getValueString();
-    //            }
-    //            implicitFunction.append(
-    //                        "   x = pos.x - evalPosition" + dataName + ".x;\n"
-    //                        "   y = pos.y - evalPosition" + dataName + ".y;\n"
-    //                        "   z = pos.z - evalPosition" + dataName + ".z;\n"
-    //                        );
-    //            implicitFunction.append(
-    //                        "   res = minVec4(\n"
-    //                        "       res,\n"
-    //                        );
+            if (changedFromDataField)
+            {
+                BaseData* data = fetchData(name);
+                value = data->getValueString();
+            }
+            implicitFunction.append(
+                        "   x = pos.x - evalPosition" + dataName + ".x;\n"
+                                                                   "   y = pos.y - evalPosition" + dataName + ".y;\n"
+                                                                                                              "   z = pos.z - evalPosition" + dataName + ".z;\n"
+                        );
+            implicitFunction.append(
+                        "   res = minVec4(\n"
+                        "       res,\n"
+                        );
 
-    //            implicitFunction.append("\t\tvec4(" + value + ", evalColor" + dataName + ")\n");
-    //            implicitFunction.append("   );    \n");
-    //        }
-    //    }
-
-
-    /// THOMAS TEST
-    implicitFunction.clear();
-    implicitFunction.append(
-                "   res = minVec4(\n"
-                "       res,\n"
-                );
-    implicitFunction.append("\t\tvec4( thomasFunc(vec3(x,y,z)), evalColorSphere1)\n");
-    implicitFunction.append("   );    \n");
-    ///
-
+            implicitFunction.append("\t\tvec4(" + value + ", evalColor" + dataName + ")\n");
+            implicitFunction.append("   );    \n");
+        }
+    }
 
 
     changedFromDataField = false;
@@ -427,21 +414,7 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
                 "   return length(p)-s;\n"
                 "}\n"
                 "\n"
-                "float thomasFunc( vec3 p )\n"
-                "{\n"
-                "   float x = p.x;\n"
-                "   float y = p.y;\n"
-                "   float z = p.z;\n\n");
-    /// :S only for thomas dev ... we need to remove it later
-    std::string file = sofa::helper::system::SetDirectory::GetCurrentDir() + "/../../../../tools/geneticalgo/geneticalgo/erwan.txt";
-    std::cout << file << std::endl;
-    std::ifstream ifs(file);
-    std::string content( (std::istreambuf_iterator<char>(ifs) ),
-                         (std::istreambuf_iterator<char>()    ) );
-    tmp.append(content);
-    tmp.append(
-                "}\n"
-                "\n"
+
                 "vec4 minVec4( vec4 d1, vec4 d2 )\n"
                 "{\n"
                 "   return (d1.x<d2.x) ? d1 : d2;\n"

@@ -18,12 +18,48 @@ uniform vec3 evalPositionSphere2;
 uniform vec3 evalColorSphere3;
 uniform vec3 evalPositionSphere3;
 
+float sdPlane( vec3 p )
+{
+   return p.y;
+}
+float sdSphere( vec3 p, float s )
+{
+   return length(p)-s;
+}
+
+vec4 minVec4( vec4 d1, vec4 d2 )
+{
+   return (d1.x<d2.x) ? d1 : d2;
+}
+
 vec4 map( in vec3 pos )
 {
    float x = pos.x;
    float y = pos.y;
    float z = pos.z;
-   return vec4( length(max(abs(pos)-vec3(1.0, 1.0, 1.0),0.0)), evalColorSphere1);
+   vec4 res = vec4(sdPlane(pos), vec3(0.45, 0.45, 0.45));
+   x = pos.x - evalPositionSphere1.x;
+   y = pos.y - evalPositionSphere1.y;
+   z = pos.z - evalPositionSphere1.z;
+   res = minVec4(
+       res,
+		vec4(min(sqrt(x*x+y*y+z*z) -1.0, sqrt((x+.5)*(x+0.5)+y*y+z*z) -1.0), evalColorSphere1)
+   );    
+   x = pos.x - evalPositionSphere2.x;
+   y = pos.y - evalPositionSphere2.y;
+   z = pos.z - evalPositionSphere2.z;
+   res = minVec4(
+       res,
+		vec4(sqrt(x*x+y*y+z*z) -1.0, evalColorSphere2)
+   );    
+   x = pos.x - evalPositionSphere3.x;
+   y = pos.y - evalPositionSphere3.y;
+   z = pos.z - evalPositionSphere3.z;
+   res = minVec4(
+       res,
+		vec4(sqrt(x*x+y*y+z*z) -1.0, evalColorSphere3)
+   );    
+   return res;
 }
 
 vec4 castRay( in vec3 ro, in vec3 rd )
@@ -91,18 +127,18 @@ vec3 render( in vec3 ro, in vec3 rd )
    return vec3( clamp(col,0.0,1.0) );
 }
 
-   vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
-      vec2 xy = fragCoord - size / 2.0;
-      float z = size.y / tan(radians(fieldOfView));
-      return normalize(vec3(xy, -z));
-   }
+vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
+   vec2 xy = fragCoord - size / 2.0;
+   float z = size.y / tan(radians(fieldOfView));
+   return normalize(vec3(xy, -z));
+}
 
-   mat3 viewMatrix(vec3 eye, vec3 center, vec3 up) {
-       vec3 f = normalize(center - eye);
-       vec3 s = normalize(cross(f, up));
-       vec3 u = cross(s, f);
-       return mat3(s, u, -f);
-   }
+mat3 viewMatrix(vec3 eye, vec3 center, vec3 up) {
+    vec3 f = normalize(center - eye);
+    vec3 s = normalize(cross(f, up));
+    vec3 u = cross(s, f);
+    return mat3(s, u, -f);
+}
 
 void main()
 {
