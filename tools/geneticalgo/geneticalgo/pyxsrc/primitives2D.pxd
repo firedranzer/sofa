@@ -68,6 +68,8 @@ cdef class Vector2D(object):
 
 cpdef double Det(Vector2D u, Vector2D v)
 
+cpdef double scal(Vector2D u, Vector2D v)
+
 cdef Point2D translationRotation(double, double, Point2D, Point2D)
 
 cdef class Shape2D(object):

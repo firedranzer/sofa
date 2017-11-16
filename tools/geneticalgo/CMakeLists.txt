@@ -20,6 +20,7 @@ set(EXTRA_FILES
     geneticalgo/pyxsrc/primitives.pxd
     geneticalgo/pyxsrc/primitives2D.pyx
     geneticalgo/pyxsrc/primitives2D.pxd
+    geneticalgo/pyxsrc/piecewisePolynom2D.pyx
     geneticalgo/setup.py
 
     scenes/accordion/main.py

@@ -92,6 +92,8 @@ cdef class Point2D(object):
         print "("+str(self.x),str(self.y)+")"
         return
 
+def equal (p1, p2):
+    return p1.x == p2.x and p1.y == p2.y
 
 cdef class Vector2D(object):
 
@@ -107,8 +109,12 @@ cdef class Vector2D(object):
 
         return self.second.y-self.first.y
 
+
 cpdef double Det(Vector2D u, Vector2D v):
     return u.firstCoord()*v.secondCoord()-u.secondCoord()*v.firstCoord()
+
+cpdef double scal(Vector2D u, Vector2D v):
+    return u.firstCoord()*v.firstCoord() + u.secondCoord()*v.secondCoord()
 
 cdef Point2D translationRotation(double sinTheta, double cosTheta, Point2D center, Point2D point):
 

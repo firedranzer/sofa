@@ -14,12 +14,12 @@ from sofalauncher import launcher
 
 
 individualId = 0
-heightTube = 15.0
+heightTube = 25.0
 radiusTube = 3.0
 thickness = 1.0
 number_of_cavities = 3
 generate_random="OFF"
-type=[ "frisbee","ellipsoid"]#
+type=["frisbee","ellipsoid"]#
 
 Vref = 1033.0
 
@@ -102,7 +102,9 @@ def mutation_axisX(ind):
 
     axisX=ind.listCavities[index][2]
     epsilon=random.uniform(-0.5,0.5)
-    axisX=max(max((4.0/3.0)*ind.radius, ind.thickness+0.5), min(axisX+epsilon, (15.0/3.0)*ind.radius))
+    axisX=min(axisX+epsilon, (15.0/3.0)*ind.radius)
+
+    axisX = max(axisX, max(2.0*ind.radius, ind.thickness+1.0))
 
     ind.listCavities[index][2]=axisX
 
@@ -115,7 +117,8 @@ def mutation_axisY(ind):
     index=random.randint(1,length-2)
     axisY=ind.listCavities[index][3]
     epsilon=random.uniform(-0.5,0.5)
-    axisY=max(ind.thickness+0.5, min(axisY+epsilon, (15.0/3.0)*ind.radius))
+    axisY=min(axisY+epsilon, (15.0/3.0)*ind.radius)
+    axisY = max(axisY, max(2.0*ind.radius, ind.thickness+1.0))
     ind.listCavities[index][3]=axisY
 
 
@@ -128,10 +131,10 @@ def mutation_axisZ(ind):
     axisZ=ind.listCavities[index][4]
     cavity = ind.listCavities[index]
     epsilon=random.uniform(-0.5,0.5)
-    axisZ=max(ind.thickness+0.5, min(3.0*(ind.height-1.5)/(2*number_of_cavities), axisZ+epsilon))
+    axisZ=min(3.0*(ind.height-1.5)/float(2*(number_of_cavities+1)), axisZ+epsilon)
     axisZ=min(axisZ, (ind.height-cavity[0]))
     axisZ=min(axisZ, cavity[0]-0.5)
-    axisZ=max(ind.thickness+0.5, axisZ)
+    axisZ=max(ind.thickness+1.0, axisZ)
     ind.listCavities[index][4]=axisZ
 
 def mutation_rotation(ind):
@@ -172,19 +175,28 @@ def mutation_type(ind):
 
 def mutation(ind):
     if mutationAxisX=="ON":
-        mutation_axisX(ind)
+        if random.choice([True, False]):
+            mutation_axisX(ind)
 
     if mutationAxisY=="ON":
-        mutation_axisY(ind)
+
+        if random.choice([True, False]):
+            mutation_axisY(ind)
 
     if mutationAxisZ=="ON":
-        mutation_axisZ(ind)
+
+        if random.choice([True, False]):
+            mutation_axisZ(ind)
 
     if mutationType=="ON":
-        mutation_type(ind)
+
+        if random.choice([True, False]):
+            mutation_type(ind)
 
     if mutationRotation=="ON":
-        mutation_rotation(ind)
+
+        if random.choice([True, False]):
+            mutation_rotation(ind)
 
 def mutationFunc(pop, params):
 
@@ -257,28 +269,28 @@ def generateIndividual(aType):
         individual=AccordionIndividual()
 
         for i in range(1,number_of_cavities+1):
-            height=1.0+i*(individual.height-1.0)/float(number_of_cavities+1)
+            height=0.5+i*(individual.height-1.0)/float(number_of_cavities+1)
 
             if aType=="ellipsoid":
                 if generate_random=="ON":
-                    axisX=max(individual.thickness+0.5, random.uniform((4.0/3.0)*individual.radius,(10.0/3.0)*individual.radius))
-                    axisY=max(individual.thickness+0.5, random.uniform(2.0*individual.thickness,(10.0/3.0)*individual.radius))
-                    axisZ=max(individual.thickness+0.5, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
+                    axisX=max(individual.thickness+1.0, random.uniform((4.0/3.0)*individual.radius,(10.0/3.0)*individual.radius))
+                    axisY=max(individual.thickness+1.0, random.uniform(2.0*individual.thickness,(10.0/3.0)*individual.radius))
+                    axisZ=max(individual.thickness+1.0, (individual.height-1.0)/float((2*(number_of_cavities+1))))
 
                 else:
-                    axisX=max(individual.thickness+0.5, (7.0/3.0)*individual.radius)
-                    axisY=max(individual.thickness+0.5, (7.0/3.0)*individual.radius)
-                    axisZ=max(individual.thickness+0.5, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
+                    axisX=max(individual.height/2.5 , max(individual.thickness+1.0, (7.0/3.0)*individual.radius))
+                    axisY=max(individual.height/2.5 , max(individual.thickness+1.0, (7.0/3.0)*individual.radius))
+                    axisZ=max(individual.thickness+1.0, (individual.height-1.0)/float((2*(number_of_cavities+1))))
 
             else:
                 if generate_random=="ON":
-                    axisX=max(individual.thickness+0.5, random.uniform((4.0/3.0)*individual.radius,(10.0/3.0)*individual.radius))
-                    axisY=max(individual.thickness+0.5, random.uniform(2.0*individual.thickness,(10.0/3.0)*individual.radius))
-                    axisZ=max(individual.thickness+0.5, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
+                    axisX=max(individual.thickness+1.0, random.uniform((4.0/3.0)*individual.radius,(10.0/3.0)*individual.radius))
+                    axisY=max(individual.thickness+1.0, random.uniform(2.0*individual.thickness,(10.0/3.0)*individual.radius))
+                    axisZ=max(individual.thickness+1.0, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
                 else:
-                    axisX=max(individual.thickness+0.5, (7.0/3.0)*individual.radius)
-                    axisY=max(individual.thickness+0.5, (7.0/3.0)*individual.radius)
-                    axisZ=max(individual.thickness+0.5, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
+                    axisX=max(individual.height/2.5 , max(individual.thickness+1.0, (7.0/3.0)*individual.radius))
+                    axisY=max(individual.height/2.5 , max(individual.thickness+1.0, (7.0/3.0)*individual.radius))
+                    axisZ=max(individual.thickness+1.0, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
 
             cavity=[height,aType,axisX,axisY,axisZ]
             accordion.addCavity(individual,cavity)
@@ -371,9 +383,12 @@ def evaluationFunc(pop):
             level =(Zmax-Z0)
 
 
-            if level > 10.0:
+            if level > 20.0:
                 print "a scene is ill defined, excessive result"
                 ind.level = - float(sys.maxint)
+            elif level < 0.0:
+                print "becareful, negative result"
+                ind.level = level
             else:
                 ind.level = level
 

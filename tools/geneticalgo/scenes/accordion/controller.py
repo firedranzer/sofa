@@ -1,11 +1,4 @@
-#compiler-settings
-#commentStartToken = //
-#end compiler-settings
 
-### SCENE FILE AUTOMATICALLY GENERATED.
-###
-### $GENERATION
-###
 
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
@@ -26,19 +19,14 @@ class controller(Sofa.PythonScriptController):
         self.compteur+=1
 
         if self.compteur==1:
-            values=self.node.getChild('accordion').getObject('tetras').findData('position').value
-            Z=[]
-            for point in values:
-                Z.append(point[2])
-            self.Z0 = max(Z)-min(Z)
+            positions = self.node.getChild('accordion').getChild('markedPositions').getObject('markedPoints').findData('position').value
+            self.Z0 = positions[1][2] - positions[0][2]
             self.V0 = self.node.getChild('accordion').getChild('cavity').getObject('pressure').findData('cavityVolume').value
 
         if self.compteur==$nbIterations:
-            values=self.node.getChild('accordion').getObject('tetras').findData('position').value
-            Z=[]
-            for point in values:
-                Z.append(point[2])
-            self.Zmax=max(Z)-min(Z)
+            positions = self.node.getChild('accordion').getChild('markedPositions').getObject('markedPoints').findData('position').value
+            print str(positions)
+            self.Zmax = positions[1][2] - positions[0][2]
             self.Vmax = self.node.getChild('accordion').getChild('cavity').getObject('pressure').findData('cavityVolume').value
             dict = {"Z0":self.Z0, "Zmax":self.Zmax, "V0":self.V0, "Vmax":self.Vmax}
             emitJSONFragmentFromData(dict)
