@@ -1,0 +1,9 @@
+# CMake package configuration file for SofaCommon
+
+@PACKAGE_INIT@
+
+find_package(SofaFramework REQUIRED)
+
+#set(Sofa_Base_LIBRARIES SofaCommon)
+#set(Sofa_Base_INCLUDE_DIRS @PACKAGE_SOFACOMMON_INCLUDE_DIR@)
+

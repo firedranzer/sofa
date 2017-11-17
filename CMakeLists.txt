@@ -358,6 +358,11 @@ add_subdirectory(applications/plugins)
 ## Packages
 add_subdirectory(applications/packages)
 
+### TODO(dmarchal) clean before merging
+add_subdirectory(applications/pluginsNG)
+add_subdirectory(applications/packagesNG)
+
+
 ## Applications
 add_subdirectory(applications/projects)
 

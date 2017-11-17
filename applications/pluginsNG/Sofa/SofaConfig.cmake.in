@@ -1,0 +1,4 @@
+# CMake package configuration file for SofaCommon
+
+@PACKAGE_INIT@
+
