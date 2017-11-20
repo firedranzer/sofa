@@ -36,6 +36,7 @@ if(SOFA_BUILD_COMPONENTSET_STANDARD)
         PauseAnimation.h
         PauseAnimationOnEvent.h
         RequiredPlugin.h
+        From.h
         SofaDefaultPathSetting.h
         StatsSetting.h
         ViewerSetting.h
@@ -62,6 +63,7 @@ if(SOFA_BUILD_COMPONENTSET_STANDARD)
         SceneCheckAPIChanges.cpp
         SceneCheckerVisitor.cpp
         APIVersion.cpp
+        From.cpp
         )
 
 endif()
