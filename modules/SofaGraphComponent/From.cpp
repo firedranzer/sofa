@@ -45,7 +45,8 @@ int FromPluginClass = core::RegisterObject("Import a plugin & load components")
 
 From::From()
     : d_plugin( initData(&d_plugin, std::string(""), "plugin", "plugin name to components import from"))
-     ,d_import( initData(&d_import, std::string("*"), "import", "a regexp for the component name (default='*')"))
+     ,d_import( initData(&d_import, std::string(""), "import", "a regexp for the component name (default='*')"))
+     ,d_as( initData(&d_as, std::string(""), "as", "alternative name for the component"))
 {
     /// print log by default, to identify which pluging is responsible in case of a crash during loading
     this->f_printLog.setValue(true);
@@ -55,11 +56,24 @@ void From::parse(sofa::core::objectmodel::BaseObjectDescription* arg)
 {
     Inherit1::parse(arg);
 
-    if(!d_plugin.isSet() )
+    if(!d_plugin.isSet())
     {
-        msg_error() << "The mandatory attribute 'plugin' is not set." ;
+        if(!name.isSet())
+            msg_error() << "The mandatory attribute 'plugin' is not set." ;
         return ;
     }
+    if(arg->getAttribute("name"))
+    {
+        msg_warning() << "The attribute 'name' is set but it will be overriden by the attribute 'plugin'." ;
+    }
+    name.setValue(d_plugin.getValue()+"/"+d_import.getValue()) ;
+
+    if(d_import.getValue().empty())
+    {
+        msg_error() << "The mandatory attribute 'import' is not set." ;
+        return ;
+    }
+
     loadPlugin();
 }
 
@@ -82,17 +96,20 @@ void From::loadPlugin()
 
     for(auto& component : ObjectFactory::getInstance()->getAllEntries())
     {
-        if(!component->moduleName.empty())
-            std::cout << "'" << d_plugin.getValue() << "' vs '" << component->moduleName << "'" << std::endl ; ;
-        if(d_plugin.getValue() == component->moduleName && d_import == "*" )
+        if(d_plugin == component->moduleName)
         {
-            if( ObjectFactory::getInstance()->addAlias(d_plugin.getValue()+"."+component->className, component->className) )
+            if(d_import == "*" )
             {
-                msg_info() << "Registering an alias from " << d_plugin.getValue()+"."+component->className << " to " << component->className ;
-            }
-            else
+                if( ObjectFactory::getInstance()->addAlias(component->className, component->moduleName+"."+component->className) )
+                    msg_info() << "Registering an alias for " << d_plugin.getValue()+"."+component->className << " to " << component->className ;
+            }else if(d_import == component->className )
             {
-                msg_warning() << "Unable to register an alias between " << d_plugin.getValue()+"."+component->className << " and " << component->className ;
+                std::string aliasName = component->className ;
+                if(!d_as.getValue().empty())
+                    aliasName = d_as.getValue() ;
+
+                if( ObjectFactory::getInstance()->addAlias(aliasName, component->moduleName+"."+component->className) )
+                        msg_info() << "Registering an alias for " << d_plugin.getValue()+"."+component->className << " to " << aliasName ;
             }
         }
     }

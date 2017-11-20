@@ -49,6 +49,7 @@ public:
     SOFA_CLASS(From,core::objectmodel::BaseObject);
     sofa::core::objectmodel::Data<std::string> d_plugin;
     sofa::core::objectmodel::Data<std::string> d_import;
+    sofa::core::objectmodel::Data<std::string> d_as;
 
 protected:
     From();
