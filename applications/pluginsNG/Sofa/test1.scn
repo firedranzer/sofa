@@ -1,0 +1,7 @@
+<Node name="root">
+    <From plugin="Sofa.Loader.Mesh" import="*"/>
+    
+    <Sofa.Loader.Mesh.ObjLoader/>
+    <ObjLoader/>
+
+</Node>

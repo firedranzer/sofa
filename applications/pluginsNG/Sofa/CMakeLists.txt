@@ -5,6 +5,7 @@ set(PROJECT_VERSION 1.0)
 
 set(SOURCE_FILES
     init.cpp
+    test1.scn
 )
 
 sofa_add_plugin(Haptics Sofa.Haptics ON)

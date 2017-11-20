@@ -5,6 +5,7 @@ set(SOFA_VERSION 1.0)
 
 set(SOURCE_FILES
     init.cpp
+    OBJLoader.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} )

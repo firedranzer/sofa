@@ -69,6 +69,11 @@ const char* getModuleDescription()
     return "This package expose all the Base components.";
 }
 
+const char* getModuleNamespace()
+{
+    return "Sofa.Haptics" ;
+}
+
 const char* getModuleComponentList()
 {
     return "";

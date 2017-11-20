@@ -244,6 +244,14 @@ ObjectFactory* ObjectFactory::getInstance()
     return &instance;
 }
 
+std::vector<ObjectFactory::ClassEntry::SPtr> ObjectFactory::getAllEntries()
+{
+    std::vector<ClassEntry::SPtr> result ;
+    getAllEntries(result) ;
+    return result ;
+}
+
+
 void ObjectFactory::getAllEntries(std::vector<ClassEntry::SPtr>& result)
 {
     result.clear();
@@ -252,9 +260,21 @@ void ObjectFactory::getAllEntries(std::vector<ClassEntry::SPtr>& result)
     {
         ClassEntry::SPtr entry = it->second;
         // Push the entry only if it is not an alias
-        if (entry->className == it->first)
+        if (entry->moduleName.empty()){
+            if(entry->className == it->first){
+                result.push_back(entry);
+            }
+        }else{
             result.push_back(entry);
+        }
     }
+}
+
+std::vector<ObjectFactory::ClassEntry::SPtr> ObjectFactory::getEntriesFromTarget(const std::string& target)
+{
+    std::vector<ClassEntry::SPtr> result ;
+    getEntriesFromTarget(result, target) ;
+    return result;
 }
 
 void ObjectFactory::getEntriesFromTarget(std::vector<ClassEntry::SPtr>& result, std::string target)

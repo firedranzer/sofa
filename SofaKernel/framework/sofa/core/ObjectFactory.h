@@ -98,6 +98,7 @@ public:
         std::string authors;
         std::string license;
         std::string defaultTemplate;
+        std::string moduleName{""};
         CreatorMap creatorMap;
         std::map<std::string, std::vector<std::string>> m_dataAlias ;
     };
@@ -122,10 +123,16 @@ public:
     std::string shortName(std::string classname);
 
     /// Fill the given vector with all the registered classes
+    std::vector<ClassEntry::SPtr> getAllEntries() ;
+
+    /// Fill the given vector with all the registered classes
     void getAllEntries(std::vector<ClassEntry::SPtr>& result);
 
     /// Fill the given vector with the registered classes from a given target
-    void getEntriesFromTarget(std::vector<ClassEntry::SPtr>& result, std::string target);
+    std::vector<ObjectFactory::ClassEntry::SPtr> getEntriesFromTarget(const std::string& target) ;
+
+    /// Fill the given vector with the registered classes from a given target
+    void getEntriesFromTarget(std::vector<ClassEntry::SPtr>& result, std::string target) ;
 
     /// Return the list of classes from a given target
     std::string listClassesFromTarget(std::string target, std::string separator = ", ");
@@ -265,6 +272,14 @@ public:
 
     /// Start the registration by giving the description of this class.
     RegisterObject(const std::string& description);
+
+    /// Add an namespace to this component
+    RegisterObject& withinPlugin(std::string ns);
+
+    /// Add an namespace to this component
+    RegisterObject& withName(std::string ns);
+
+
 
     /// Add an alias name for this class
     RegisterObject& addAlias(std::string val);
