@@ -20,29 +20,29 @@ import numpy as np
 import random
 
 
-A1 = [0.0,5.0,random.uniform(0.0,0.5),random.uniform(0.0,0.5)]
+A1 = [0.0,5.0, 0.0, 0.0]
 
-A2 = [-1.0,2.5,random.uniform(0.0,0.5),random.uniform(0.0,0.5)]
+A2 = [-1.0,2.5,1.0, 1.0]
 
-A3 = [-1.0,1.0,random.uniform(0.0,0.5),random.uniform(0.0,0.5)]
+A3 = [-1.0,1.0,1.0, 1.0]
 
-A4 = [0.0,0.0,random.uniform(0.0,0.5),random.uniform(0.0,0.5)]
+A4 = [0.0,0.0,1.0, 1.0]
 
-A5 = [1.0,1.0,random.uniform(0.0,0.5),random.uniform(0.0,0.5)]
+A5 = [1.0,1.0,1.0, 1.0]
 
-B1 = [0.5,5.0,random.uniform(0.0,0.5),random.uniform(0.0,0.5)]
+B1 = [0.5,5.0,0.0, 0.0]
 
-B2 = [-0.5,2.5,random.uniform(0.0,0.5),random.uniform(0.0,0.5)]
+B2 = [-0.5,2.5,1.0, 1.0]
 
-B3 = [-0.50,1.0,random.uniform(0.0,0.5),random.uniform(0.0,0.5)]
+B3 = [-0.50,1.0,1.0, 1.0]
 
-B4 = [0.0,0.5,random.uniform(0.0,0.5),random.uniform(0.0,0.5)]
+B4 = [0.0,0.5,1.0, 1.0]
 
 
 
-listofWeightedPoints1=[A1, A2, A3, A4, A5, A1]
+listofWeightedPoints1=[A1, A2, A3, A4, A5]
 
-listofWeightedPoints2 =[A1, B1, B2,B3, B4, A5]
+listofWeightedPoints2 =[A5, B4, B3, B2, B1, A1]
 
 
 ListTangentPoints1 = piecewisePolynom2D.createListTangentPoints(listofWeightedPoints1)
@@ -61,7 +61,7 @@ P = piecewisePolynom2D.Polynom(X1, X2, 1.0)
 
 
 
-ListPolynom1 = piecewisePolynom2D.createListPolynom(ListTangentPoints1, -1.0)
+ListPolynom1 = piecewisePolynom2D.createListPolynom(ListTangentPoints1, 1.0)
 ListPolynom2 = piecewisePolynom2D.createListPolynom(ListTangentPoints2,1.0)
 
 
@@ -70,14 +70,15 @@ C1smoothPiecewisePolynomialChain2 = piecewisePolynom2D.C1smoothPiecewisePolynomi
 
 
 shape2D = primitives2D.Intersection(C1smoothPiecewisePolynomialChain1, C1smoothPiecewisePolynomialChain2)
-
 shape=primitives.ExtrusionOfShape2D(shape2D, 1.0, 0.0, 0.0, primitives.Point(0.0,0.0,0.0))
 
+#shape2D = C1smoothPiecewisePolynomialChain2
 
 print shape.eval(primitives.Point(-0.75,2.5,0.5))
 
 def f(x,y):
     return shape2D.eval(primitives2D.Point2D(x, y))
+
 (n,p)=(200,200)
 x , y = np.meshgrid(np.linspace(-10,10,n),np.linspace(-5,5,p))
 
@@ -96,7 +97,7 @@ print z
 
 import matplotlib.pyplot as plt
 plt.figure()
-levels = [0.0]
+levels = [-1.0,0.0,1.0]
 contour = plt.contour(x, y, z, levels,)
 plt.clabel(contour, colors = 'k', fmt = '%2.1f', fontsize=12)
 

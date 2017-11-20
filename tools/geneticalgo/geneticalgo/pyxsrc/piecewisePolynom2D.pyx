@@ -61,7 +61,7 @@ def equal(X,Y):
 
 cdef class Polynom(primitives2D.Shape2D):
 
-    def __init__(self, X, Y, orientation):
+    def __init__(self, X, Y, orientation, side = "down"):
 
         if equal(X,Y):
 
@@ -78,13 +78,17 @@ cdef class Polynom(primitives2D.Shape2D):
         if not orientation in [-1.0,1.0]:
             raise ValueError, "not orientation in [-1.0,1.0]"
         self.orientation = orientation
-        self.identifier=[self.type, self.X1, self.X2, self.vect, self.orientation]
+
+        if not side in ["up","down"]:
+            raise ValueError, "not side in ['up','down']"
+
+        self.side = side
+        self.identifier=[self.type, self.X1, self.X2, self.vect, self.orientation, self.side]
 
     cpdef double eval(self,primitives2D.Point2D point):
 
         cdef double l=math.sqrt(self.vect.firstCoord()*self.vect.firstCoord()\
                      +self.vect.secondCoord()*self.vect.secondCoord())
-        print "l="+str(l)
         if l==0.0:
             raise ValueError, "both points are the same"
 
@@ -102,8 +106,6 @@ cdef class Polynom(primitives2D.Shape2D):
             raise ValueError, "vertical tangent"
 
         point=primitives2D.translationRotation(sinTheta, cosTheta, self.X1.p, point)
-        print "t1_temp.firstCoord"+str(t1_temp.firstCoord)
-        print "t2_temp.firstCoord"+str(t2_temp.firstCoord)
 
         alpha1 = t1_temp.secondCoord/t1_temp.firstCoord
         alpha2 = t2_temp.secondCoord/t2_temp.firstCoord
@@ -111,16 +113,36 @@ cdef class Polynom(primitives2D.Shape2D):
         cdef double x = point.x
         cdef double y = point.y
 
-        print "(p2_temp.x - p1_temp.x)" +str(p2_temp.x - p1_temp.x)
-
-
         function = self.X1.wRight * alpha1 * (x - p1_temp.x) * (x - p1_temp.x) * (x - p2_temp.x) /((p2_temp.x - p1_temp.x) * (p2_temp.x - p1_temp.x))\
                  + self.X2.wLeft * alpha2 * (x - p2_temp.x) * (x - p2_temp.x) * (x - p1_temp.x) /((p2_temp.x - p1_temp.x) * (p2_temp.x - p1_temp.x))
 
-        if x > p1_temp.x and x < p2_temp.x:
-            return self.orientation * (y - function)
+        if self.side == "up":
+            if self.orientation == 1.0:
+                if x > p1_temp.x and x < p2_temp.x  and y >=0.0:
+                    return (y - function)
+                else:
+                    return 1.0
+            else:
+                if x > p1_temp.x and x < p2_temp.x  and y <=0.0:
+                    return -(y - function)
+                else:
+                    return 1.0
+
+        elif self.side == "down":
+            if self.orientation == 1.0:
+                if x > p1_temp.x and x < p2_temp.x:
+                    return (y - function)
+                else:
+                    return y
+            else:
+                if x > p1_temp.x and x < p2_temp.x:
+                    return -(y - function)
+                else:
+                    return -y
         else:
-            return self.orientation * y
+
+            raise ValueError, "I need a 'up' or 'down'"
+
 
 def createListTangentPoints(listOfCouplesxyWeight):
 
@@ -197,7 +219,7 @@ def createListPolynom(listOfTangentPoints, orientation):
         if equal(listOfTangentPoints[i],listOfTangentPoints[i+1]):
             raise ValueError, "two points are equal"
 
-        newList.append(Polynom(listOfTangentPoints[i], listOfTangentPoints[i+1], orientation))
+        newList.append(Polynom(listOfTangentPoints[i], listOfTangentPoints[i+1], orientation, 'down'))
 
     return newList
 
@@ -217,6 +239,7 @@ def C1smoothPiecewisePolynomialChain(listPolynom):
     newShape=listPolynom[0]
 
     if length>1:
+
         for i in range(length-1):
 
             P1 = listPolynom[i]
@@ -232,6 +255,11 @@ def C1smoothPiecewisePolynomialChain(listPolynom):
             else:
 
                 newShape = primitives2D.Union(newShape, P2)
+
+    for polynom in listPolynom:
+
+        newShape = primitives2D.Union(newShape, Polynom(polynom.X1, polynom.X2, polynom.orientation, "up"))
+
 
     return newShape
 

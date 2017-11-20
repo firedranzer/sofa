@@ -30,6 +30,7 @@ cdef class WeightedTangencedPoint2D(object):
     cdef public double wLeft, wRight
 
 cdef class Polynom(primitives2D.Shape2D):
+    cdef public str side
     cdef public double orientation
     cdef public WeightedTangencedPoint2D X1
     cdef public WeightedTangencedPoint2D X2
