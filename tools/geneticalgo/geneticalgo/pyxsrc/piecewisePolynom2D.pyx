@@ -98,11 +98,23 @@ cdef class Polynom(primitives2D.Shape2D):
         cdef primitives2D.Point2D p1_temp = primitives2D.Point2D(0.0,0.0)
         cdef primitives2D.Point2D p2_temp = primitives2D.translationRotation(sinTheta, cosTheta, self.X1.p, self.X2.p)
 
-        cdef Tangency2D t1_temp = Tangency2D(cosTheta * self.X1.t.firstCoord - sinTheta * self.X1.t.secondCoord , sinTheta * self.X1.t.firstCoord - cosTheta * self.X1.t.secondCoord)
-        cdef Tangency2D t2_temp = Tangency2D(cosTheta * self.X2.t.firstCoord - sinTheta * self.X2.t.secondCoord , sinTheta * self.X2.t.firstCoord - cosTheta * self.X2.t.secondCoord)
+        cdef Tangency2D t1_temp = Tangency2D(cosTheta * self.X1.t.firstCoord + sinTheta * self.X1.t.secondCoord , -sinTheta * self.X1.t.firstCoord + cosTheta * self.X1.t.secondCoord)
+        cdef Tangency2D t2_temp = Tangency2D(cosTheta * self.X2.t.firstCoord + sinTheta * self.X2.t.secondCoord , -sinTheta * self.X2.t.firstCoord + cosTheta * self.X2.t.secondCoord)
 
+        if t2_temp.firstCoord == 0.0:
+            print str(self.X1.p.x)
+            print str(self.X1.p.y)
+            print str(self.X2.p.x)
+            print str(self.X2.p.y)
+            print "self.X2.t.firstCoord " + str(self.X2.t.firstCoord)
+            print "self.X2.t.secondCoord " + str(self.X2.t.secondCoord)
+            print "cosTheta "+str(cosTheta)
+            print "sinTheta "+str(sinTheta)
 
         if t1_temp.firstCoord == 0.0 or t2_temp.firstCoord == 0.0:
+
+            print "t1_temp.firstCoord  "+str(t1_temp.firstCoord)
+            print "t2_temp.firstCoord  "+str(t2_temp.firstCoord)
             raise ValueError, "vertical tangent"
 
         point=primitives2D.translationRotation(sinTheta, cosTheta, self.X1.p, point)
@@ -113,29 +125,29 @@ cdef class Polynom(primitives2D.Shape2D):
         cdef double x = point.x
         cdef double y = point.y
 
-        function = self.X1.wRight * alpha1 * (x - p1_temp.x) * (x - p1_temp.x) * (x - p2_temp.x) /((p2_temp.x - p1_temp.x) * (p2_temp.x - p1_temp.x))\
-                 + self.X2.wLeft * alpha2 * (x - p2_temp.x) * (x - p2_temp.x) * (x - p1_temp.x) /((p2_temp.x - p1_temp.x) * (p2_temp.x - p1_temp.x))
+        function = self.X2.wLeft * alpha2 * (x - p1_temp.x) * (x - p1_temp.x) * (x - p2_temp.x) /((p2_temp.x - p1_temp.x) * (p2_temp.x - p1_temp.x))\
+                 + self.X1.wRight * alpha1 * (x - p2_temp.x) * (x - p2_temp.x) * (x - p1_temp.x) /((p2_temp.x - p1_temp.x) * (p2_temp.x - p1_temp.x))
 
         if self.side == "up":
             if self.orientation == 1.0:
-                if x > p1_temp.x and x < p2_temp.x  and y >=0.0:
+                if x >= p1_temp.x and x <= p2_temp.x  and y >=0.0:
                     return (y - function)
                 else:
                     return 1.0
             else:
-                if x > p1_temp.x and x < p2_temp.x  and y <=0.0:
+                if x >= p1_temp.x and x <= p2_temp.x  and y <=0.0:
                     return -(y - function)
                 else:
                     return 1.0
 
         elif self.side == "down":
             if self.orientation == 1.0:
-                if x > p1_temp.x and x < p2_temp.x:
+                if x >= p1_temp.x and x <= p2_temp.x:
                     return (y - function)
                 else:
                     return y
             else:
-                if x > p1_temp.x and x < p2_temp.x:
+                if x >= p1_temp.x and x <= p2_temp.x:
                     return -(y - function)
                 else:
                     return -y
@@ -159,7 +171,8 @@ def createListTangentPoints(listOfCouplesxyWeight):
     p2=primitives2D.Point2D(listOfCouplesxyWeight[1][0],listOfCouplesxyWeight[1][1])
 
     if primitives2D.equal(p1, p2):
-        raise ValueError, "two given points are the same"
+        raise ValueError, "two successive given points are the same"
+
     t1 = Tangency2D(p2.x - p1.x, p2.y - p1.y)
 
     wLeft1 = listOfCouplesxyWeight[0][2]
@@ -174,22 +187,22 @@ def createListTangentPoints(listOfCouplesxyWeight):
             p3=primitives2D.Point2D(listOfCouplesxyWeight[i+2][0],listOfCouplesxyWeight[i+2][1])
 
             if primitives2D.equal(p1, p2) or primitives2D.equal(p2, p3) or primitives2D.equal(p1, p3):
-                raise ValueError, "two points are the same"
+                raise ValueError, "two successive points are the same"
 
 
             tan1 = Tangency2D(p2.x - p1.x , p2.y - p1.y)
             tan2 = Tangency2D(p3.x - p2.x , p3.y - p2.y)
 
-            if abs(Det(tan1, tan2))<0.1*math.sqrt(norm2(tan1)*norm2(tan2)) and scal(tan1, tan2) < 0.0:
-                raise ValueError, "the succesive points make a too sharp angle"
+#            if abs(Det(tan1, tan2))<0.01*math.sqrt(norm2(tan1)*norm2(tan2)) and scal(tan1, tan2) < 0.0:
+#                raise ValueError, "the succesive points make a too sharp angle"
 
-            while scal(tan1,tan1 + tan2) <= 0.1*math.sqrt(norm2(tan1)*norm2(tan2)):
+            while scal(tan1,tan1 + tan2) <= 0.1*math.sqrt(norm2(tan1)*norm2(tan1 + tan2)):
                 tan2 = tan2.prod(0.5)
 
             t2 = tan1 + tan2
 
             wLeft2 = listOfCouplesxyWeight[i+1][2]
-            wRight2 = listOfCouplesxyWeight[i+1][3]
+            wRight2= listOfCouplesxyWeight[i+1][3]
 
             newList.append(WeightedTangencedPoint2D(p2,t2,wLeft2, wRight2))
 
@@ -197,7 +210,7 @@ def createListTangentPoints(listOfCouplesxyWeight):
     p2=primitives2D.Point2D(listOfCouplesxyWeight[-1][0],listOfCouplesxyWeight[-1][1])
 
     if primitives2D.equal(p1, p2):
-        raise ValueError, "two points are the same"
+        raise ValueError, "two successive points are the same"
 
     t2 = Tangency2D(p2.x - p1.x, p2.y - p1.y)
 
@@ -217,7 +230,7 @@ def createListPolynom(listOfTangentPoints, orientation):
     for i in range(len(listOfTangentPoints)-1):
 
         if equal(listOfTangentPoints[i],listOfTangentPoints[i+1]):
-            raise ValueError, "two points are equal"
+            raise ValueError, "two successive points are equal"
 
         newList.append(Polynom(listOfTangentPoints[i], listOfTangentPoints[i+1], orientation, 'down'))
 
