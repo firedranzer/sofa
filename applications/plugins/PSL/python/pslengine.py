@@ -668,7 +668,7 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                         data = t.createATrackedData(k, "Live.Properties", "Help", "f", str(v))
 
                     if data != None:
-                        n.realAddData(data)
+                        n.addNewData(data)
                         templates[key].trackData( data )
 
         else:

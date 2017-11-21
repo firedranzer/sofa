@@ -40,80 +40,7 @@ static Base* get_base(PyObject* self) {
     return sofa::py::unwrap<Base>(self);
 }
 
-//TODO(dmarchal 2017-07-15) Factor that before PR.
-/// This function converts an PyObject into a sofa string.
-/// string that can be safely parsed in helper::vector<int> or helper::vector<double>
-static std::ostream& pythonToSofaDataString(PyObject* value, std::ostream& out)
-{
-    /// String are just returned as string.
-    if (PyString_Check(value))
-    {
-        return out << PyString_AsString(value) ;
-    }
-
-
-    if( PySequence_Check(value) )
-    {
-        /// It is a sequence...so we can iterate over it.
-        PyObject *iterator = PyObject_GetIter(value);
-        if(iterator)
-        {
-            bool first = true;
-            while(PyObject* next = PyIter_Next(iterator))
-            {
-                if(first) first = false;
-                else out << ' ';
-
-                pythonToSofaDataString(next, out);
-                Py_DECREF(next);
-            }
-            Py_DECREF(iterator);
-
-            if (PyErr_Occurred())
-            {
-                msg_error("SofaPython") << "error while iterating." << msgendl
-                                        << PythonEnvironment::getStackAsString() ;
-            }
-            return out;
-        }
-    }
-
-
-    /// Check if the object has an explicit conversion to a Sofa path. If this is the case
-    /// we use it.
-    if( PyObject_HasAttrString(value, "getAsACreateObjectParameter") ){
-       PyObject* retvalue = PyObject_CallMethod(value, (char*)"getAsACreateObjectParameter", nullptr) ;
-       return pythonToSofaDataString(retvalue, out);
-    }
-
-    /// Default conversion for standard type:
-    if( !(PyInt_Check(value) || PyLong_Check(value) || PyFloat_Check(value) || PyBool_Check(value) ))
-    {
-        msg_warning("SofaPython") << "You are trying to convert a non primitive type to Sofa using the 'str' operator." << msgendl
-                                  << "Automatic conversion is provided for: String, Integer, Long, Float and Bool and Sequences." << msgendl
-                                  << "Other objects should implement the method getAsACreateObjectParameter(). " << msgendl
-                                  << "This function should return a string usable as a parameter in createObject()." << msgendl
-                                  << "So to remove this message you must add a method getAsCreateObjectParameter(self) "
-                                     "to the object you are passing the createObject function." << msgendl
-                                  << PythonEnvironment::getStackAsString() ;
-    }
-
-
-    PyObject* tmpstr=PyObject_Str(value);
-    out << PyString_AsString(tmpstr) ;
-    Py_DECREF(tmpstr) ;
-    return out ;
-}
-
-//TODO(dmarchal 2017-07-15) Factor that before PR.
-char* getStringCopy(char *c)
-{
-    char* tmp = new char[strlen(c)+1] ;
-    strcpy(tmp,c);
-    return tmp ;
-}
-
-static PyObject * Base_realAddData(PyObject *self, PyObject *args )
+static PyObject * Base_addData(PyObject *self, PyObject *args )
 {
     Base* obj = get_base(self);
     PyObject* pydata;
@@ -128,7 +55,14 @@ static PyObject * Base_realAddData(PyObject *self, PyObject *args )
     Py_RETURN_NONE;
 }
 
-static PyObject * Base_addData(PyObject *self, PyObject *args ) {
+static char* getStringCopy(char *c)
+{
+    char* tmp = new char[strlen(c)+1] ;
+    strcpy(tmp,c);
+    return tmp ;
+}
+
+static PyObject * Base_addNewData(PyObject *self, PyObject *args ) {
     Base* obj = get_base(self);
     char* dataName;
     char* dataClass;
@@ -144,10 +78,6 @@ static PyObject * Base_addData(PyObject *self, PyObject *args ) {
     dataClass = getStringCopy(dataClass) ;
     dataHelp  = getStringCopy(dataHelp) ;
 
-
-    //TODO(dmarchal 2017-07-15) il y a une fuite mémoire ici. A cause de l'init qui ne fait
-    // pas de copie des chaines... mais juste du swallow du coup on se retrouve à copier les nom
-    // à chaque template. C'est méga naze !
     BaseData* bd = nullptr ;
     if(dataRawType[0] == 's'){
         Data<std::string>* t = new Data<std::string>() ;
@@ -394,18 +324,32 @@ static PyObject * Base_downCast(PyObject *self, PyObject * /*args*/) {
 }
 
 SP_CLASS_METHODS_BEGIN(Base)
-SP_CLASS_METHOD(Base,addData)
-SP_CLASS_METHOD(Base,realAddData)
-SP_CLASS_METHOD(Base,findData)
-SP_CLASS_METHOD(Base,findLink)
-SP_CLASS_METHOD(Base,getData)
-SP_CLASS_METHOD(Base,getLink)
+SP_CLASS_METHOD_DOC(Base,addNewData, "Add a new Data field to the current object. \n"
+                                        "Eg:                                         \n"
+                                        "  obj.addNewData('myDataName1','theDataGroupA','help message','f',1.0)  \n"
+                                        "  obj.addNewData('myDataName2','theDataGroupA','help message','b',True) \n"
+                                        "  obj.addNewData('myDataName3','theDataGroupB','help message','d',1)     \n"
+                                        "  obj.addNewData('myDataName4','theDataGroupB','help message','s','hello') \n")
+SP_CLASS_METHOD_DOC(Base,addData, "Adds an existing data field to the current object")
+SP_CLASS_METHOD_DOC(Base,findData, "Returns the data field if there is one associated \n"
+                                   "with the provided name and downcasts it to the lowest known type. \n"
+                                   "Returns None otherwhise.")
+SP_CLASS_METHOD_DOC(Base,findLink, "Returns a link field if there is one associated \n"
+                                   "with the provided name, returns None otherwhise")
+SP_CLASS_METHOD_DOC(Base,getData, "Returns the data field if there is one associated \n"
+                              "with the provided name but don't downcasts it to the lowest known type. \n"
+                              "Returns None is there is no field with this name.")
+SP_CLASS_METHOD_DOC(Base,getLink, "Returns the link field if there is one associated \n"
+                              "with the provided name but. \n"
+                              "Returns None is there is no field with this name.")
 SP_CLASS_METHOD(Base,getClassName)
 SP_CLASS_METHOD(Base,getTemplateName)
 SP_CLASS_METHOD(Base,getName)
-SP_CLASS_METHOD(Base,getDataFields)
-SP_CLASS_METHOD(Base,getListOfDataFields)
-SP_CLASS_METHOD(Base,getListOfLinks)
+
+SP_CLASS_METHOD_DOC(Base,getDataFields, "Returns a list with the *content* of all the data fields converted in python"
+                                        " type. \n")
+SP_CLASS_METHOD_DOC(Base,getListOfDataFields, "Returns the list of data fields.")
+SP_CLASS_METHOD_DOC(Base,getListOfLinks, "Returns the list of link fields.")
 SP_CLASS_METHOD(Base,downCast)
 SP_CLASS_METHODS_END;
 
