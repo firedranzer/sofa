@@ -135,6 +135,7 @@ private:
 } /// namespace _scalarfield_
 
 using _customfield_::CustomField ;
+using _customfield_::GLSLCodeFragment ;
 
 } /// namespace geometry
 

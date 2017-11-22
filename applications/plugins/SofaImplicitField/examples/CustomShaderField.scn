@@ -2,21 +2,19 @@
 <Node 	 name="1"  dt="0.01"  time="8.36"  animate="0"  >
 
     <RequiredPlugin name="SofaImplicitField"  printLog="1" />
-    <CustomField name="field"  function="customfield.evalField"  state="2" />
     <DefaultAnimationLoop name="defaultAnimationLoop" />
     <DefaultVisualManagerLoop name="defaultVisualManagerLoop" />
     <VisualStyle name="visualStyle"  displayFlags="showVisual" />
 
-    <Node name="2">
-        <OglModel template="ExtVec3f" name="oglModel1"  position="-20 20 -4.44089e-15 -20 -20 4.44089e-15 20 -20 4.44089e-15 20 20 -4.44089e-15"  normal="0 2.22044e-16 1 0 2.22044e-16 1 0 2.22044e-16 1 0 2.22044e-16 1"  texcoords="-2 -2 -2 2 2 2 2 -2"  quads="0 1 2 3"  fileMesh="mesh/floorFlat.obj"  translation="0 0 0"  rotation="0 0 0"  scale3d="1 1 1"  scaleTex="1 1"  translationTex="0 0"  groups="Floor defaultMaterial -1 0 0 0 1 0 0"  primitiveType="DEFAULT"  blendEquation="GL_FUNC_ADD"  sfactor="GL_SRC_ALPHA"  dfactor="GL_ONE_MINUS_SRC_ALPHA" />
-        <ImplicitFieldShaderVisualization name="implicitFieldShaderVisualization1"  listening="1"  field="@field" />
+    
+
+    <Node name="3">
+        <OglModel template="ExtVec3f" name="oglModel1"  fileMesh="mesh/cube.obj"  />
     </Node>
 
-
-<Node name="3">
-    <OglModel template="ExtVec3f" name="oglModel1" color="0.0 0.0 1.0 .3" fileMesh="mesh/cube.obj"  />
-</Node>
-
-<InteractiveCamera name="baseCamera"  listening="1"  position="-0 -0 -0"  orientation="0.0 0.0 0.0 1.0"  lookAt="0 0 0"  zNear="0.1"  zFar="50"  minBBox="-20 -20 -4.44089e-15"  maxBBox="20 20 4.44089e-15"  projectionType="Perspective"  modelViewMatrix="0.80547 0.0641769 -0.589151 -0 0.0689105 0.977234 0.200664 -0 0.588616 -0.202227 0.78271 -0 0 0 0 1"  projectionMatrix="1.81066 0 0 0 0 2.41421 0 0 0 0 -1.09524 -2.96311 0 0 -1 0" />
+    <Node name="2">
+    	<CustomField name="field"  function="customfield.evalField"/>
+        <ImplicitFieldShaderVisualization name="implicitFieldShaderVisualization1"  listening="1"  field="@field" />
+    </Node>
 
 </Node>

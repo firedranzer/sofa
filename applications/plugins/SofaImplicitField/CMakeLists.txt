@@ -23,7 +23,6 @@ set(HEADER_FILES
     components/mapping/ImplicitSurfaceMapping.inl
     components/visual/PointCloudImplicitFieldVisualization.h
     components/visual/ImplicitFieldShaderVisualization.h
-    components/visual/ImplicitFieldShaderVisualization.inl
 )
 
 set(SOURCE_FILES
@@ -66,6 +65,7 @@ set(EXTRA_FILES
     examples/cython/CustomField.scn
     examples/cython/customfield.py
     examples/cython/cythonfield.pyx
+    python/difigeometry/__init__.py
     )
 
 add_subdirectory(SofaImplicitField_test)

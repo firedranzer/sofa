@@ -126,7 +126,6 @@ namespace sofa
 namespace component
 {
 
-
 namespace geometry
 {
 
@@ -208,7 +207,6 @@ public:
         double dist_out = 0.0;
         return projectPointOutOfSurface(point, domain, dir, dist_out);
     }
-
 
 protected:
     ScalarField( ) : TrackedComponent(this) { }

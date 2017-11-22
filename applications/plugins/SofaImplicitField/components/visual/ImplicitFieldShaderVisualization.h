@@ -19,50 +19,29 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_ImplicitFieldShaderVisualization_H
-#define SOFA_ImplicitFieldShaderVisualization_H
+/*****************************************************************************
+ * Contributors:
+ *      erwan.douaille@inria.fr
+ *      damien.marchal@univ-lille1.fr
+ *****************************************************************************/
+#ifndef SOFA_IMPLICITFIELDSHADERVISUALIZATION_H
+#define SOFA_IMPLICITFIELDSHADERVISUALIZATION_H
 
 #include <SofaImplicitField/config.h>
 
-#include <iostream>
-#include <fstream>
-#include <iterator>
-#include <string>
-#include <regex>
-#include <stdlib.h>
-
-
-#include <sofa/core/ObjectFactory.h>
-using sofa::core::RegisterObject;
-
 #include <sofa/core/visual/VisualModel.h>
-#include <sofa/core/visual/Shader.h>
-using sofa::core::visual::VisualParams;
-
 #include <sofa/helper/gl/GLSLShader.h>
-#include <sofa/helper/system/Locale.h>
 
 #include <sofa/core/objectmodel/Base.h>
 #include <sofa/core/objectmodel/Link.h>
 #include <sofa/core/objectmodel/Data.h>
-#include <sofa/core/objectmodel/MouseEvent.h>
 #include <sofa/core/objectmodel/DataFileName.h>
-using sofa::core::objectmodel::Data;
-using sofa::core::objectmodel::BaseData;
-using sofa::core::objectmodel::MouseEvent;
 
-#include <SofaImplicitField/components/geometry/ScalarField.h>
 #include <SofaImplicitField/components/geometry/CustomField.h>
-using  sofa::component::geometry::ScalarField;
-using sofa::component::geometry::_customfield_::CustomField;
-using sofa::component::geometry::_customfield_::GLSLCodeFragment;
 
 #include <sofa/core/DataEngine.h>
-using sofa::core::DataEngine ;
-using sofa::core::DataTracker ;
 
 #include <SofaBaseVisual/InteractiveCamera.h>
-using sofa::component::visualmodel::InteractiveCamera;
 
 namespace sofa
 {
@@ -73,42 +52,44 @@ namespace component
 namespace visual
 {
 
-namespace _pointcloudimplicitfieldvisualization_
+namespace _implicitfieldshadervisualization_
 {
+using sofa::core::visual::Shader ;
+using sofa::core::visual::VisualModel ;
+using  sofa::component::geometry::CustomField;
+using sofa::component::geometry::GLSLCodeFragment;
 
-class SOFA_SOFAIMPLICITFIELD_API ImplicitFieldShaderVisualization: public core::visual::Shader, public core::visual::VisualModel
+using sofa::core::DataEngine ;
+using sofa::core::DataTracker ;
+using sofa::core::objectmodel::Data;
+using sofa::core::objectmodel::BaseData;
+using sofa::core::objectmodel::Event ;
+using sofa::core::objectmodel::BaseNode ;
+using sofa::core::visual::VisualParams;
+using sofa::core::objectmodel::DataFileName;
+
+
+class SOFA_SOFAIMPLICITFIELD_API ImplicitFieldShaderVisualization: public VisualModel
 {
 public:
-
-    SOFA_CLASS2(ImplicitFieldShaderVisualization, core::visual::Shader, core::visual::VisualModel);
+    SOFA_CLASS(ImplicitFieldShaderVisualization, VisualModel);
 
     ImplicitFieldShaderVisualization() ;
     virtual ~ImplicitFieldShaderVisualization() ;
 
-    void initVisual();
-    void init();
-    void reinit();
+    /// Inherited from VisualModel
+    void init() override ;
+    void reinit() override ;
+    void initVisual() override ;
+    void drawVisual(const VisualParams* vp) override ;
 
-    void start();
-    void stop();
-    bool isActive();
-    bool drawScene(core::visual::VisualParams* vp);
-
-    void handleEvent(core::objectmodel::Event * event);
-
-    virtual bool insertInNode( core::objectmodel::BaseNode* node ) { Inherit1::insertInNode(node); Inherit2::insertInNode(node); return true; }
-    virtual bool removeInNode( core::objectmodel::BaseNode* node ) { Inherit1::removeInNode(node); Inherit2::removeInNode(node); return true; }
-
-    SingleLink<ImplicitFieldShaderVisualization,  CustomField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> l_field ;
+    SingleLink<ImplicitFieldShaderVisualization, CustomField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> l_field ;
     void shaderGenerationCodeHasChanged();
 
-    sofa::core::objectmodel::DataFileName d_vertFilename;
-    sofa::core::objectmodel::DataFileName d_fragFilename;
-
+    DataFileName d_vertFilename;
+    DataFileName d_fragFilename;
 
 protected:
-    int mouseX, mouseY;
-    float wheelDelta;
     bool changedFromDataField;
     std::vector<DataTracker*> m_datatrackerList;
     sofa::helper::gl::GLSLShader* shader;
@@ -135,4 +116,4 @@ private:
 } /// namespace component
 } /// namespace sofa
 
-#endif // SOFA_ImplicitFieldShaderVisualization_H
+#endif // SOFA_IMPLICITFIELDSHADERVISUALIZATION_H
