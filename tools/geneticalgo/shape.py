@@ -45,9 +45,9 @@ A8 = [15.6629416, -43.4429904,1, 1]
 A9 = [21.16511222,-33.0330063,1, 1]
 
 
-B1 =[0.25955391, 65.13043478, 0,0]
+B1 =[5.25955391, 65.13043478, 0,0]
 
-B2 = [0.25812001, 38.91081713,1, 1]
+B2 = [5.25812001, 38.91081713,1, 1]
 
 B3 = [-12.83819983,-16.95571288,1, 1]
 
@@ -55,11 +55,17 @@ B4 = [-12.51071676,-26.38135205,1, 1]
 
 B5 = [4.60835077,-33.66507377,1, 1]
 
+def scale(liste):
+    newList=[]
+    for i in range(len(liste)):
+        newList.append([liste[i][0]*0.001, liste[i][1]*0.001, liste[i][2], liste[i][3]])
 
-listofWeightedPoints1=[A1, A2, A3, A4, A5, A6, A7, A8, A9]
+    return newList
 
-listofWeightedPoints2 =[A1, B1, B2, B3, B4, B5, A9]
 
+listofWeightedPoints1=scale([A1, A2, A3, A4, A5, A6, A7, A8, A9])
+listofWeightedPoints2 =scale([A1, B1, B2, B3, B4, B5, A9])
+print listofWeightedPoints1[0]
 
 ListTangentPoints1 = piecewisePolynom2D.createListTangentPoints(listofWeightedPoints1)
 ListTangentPoints2 = piecewisePolynom2D.createListTangentPoints(listofWeightedPoints2)
@@ -73,7 +79,7 @@ C1smoothPiecewisePolynomialChain2 = piecewisePolynom2D.C1smoothPiecewisePolynomi
 
 
 shape2D = primitives2D.Intersection(C1smoothPiecewisePolynomialChain1, C1smoothPiecewisePolynomialChain2)
-shape=primitives.ExtrusionOfShape2D(shape2D, 10.0,0.0,0.0, primitives.Point(0.0,0.0,0.0))
+shape=primitives.ExtrusionOfShape2D(shape2D, 0.010,0.0,0.0, primitives.Point(0.0,0.0,0.0))
 
 
 
