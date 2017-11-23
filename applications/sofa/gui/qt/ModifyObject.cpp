@@ -51,7 +51,8 @@ using sofa::helper::logging::Message ;
 
 
 // uncomment to show traces of GUI operations in this file
- #define DEBUG_GUI
+//#define DEBUG_GUI
+
 
 namespace sofa
 {

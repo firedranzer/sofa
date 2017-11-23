@@ -56,6 +56,7 @@ namespace _implicitfieldshadervisualization_
 {
 using sofa::core::visual::Shader ;
 using sofa::core::visual::VisualModel ;
+using sofa::helper::gl::GLSLShader ;
 using  sofa::component::geometry::CustomField;
 using sofa::component::geometry::GLSLCodeFragment;
 
@@ -88,14 +89,16 @@ public:
 
     DataFileName d_vertFilename;
     DataFileName d_fragFilename;
-
+    std::string  m_templateShaderFileName;
+    std::string  m_templateFileName;
 protected:
     bool changedFromDataField;
     std::vector<DataTracker*> m_datatrackerList;
-    sofa::helper::gl::GLSLShader* shader;
+    GLSLShader* shader;
 
-    std::string generateFragmentShader();
-    std::string generateVertexShader();
+    void uploadUniformsValues();
+    std::ostream& generateFragmentShader(std::ostream&);
+    std::ostream& generateVertexShader(std::ostream&);
     BaseData* fetchData(std::string argumentName);
     void initComponentShaderValue();
 

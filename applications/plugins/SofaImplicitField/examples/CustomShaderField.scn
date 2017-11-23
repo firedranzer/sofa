@@ -6,15 +6,14 @@
     <DefaultVisualManagerLoop name="defaultVisualManagerLoop" />
     <VisualStyle name="visualStyle"  displayFlags="showVisual" />
 
-    
-
-    <Node name="3">
-        <OglModel template="ExtVec3f" name="oglModel1"  fileMesh="mesh/cube.obj"  />
-    </Node>
-
     <Node name="2">
     	<CustomField name="field"  function="customfield.evalField"/>
         <ImplicitFieldShaderVisualization name="implicitFieldShaderVisualization1"  listening="1"  field="@field" />
     </Node>
+
+
+<Node name="3">
+    <OglModel template="ExtVec3f" name="oglModel1" color="0.0 0.0 1.0 0.3" fileMesh="mesh/cube.obj"  />
+</Node>
 
 </Node>
