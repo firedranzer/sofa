@@ -45,6 +45,8 @@ using sofa::helper::system::FileSystem ;
 
 #include "FileMonitor.h"
 
+#include <boost/filesystem.hpp>
+
 using namespace std ;
 
 #define EVENT_SIZE  ( sizeof (struct inotify_event) + NAME_MAX + 1 )
@@ -144,7 +146,7 @@ int FileMonitor::addFile(const std::string& filepath, FileEventListener* listene
                    FileSystem::stripDirectory(filepath), listener) ;
 }
 
-int FileMonitor::addFile(const std::string& parentname,
+int FileMonitor::addFile(const std::string& pname,
                          const std::string& filename,
                          FileEventListener* listener)
 {
@@ -157,7 +159,7 @@ int FileMonitor::addFile(const std::string& parentname,
     path name(filename) ;
 
     path fullPath = prefix/name;
-    path absolutePath = absolute(fullPath) ;
+    path absolutePath = canonical(fullPath) ;
 
     if(! exists(status(fullPath)) )
         return -1;
