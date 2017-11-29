@@ -123,7 +123,9 @@ void ImplicitFieldShaderVisualization::initComponentShaderValue()
             GLSLCodeFragment tmpGLSLCode = *itGLSLCode;
             std::string uniformName = tmpGLSLCode.m_name;
             std::string uniformValue = tmpGLSLCode.m_value;
-            BaseData* data = fetchData(uniformName);
+            std::cout << "initComponentShaderValue: " << name << " " << tmpGLSLCode.m_type << std::endl ;
+
+            BaseData* data = fetchData(uniformName, tmpGLSLCode.m_type);
             data->read(uniformValue);
             DataTracker* tmp = new DataTracker();
             tmp->trackData(*data);
@@ -132,15 +134,22 @@ void ImplicitFieldShaderVisualization::initComponentShaderValue()
     }
 }
 
-BaseData* ImplicitFieldShaderVisualization::fetchData(std::string argumentName)
+BaseData* ImplicitFieldShaderVisualization::fetchData(const std::string& argumentName, const std::string& type)
 {
     MapData dataMap = getDataAliases();
     MapData::const_iterator itData = dataMap.find(argumentName);
-    BaseData* data;
+    BaseData* data=nullptr;
 
     if (itData == dataMap.end())
     {
-        data = new sofa::core::objectmodel::Data<sofa::defaulttype::Vec3d>();
+        std::cout << "DATA TYPE: " << type << std::endl ;
+        if(type=="vec3")
+           data = new sofa::core::objectmodel::Data<sofa::defaulttype::Vec3d>();
+        else if(type=="float")
+           data = new sofa::core::objectmodel::Data<float>();
+        else
+            data = new sofa::core::objectmodel::Data<std::string>();
+
         if (data == nullptr)
         {
             msg_warning() << " Something went wrong while creating data";
@@ -171,6 +180,9 @@ void ImplicitFieldShaderVisualization::uploadUniformsValues()
 
             BaseData* d = findData(tmpGLSLCode.m_name) ;
             const sofa::defaulttype::AbstractTypeInfo* nfo = d->getValueTypeInfo() ;
+
+            std::cout << "Properties: " << nfo->Scalar() << " " << nfo->size() << " " << nfo->Container() << std::endl ;
+
             if( nfo->Scalar() && nfo->Container() && nfo->size() == 3 )
             {
                 const void* dv = d->getValueVoidPtr();
@@ -178,6 +190,13 @@ void ImplicitFieldShaderVisualization::uploadUniformsValues()
                                   nfo->getScalarValue(dv,0),
                                   nfo->getScalarValue(dv,1),
                                   nfo->getScalarValue(dv,2));
+            }
+            else if( nfo->Scalar() && nfo->size() == 1 )
+            {
+                std::cout << "UPLOAD VALUE" << std::endl ;
+                const void* dv = d->getValueVoidPtr();
+                shader->SetFloat(shader->GetVariable(tmpGLSLCode.m_name),
+                                  nfo->getScalarValue(dv,0));
             }
         }
     }
@@ -289,24 +308,14 @@ std::string ImplicitFieldShaderVisualization::implicitFunction()
             std::string name = shaderCode.m_name;
             std::string dataName = shaderCode.m_dataname;
             std::string value = shaderCode.m_value;
+            std::cout << "IMPLICTI FUNCT: " << name << " " << shaderCode.m_type << std::endl ;
 
             if (changedFromDataField)
             {
-                BaseData* data = fetchData(name);
+                BaseData* data = fetchData(name, shaderCode.m_type);
                 value = data->getValueString();
             }
-            implicitFunction.append(
-                        "   x = pos.x - evalPosition" + dataName + ".x;\n"
-                                                                   "   y = pos.y - evalPosition" + dataName + ".y;\n"
-                                                                                                              "   z = pos.z - evalPosition" + dataName + ".z;\n"
-                        );
-            implicitFunction.append(
-                        "   res = minVec4(\n"
-                        "       res,\n"
-                        );
-
-            implicitFunction.append("\t\tvec4(" + value + ", evalColor" + dataName + ")\n");
-            implicitFunction.append("   );    \n");
+            implicitFunction.append( value );
         }
     }
     return implicitFunction;

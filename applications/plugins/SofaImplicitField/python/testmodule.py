@@ -1,5 +1,4 @@
-
-# coding=utf-
+# coding=utf-8
 
 def gradFunction(x,y,z):
 	return [0.0, 0.0, 0.0]

@@ -12,12 +12,10 @@ const float EPSILON = 0.00001;
 const vec3 lightPos=vec3(1.0,1.0,1.0);
 
 //// This text will be replaced by the shape compiler before compiling the shader. 
-uniform vec3 evalColorSphere1;
-uniform vec3 evalPositionSphere1;
-uniform vec3 evalColorSphere2;
-uniform vec3 evalPositionSphere2;
-uniform vec3 evalColorSphere3;
-uniform vec3 evalPositionSphere3;
+uniform vec3 positionSphere1;
+uniform vec3 positionSphere0;
+uniform float radiusSphere0;
+uniform float radiusSphere1;
 
 
 
@@ -25,9 +23,15 @@ float sdPlane( vec3 p )
 {
    return p.y;
 }
-float sdSphere( vec3 p, float s )
+
+float sdSphere( vec3 p, vec3 center, float radius )
 {
-   return length(p)-s;
+   return length(p-center)-radius;
+}
+
+float sdDifference(float a, float b)
+{
+	return max(-a,b);
 }
 
 vec4 minVec4( vec4 d1, vec4 d2 )
@@ -38,33 +42,7 @@ vec4 minVec4( vec4 d1, vec4 d2 )
 //// This text will be replaced by the shape compiler before compiling the shader. 
 vec4 map(in vec3 pos)
 {
-	float x=pos.x;
-	float y=pos.y;
-	float z=pos.z;
-	vec4 res=vec4(100000,1.0,1.0,1.0);
-	   x = pos.x - evalPositionSphere1.x;
-   y = pos.y - evalPositionSphere1.y;
-   z = pos.z - evalPositionSphere1.z;
-   res = minVec4(
-       res,
-		vec4(min(sqrt(x*x+y*y+z*z) -1.0, sqrt((x+.5)*(x+0.5)+y*y+z*z) -1.0), evalColorSphere1)
-   );    
-   x = pos.x - evalPositionSphere2.x;
-   y = pos.y - evalPositionSphere2.y;
-   z = pos.z - evalPositionSphere2.z;
-   res = minVec4(
-       res,
-		vec4(sqrt(x*x+y*y+z*z) -1.0, evalColorSphere2)
-   );    
-   x = pos.x - evalPositionSphere3.x;
-   y = pos.y - evalPositionSphere3.y;
-   z = pos.z - evalPositionSphere3.z;
-   res = minVec4(
-       res,
-		vec4(sqrt(x*x+y*y+z*z) -1.0, evalColorSphere3)
-   );    
-
-	return res; 
+	return vec4(sdDifference(sdSphere(pos, positionSphere0, radiusSphere0),sdSphere(pos, positionSphere1, radiusSphere1)), vec3(1.0,1.0,1.0)) ;
 }
 
 vec4 castRay( in vec3 ro, in vec3 rd )

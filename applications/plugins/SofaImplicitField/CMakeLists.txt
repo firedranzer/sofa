@@ -65,7 +65,16 @@ set(EXTRA_FILES
     examples/cython/CustomField.scn
     examples/cython/customfield.py
     examples/cython/cythonfield.pyx
+    python/difigeometry/Makefile
     python/difigeometry/__init__.py
+    python/difigeometry/expression.py
+    python/difigeometry/expression2D.py
+    python/difigeometry/expressionToString.py
+    python/difigeometry/generate_expression.py
+    python/difigeometry/pyxsrc/primitives.pxd
+    python/difigeometry/pyxsrc/primitives.pyx
+    python/difigeometry/pyxsrc/primitives2D.pxd
+    python/difigeometry/pyxsrc/primitives2D.pyx
     )
 
 add_subdirectory(SofaImplicitField_test)

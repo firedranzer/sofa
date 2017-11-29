@@ -7,7 +7,9 @@
     <VisualStyle name="visualStyle"  displayFlags="showVisual" />
 
     <Node name="2">
-    	<CustomField name="field"  function="customfield.evalField"/>
+    	<CustomField name="field"  
+                     function="customfield.evalField" 
+                     glslFunction="customfield.glslFunction"/>
         <ImplicitFieldShaderVisualization name="implicitFieldShaderVisualization1"  listening="1"  field="@field" />
     </Node>
 

@@ -99,7 +99,7 @@ protected:
     void uploadUniformsValues();
     std::ostream& generateFragmentShader(std::ostream&);
     std::ostream& generateVertexShader(std::ostream&);
-    BaseData* fetchData(std::string argumentName);
+    BaseData* fetchData(const std::string& argumentName, const std::string& type);
     void initComponentShaderValue();
 
     std::string uniformsAndConst();

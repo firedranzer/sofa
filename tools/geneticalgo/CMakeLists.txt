@@ -14,6 +14,9 @@ set(EXTRA_FILES
     Makefile
     geneticalgo/shapewriter.py
     geneticalgo/generate_expression.py
+    geneticalgo/expression.py
+    geneticalgo/expression2D.py
+    geneticalgo/expressionToString.py
     geneticalgo/algorithm.py
 
     geneticalgo/pyxsrc/primitives.pyx

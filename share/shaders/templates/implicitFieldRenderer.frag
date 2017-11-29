@@ -16,9 +16,15 @@ float sdPlane( vec3 p )
 {
    return p.y;
 }
-float sdSphere( vec3 p, float s )
+
+float sdSphere( vec3 p, vec3 center, float radius )
 {
-   return length(p)-s;
+   return length(p-center)-radius;
+}
+
+float sdDifference(float a, float b)
+{
+	return max(-a,b);
 }
 
 vec4 minVec4( vec4 d1, vec4 d2 )
@@ -29,12 +35,7 @@ vec4 minVec4( vec4 d1, vec4 d2 )
 //// This text will be replaced by the shape compiler before compiling the shader. 
 vec4 map(in vec3 pos)
 {
-	float x=pos.x;
-	float y=pos.y;
-	float z=pos.z;
-	vec4 res=vec4(100000,1.0,1.0,1.0);
-	REPLACE_WITH_SHAPE
-	return res; 
+	return vec4(REPLACE_WITH_SHAPE, vec3(1.0,1.0,1.0)) ;
 }
 
 vec4 castRay( in vec3 ro, in vec3 rd )

@@ -211,94 +211,46 @@ void CustomField::updateGLSLCodeCacheFromPython()
         m_glslcodes.clear() ;
         return ;
     }
-    std::cout << glslFunction << std::endl;
-    std::cout << glslFunction->ob_type << std::endl;
-    std::cout << glslFunction->ob_refcnt << std::endl;
-    //TODO(dmarchal) add here the call to the python code and the conversion from the dict to the
-    // right function.
 
-    /// Nom, type, valeur.
-    //m_glslcodes["VARIABLES"] = "pos0 = vec4(0,0,0,1); " ;
+    PyObject* res = PyObject_CallFunction(glslFunction, "");
+    if(!res)
+    {
+        PyErr_Print() ;
+    }
+    PyObject* items  = PyTuple_GetItem(res, 0) ;
+    PyObject* glslcode = PyTuple_GetItem(res, 1) ;
 
-    ///
-    //m_glslcodes["EVALFUNCTION"] = "return pos0*min(x,y); " ;
-    //m_glslcodes["GRADFUNCTION"] = "return vec3(1.0,0.0,0.0)" ;
+    m_glslcodes.clear();
+    std::vector<GLSLCodeFragment> evalList;
+    GLSLCodeFragment frag;
+    frag.m_value = PyString_AsString(glslcode);
+    evalList.push_back(frag);
+    m_glslcodes["eval"] = evalList;
+
+    std::vector<GLSLCodeFragment> variableList;
+    for(unsigned int i=0;i<PyList_Size(items);i++)
+    {
+        PyObject* item = PyList_GetItem(items, i) ;
+        PyObject* glslname = PyTuple_GetItem(item, 0);
+        PyObject* glsltype = PyTuple_GetItem(item, 1) ;
+        PyObject* glslcode = PyTuple_GetItem(item, 2);
+        PyObject* glslvalue = PyTuple_GetItem(item, 3) ;
+
+        GLSLCodeFragment frag;
+        frag.m_dataname = PyString_AsString(glslname);
+        frag.m_name = PyString_AsString(glslname);
+        frag.m_type = PyString_AsString(glsltype);
+        frag.m_value = PyString_AsString(glslvalue);
+        std::cout << "VARIABLE TYPE: " << frag.m_type << std::endl ;
+        variableList.push_back(frag);
+    }
+
+    m_glslcodes["variable"] = variableList;
 }
 
 const std::map<std::string, std::vector<GLSLCodeFragment> > &CustomField::getGLSLCode()
 {
-//    updateGLSLCodeCacheFromPython();
-    m_glslcodes.clear();
-    std::vector<GLSLCodeFragment> evalList;
-    std::vector<GLSLCodeFragment> variableList;
-
-    GLSLCodeFragment eval1;
-    eval1.m_dataname = "Sphere1";
-    eval1.m_name = "Sphere1";
-    eval1.m_type = "anEval";
-    eval1.m_value = "min(sqrt(x*x+y*y+z*z) -1.0, sqrt((x+.5)*(x+0.5)+y*y+z*z) -1.0)";
-
-    GLSLCodeFragment eval2;
-    eval2.m_dataname = "Sphere2";
-    eval2.m_name = "Sphere2";
-    eval2.m_type = "anEval";
-    eval2.m_value = "sqrt(x*x+y*y+z*z) -1.0";
-
-    GLSLCodeFragment eval3;
-    eval3.m_dataname = "Sphere3";
-    eval3.m_name = "Sphere3";
-    eval3.m_type = "anEval";
-    eval3.m_value = "sqrt(x*x+y*y+z*z) -1.0";
-
-    GLSLCodeFragment var1;
-    var1.m_dataname = "evalColorSphere1";
-    var1.m_name = "evalColorSphere1";
-    var1.m_type = "vec3";
-    var1.m_value = "1.0 0.0 0.0";
-
-    GLSLCodeFragment var2;
-    var2.m_dataname = "evalPositionSphere1";
-    var2.m_name = "evalPositionSphere1";
-    var2.m_type = "vec3";
-    var2.m_value = "0.0 1.0 0.0";
-
-    GLSLCodeFragment var3;
-    var3.m_dataname = "evalColorSphere2";
-    var3.m_name = "evalColorSphere2";
-    var3.m_type = "vec3";
-    var3.m_value = "0.0 1.0 0.0";
-
-    GLSLCodeFragment var4;
-    var4.m_dataname = "evalPositionSphere2";
-    var4.m_name = "evalPositionSphere2";
-    var4.m_type = "vec3";
-    var4.m_value = "1.0 1.0 0.0";
-
-    GLSLCodeFragment var5;
-    var5.m_dataname = "evalColorSphere3";
-    var5.m_name = "evalColorSphere3";
-    var5.m_type = "vec3";
-    var5.m_value = "0.0 0.0 1.0";
-
-    GLSLCodeFragment var6;
-    var6.m_dataname = "evalPositionSphere3";
-    var6.m_name = "evalPositionSphere3";
-    var6.m_type = "vec3";
-    var6.m_value = "2.0 1.0 0.0";
-
-    evalList.push_back(eval1);
-    evalList.push_back(eval2);
-    evalList.push_back(eval3);
-
-    variableList.push_back(var1);
-    variableList.push_back(var2);
-    variableList.push_back(var3);
-    variableList.push_back(var4);
-    variableList.push_back(var5);
-    variableList.push_back(var6);
-
-    m_glslcodes["eval"] = evalList;
-    m_glslcodes["variable"] = variableList;
+    updateGLSLCodeCacheFromPython();
     return m_glslcodes ;
 }
 
