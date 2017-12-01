@@ -38,8 +38,8 @@ class psltemplate(object):
        for k in kwargs:
            calledAs += str(k)+"="+repr(kwargs[k])
        calledAs += ")"
-       #templatenode.addData("psl_instanceof", "PSL", "", "s", "PythonDecoratorTemplate")
-       #templatenode.addData("psl_templatename", "PSL", "", "s", calledAs)
+       #templatenode.addNewData("psl_instanceof", "PSL", "", "s", "PythonDecoratorTemplate")
+       #templatenode.addNewData("psl_templatename", "PSL", "", "s", calledAs)
        return templatenode
 
 for (name,desc) in Sofa.getAvailableComponents():

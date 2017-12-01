@@ -102,7 +102,7 @@ def findStackLevelFor(key, stack):
 def processPython(parent, key, kv, stack, frame):
         """Process a python fragment of code with context provided by the content of the stack."""
         p=parent.createObject("Python", name='"'+kv[0:20]+'..."')
-        p.addData("psl_source","PSL", "This hold a python expression.", "s", str(kv))
+        p.addNewData("psl_source","PSL", "This hold a python expression.", "s", str(kv))
 
         context = flattenStackFrame(stack)
         local = {}
@@ -154,7 +154,7 @@ def whatis(name, n=5):
 def processString(object, name, value, stack, frame):
     ## Python Hook to build an eval function.
     if len(value) > 2 and value[0] == 'p' and value[1] == '"':
-            d = object.addData("psl_"+name, "PSL", "This hold a python expression.", "s", str(value))
+            d = object.addNewData("psl_"+name, "PSL", "This hold a python expression.", "s", str(value))
             object.findData("psl_"+name).setPersistant(True)
             return evalPython(None, value[2:-1], stack, frame)
 
@@ -196,7 +196,7 @@ def createObject(parentNode, name, stack , frame, kv):
                 for k in kv:
                     if getField(obj, k) == None:
                         Sofa.msg_info(obj, pslprefix+" attribute '"+str(k)+"' is a parsing hook. Let's add Data field to fix it. To remove this warning stop using parsing hook.")
-                        d = obj.addData(k, "PSL", "", "s", str(kv[k]))
+                        d = obj.addNewData(k, "PSL", "", "s", str(kv[k]))
                         obj.findData(k).setPersistant(True)
                 return obj
 
@@ -390,7 +390,7 @@ def processTemplate(parent, key, kv, stack, frame):
         o.listening = True
         o.setTemplate(kv)
         o.trackData(o.findData("psl_source"))
-        o.addData("psl_instanceof", "PSL", "", "s", "Template")
+        o.addNewData("psl_instanceof", "PSL", "", "s", "Template")
         frame[str(name)] = o
         templates[str(name)] = o
         return o
@@ -583,11 +583,11 @@ def processProperties(self, key, kv, stack, frame):
             v=processString(self, k, v, stack, frame)
 
         if isinstance(v, int):
-            self.addData(k, "Properties", "", "d", v)
+            self.addNewData(k, "Properties", "", "d", v)
         elif isinstance(v, str) or isinstance(v,unicode):
-            self.addData(k, "Properties", "", "s", str(v))
+            self.addNewData(k, "Properties", "", "s", str(v))
         elif isinstance(v, float):
-            self.addData(k, "Properties", "", "f", v)
+            self.addNewData(k, "Properties", "", "f", v)
 
         if hasattr(self, k):
             msg += " - adding: '"+str(k)+"' = "+str(v)
@@ -614,6 +614,7 @@ def instanciateTemplate(parent, key, kv, stack, frame):
         nframe={}
         stack = [nframe]
         source = None
+        properties=[]
         if isinstance(templates[key], Sofa.Template):
                 templatesource = templates[key].getTemplate()
         else:
@@ -641,11 +642,16 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                             for kk,vv in v:
                                     if not kk in frame:
                                             nframe[kk] = vv
+                                    properties.append(kk)
                     else:
                             source.append((k,v))
 
+            nframe["args"] = []
             for k,v in kv:
-                    nframe[k] = v
+                    if k in nframe:
+                        nframe[k] = v
+                    else:
+                        nframe["args"].append((k,v))
 
             if len(source)==1 and source[0][0]=="Node":
                 n = processNode(parent, "Node", source[0][1], stack, nframe, doCreate=True)
@@ -655,7 +661,7 @@ def instanciateTemplate(parent, key, kv, stack, frame):
         if isinstance(templates[key], Sofa.Template):
             ## Add to the created node the different template properties.
             for k,v in kv:
-                if not hasattr(n, k):
+                if not hasattr(n, k) and k in properties:
                     data = None
                     t = templates[key]
                     if isinstance(v, int):
@@ -668,29 +674,29 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                         data = t.createATrackedData(k, "Live.Properties", "Help", "f", str(v))
 
                     if data != None:
-                        n.addNewData(data)
+                        n.addData(data)
                         templates[key].trackData( data )
 
         else:
             ## Add to the created node the different template properties.
             for k,v in kv:
-                if not hasattr(n, k):
+                if not hasattr(n, k) and k in properties:
                     if isinstance(v, int):
-                        n.addData(k, "Live.Properties", "Help", "d", v)
+                        n.addNewData(k, "Live.Properties", "Help", "d", v)
                     elif isinstance(v, str) or isinstance(v,unicode):
-                        n.addData(k, "Live.Properties", "Help", "s", str(v))
+                        n.addNewData(k, "Live.Properties", "Help", "s", str(v))
                     elif isinstance(v, float):
-                        n.addData(k, "Live.Properties", "Help", "f", v)
+                        n.addNewData(k, "Live.Properties", "Help", "f", v)
                     elif isinstance(v, unicode):
-                        n.addData(k, "Live.Properties", "Help", "f", str(v))
+                        n.addNewData(k, "Live.Properties", "Help", "f", str(v))
 
                 ## Add the data tracker to the template instances (this is bad) :(
                 ##if isinstance(templates[key], Sofa.Template):
                 ##    templates[key].trackData( n.findData(k) )
 
         ## Add the meta-type information.
-        n.addData("psl_properties", "PSL", "Captured variables for template re-instantiation", "s", repr(kv))
-        n.addData("psl_instanceof", "PSL", "Type of the object", "s", str(key))
+        n.addNewData("psl_properties", "PSL", "Captured variables for template re-instantiation", "s", repr(kv))
+        n.addNewData("psl_instanceof", "PSL", "Type of the object", "s", str(key))
 
         stack.pop(-1)
 

@@ -10,6 +10,7 @@ set(HEADER_FILES
     components/TestResult.h
     components/PSLVersion.h
     components/Template.h
+    components/PythonBaseObject.h
 )
 
 set(SOURCE_FILES
@@ -21,6 +22,7 @@ set(SOURCE_FILES
     components/TestResult.cpp
     components/PSLVersion.cpp
     components/Template.cpp
+    components/PythonBaseObject.cpp
 )
 
 find_package(SofaFramework REQUIRED)
@@ -80,7 +82,7 @@ endif()
 
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${PYTHON_FILES} ${EXTRA_FILES})
 target_link_libraries(${PROJECT_NAME} SofaCore SofaSimulationGraph SofaPython)
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
+target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/..")
 
 install(TARGETS ${PROJECT_NAME}
         COMPONENT PSL_libraries
