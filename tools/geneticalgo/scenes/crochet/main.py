@@ -180,7 +180,7 @@ def mutation_Type(ind, side):
 
         else:
             type = "smooth"
-            del ind.listOfDrawnPoints[index][3][-2,-1]
+            del ind.listOfDrawnPoints[index][3][-2:]
 
 
 def mutation_Thickness(ind, side):
@@ -191,21 +191,19 @@ def mutation_Thickness(ind, side):
         raise ValueError, "choose a side"
 
     index=random.randint(0,length-1)
+
     if side = "left":
 
         param = ind.listOfDrawnPoints[index][2]
-    else:
-        param = ind.listOfDrawnPoints[index][3]
-
-
-    thickness=param[1]
-    epsilon=random.uniform(thickness/8.0,thickness/4.0)
-    thickness+=epsilon
-    if side = "left":
-
+        thickness=param[1]
+        epsilon=random.uniform(thickness/8.0,thickness/4.0)
+        thickness+=epsilon
         ind.listOfDrawnPoints[index][2][1] = thickness
     else:
-
+        param = ind.listOfDrawnPoints[index][3]
+        thickness=param[1]
+        epsilon=random.uniform(thickness/8.0,thickness/4.0)
+        thickness+=epsilon
         ind.listOfDrawnPoints[index][3][1] = thickness
 
 
@@ -223,27 +221,18 @@ def mutation_Coef(ind, side):
     if side = "left":
 
         param = ind.listOfDrawnPoints[index][2]
-    else:
-        param = ind.listOfDrawnPoints[index][3]
-
-
-    coef = param[2]
-    epsilon=random.uniform(0.8,1.2)
-    coef*=epsilon
-    if side = "left":
-
+        coef = param[2]
+        epsilon=random.uniform(0.8,1.2)
+        coef*=epsilon
         ind.listOfDrawnPoints[index][2][2] = coef
+
     else:
 
+        param = ind.listOfDrawnPoints[index][3]
+        coef = param[2]
+        epsilon=random.uniform(0.8,1.2)
+        coef*=epsilon
         ind.listOfDrawnPoints[index][3][2] = coef
-
-
-mutationType="OFF"
-mutationThickness="OFF"
-mutationCoef="OFF"
-mutationWidth="ON"
-mutationDepht="OFF"
-mutationPosition="OFF"
 
 def mutation(ind):
 
@@ -253,15 +242,12 @@ def mutation(ind):
             mutation_Type(ind, side)
 
     if mutationThickness=="ON":
-
         if random.choice([True, False]):
-
             side = random.choice("left", "right")
             mutation_Thickness(ind, side)
 
 
     if mutationCoef=="ON":
-
         if random.choice([True, False]):
             side = random.choice("left", "right")
             mutation_Coef(ind, side)
@@ -272,15 +258,12 @@ def mutation(ind):
             mutation_Width(ind, side)
 
     if mutationDepht=="ON":
-
         if random.choice([True, False]):
-
             side = random.choice("left", "right")
             mutation_Depht(ind, side)
 
 
     if mutationPosition=="ON":
-
         if random.choice([True, False]):
             side = random.choice("left", "right")
             mutation_Position="OFF"(ind, side)
@@ -312,15 +295,25 @@ def mutationFunc(pop, params):
 ###
 def crossing_ind(individual1, individual2):
 
-    length1=len(individual1.listCavities)
+    crochet1 = crochet.generateCrochetManually(individual1.listOfDrawnPoints)
+    crochet2 = crochet.generateCrochetManually(individual2.listOfDrawnPoints)
 
-    if length1!=len(individual2.listCavities):
+    s = random.uniform(0.0, 1.0)
 
-        raise ValueError, "they have not the same number of cavities"
+    index1 = 0
+    while chrochet1.listOfControlPoints[index1].absisse < s:
+        index1+=1
+
+    index2 = 0
+    while chrochet2.listOfControlPoints[index2].absisse < s:
+        index2+=1
+
 
     ind1=newIndividualFrom(individual1)
     ind2=newIndividualFrom(individual2)
-    index=random.randint(0,length1-1)
+
+    del ind1.listOfDrawnPoints[index1:]
+    del ind2.listOfDrawnPoints[index2:]
 
     temp1 = ind1.listCavities[index]
     temp2 = ind2.listCavities[index]
