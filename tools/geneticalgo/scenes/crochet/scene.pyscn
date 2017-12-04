@@ -1,4 +1,3 @@
-
 import Sofa
 import os
 
@@ -8,7 +7,7 @@ def createScene(rootNode):
                 rootNode.createObject('BackgroundSetting', color="1 1 1")
                 rootNode.createObject('FreeMotionAnimationLoop')
                 rootNode.createObject('GenericConstraintSolver', maxIterations='250', printLog='1', tolerance = '0.0000001')
-                rootNode.findData('gravity').value='0 0 -981.0'
+                rootNode.findData('gravity').value='0 0 -9.810'
                 rootNode.createObject('PythonScriptController', filename="controller.py", classname="controller")
 
                 shape = rootNode.createChild("Shape")
@@ -16,12 +15,10 @@ def createScene(rootNode):
                 #shape.createObject("CGLinearSolver", template="GraphScattered", name="linear solver",  iterations="25",  tolerance="1e-09", threshold="1e-09")
 
                 shape.createObject("CustomField", name="shape", function="shape.evalField")
-                shape.createObject("CustomField", name="shapeinv",  function="shapeinv.evalField")
 
                 #Mesh component
-                mesh=shape.createObject("MeshGenerationFromImplicitShape", meshingzone_center="0 0 1.0", meshingzone_radius="30", name="mesh", facet_size="0.5", cell_size="1.0", scalarfield="@shape", drawTetras="true")
-                meshinv=shape.createObject("SurfaceMeshGenerationFromScalarField", name="Mesh", min = "-15 -15 -3", max = "15 15 30", step = "0.5", field="@shapeinv", visuCavity="false")
-                #shape.createObject("PointCloudImplicitFieldVisualization", field="@shape", box="-10 -10 -2 10 10 20")
+                mesh=shape.createObject("MeshGenerationFromImplicitShape", meshingzone_center="0 0 0.005", meshingzone_radius="0.0150", name="mesh", facet_size="0.00035", cell_size="0.000", scalarfield="@shape", drawTetras="true")
+                
 
                 if True:
                    #accordion"
@@ -32,30 +29,20 @@ def createScene(rootNode):
                     accordion.createObject('TetrahedronSetTopologyModifier')
                     accordion.createObject('TetrahedronSetTopologyAlgorithms', template='Vec3d')
                     accordion.createObject('TetrahedronSetGeometryAlgorithms', template='Vec3d')
+                    
+                    if True:
+                        accordion.createObject('MechanicalObject', name='tetras', src="@container", template='Vec3d', showIndices='false', showIndicesScale='4e-5', rx='0', dz='0')
+                        accordion.createObject('UniformMass', totalmass='.005')
+                        accordion.createObject('TetrahedronFEMForceField', template='Vec3d', name='FEM', method='large', poissonRatio='0.3',  youngModulus='130000000')
+                        accordion.createObject('BoxROI', name='boxROI', box='-0.0005 0.008  -0.005  0.005 0.010 0.0010', drawBoxes='true', position="@tetras.rest_position",tetrahedra="@container.tetrahedra")
+                        accordion.createObject('RestShapeSpringsForceField', points='@boxROI.indices', stiffness='1e12')
+                        accordion.createObject('BoxROI', name='boxROI2', box=' 0.003 -0.0014 0  0.004 -0.010 0.0010', drawBoxes='true', position="@tetras.rest_position", tetrahedra="@container.tetrahedra")
+                        accordion.createObject('ConstantForceField', indices='@boxROI2.indices', totalForce="-0.20 0.20 0 ", arrowSizeCoef=".2")
 
-                    accordion.createObject('MechanicalObject', name='tetras', src="@container", template='Vec3d', showIndices='false', showIndicesScale='4e-5', rx='0', dz='0')
-                    accordion.createObject('UniformMass', totalmass='.50')
-                    accordion.createObject('TetrahedronFEMForceField', template='Vec3d', name='FEM', method='large', poissonRatio='0.3',  youngModulus='7000')
-                    accordion.createObject('BoxROI', name='boxROI', box='-10 -10 0  10 10 1', drawBoxes='true', position="@tetras.rest_position", tetrahedra="@container.tetrahedra")
-                    accordion.createObject('RestShapeSpringsForceField', points='@boxROI.indices', stiffness='1e12')
-                    accordion.createObject('BoxROI', name='boxROI2', box='-10 -10 25  10 10 25.5', drawBoxes='true', position="@tetras.rest_position", tetrahedra="@container.tetrahedra")
-                    accordion.createObject('ConstantForceField', indices='@boxROI2.indices', totalForce="0 0 -2000", arrowSizeCoef=".02")
-                    accordion.createObject('PartialFixedConstraint', name="partialFixedConstraint", indices='@boxROI2.indices', fixedDirections="1 1 0")
-                    #accordion.createObject('RestShapeSpringsForceField', indices='@boxROI2.indices', stiffness='1')
+                        accordion.createObject('SparseLDLSolver', name='preconditioner')
+                        accordion.createObject('LinearSolverConstraintCorrection', solverName='preconditioner')
 
-                    accordion.createObject('SparseLDLSolver', name='preconditioner')
-                    accordion.createObject('LinearSolverConstraintCorrection', solverName='preconditioner')
-
-#                    accordion/cavity
-                    cavity = accordion.createChild('cavity')
-                    #cavity.createObject('MeshSTLLoader', name='loader', filename='cylinder.stl')
-                    #cavity.createObject('Mesh', src='@loader', name='topo')
-                    cavity.createObject('Mesh', position='@../../Shape/Mesh.outputPoints', triangles='@../../Shape/Mesh.outputTriangles', name='topo')
-
-                    cavity.createObject('MechanicalObject', name='cavity')
-                    cavity.createObject('SurfacePressureConstraint', name="pressure", triangles='@topo.triangles', value='500', valueType="volumeGrowth", flipNormal="true")
-                    cavity.createObject('BarycentricMapping', name='mapping',  mapForces='true', mapMasses='true')
-
+    #                    
     #                accordion/accordionVisu
                     accordionVisu = accordion.createChild('visu')
                     accordionVisu.createObject('TriangleSetTopologyContainer', name='container')
@@ -67,9 +54,9 @@ def createScene(rootNode):
                     accordionVisu.createObject('OglModel', template='ExtVec3f', color='0.3 0.2 0.2 0.6')
                     accordionVisu.createObject('IdentityMapping')
 
-    #                accordion/accordionMarkPoints
+            #       accordion/accordionMarkPoints
                     accordionMarkedPoints = accordion.createChild('markedPositions')
-                    accordionMarkedPoints.createObject('MechanicalObject', position=" 0 0 0  0 0 25", name='markedPoints', showObject = "true", showObjectScale = "10.0" )
+                    accordionMarkedPoints.createObject('MechanicalObject', position="0.0035 -0.00125 0.0005", name='markedPoints', showObject = "true", showObjectScale = "10.0" )
                     accordionMarkedPoints.createObject('BarycentricMapping')
 
                 return rootNode

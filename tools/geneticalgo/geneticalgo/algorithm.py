@@ -148,6 +148,7 @@ class GeneticAlgorithm(object):
 
 
     def saveHTMLGeneration(self, gen, score, wdir):
+        return
         if wdir == None:
             return
         with HTML().html as h:

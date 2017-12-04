@@ -5,12 +5,27 @@ import os
 import json
 import sys
 import math
+import crochetutils
 from geneticalgo import algorithm
 from geneticalgo import primitives
 from geneticalgo import primitives2D
 from geneticalgo import piecewisePolynom2D
+from geneticalgo import crochetInFile
 from sofalauncher import launcher
+import crochet
 
+
+A = [0.0, 0.010, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
+B = [0.0, 0.005, ["smooth", 0.0007, 1.0], ["smooth", 0.0007, 1.0]]
+C = [-0.0025, 0.00125, ["smooth", 0.0007, 1.0], ["smooth", 0.0007, 1.0]]
+D = [-0.0025, -0.00125, ["smooth", 0.0007, 1.0], ["corner", 0.0015, 1.0, 0.0007, 0.0007]]
+E = [0.0, -0.00250, ["smooth", 0.0007, 1.0], ["smooth", 0.0007, 1.0]]
+F = [0.0025, -0.0025, ["smooth", 0.0007, 1.0], ["smooth", 0.0007, 1.0]]
+G = [0.0035, -0.00125, ["smooth", 0.0007, 1.0], ["smooth", 0.0007, 1.0]]
+
+reference = [A, B, C, D, E, F, G]
+
+individualId = 0
 mutationType="OFF"
 mutationThickness="OFF"
 mutationCoef="OFF"
@@ -90,7 +105,7 @@ def mutation_Depht(ind, side):
 
     index=random.randint(1,length-2)
 
-    if side = "left":
+    if side == "left":
 
         param = ind.listOfDrawnPoints[index][2]
 
@@ -120,7 +135,7 @@ def mutation_Width(ind, side):
 
     index=random.randint(1,length-2)
 
-    if side = "left":
+    if side == "left":
 
         param = ind.listOfDrawnPoints[index][2]
 
@@ -149,7 +164,7 @@ def mutation_Type(ind, side):
 
     index=random.randint(1,length-2)
 
-    if side = "left":
+    if side == "left":
 
         param = ind.listOfDrawnPoints[index][2]
         type=param[0]
@@ -192,7 +207,7 @@ def mutation_Thickness(ind, side):
 
     index=random.randint(0,length-1)
 
-    if side = "left":
+    if side == "left":
 
         param = ind.listOfDrawnPoints[index][2]
         thickness=param[1]
@@ -218,7 +233,7 @@ def mutation_Coef(ind, side):
         raise ValueError, "choose a side"
 
     index=random.randint(1,length-2)
-    if side = "left":
+    if side == "left":
 
         param = ind.listOfDrawnPoints[index][2]
         coef = param[2]
@@ -238,34 +253,34 @@ def mutation(ind):
 
     if mutationType=="ON":
         if random.choice([True, False]):
-            side = random.choice("left", "right")
+            side = random.choice(["left", "right"])
             mutation_Type(ind, side)
 
     if mutationThickness=="ON":
         if random.choice([True, False]):
-            side = random.choice("left", "right")
+            side = random.choice(["left", "right"])
             mutation_Thickness(ind, side)
 
 
     if mutationCoef=="ON":
         if random.choice([True, False]):
-            side = random.choice("left", "right")
+            side = random.choice(["left", "right"])
             mutation_Coef(ind, side)
 
     if mutationWidth=="ON":
         if random.choice([True, False]):
-            side = random.choice("left", "right")
+            side = random.choice(["left", "right"])
             mutation_Width(ind, side)
 
     if mutationDepht=="ON":
         if random.choice([True, False]):
-            side = random.choice("left", "right")
+            side = random.choice(["left", "right"])
             mutation_Depht(ind, side)
 
 
     if mutationPosition=="ON":
         if random.choice([True, False]):
-            side = random.choice("left", "right")
+            side = random.choice(["left", "right"])
             mutation_Position="OFF"(ind, side)
 
 
@@ -301,11 +316,11 @@ def crossing_ind(individual1, individual2):
     s = random.uniform(0.0, 1.0)
 
     index1 = 0
-    while chrochet1.listOfControlPoints[index1].absisse < s:
+    while crochet1.listOfControlPoints[index1].absisse < s:
         index1+=1
 
     index2 = 0
-    while chrochet2.listOfControlPoints[index2].absisse < s:
+    while crochet2.listOfControlPoints[index2].absisse < s:
         index2+=1
 
 
@@ -315,11 +330,8 @@ def crossing_ind(individual1, individual2):
     del ind1.listOfDrawnPoints[index1:]
     del ind2.listOfDrawnPoints[index2:]
 
-    temp1 = ind1.listCavities[index]
-    temp2 = ind2.listCavities[index]
-
-    ind1.listCavities[index]=temp2
-    ind2.listCavities[index]=temp1
+    ind1.listOfDrawnPoints+=individual2.listOfDrawnPoints[index2:]
+    ind2.listOfDrawnPoints+=individual1.listOfDrawnPoints[index1:]
 
     return (ind1, ind2)
 
@@ -346,41 +358,38 @@ def crossFunc(pop, params):
 ####################################################################################################
 ### Generate
 ###
-def generateIndividual(aType):
-        individual=AccordionIndividual()
+def generateIndividual(reference):
+        individual=CrochetIndividual()
 
-        for i in range(1,number_of_cavities+1):
-            height=0.5+i*(individual.height-1.0)/float(number_of_cavities+1)
+        length = len(reference)
 
-            if aType=="ellipsoid":
-                if generate_random=="ON":
-                    axisX=max(individual.thickness+1.0, random.uniform((4.0/3.0)*individual.radius,(10.0/3.0)*individual.radius))
-                    axisY=max(individual.thickness+1.0, random.uniform(2.0*individual.thickness,(10.0/3.0)*individual.radius))
-                    axisZ=max(individual.thickness+1.0, (individual.height-1.0)/float((2*(number_of_cavities+1))))
+        individual.listOfDrawnPoints.append(reference[0])
 
-                else:
-                    axisX=max(individual.height/2.5 , max(individual.thickness+1.0, (7.0/3.0)*individual.radius))
-                    axisY=max(individual.height/2.5 , max(individual.thickness+1.0, (7.0/3.0)*individual.radius))
-                    axisZ=max(individual.thickness+1.0, (individual.height-1.0)/float((2*(number_of_cavities+1))))
+        if length > 2:
 
-            else:
-                if generate_random=="ON":
-                    axisX=max(individual.thickness+1.0, random.uniform((4.0/3.0)*individual.radius,(10.0/3.0)*individual.radius))
-                    axisY=max(individual.thickness+1.0, random.uniform(2.0*individual.thickness,(10.0/3.0)*individual.radius))
-                    axisZ=max(individual.thickness+1.0, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
-                else:
-                    axisX=max(individual.height/2.5 , max(individual.thickness+1.0, (7.0/3.0)*individual.radius))
-                    axisY=max(individual.height/2.5 , max(individual.thickness+1.0, (7.0/3.0)*individual.radius))
-                    axisZ=max(individual.thickness+1.0, 1.5*(individual.height-1.0)/float((2*(number_of_cavities+1))))
+            for i in range(1, length-1):
 
-            cavity=[height,aType,axisX,axisY,axisZ]
-            accordion.addCavity(individual,cavity)
+                param = reference[i]
 
-        cavityBottom=[0.5,"cylinder",5.0*individual.radius/3.0,5.0*individual.radius/3.0,0.75]
-        cavityTop=[individual.height,"cylinder",5.0*individual.radius/3.0,5.0*individual.radius/3.0,0.75]
+                newPoint = [param[0]+random.uniform(-0.0001, 0.0001), param[1]+random.uniform(-0.0001, 0.0001)]
 
-        accordion.addCavity(individual,cavityBottom)
-        accordion.addCavity(individual,cavityTop)
+                if param[2][0] == "smooth":
+                    newPoint.append(["smooth", param[2][1]+random.uniform(-0.0001, 0.0001), param[2][2]+random.uniform(-0.001, 0.001)])
+
+                elif param[2][0] == "corner":
+                    newPoint.append(["corner", param[2][1]+random.uniform(-0.0001, 0.0001), param[2][2]+random.uniform(-0.001, 0.001),\
+                                     param[2][3]+random.uniform(-0.0001, 0.0001), param[2][4]+random.uniform(-0.0001, 0.0001)])
+
+
+                if param[3][0] == "smooth":
+                     newPoint.append(["smooth", param[3][1]+random.uniform(-0.0001, 0.0001), param[3][2]+random.uniform(-0.001, 0.001)])
+
+                elif param[3][0] == "corner":
+                    newPoint.append(["corner", param[3][1]+random.uniform(-0.0001, 0.0001), param[3][2]+random.uniform(-0.001, 0.001),\
+                                                          param[3][3]+random.uniform(-0.0001, 0.0001), param[3][4]+random.uniform(-0.0001, 0.0001)])
+                individual.listOfDrawnPoints.append(newPoint)
+
+        individual.listOfDrawnPoints.append(reference[-1])
 
         individual.level=None
 
@@ -392,8 +401,8 @@ def generateFunc(numgen, params):
     pop = algorithm.Population()
 
     for i in range(nbInd):
-        ltype=random.choice(type)
-        pop.append(generateIndividual(ltype))
+        global reference
+        pop.append(generateIndividual(reference))
 
     return pop
 
@@ -401,38 +410,32 @@ def generateFunc(numgen, params):
 ### Eval
 ###
 def evaluationFunc(pop):
-    global thickness
+
     print("Evaluation Function "+str(len(pop)))
     basedir=os.path.dirname(__file__)
     bestscore = -float(sys.maxint)
 
     filename=[]
     for ind in pop:
-        shape, shapeMinus = getShapeFromInd(ind)
 
-        ### return (shape,shapeMinus)
-        ###
-        fend =  "def evalField(x,y,z): \n\treturn shape.eval(primitives.Point(x,y,z))"
-        f1 = shapewriter.toPythonString(shape) + fend
-        f2 = shapewriter.toPythonString(shapeMinus) + fend
-
-        filename.append((f1,f2, ind))
+        fend =  "def evalField(x,y,z):\n   return shape.eval(primitives.Point(x,y,z))"
+        f1 = crochetInFile.toPythonString(ind) + fend
+        filename.append((f1, ind))
 
     #################### EXAMPLE USING THE SEQUENTIAL LAUNCHER #################################
     ### List of filename that contains the simulation to run
-    scenefiles = ["scene.pyscn","controller.py", "shape.py", "shapeinv.py"]
+    scenefiles = ["scene.pyscn","controller.py", "shape.py"]
     filesandtemplates = []
     for scenefile in scenefiles:
         filesandtemplates.append( (open(basedir+"/"+scenefile).read(), scenefile) )
 
-    for f1, f2, ind in filename:
+    for f1, ind in filename:
         runs = []
-        for f1,f2,ind in filename:
+        for f1,ind in filename:
             runs.append( {"GENERATION": str(pop.id),
                           "INDIVIDUAL": str(ind.id),
-                          "SHAPECONTENT": f1, "SHAPEINVCONTENT": f2, "nbIterations":10,
-                          "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__),
-                          "THICKNESS" : thickness
+                          "SHAPECONTENT": f1, "nbIterations":90,
+                          "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__)
                           } )
 
     results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
@@ -447,7 +450,7 @@ def evaluationFunc(pop):
 
     ### Associate the results to the individuals.
     for i in range(len(filename)):
-        f1, f2, ind = filename[i]
+        f1, ind = filename[i]
         ind.results = results[i]
         data = getJSONFragmentFrom( ind.results["logfile"] )
 
@@ -457,26 +460,18 @@ def evaluationFunc(pop):
             ind.level = - float(sys.maxint)
         else:
 
-            Z0 = data["Z0"]
-            Zmax = data["Zmax"]
-            V0 = data["V0"]
+            HorizontalGap = data["HorizontalGap"]
+            VerticalGap = data["VerticalGap"]
+            if HorizontalGap > 0.0 or VerticalGap > 0.0:
+                raise ValueError, "strange behavior"
+            level = -1.0 * HorizontalGap + VerticalGap
 
-            level =(Zmax-Z0)
-
-
-            if level > 20.0:
-                print "a scene is ill defined, excessive result"
-                ind.level = - float(sys.maxint)
-            elif level < 0.0:
-                print "becareful, negative result"
-                ind.level = level
-            else:
-                ind.level = level
+            ind.level = level
 
 
 
     ## Wait here the results.
-    for f1,f2,ind in filename:
+    for f1, ind in filename:
         if ind.level > bestscore:
             bestscore = ind.level
 

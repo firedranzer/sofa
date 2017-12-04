@@ -24,7 +24,7 @@ sys.path.append(os.getcwd())
 sys.path.append( os.path.dirname(os.getcwd()) )
 
 import geneticalgo.algorithm
-import  scenes.accordion.main
+import  scenes.crochet.main
 
 
 workdir="/tmp/sg"
@@ -45,16 +45,16 @@ print("copied: " + os.getcwd() + "/fragmentCodePartTwo to: " + workdir + "/fragm
 copy2(os.getcwd() + "/webGLJSCode", workdir + "/webGLJSCode")
 print("copied: " + os.getcwd() + "/webGLJSCode to: " + workdir + "/webGLJSCode")
 
-algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":20,
+algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":2,
                                    "crossTx":10,
                                    "nbIndMutated":10,
                                    "nbMutationsPerInd":10})
-algo.start(30,
-           scenes.accordion.main.generateFunc,
-           scenes.accordion.main.mutationFunc,
-           scenes.accordion.main.crossFunc,
-           scenes.accordion.main.evaluationFunc,
-           scenes.accordion.main.selectionFunc,
+algo.start(2,
+           scenes.crochet.main.generateFunc,
+           scenes.crochet.main.mutationFunc,
+           scenes.crochet.main.crossFunc,
+           scenes.crochet.main.evaluationFunc,
+           scenes.crochet.main.selectionFunc,
            workdir
            )
 
