@@ -46,15 +46,16 @@ copy2(os.getcwd() + "/webGLJSCode", workdir + "/webGLJSCode")
 print("copied: " + os.getcwd() + "/webGLJSCode to: " + workdir + "/webGLJSCode")
 
 algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":2,
-                                   "crossTx":10,
-                                   "nbIndMutated":10,
-                                   "nbMutationsPerInd":10})
-algo.start(2,
+                                   "crossTx":1,
+                                   "nbIndMutated":1,
+                                   "nbMutationsPerInd":1})
+algo.start(3,
            scenes.crochet.main.generateFunc,
            scenes.crochet.main.mutationFunc,
            scenes.crochet.main.crossFunc,
            scenes.crochet.main.evaluationFunc,
            scenes.crochet.main.selectionFunc,
+           None,
            workdir
            )
 

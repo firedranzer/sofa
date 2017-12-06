@@ -112,7 +112,7 @@ class GeneticAlgorithm(object):
         data = ""
         with open('fragmentCodePartOne', 'r') as myfile:
             data+=myfile.read().replace("SHAPEID", str(id))
-        data += shapeExpression
+            data += shapeExpression
         with open('fragmentCodePartTwo', 'r') as myfile:
             data+=myfile.read().replace("SHAPEID", str(id))
         return data
@@ -126,30 +126,30 @@ class GeneticAlgorithm(object):
         return data
 
 
-    def saveHTMLIndividual(self, gen, ind, wdir ):
+    def saveHTMLIndividual(self, gen, ind, shaderFunc, wdir ):
 
         if wdir == None:
             return
         with HTML().html as h:
             with h.head as head:
-
-#ATTENTION CA CHANGE ICI      shaderShape = shaderInd(ind)
-                with head.script(id="shader-fscanvas"+str(ind.id), type="x-shader/x-fragment") as scriptFragment :
-                    scriptFragment.text(self.fragmentCode(shaderShape, str(ind.id)), False)
+                if shaderFunc!=None:
+                    shaderShape = shaderFunc(ind)
+                    with head.script(id="shader-fscanvas"+str(ind.id), type="x-shader/x-fragment") as scriptFragment :
+                        scriptFragment.text(self.fragmentCode(shaderShape, str(ind.id)), False)
                 with head.script(id="shader-vs", type="x-shader/x-vertex") as scriptVertex :
                     scriptVertex.text(self.vertexCode(), False)
                 with head.script(type="text/javascript") as scriptWebGL :
                     scriptWebGL.text(self.webGLJSCode(), False)
-                with h.body(onload="webGLStart();") as b:
-                    b.h1("Population "+str(gen.id)+" Individual: "+str(ind.id))
-                    b.canvas("", id="canvas"+str(ind.id), style="border: none;", width="800", height="600")
-                    b.p("Score: "+str(ind.level))
-                    b.a("Files: " +str(ind.results["directory"]), href=ind.results["directory"], title="Files: " +str(ind.results["directory"]))
+            with h.body(onload="webGLStart();") as b:
+                b.h1("Population "+str(gen.id)+" Individual: "+str(ind.id))
+                b.canvas("", id="canvas"+str(ind.id), style="border: none;", width="800", height="600")
+                b.p("Score: "+str(ind.level))
+                b.a("Files: " +str(ind.results["directory"]), href=ind.results["directory"], title="Files: " +str(ind.results["directory"]))
         f=open(ind.results["directory"]+str("/index.html"), "w")
         f.write(str(h))
 
 
-    def saveHTMLGeneration(self, gen, score, wdir):
+    def saveHTMLGeneration(self, gen, score, shaderFunc, wdir):
 
         if wdir == None:
             return
@@ -168,7 +168,7 @@ class GeneticAlgorithm(object):
                             tr.td(str(ind.id))
                             tr.td(str(ind.level))
                             tr.td("").a(ind.results["directory"], href=ind.results["directory"]+str("/index.html"))
-                            self.saveHTMLIndividual(gen, ind, ind.results["directory"])
+                            self.saveHTMLIndividual(gen, ind, shaderFunc, ind.results["directory"])
 
 
         f=open("generation_"+str(gen.id)+".html", "w")
@@ -193,7 +193,7 @@ class GeneticAlgorithm(object):
         f.write(str(h))
 
 
-    def start(self,  numGen, generateFunc, mutationFunc, crossFunc, evalFunc, selectionFunc, wdir=None):
+    def start(self,  numGen, generateFunc, mutationFunc, crossFunc, evalFunc, selectionFunc, shaderFunc, wdir=None):
 
         if wdir != None:
 
@@ -211,7 +211,7 @@ class GeneticAlgorithm(object):
             print("size: "+str(len(currgen)))
             print("score: "+str(currscore))
 
-            self.saveHTMLGeneration(currgen, currscore, wdir)
+            self.saveHTMLGeneration(currgen, currscore, shaderFunc, wdir)
             for k in range(1, numGen):
 
                 print("=================== GENERATION "+str(k)+"==================")

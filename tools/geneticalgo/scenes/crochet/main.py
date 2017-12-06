@@ -470,51 +470,46 @@ def evaluationFunc(pop):
     for scenefile in scenefiles:
         filesandtemplates.append( (open(basedir+"/"+scenefile).read(), scenefile) )
 
-    for f1, ind in filename:
-        runs = []
-        for f1,ind in filename:
-            runs.append( {"GENERATION": str(pop.id),
-                          "INDIVIDUAL": str(ind.id),
-                          "SHAPECONTENT": f1, "nbIterations":180,
-                          "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__)
-                          } )
-        results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
+    runs = []
+    for f1,ind in filename:
+        runs.append( {"GENERATION": str(pop.id),
+        "INDIVIDUAL": str(ind.id),
+        "SHAPECONTENT": f1, "nbIterations":180,
+        "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__)
+        } )
+    results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
 
-        for res in results:
+    for res in results:
+        print("Results: ")
+        print("    directory: "+res["directory"])
+        print("        scene: "+res["scene"])
+        print("      logfile: "+res["logfile"])
+        print("     duration: "+str(res["duration"])+" sec")
 
-                   print("Results: ")
-                   print("    directory: "+res["directory"])
-                   print("        scene: "+res["scene"])
-                   print("      logfile: "+res["logfile"])
-                   print("     duration: "+str(res["duration"])+" sec")
-
-        ### Associate the results to the individuals.
-        for i in range(len(filename)):
-            f1, ind = filename[i]
-            ind.results = results[i]
-            data = getJSONFragmentFrom( ind.results["logfile"] )
+    ### Associate the results to the individuals.
+    for i in range(len(filename)):
+        f1, ind = filename[i]
+        ind.results = results[i]
+        data = getJSONFragmentFrom( ind.results["logfile"] )
 
 
-            if data == None:
-                print "SOFA CRASHED DOWN!!  TRY TO LAUNCH MANUALLY scene.pyscn"
-                ind.level = - float(sys.maxint)
-            else:
+    if data == None:
+        print "SOFA CRASHED DOWN!!  TRY TO LAUNCH MANUALLY scene.pyscn"
+        ind.level = - float(sys.maxint)
+    else:
 
-                VerticalGap1 = data["VerticalGap1"]
-                VerticalGap2 = data["VerticalGap2"]
+        VerticalGap1 = data["VerticalGap1"]
+        VerticalGap2 = data["VerticalGap2"]
 
-                print "VerticalGap1 ="+str(VerticalGap1)
-                print "VerticalGap2 ="+str(VerticalGap2)
+        if VerticalGap1 < 0.0 or VerticalGap2 > 0.0:
+            print "STRANGE BEHAVIOR, VerticalGap1 < 0.0 or VerticalGap2 > 0.0"
+            level = VerticalGap1 + 10.0*VerticalGap2
 
-                if VerticalGap1 < 0.0 or VerticalGap2 > 0.0:
-                    print "STRANGE BEHAVIOR, VerticalGap1 < 0.0 or VerticalGap2 > 0.0"
-                level = VerticalGap1 + 10.0*VerticalGap2
-
-                if abs(level) > 10.0 or VerticalGap1 == 0.0 or VerticalGap2 == 0.0:
-                    print "bad shape"
-                    ind.level = - float(sys.maxint)
-                else:
-                    ind.level = level
+        if abs(level) > 10.0 or VerticalGap1 == 0.0 or VerticalGap2 == 0.0:
+            print "bad shape"
+            ind.level = - float(sys.maxint)
+        else:
+            ind.level = level
 
 
 
