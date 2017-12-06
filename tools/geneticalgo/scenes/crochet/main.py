@@ -13,6 +13,8 @@ from geneticalgo import piecewisePolynom2D
 from geneticalgo import crochetInFile
 from sofalauncher import launcher
 import crochet
+import time
+import errno
 
 
 A = [0.0, 0.010, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
@@ -26,12 +28,12 @@ G = [0.0035, -0.00125, ["smooth", 0.0007, 1.0], ["smooth", 0.0007, 1.0]]
 reference = [A, B, C, D, E, F, G]
 
 individualId = 0
-mutationType="OFF"
-mutationThickness="OFF"
+mutationType="ON"
+mutationThickness="ON"
 mutationCoef="OFF"
-mutationWidth="ON"
+mutationWidth="OFF"
 mutationDepht="OFF"
-mutationPosition="OFF"
+mutationPosition="ON"
 
 def getNextId():
     global individualId
@@ -57,12 +59,12 @@ class CrochetIndividual(algorithm.Individual):
         self.level=None
         self.id = getNextId()
         crochetutils.create(self)
-        
+
 
 
 def newIndividualFrom(ind):
     newInd=CrochetIndividual()
-    newInd.listCavities=copy.deepcopy(ind.listOfDrawnPoints)
+    newInd.listOfDrawnPoints=copy.deepcopy(ind.listOfDrawnPoints)
 
     return newInd
 
@@ -85,7 +87,7 @@ def mutation_Position(ind, side):
 
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
-
+    index=random.randint(1,length-2)
     ind.listOfDrawnPoints[index][0]+=random.uniform(-0.0001,0.0001)
     ind.listOfDrawnPoints[index][1]+=random.uniform(-0.0001,0.0001)
 
@@ -112,8 +114,8 @@ def mutation_Depht(ind, side):
         if param[0]=="corner":
             Depht=param[4]
             epsilon = random.uniform(0.8,1.2)
-            ind.listOfDrawnPoints[index][2][4]*=epsilon
-
+            ind.listOfDrawnPoints[index][2][4]=min(ind.listOfDrawnPoints[index][2][4]*epsilon, param[1]/3.0)
+#            ind.listOfDrawnPoints[index][2][2]*=1.0/epsilon
     else:
 
         param = ind.listOfDrawnPoints[index][3]
@@ -121,7 +123,8 @@ def mutation_Depht(ind, side):
         if param[0]=="corner":
             Depht=param[4]
             epsilon = random.uniform(0.8,1.2)
-            ind.listOfDrawnPoints[index][3][4]*=epsilon
+            ind.listOfDrawnPoints[index][3][4]=min(ind.listOfDrawnPoints[index][2][4]*epsilon, param[1]/3.0)
+#            ind.listOfDrawnPoints[index][3][2]*=1.0/epsilon
 
 def mutation_Width(ind, side):
 
@@ -173,13 +176,16 @@ def mutation_Type(ind, side):
 
             type = "corner"
             ind.listOfDrawnPoints[index][2][0] = type
-            ind.listOfDrawnPoints[index][2].append(0.0007)
+            ind.listOfDrawnPoints[index][2].append(min(param[1]/3.0,0.0003))
+            ind.listOfDrawnPoints[index][2].append(min(param[1]/3.0,0.0003))
+            ind.listOfDrawnPoints[index][2][2]*=0.5
 
-            ind.listOfDrawnPoints[index][2].append(0.0007)
-
+            print str(ind.listOfDrawnPoints[index][2])
         else:
             type = "smooth"
-            del ind.listOfDrawnPoints[index][2][-2,-1]
+            ind.listOfDrawnPoints[index][2][0] = type
+            del ind.listOfDrawnPoints[index][2][-2:]
+            print str(ind.listOfDrawnPoints[index][2])
 
     else:
 
@@ -190,12 +196,15 @@ def mutation_Type(ind, side):
 
             type = "corner"
             ind.listOfDrawnPoints[index][3][0] = type
-            ind.listOfDrawnPoints[index][3].append(0.0007)
-            ind.listOfDrawnPoints[index][3].append(0.0007)
-
+            ind.listOfDrawnPoints[index][3].append(min(param[1]/3.0,0.0003))
+            ind.listOfDrawnPoints[index][3].append(min(param[1]/3.0,0.0003))
+            ind.listOfDrawnPoints[index][3][2]*=0.5
+            print str(ind.listOfDrawnPoints[index][3])
         else:
             type = "smooth"
+            ind.listOfDrawnPoints[index][3][0] = type
             del ind.listOfDrawnPoints[index][3][-2:]
+            print str(ind.listOfDrawnPoints[index][3])
 
 
 def mutation_Thickness(ind, side):
@@ -211,14 +220,14 @@ def mutation_Thickness(ind, side):
 
         param = ind.listOfDrawnPoints[index][2]
         thickness=param[1]
-        epsilon=random.uniform(thickness/8.0,thickness/4.0)
-        thickness+=epsilon
+        epsilon=random.uniform(0.9, 1.1)
+        thickness*=epsilon
         ind.listOfDrawnPoints[index][2][1] = thickness
     else:
         param = ind.listOfDrawnPoints[index][3]
         thickness=param[1]
-        epsilon=random.uniform(thickness/8.0,thickness/4.0)
-        thickness+=epsilon
+        epsilon=random.uniform(0.9, 1.1)
+        thickness*=epsilon
         ind.listOfDrawnPoints[index][3][1] = thickness
 
 
@@ -238,7 +247,7 @@ def mutation_Coef(ind, side):
         param = ind.listOfDrawnPoints[index][2]
         coef = param[2]
         epsilon=random.uniform(0.8,1.2)
-        coef*=epsilon
+        coef=max(0.0, min(1.1, coef*epsilon))
         ind.listOfDrawnPoints[index][2][2] = coef
 
     else:
@@ -246,10 +255,11 @@ def mutation_Coef(ind, side):
         param = ind.listOfDrawnPoints[index][3]
         coef = param[2]
         epsilon=random.uniform(0.8,1.2)
-        coef*=epsilon
+        coef=max(0.0, min(1.1, coef*epsilon))
         ind.listOfDrawnPoints[index][3][2] = coef
 
 def mutation(ind):
+
 
     if mutationType=="ON":
         if random.choice([True, False]):
@@ -281,7 +291,7 @@ def mutation(ind):
     if mutationPosition=="ON":
         if random.choice([True, False]):
             side = random.choice(["left", "right"])
-            mutation_Position="OFF"(ind, side)
+            mutation_Position=(ind, side)
 
 
 def mutationFunc(pop, params):
@@ -309,6 +319,7 @@ def mutationFunc(pop, params):
 ###CROSSING
 ###
 def crossing_ind(individual1, individual2):
+
 
     crochet1 = crochet.generateCrochetManually(individual1.listOfDrawnPoints)
     crochet2 = crochet.generateCrochetManually(individual2.listOfDrawnPoints)
@@ -360,40 +371,70 @@ def crossFunc(pop, params):
 ###
 def generateIndividual(reference):
         individual=CrochetIndividual()
+        individual.listOfDrawnPoints = reference
 
-        length = len(reference)
+        side = random.choice(["left", "right"])
+        mutation_Type(individual, side)
 
-        individual.listOfDrawnPoints.append(reference[0])
-
-        if length > 2:
-
-            for i in range(1, length-1):
-
-                param = reference[i]
-
-                newPoint = [param[0]+random.uniform(-0.0001, 0.0001), param[1]+random.uniform(-0.0001, 0.0001)]
-
-                if param[2][0] == "smooth":
-                    newPoint.append(["smooth", param[2][1]+random.uniform(-0.0001, 0.0001), param[2][2]+random.uniform(-0.001, 0.001)])
-
-                elif param[2][0] == "corner":
-                    newPoint.append(["corner", param[2][1]+random.uniform(-0.0001, 0.0001), param[2][2]+random.uniform(-0.001, 0.001),\
-                                     param[2][3]+random.uniform(-0.0001, 0.0001), param[2][4]+random.uniform(-0.0001, 0.0001)])
+        for i in range(5):
+            side = random.choice(["left", "right"])
+            mutation_Thickness(individual, side)
 
 
-                if param[3][0] == "smooth":
-                     newPoint.append(["smooth", param[3][1]+random.uniform(-0.0001, 0.0001), param[3][2]+random.uniform(-0.001, 0.001)])
+        for i in range(5):
+            side = random.choice(["left", "right"])
+            mutation_Coef(individual, side)
 
-                elif param[3][0] == "corner":
-                    newPoint.append(["corner", param[3][1]+random.uniform(-0.0001, 0.0001), param[3][2]+random.uniform(-0.001, 0.001),\
-                                                          param[3][3]+random.uniform(-0.0001, 0.0001), param[3][4]+random.uniform(-0.0001, 0.0001)])
-                individual.listOfDrawnPoints.append(newPoint)
+#            if mutationWidth=="ON":
+#                if random.choice([True, False]):
+#                    side = random.choice(["left", "right"])
+#                    mutation_Width(individual, side)
 
-        individual.listOfDrawnPoints.append(reference[-1])
+#            if mutationDepht=="ON":
+#                if random.choice([True, False]):
+#                    side = random.choice(["left", "right"])
+#                    mutation_Depht(individual, side)
 
-        individual.level=None
+
+        for i in range(5):
+            side = random.choice(["left", "right"])
+            mutation_Position=(individual, side)
 
         return individual
+#        length = len(reference)
+
+#        individual.listOfDrawnPoints.append(reference[0])
+
+#        if length > 2:
+
+#            for i in range(1, length-1):
+
+#                param = reference[i]
+
+#                newPoint = [param[0]+random.uniform(-0.0001, 0.0001), param[1]+random.uniform(-0.0001, 0.0001)]
+
+#                if param[2][0] == "smooth":
+#                    newPoint.append(["smooth", max(0.0001, param[2][1]+random.uniform(-0.0001, 0.0001), max(0.0, min(1.1,param[2][2]+random.uniform(-0.0001, 0.00001)))])
+
+#                elif param[2][0] == "corner":
+#                    newPoint.append(["corner", max(0.0001, param[2][1]+random.uniform(-0.0001, 0.0001)), max(0.0, min(1.1,param[2][2]+random.uniform(-0.0001, 0.00001))),\
+#                                     min(param[2][1]/4.0, param[2][3]+random.uniform(-0.0001, 0.0001)),  max(0.00001,param[2][4]+random.uniform(-0.0001, 0.0001))])
+##)
+
+#                if param[3][0] == "smooth":
+#                     newPoint.append(["smooth", param[3][1]+random.uniform(-0.0001, 0.0001), max(0.0, min(1.1,param[3][2]+random.uniform(-0.0001, 0.00001)))])#
+
+#                elif param[3][0] == "corner":
+#                    newPoint.append(["corner", param[3][1]+random.uniform(-0.0001, 0.0001), max(0.0, min(1.1,param[3][2]+random.uniform(-0.0001, 0.00001))),\
+#                                                          min(param[3][1]/4.0, param[3][3]+random.uniform(-0.0001, 0.0001)), max(0.1, param[3][4]+random.uniform(-0.0001, 0.0001))])
+#                                                          #
+#                individual.listOfDrawnPoints.append(newPoint)
+
+#        individual.listOfDrawnPoints.append(reference[-1])
+
+#        individual.level=None
+
+
 
 
 def generateFunc(numgen, params):
@@ -434,39 +475,46 @@ def evaluationFunc(pop):
         for f1,ind in filename:
             runs.append( {"GENERATION": str(pop.id),
                           "INDIVIDUAL": str(ind.id),
-                          "SHAPECONTENT": f1, "nbIterations":90,
+                          "SHAPECONTENT": f1, "nbIterations":180,
                           "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__)
                           } )
+        results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
 
-    results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
+        for res in results:
 
-    for res in results:
+                   print("Results: ")
+                   print("    directory: "+res["directory"])
+                   print("        scene: "+res["scene"])
+                   print("      logfile: "+res["logfile"])
+                   print("     duration: "+str(res["duration"])+" sec")
 
-               print("Results: ")
-               print("    directory: "+res["directory"])
-               print("        scene: "+res["scene"])
-               print("      logfile: "+res["logfile"])
-               print("     duration: "+str(res["duration"])+" sec")
-
-    ### Associate the results to the individuals.
-    for i in range(len(filename)):
-        f1, ind = filename[i]
-        ind.results = results[i]
-        data = getJSONFragmentFrom( ind.results["logfile"] )
+        ### Associate the results to the individuals.
+        for i in range(len(filename)):
+            f1, ind = filename[i]
+            ind.results = results[i]
+            data = getJSONFragmentFrom( ind.results["logfile"] )
 
 
-        if data == None:
-            print "SOFA CRASHED DOWN!!  TRY TO LAUNCH MANUALLY scene.pyscn"
-            ind.level = - float(sys.maxint)
-        else:
+            if data == None:
+                print "SOFA CRASHED DOWN!!  TRY TO LAUNCH MANUALLY scene.pyscn"
+                ind.level = - float(sys.maxint)
+            else:
 
-            HorizontalGap = data["HorizontalGap"]
-            VerticalGap = data["VerticalGap"]
-            if HorizontalGap > 0.0 or VerticalGap > 0.0:
-                raise ValueError, "strange behavior"
-            level = -1.0 * HorizontalGap + VerticalGap
+                VerticalGap1 = data["VerticalGap1"]
+                VerticalGap2 = data["VerticalGap2"]
 
-            ind.level = level
+                print "VerticalGap1 ="+str(VerticalGap1)
+                print "VerticalGap2 ="+str(VerticalGap2)
+
+                if VerticalGap1 < 0.0 or VerticalGap2 > 0.0:
+                    print "STRANGE BEHAVIOR, VerticalGap1 < 0.0 or VerticalGap2 > 0.0"
+                level = VerticalGap1 + 10.0*VerticalGap2
+
+                if abs(level) > 10.0 or VerticalGap1 == 0.0 or VerticalGap2 == 0.0:
+                    print "bad shape"
+                    ind.level = - float(sys.maxint)
+                else:
+                    ind.level = level
 
 
 
