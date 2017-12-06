@@ -127,28 +127,30 @@ class GeneticAlgorithm(object):
 
 
     def saveHTMLIndividual(self, gen, ind, wdir ):
+
         if wdir == None:
             return
         with HTML().html as h:
             with h.head as head:
-                shaderShape = shaderInd(ind)
+
+#ATTENTION CA CHANGE ICI      shaderShape = shaderInd(ind)
                 with head.script(id="shader-fscanvas"+str(ind.id), type="x-shader/x-fragment") as scriptFragment :
                     scriptFragment.text(self.fragmentCode(shaderShape, str(ind.id)), False)
                 with head.script(id="shader-vs", type="x-shader/x-vertex") as scriptVertex :
                     scriptVertex.text(self.vertexCode(), False)
                 with head.script(type="text/javascript") as scriptWebGL :
                     scriptWebGL.text(self.webGLJSCode(), False)
-            with h.body(onload="webGLStart();") as b:
-                b.h1("Population "+str(gen.id)+" Individual: "+str(ind.id))
-                b.canvas("", id="canvas"+str(ind.id), style="border: none;", width="800", height="600")
-                b.p("Score: "+str(ind.level))
-                b.a("Files: " +str(ind.results["directory"]), href=ind.results["directory"], title="Files: " +str(ind.results["directory"]))
+                with h.body(onload="webGLStart();") as b:
+                    b.h1("Population "+str(gen.id)+" Individual: "+str(ind.id))
+                    b.canvas("", id="canvas"+str(ind.id), style="border: none;", width="800", height="600")
+                    b.p("Score: "+str(ind.level))
+                    b.a("Files: " +str(ind.results["directory"]), href=ind.results["directory"], title="Files: " +str(ind.results["directory"]))
         f=open(ind.results["directory"]+str("/index.html"), "w")
         f.write(str(h))
 
 
     def saveHTMLGeneration(self, gen, score, wdir):
-        return
+
         if wdir == None:
             return
         with HTML().html as h:
@@ -192,7 +194,9 @@ class GeneticAlgorithm(object):
 
 
     def start(self,  numGen, generateFunc, mutationFunc, crossFunc, evalFunc, selectionFunc, wdir=None):
+
         if wdir != None:
+
             if not os.path.exists(wdir):
                 os.makedirs(wdir)
 
@@ -209,6 +213,7 @@ class GeneticAlgorithm(object):
 
             self.saveHTMLGeneration(currgen, currscore, wdir)
             for k in range(1, numGen):
+
                 print("=================== GENERATION "+str(k)+"==================")
                 ## Pour chaque génération.
                 nextgen = crossFunc(currgen,self.params)

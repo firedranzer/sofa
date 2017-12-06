@@ -373,8 +373,8 @@ def generateIndividual(reference):
         individual=CrochetIndividual()
         individual.listOfDrawnPoints = reference
 
-        side = random.choice(["left", "right"])
-        mutation_Type(individual, side)
+#        side = random.choice(["left", "right"])
+#        mutation_Type(individual, side)
 
         for i in range(5):
             side = random.choice(["left", "right"])
