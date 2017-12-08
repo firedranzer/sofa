@@ -193,5 +193,3 @@ cdef class HalfPlaneGivenByAVector2D(Shape2D):
 
 
 cpdef list createPolygoalChain(list)
-
-cpdef Shape2D closedPolygonalChain(list)

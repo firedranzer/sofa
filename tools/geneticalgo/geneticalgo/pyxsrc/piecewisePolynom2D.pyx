@@ -17,7 +17,36 @@
 import numpy
 import math
 import primitives2D
+import triangulation
+import copy
 #cimport piecewisePolynom2D
+
+def clockwise(triangle):
+
+#    barycenter = ((triangle[0][0] + triangle[1][0] + triangle[2][0])/3.0,\
+#                  (triangle[1][1] + triangle[1][1] + triangle[2][1])/3.0)
+
+    if triangulation.equation_droite(triangle[0], triangle[1], triangle[2]) <= 0.0:
+        return True
+    else:
+        return False
+
+
+def clockwise_triangle(triangle):
+
+
+    new_triangle = copy.deepcopy(triangle)
+
+#    barycenter = [(triangle[0][0] + triangle[1][0] + triangle[2][0])/3.0,\
+#                  (triangle[1][1] + triangle[1][1] + triangle[2][1])/3.0]
+
+    if triangulation.equation_droite(triangle[0], triangle[1], triangle[2]) > 0.0:
+        new_triangle[1] = triangle[2]
+        new_triangle[2] = triangle[1]
+        print "triangle   "+ str(triangle)
+        print "new_triangle   "+ str(new_triangle)
+
+    return new_triangle
 
 cdef class Tangency2D(object):
 
@@ -144,6 +173,7 @@ cdef class Polynom(primitives2D.Shape2D):
             if self.orientation == 1.0:
                 if x >= p1_temp.x and x <= p2_temp.x:
                     return (y - function)
+
                 else:
                     return y
             else:
@@ -197,6 +227,7 @@ def createListTangentPoints(listOfCouplesxyWeight):
 #                raise ValueError, "the succesive points make a too sharp angle"
 
             while scal(tan1,tan1 + tan2) <= 0.1*math.sqrt(norm2(tan1)*norm2(tan1 + tan2)):
+
                 tan2 = tan2.prod(0.5)
 
             t2 = tan1 + tan2
@@ -236,11 +267,11 @@ def createListPolynom(listOfTangentPoints, orientation):
 
     return newList
 
-def C1smoothPiecewisePolynomialChain(listPolynom):
+def CLOSEDC1smoothPiecewisePolynomialChain(listPolynom):
 
     """
     The body of the shape will be on the right of the line, according to its
-    orientation. It may not be bounded!!
+    orientation. BECAREFUL: first and last point have to be equal!! Points have to be clockwise!!!!!
     """
 
     length=len(listPolynom)
@@ -249,30 +280,58 @@ def C1smoothPiecewisePolynomialChain(listPolynom):
 
         raise ValueError, "I need more than one polynom!!"
 
-    newShape=listPolynom[0]
+    listVectors = []
+    listVertices = []
+    listShape = []
+    for polynom in listPolynom:
+        listVectors.append(polynom.vect)
+        listVertices.append([polynom.X1.p.x, polynom.X1.p.y])
+    listVertices.append([listPolynom[-1].X2.p.x, listPolynom[-1].X2.p.y])
+    if listVertices[0]!=listVertices[-1]:
+        print "listVertices[0]!=listVertices[-1]"+str(listVertices[0])+str( listVertices[-1])
+#        raise ValueError, "the chain is not closed"
 
-    if length>1:
+    liste_triangles = triangulation.trianguler_polygone(listVertices)
+    list_shapes_triangle = []
 
-        for i in range(length-1):
+    for triangle in liste_triangles:
+        triangle = clockwise_triangle(triangle)
+        if not clockwise(triangle):
+            print str(triangle)
+#            raise ValueError, "ill-oriented triangle"
 
-            P1 = listPolynom[i]
-            P2 = listPolynom[i+1]
-
-            if P1.orientation != P2.orientation:
-                raise ValueError, "inconsistent orientation"
-
-            if P1.orientation * primitives2D.Det(P1.vect,P2.vect)<=0.0:
-
-                newShape = primitives2D.Intersection(newShape, P2)
-
+        vects = [primitives2D.Vector2D(primitives2D.Point2D(triangle[0][0],triangle[0][1]), primitives2D.Point2D(triangle[1][0],triangle[1][1])),\
+                 primitives2D.Vector2D(primitives2D.Point2D(triangle[1][0],triangle[1][1]), primitives2D.Point2D(triangle[2][0],triangle[2][1])),\
+                 primitives2D.Vector2D(primitives2D.Point2D(triangle[2][0],triangle[2][1]), primitives2D.Point2D(triangle[0][0],triangle[0][1]))\
+                ]
+        localShapes = []
+        for i in range(3):
+            if vects[i] in listVectors:
+                localShapes.append(listPolynom[listVectors.index(vects[i])])
             else:
+                localShapes.append(primitives2D.HalfPlaneGivenByAVector2D(vects[i]))
 
-                newShape = primitives2D.Union(newShape, P2)
+        shape_triangle = localShapes[0]
+
+        for i in [1,2]:
+            shape_triangle = primitives2D.Intersection(shape_triangle, localShapes[i])
+
+#        for i in range(3):
+#            if vects[i] in listVectors:
+#                    polynom = listPolynom[listVectors.index(vects[i])]
+#                    shape_triangle = primitives2D.Union(shape_triangle, Polynom(polynom.X1, polynom.X2, polynom.orientation, "up"))
+
+        list_shapes_triangle.append(shape_triangle)
+
+    newShape = list_shapes_triangle[0]
+    if len(list_shapes_triangle)>1:
+        for i in range(1, len(list_shapes_triangle)):
+            newShape = primitives2D.Union(newShape, list_shapes_triangle[i])
 
     for polynom in listPolynom:
-
         newShape = primitives2D.Union(newShape, Polynom(polynom.X1, polynom.X2, polynom.orientation, "up"))
 
-
     return newShape
+
+
 

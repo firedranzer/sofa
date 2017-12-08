@@ -233,7 +233,7 @@ class GeneticAlgorithm(object):
                 print("score: "+str(currscore))
 
                 currgen.id = k
-                self.saveHTMLGeneration(currgen, currscore, wdir)
+                self.saveHTMLGeneration(currgen, currscore, shaderFunc, wdir)
 
             self.saveHTMLIndex(numGen, wdir)
             print("Experiment terminated.")

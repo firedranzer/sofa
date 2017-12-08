@@ -15,15 +15,18 @@ from sofalauncher import launcher
 import crochet
 import time
 import errno
+import show2Dshape
 
+x=1.0
 
 A = [0.0, 0.010, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
-B = [0.0, 0.005, ["smooth", 0.0007, 1.0], ["smooth", 0.0007, 1.0]]
-C = [-0.0025, 0.00125, ["smooth", 0.0007, 1.0], ["smooth", 0.0007, 1.0]]
-D = [-0.0025, -0.00125, ["smooth", 0.0007, 1.0], ["corner", 0.0015, 1.0, 0.0007, 0.0007]]
-E = [0.0, -0.00250, ["smooth", 0.0007, 1.0], ["smooth", 0.0007, 1.0]]
-F = [0.0025, -0.0025, ["smooth", 0.0007, 1.0], ["smooth", 0.0007, 1.0]]
-G = [0.0035, -0.00125, ["smooth", 0.0007, 1.0], ["smooth", 0.0007, 1.0]]
+A2 = [0.0, 0.009, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
+B = [0.0, 0.005, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
+C = [-0.0025, 0.00125, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
+D = [-0.0025, -0.00125, ["smooth", 0.0007, x], ["corner", 0.0015, x, 0.0007, 0.0007]]
+E = [0.0, -0.00250, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
+F = [0.0025, -0.0025, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
+G = [0.0035, -0.00125, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
 
 reference = [A, B, C, D, E, F, G]
 
@@ -82,14 +85,14 @@ def getShapeFromInd(ind):
 def mutation_Position(ind, side):
 
     length=len(ind.listOfDrawnPoints)
-    if length < 2:
+    if length < 3:
         raise ValueError, "don't touch the bottom and the top!"
 
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
-    index=random.randint(1,length-2)
-    ind.listOfDrawnPoints[index][0]+=random.uniform(-0.0001,0.0001)
-    ind.listOfDrawnPoints[index][1]+=random.uniform(-0.0001,0.0001)
+    index=random.randint(2,length-2)
+    ind.listOfDrawnPoints[index][0] = ind.listOfDrawnPoints[index][0]+random.uniform(-0.0003,0.0003)
+    ind.listOfDrawnPoints[index][1] = min(ind.listOfDrawnPoints[1][1], ind.listOfDrawnPoints[index][1]+random.uniform(-0.0003,0.0003))
 
 
 
@@ -98,14 +101,14 @@ def mutation_Position(ind, side):
 def mutation_Depht(ind, side):
 
     length=len(ind.listOfDrawnPoints)
-    if length < 2:
+    if length < 3:
         raise ValueError, "don't touch the bottom and the top!"
 
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
 
 
-    index=random.randint(1,length-2)
+    index=random.randint(2,length-2)
 
     if side == "left":
 
@@ -129,14 +132,14 @@ def mutation_Depht(ind, side):
 def mutation_Width(ind, side):
 
     length=len(ind.listOfDrawnPoints)
-    if length < 2:
+    if length < 3:
         raise ValueError, "don't touch the bottom and the top!"
 
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
 
 
-    index=random.randint(1,length-2)
+    index=random.randint(2,length-2)
 
     if side == "left":
 
@@ -159,13 +162,13 @@ def mutation_Width(ind, side):
 def mutation_Type(ind, side):
 
     length=len(ind.listOfDrawnPoints)
-    if length < 2:
+    if length < 3:
         raise ValueError, "don't touch the bottom and the top!"
 
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
 
-    index=random.randint(1,length-2)
+    index=random.randint(2,length-2)
 
     if side == "left":
 
@@ -220,13 +223,13 @@ def mutation_Thickness(ind, side):
 
         param = ind.listOfDrawnPoints[index][2]
         thickness=param[1]
-        epsilon=random.uniform(0.9, 1.1)
+        epsilon=random.uniform(0.7, 1.3)
         thickness*=epsilon
         ind.listOfDrawnPoints[index][2][1] = thickness
     else:
         param = ind.listOfDrawnPoints[index][3]
         thickness=param[1]
-        epsilon=random.uniform(0.9, 1.1)
+        epsilon=random.uniform(0.7, 1.3)
         thickness*=epsilon
         ind.listOfDrawnPoints[index][3][1] = thickness
 
@@ -235,13 +238,13 @@ def mutation_Thickness(ind, side):
 def mutation_Coef(ind, side):
 
     length=len(ind.listOfDrawnPoints)
-    if length < 2:
+    if length < 3:
         raise ValueError, "don't touch the bottom and the top!"
 
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
 
-    index=random.randint(1,length-2)
+    index=random.randint(2,length-2)
     if side == "left":
 
         param = ind.listOfDrawnPoints[index][2]
@@ -344,6 +347,12 @@ def crossing_ind(individual1, individual2):
     ind1.listOfDrawnPoints+=individual2.listOfDrawnPoints[index2:]
     ind2.listOfDrawnPoints+=individual1.listOfDrawnPoints[index1:]
 
+    print "individual1 = "+str(individual1.listOfDrawnPoints)
+    print "ind1 = "+str(ind1.listOfDrawnPoints)
+    print str(len(individual1.listOfDrawnPoints)-len(ind1.listOfDrawnPoints))
+    print "individual2 = "+str(individual2.listOfDrawnPoints)
+    print "ind2 = "+str(ind2.listOfDrawnPoints)
+    print str(len(individual2.listOfDrawnPoints)-len(ind2.listOfDrawnPoints))
     return (ind1, ind2)
 
 
@@ -373,17 +382,17 @@ def generateIndividual(reference):
         individual=CrochetIndividual()
         individual.listOfDrawnPoints = reference
 
-#        side = random.choice(["left", "right"])
-#        mutation_Type(individual, side)
+        side = random.choice(["left", "right"])
+        mutation_Type(individual, side)
 
         for i in range(5):
             side = random.choice(["left", "right"])
             mutation_Thickness(individual, side)
 
 
-        for i in range(5):
-            side = random.choice(["left", "right"])
-            mutation_Coef(individual, side)
+#        for i in range(5):
+#            side = random.choice(["left", "right"])
+#            mutation_Coef(individual, side)
 
 #            if mutationWidth=="ON":
 #                if random.choice([True, False]):
@@ -461,25 +470,31 @@ def evaluationFunc(pop):
 
         fend =  "def evalField(x,y,z):\n   return shape.eval(primitives.Point(x,y,z))"
         f1 = crochetInFile.toPythonString(ind) + fend
+        f1 +=show2Dshape.show2Dshape()
         filename.append((f1, ind))
 
-    #################### EXAMPLE USING THE SEQUENTIAL LAUNCHER #################################
-    ### List of filename that contains the simulation to run
-    scenefiles = ["scene.pyscn","controller.py", "shape.py"]
-    filesandtemplates = []
-    for scenefile in scenefiles:
-        filesandtemplates.append( (open(basedir+"/"+scenefile).read(), scenefile) )
+        #################### EXAMPLE USING THE SEQUENTIAL LAUNCHER #################################
+        ### List of filename that contains the simulation to run
 
-    runs = []
-    for f1,ind in filename:
-        runs.append( {"GENERATION": str(pop.id),
-        "INDIVIDUAL": str(ind.id),
-        "SHAPECONTENT": f1, "nbIterations":180,
-        "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__)
-        } )
+        scenefiles = ["scene.pyscn","controller.py", "shape.py"]
+
+        filesandtemplates = []
+
+        for scenefile in scenefiles:
+            filesandtemplates.append( (open(basedir+"/"+scenefile).read(), scenefile) )
+
+#    for f1,ind in filename:
+        runs = []
+        for f1,ind in filename:
+            runs.append( {"GENERATION": str(pop.id),
+                          "INDIVIDUAL": str(ind.id),
+                          "SHAPECONTENT": f1, "nbIterations":180,
+                          "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__)
+                         } )
     results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
 
     for res in results:
+
         print("Results: ")
         print("    directory: "+res["directory"])
         print("        scene: "+res["scene"])
@@ -493,23 +508,25 @@ def evaluationFunc(pop):
         data = getJSONFragmentFrom( ind.results["logfile"] )
 
 
-    if data == None:
-        print "SOFA CRASHED DOWN!!  TRY TO LAUNCH MANUALLY scene.pyscn"
-        ind.level = - float(sys.maxint)
-    else:
+        if data == None:
+            print "SOFA CRASHED DOWN!!  TRY TO LAUNCH MANUALLY scene.pyscn"
+            ind.level = - float(sys.maxint)
 
-        VerticalGap1 = data["VerticalGap1"]
-        VerticalGap2 = data["VerticalGap2"]
+        else:
 
-        if VerticalGap1 < 0.0 or VerticalGap2 > 0.0:
-            print "STRANGE BEHAVIOR, VerticalGap1 < 0.0 or VerticalGap2 > 0.0"
+            VerticalGap1 = data["VerticalGap1"]
+            VerticalGap2 = data["VerticalGap2"]
+
+            if VerticalGap1 < 0.0 or VerticalGap2 > 0.0:
+                print "STRANGE BEHAVIOR, VerticalGap1 < 0.0 or VerticalGap2 > 0.0"
+
             level = VerticalGap1 + 10.0*VerticalGap2
 
-        if abs(level) > 10.0 or VerticalGap1 == 0.0 or VerticalGap2 == 0.0:
-            print "bad shape"
-            ind.level = - float(sys.maxint)
-        else:
-            ind.level = level
+            if abs(level) > 10.0 or VerticalGap1 == 0.0 or VerticalGap2 == 0.0:
+                print "bad shape"
+                ind.level = - float(sys.maxint)
+            else:
+                ind.level = level
 
 
 
