@@ -26,7 +26,7 @@ C = [-0.0025, 0.00125, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
 D = [-0.0025, -0.00125, ["smooth", 0.0007, x], ["corner", 0.0015, x, 0.0007, 0.0007]]
 E = [0.0, -0.00250, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
 F = [0.0025, -0.0025, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
-G = [0.0035, -0.00125, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
+G = [0.0035, -0.00125, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
 
 reference = [A, B, C, D, E, F, G]
 
@@ -91,8 +91,8 @@ def mutation_Position(ind, side):
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
     index=random.randint(2,length-2)
-    ind.listOfDrawnPoints[index][0] = ind.listOfDrawnPoints[index][0]+random.uniform(-0.0003,0.0003)
-    ind.listOfDrawnPoints[index][1] = min(ind.listOfDrawnPoints[1][1], ind.listOfDrawnPoints[index][1]+random.uniform(-0.0003,0.0003))
+    ind.listOfDrawnPoints[index][0] = ind.listOfDrawnPoints[index][0]+random.uniform(-0.0005,0.0005)
+    ind.listOfDrawnPoints[index][1] = min(ind.listOfDrawnPoints[1][1], ind.listOfDrawnPoints[index][1]+random.uniform(-0.0005,0.0005))
 
 
 
@@ -179,16 +179,14 @@ def mutation_Type(ind, side):
 
             type = "corner"
             ind.listOfDrawnPoints[index][2][0] = type
-            ind.listOfDrawnPoints[index][2].append(min(param[1]/3.0,0.0003))
-            ind.listOfDrawnPoints[index][2].append(min(param[1]/3.0,0.0003))
-            ind.listOfDrawnPoints[index][2][2]*=0.5
+            ind.listOfDrawnPoints[index][2].append(param[1]/2.5)
+            ind.listOfDrawnPoints[index][2].append(param[1]/2.5)
+            ind.listOfDrawnPoints[index][2][2]=0.1
 
-            print str(ind.listOfDrawnPoints[index][2])
         else:
             type = "smooth"
             ind.listOfDrawnPoints[index][2][0] = type
             del ind.listOfDrawnPoints[index][2][-2:]
-            print str(ind.listOfDrawnPoints[index][2])
 
     else:
 
@@ -201,13 +199,11 @@ def mutation_Type(ind, side):
             ind.listOfDrawnPoints[index][3][0] = type
             ind.listOfDrawnPoints[index][3].append(min(param[1]/3.0,0.0003))
             ind.listOfDrawnPoints[index][3].append(min(param[1]/3.0,0.0003))
-            ind.listOfDrawnPoints[index][3][2]*=0.5
-            print str(ind.listOfDrawnPoints[index][3])
+            ind.listOfDrawnPoints[index][3][2] = 0.1
         else:
             type = "smooth"
             ind.listOfDrawnPoints[index][3][0] = type
             del ind.listOfDrawnPoints[index][3][-2:]
-            print str(ind.listOfDrawnPoints[index][3])
 
 
 def mutation_Thickness(ind, side):
@@ -223,13 +219,13 @@ def mutation_Thickness(ind, side):
 
         param = ind.listOfDrawnPoints[index][2]
         thickness=param[1]
-        epsilon=random.uniform(0.7, 1.3)
+        epsilon=random.uniform(0.6, 1.4)
         thickness*=epsilon
         ind.listOfDrawnPoints[index][2][1] = thickness
     else:
         param = ind.listOfDrawnPoints[index][3]
         thickness=param[1]
-        epsilon=random.uniform(0.7, 1.3)
+        epsilon=random.uniform(0.6, 1.4)
         thickness*=epsilon
         ind.listOfDrawnPoints[index][3][1] = thickness
 
@@ -347,12 +343,12 @@ def crossing_ind(individual1, individual2):
     ind1.listOfDrawnPoints+=individual2.listOfDrawnPoints[index2:]
     ind2.listOfDrawnPoints+=individual1.listOfDrawnPoints[index1:]
 
-    print "individual1 = "+str(individual1.listOfDrawnPoints)
-    print "ind1 = "+str(ind1.listOfDrawnPoints)
-    print str(len(individual1.listOfDrawnPoints)-len(ind1.listOfDrawnPoints))
-    print "individual2 = "+str(individual2.listOfDrawnPoints)
-    print "ind2 = "+str(ind2.listOfDrawnPoints)
-    print str(len(individual2.listOfDrawnPoints)-len(ind2.listOfDrawnPoints))
+#    print "individual1 = "+str(individual1.listOfDrawnPoints)
+#    print "ind1 = "+str(ind1.listOfDrawnPoints)
+#    print str(len(individual1.listOfDrawnPoints)-len(ind1.listOfDrawnPoints))
+#    print "individual2 = "+str(individual2.listOfDrawnPoints)
+#    print "ind2 = "+str(ind2.listOfDrawnPoints)
+#    print str(len(individual2.listOfDrawnPoints)-len(ind2.listOfDrawnPoints))
     return (ind1, ind2)
 
 
@@ -379,15 +375,16 @@ def crossFunc(pop, params):
 ### Generate
 ###
 def generateIndividual(reference):
-        individual=CrochetIndividual()
-        individual.listOfDrawnPoints = reference
 
+    individual=CrochetIndividual()
+    individual.listOfDrawnPoints = copy.deepcopy(reference)
+
+    side = random.choice(["left", "right"])
+    mutation_Type(individual, side)
+
+    for i in range(5):
         side = random.choice(["left", "right"])
-        mutation_Type(individual, side)
-
-        for i in range(5):
-            side = random.choice(["left", "right"])
-            mutation_Thickness(individual, side)
+        mutation_Thickness(individual, side)
 
 
 #        for i in range(5):
@@ -405,11 +402,11 @@ def generateIndividual(reference):
 #                    mutation_Depht(individual, side)
 
 
-        for i in range(5):
-            side = random.choice(["left", "right"])
-            mutation_Position=(individual, side)
+    for i in range(5):
+        side = random.choice(["left", "right"])
+        mutation_Position=(individual, side)
 
-        return individual
+    return individual
 #        length = len(reference)
 
 #        individual.listOfDrawnPoints.append(reference[0])
@@ -470,27 +467,32 @@ def evaluationFunc(pop):
 
         fend =  "def evalField(x,y,z):\n   return shape.eval(primitives.Point(x,y,z))"
         f1 = crochetInFile.toPythonString(ind) + fend
+
         f1 +=show2Dshape.show2Dshape()
         filename.append((f1, ind))
 
-        #################### EXAMPLE USING THE SEQUENTIAL LAUNCHER #################################
-        ### List of filename that contains the simulation to run
+    #################### EXAMPLE USING THE SEQUENTIAL LAUNCHER #################################
+    ### List of filename that contains the simulation to run
 
-        scenefiles = ["scene.pyscn","controller.py", "shape.py"]
+    scenefiles = ["scene.pyscn","controller.py", "shape.py"]
 
-        filesandtemplates = []
+    filesandtemplates = []
 
-        for scenefile in scenefiles:
-            filesandtemplates.append( (open(basedir+"/"+scenefile).read(), scenefile) )
+    for scenefile in scenefiles:
+
+        filesandtemplates.append( (open(basedir+"/"+scenefile).read(), scenefile) )
 
 #    for f1,ind in filename:
-        runs = []
-        for f1,ind in filename:
-            runs.append( {"GENERATION": str(pop.id),
-                          "INDIVIDUAL": str(ind.id),
-                          "SHAPECONTENT": f1, "nbIterations":180,
-                          "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__)
-                         } )
+
+    runs = []
+
+    for f1,ind in filename:
+
+        runs.append( {"GENERATION": str(pop.id),
+                              "INDIVIDUAL": str(ind.id),
+                              "SHAPECONTENT": f1, "nbIterations":180,
+                              "LIBRARYPATH" : os.path.dirname(geneticalgo.__file__)
+                             } )
     results = launcher.startSofa(runs, filesandtemplates, launcher=launcher.SerialLauncher())
 
     for res in results:

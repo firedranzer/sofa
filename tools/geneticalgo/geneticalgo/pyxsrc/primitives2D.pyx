@@ -159,6 +159,15 @@ cdef class Shape2D(object):
     cpdef ListForWriting getListForWriting(self):
         return self.getListForWriting()
 
+cdef class All(Shape2D):
+
+    def __init__(self):
+        Shape2D.__init__(self)
+        self.type = "All"
+
+    cpdef double eval(self,Point2D point):
+        return -1.0
+
 
 cdef class Union(Shape2D):
 

@@ -281,57 +281,62 @@ def CLOSEDC1smoothPiecewisePolynomialChain(listPolynom):
         raise ValueError, "I need more than one polynom!!"
 
     listVectors = []
+
     listVertices = []
     listShape = []
+
     for polynom in listPolynom:
-        listVectors.append(polynom.vect)
+        listVectors.append([(polynom.vect.first.x, polynom.vect.first.y), (polynom.vect.second.x, polynom.vect.second.y)])
         listVertices.append([polynom.X1.p.x, polynom.X1.p.y])
+
     listVertices.append([listPolynom[-1].X2.p.x, listPolynom[-1].X2.p.y])
-    if listVertices[0]!=listVertices[-1]:
-        print "listVertices[0]!=listVertices[-1]"+str(listVertices[0])+str( listVertices[-1])
+
+#    if listVertices[0]!=listVertices[-1]:
+#        print "listVertices[0]!=listVertices[-1]"+str(listVertices[0])+str( listVertices[-1])
 #        raise ValueError, "the chain is not closed"
 
     liste_triangles = triangulation.trianguler_polygone(listVertices)
     list_shapes_triangle = []
 
+    print "listVectors:   " + str(listVectors)
+
     for triangle in liste_triangles:
         triangle = clockwise_triangle(triangle)
         if not clockwise(triangle):
             print str(triangle)
-#            raise ValueError, "ill-oriented triangle"
+            raise ValueError, "ill-oriented triangle"
 
         vects = [primitives2D.Vector2D(primitives2D.Point2D(triangle[0][0],triangle[0][1]), primitives2D.Point2D(triangle[1][0],triangle[1][1])),\
                  primitives2D.Vector2D(primitives2D.Point2D(triangle[1][0],triangle[1][1]), primitives2D.Point2D(triangle[2][0],triangle[2][1])),\
                  primitives2D.Vector2D(primitives2D.Point2D(triangle[2][0],triangle[2][1]), primitives2D.Point2D(triangle[0][0],triangle[0][1]))\
-                ]
+                 ]
         localShapes = []
         for i in range(3):
-            if vects[i] in listVectors:
-                localShapes.append(listPolynom[listVectors.index(vects[i])])
-            else:
-                localShapes.append(primitives2D.HalfPlaneGivenByAVector2D(vects[i]))
+            localShapes.append(primitives2D.HalfPlaneGivenByAVector2D(vects[i]))
 
         shape_triangle = localShapes[0]
 
         for i in [1,2]:
             shape_triangle = primitives2D.Intersection(shape_triangle, localShapes[i])
 
-#        for i in range(3):
-#            if vects[i] in listVectors:
-#                    polynom = listPolynom[listVectors.index(vects[i])]
-#                    shape_triangle = primitives2D.Union(shape_triangle, Polynom(polynom.X1, polynom.X2, polynom.orientation, "up"))
-
         list_shapes_triangle.append(shape_triangle)
 
-    newShape = list_shapes_triangle[0]
+    ShapeInt = list_shapes_triangle[0]
+
     if len(list_shapes_triangle)>1:
         for i in range(1, len(list_shapes_triangle)):
-            newShape = primitives2D.Union(newShape, list_shapes_triangle[i])
+            ShapeInt = primitives2D.Union(ShapeInt, list_shapes_triangle[i])
 
     for polynom in listPolynom:
-        newShape = primitives2D.Union(newShape, Polynom(polynom.X1, polynom.X2, polynom.orientation, "up"))
+        ShapeInt = primitives2D.Union(ShapeInt, Polynom(polynom.X1, polynom.X2, -1.0*polynom.orientation, "up"))
 
-    return newShape
+    ShapeExt = primitives2D.Difference(primitives2D.All(), ShapeInt)
+
+    for polynom in listPolynom:
+        ShapeExt = primitives2D.Union(ShapeExt, Polynom(polynom.X1, polynom.X2, polynom.orientation, "up"))
+
+
+    return primitives2D.Difference(ShapeInt, ShapeExt)
 
 
 

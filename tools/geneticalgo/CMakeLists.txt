@@ -30,7 +30,15 @@ set(EXTRA_FILES
     scenes/accordion/controller.py
     scenes/accordion/customfield.py
     scenes/accordion/shape.py
-    scenes/accordion/shapeinv.py
+
+
+    scenes/crochet/main.py
+    scenes/crochet/crochetutils.py
+    scenes/crochet/scene.pyscn
+    scenes/crochet/controller.py
+    scenes/crochet/customfield.py
+    scenes/crochet/shape.py
+    scenes/crochet/shapeinv.py
 
     utils/script.sh
     utils/script.py

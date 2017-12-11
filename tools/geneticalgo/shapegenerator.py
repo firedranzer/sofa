@@ -45,10 +45,10 @@ print("copied: " + os.getcwd() + "/fragmentCodePartTwo to: " + workdir + "/fragm
 copy2(os.getcwd() + "/webGLJSCode", workdir + "/webGLJSCode")
 print("copied: " + os.getcwd() + "/webGLJSCode to: " + workdir + "/webGLJSCode")
 
-algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":10,
-                                   "crossTx":3,
-                                   "nbIndMutated":3,
-                                   "nbMutationsPerInd":15})
+algo =geneticalgo.algorithm.GeneticAlgorithm({"nbInd":2,
+                                   "crossTx":1,
+                                   "nbIndMutated":1,
+                                   "nbMutationsPerInd":5})
 algo.start(10,
            scenes.crochet.main.generateFunc,
            scenes.crochet.main.mutationFunc,
