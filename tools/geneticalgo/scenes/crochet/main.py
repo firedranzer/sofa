@@ -179,13 +179,14 @@ def mutation_Type(ind, side):
 
             type = "corner"
             ind.listOfDrawnPoints[index][2][0] = type
-            ind.listOfDrawnPoints[index][2].append(param[1]/2.5)
-            ind.listOfDrawnPoints[index][2].append(param[1]/2.5)
+            ind.listOfDrawnPoints[index][2].append(param[1]/1.5)
+            ind.listOfDrawnPoints[index][2].append(param[1]/1.5)
             ind.listOfDrawnPoints[index][2][2]=0.1
 
         else:
             type = "smooth"
             ind.listOfDrawnPoints[index][2][0] = type
+            ind.listOfDrawnPoints[index][2][2] = 1.0
             del ind.listOfDrawnPoints[index][2][-2:]
 
     else:
@@ -197,12 +198,13 @@ def mutation_Type(ind, side):
 
             type = "corner"
             ind.listOfDrawnPoints[index][3][0] = type
-            ind.listOfDrawnPoints[index][3].append(min(param[1]/3.0,0.0003))
-            ind.listOfDrawnPoints[index][3].append(min(param[1]/3.0,0.0003))
+            ind.listOfDrawnPoints[index][3].append(param[1]/1.5)
+            ind.listOfDrawnPoints[index][3].append(param[1]/1.5)
             ind.listOfDrawnPoints[index][3][2] = 0.1
         else:
             type = "smooth"
             ind.listOfDrawnPoints[index][3][0] = type
+            ind.listOfDrawnPoints[index][3][2] = 1.0
             del ind.listOfDrawnPoints[index][3][-2:]
 
 
