@@ -43,6 +43,13 @@ enum class CStatus
     Waiting,
 } ;
 
+enum class CProtocol
+{
+    Sequential,
+    Async
+} ;
+
+
 class TrackedComponent
 {
 public:

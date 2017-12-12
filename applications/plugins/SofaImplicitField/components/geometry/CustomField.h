@@ -99,8 +99,9 @@ public:
     Data<std::string> d_function ;
     Data<std::string> d_glslFunction ;
     Data<std::string> d_gradient ;
-    PyObject*         m_evalFunction ;
-    PyObject*         m_gradFunction ;
+    PyObject*         m_evalFunction {nullptr} ;
+    PyObject*         m_evalShape {nullptr} ;
+    PyObject*         m_gradFunction {nullptr} ;
 
 
 protected:

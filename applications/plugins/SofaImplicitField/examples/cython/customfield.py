@@ -1,4 +1,6 @@
 import pyximport; pyximport.install()
+import dfgeom
+from dfgeom import
 import cythonfield
 
 import math
@@ -27,7 +29,7 @@ class Difference(object):
 
 def evalPythonField(x,y,z):
 	f=Difference( Sphere([0.5, 0.5, 0.5], 0.2),
-				  Sphere([0.3, 0.5, 0.5], 0.2) ) 
+                      Sphere([0.3, 0.5, 0.5], 0.2) )
 	f=Sphere([0.5,0.5,0.5], 0.3)
 	return f.eval(x,y,z)
 

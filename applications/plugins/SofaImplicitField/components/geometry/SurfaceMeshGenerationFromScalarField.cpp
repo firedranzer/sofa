@@ -94,8 +94,7 @@ void SurfaceMeshGenerationFromScalarField::draw(const VisualParams* vparams)
         return;
     }
 
-    //auto& box = d_box.getValue();
-    //vparams->drawTool()->drawBoundingBox(box.minBBox(), box.maxBBox()) ;
+    vparams->drawTool()->drawBoundingBox(mGridMin.getValue(), mGridMax.getValue()) ;
 
     sofa::helper::ReadAccessor< Data<VecCoord> > x = d_out_points;
     sofa::helper::ReadAccessor< Data<SeqTriangles> > triangles = d_out_triangles;
@@ -132,7 +131,7 @@ void SurfaceMeshGenerationFromScalarField::generateSurfaceMesh()
         std::cout << "INVALID COMPONENT" << std::endl;
         return ;
     }
-    //inited=true;
+    inited=true;
 
     /// Copy the surface as a Sofa topology
     sofa::helper::WriteOnlyAccessor< Data<VecCoord> >      points = d_out_points;

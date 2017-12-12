@@ -44,6 +44,9 @@ using sofa::core::objectmodel::ComponentState ;
 #include "ScalarField.h"
 using sofa::core::objectmodel::CStatus ;
 
+#include <SofaBaseLinearSolver/FullMatrix.h>
+
+
 #include "CustomField.h"
 namespace sofa
 {
@@ -204,7 +207,7 @@ void CustomField::updateGLSLCodeCacheFromPython()
     PythonEnvironment::gil lock {__func__} ;
 
     msg_info() << "Search for glsl rendering map" ;
-    PyObject* glslFunction = getPythonFunction("function", d_glslFunction.getValue(), m_glslFunctionModule, true) ;
+    PyObject* glslFunction = getPythonFunction("function", d_glslFunction.getValue(), m_glslFunctionModule, false) ;
     if(glslFunction==nullptr)
     {
         msg_error() << "Unable to find a required callable object from attribute 'function=\""<< d_glslFunction.getValue() <<"\"'" ;
@@ -241,7 +244,6 @@ void CustomField::updateGLSLCodeCacheFromPython()
         frag.m_name = PyString_AsString(glslname);
         frag.m_type = PyString_AsString(glsltype);
         frag.m_value = PyString_AsString(glslvalue);
-        std::cout << "VARIABLE TYPE: " << frag.m_type << std::endl ;
         variableList.push_back(frag);
     }
 
@@ -268,26 +270,35 @@ void CustomField::init()
         return ;
     }
 
-    m_gradFunction = getPythonFunction("gradient", d_gradient.getValue(), m_gradientModule, true) ;
+    m_evalShape = getPythonFunction("function", "customshape.evalShape", m_functionModule, false) ;
+    if(m_evalShape==nullptr)
+    {
+        msg_info() << "Unable to find a required callable object from attribute 'function=\""<< d_function.getValue() <<"\"'" ;
+    }
+
+
+    m_gradFunction = getPythonFunction("gradient", d_gradient.getValue(), m_gradientModule, false) ;
     if(m_gradFunction==nullptr)
     {
         msg_info() << "No gradient function found from attribute 'gradient=\"" << d_gradient.getValue() <<"\"'. Falling back to finite difference implementation" ;
     }    
 
     //TODO(dmarchal) N'importe quoi ! Codé en dure pour testé et ça reste !!!!Au cachot.
-    PyObject* loadShape = getPythonFunction("function", "customfield.loadShape", m_functionModule, false) ;
+    PyObject* loadShape = getPythonFunction("function", "customshape.evalShape", m_functionModule, false) ;
     if (PyCallable_Check(loadShape)){
+        msg_info() << "got an evalShape Function..." ;
+        /*
         Node* me = (Node*)getContext() ;
         Node* root = (Node*)me->getRoot() ;
 
-        PyObject* res = PyObject_CallFunction(loadShape, "O", PythonFactory::toPython(root));
+        PyObject* res = PyObject_CallFunction(loadShape, "O", PythonFactory::toPython(me));
         if(!res)
         {
             PyErr_Print() ;
             m_componentstate = ComponentState::Invalid ;
             setStatus(CStatus::Invalid) ;
             return ;
-        }
+        }*/
     }else{
         dmsg_warning() << "No loadShape function found. use evalFunction." ;
     }
@@ -320,7 +331,35 @@ double CustomField::getValue(Vec3d& pos, int& domain)
 
     PythonEnvironment::gil lock(__func__) ;
 
-    PyObject* res = PyObject_CallFunction(m_evalFunction, "fff", pos.x(), pos.y(), pos.z());
+    PyObject* res {nullptr};
+
+    if(m_evalShape){
+        if( !m_rawShape ){
+            //TODO(dmarchal) N'importe quoi ! Codé en dure pour tester et ça reste !!!!Au cachot.
+            PyObject* loadShape = getPythonFunction("function", "customshape.buildShapeFromSofaTree", m_functionModule, false) ;
+            if (PyCallable_Check(loadShape)){
+                msg_info() << "got a ShapeFromSofaTree Function..." ;
+                Node* me = (Node*)getContext() ;
+                Node* root = (Node*)me->getRoot() ;
+                PyObject* res = PyObject_CallFunction(loadShape, "O", PythonFactory::toPython(me));
+                if(!res)
+                {
+                    PyErr_Print() ;
+                    m_componentstate = ComponentState::Invalid ;
+                    setStatus(CStatus::Invalid) ;
+                     return std::nan("") ;
+                }
+                std::cout << "SETTING RIH" << PyString_AsString( PyObject_Str(res)) << std::endl ;
+                m_rawShape=res;
+            }
+        }
+    }
+
+    if(m_rawShape){
+        res = PyObject_CallFunction(m_evalShape, "Offf", m_rawShape, pos.x(), pos.y(), pos.z());
+    }else{
+        res = PyObject_CallFunction(m_evalFunction, "fff", pos.x(), pos.y(), pos.z());
+    }
     if(!res)
     {
         PyErr_Print() ;
@@ -336,6 +375,7 @@ double CustomField::getValue(Vec3d& pos, int& domain)
     Py_DecRef(res) ;
     return tmp;
 }
+
 
 Vec3d CustomField::getGradient(Vec3d& pos, int& domain)
 {

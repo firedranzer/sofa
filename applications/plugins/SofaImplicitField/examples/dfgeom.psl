@@ -1,0 +1,16 @@
+Template :
+{
+    name : "ShapeTree"
+    properties : {
+        name : "ShapeTree"
+        child : "None"
+    }
+    Python : '''print('heNNNNNNNNNN')'''
+    Node : {
+        name : p"name"
+        Python : '''
+                 if child != "None":
+                    print("Hello world 2")
+                 '''
+    }
+}

@@ -181,8 +181,6 @@ void ImplicitFieldShaderVisualization::uploadUniformsValues()
             BaseData* d = findData(tmpGLSLCode.m_name) ;
             const sofa::defaulttype::AbstractTypeInfo* nfo = d->getValueTypeInfo() ;
 
-            std::cout << "Properties: " << nfo->Scalar() << " " << nfo->size() << " " << nfo->Container() << std::endl ;
-
             if( nfo->Scalar() && nfo->Container() && nfo->size() == 3 )
             {
                 const void* dv = d->getValueVoidPtr();
@@ -193,7 +191,6 @@ void ImplicitFieldShaderVisualization::uploadUniformsValues()
             }
             else if( nfo->Scalar() && nfo->size() == 1 )
             {
-                std::cout << "UPLOAD VALUE" << std::endl ;
                 const void* dv = d->getValueVoidPtr();
                 shader->SetFloat(shader->GetVariable(tmpGLSLCode.m_name),
                                   nfo->getScalarValue(dv,0));

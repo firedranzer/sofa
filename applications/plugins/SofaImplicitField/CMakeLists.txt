@@ -62,6 +62,10 @@ set(EXTRA_FILES
     examples/CustomFieldVisualization.scn
     examples/CustomShaderField.scn
     examples/customfield.py
+    examples/customshape.py
+    examples/ShapeTreeDemo1.psl
+    examples/dfgeom.psl
+    examples/dfgeom.pyx
     examples/cython/CustomField.scn
     examples/cython/customfield.py
     examples/cython/cythonfield.pyx

@@ -1,0 +1,109 @@
+Node :
+{
+    name : "root"
+    Import : "dfgeom.psl"
+
+    Template :
+    {
+        name : "Difference"
+        properties : {
+            name : ""
+            left : ""
+            right: ""
+        }
+        Node : {
+            name : p"'Difference('+str(name)+')'"
+            Python : '''
+                     import Sofa, pslengine, os
+                     from pslengine import instanciate, processNode
+                     self.addNewData("type", "Meta-type", "", "s", "shape.Difference")
+                     if len(args) == 2:
+                        processNode(self, "Node", [args[0]], [], {"currentpath" : os.getcwd()}, False)
+                        processNode(self, "Node", [args[1]], [], {"currentpath" : os.getcwd()}, False)
+                     else:
+                        Sofa.msg_error(self, "Difference requires two parameters") ;
+                     '''
+        }
+    }
+
+    Template :
+    {
+        name : "ShapeTree"
+        properties : {
+            name : ""
+            bbox : "-1 -1 -1 1 1 1"
+        }
+
+        Node : {
+            name : p"name"
+        Node : {
+            name : p"'ShapeTree('+name+')'"
+        Python : '''
+                 import Sofa, pslengine, os
+                 from pslengine import instanciate, processNode
+                 processNode(self, "Node", args, [], {"currentpath" : os.getcwd()}, False)
+                 self.addNewData("type", "Meta-type", "", "s", "shape.ShapeTree")
+                 '''
+        }
+            CustomField : {
+                name : "myField"
+                function : "customshape.evalField"
+            }
+            PointCloudImplicitFieldVisualization : {
+                box : p"bbox"
+                field : "@myField"
+            }
+        }
+    }
+
+    Template :
+    {
+        name : "shape.Sphere"
+        properties : {
+            name : "shape.Sphere"
+        }
+        Node : {
+            name : "shape.Sphere"
+            Python : '''
+                     self.addNewData("type", "Meta-type", "", "s", "shape.Sphere")
+                     for k,v in args:
+                        self.addNewData(k, "Shape", "The world position of the cube", "vec3", str(v))
+                     '''
+        }
+    }
+
+    Template :
+    {
+        name : "shape.Box"
+        properties : {
+            name : "shape.Box"
+        }
+
+        Node : {
+            name : "shape.Box"
+            Python : '''
+                     self.addNewData("type", "Meta-type", "", "s", "shape.Box")
+                     for k,v in args:
+                        self.addNewData(k, "Shape", "The world position of the cube", "vec3", str(v))
+
+                     '''
+        }
+    }
+
+    ShapeTree : {
+        name : "shape2"
+        Difference : {
+            shape.Box : {
+                size: "0.5 1.0 1.0"
+            }
+            shape.Sphere : {
+                name : "sphere1"
+                center : "0.0 0.0 0.0"
+                radius : "1.02"
+            }
+       }
+    }
+
+
+}
+
