@@ -100,9 +100,14 @@ static PyObject * Base_addNewData(PyObject *self, PyObject *args ) {
         t = new (t) Data<float>(obj->initData(t, 0.0f, dataName, dataHelp)) ;
         bd = t;
     }
+    else if(!strcmp(dataRawType,"vec3")){
+        Data<sofa::defaulttype::Vec3f>* t = new Data<sofa::defaulttype::Vec3f>();
+        t = new (t) Data<sofa::defaulttype::Vec3f>(obj->initData(t, {0.0f, 0.0f, 0.0f}, dataName, dataHelp)) ;
+        bd = t;
+    }
     else{
         std::stringstream msg;
-        msg << "Invalid data type '" << dataRawType << "'. Supported type are: s(tring), d(ecimal), f(float), b(oolean)" ;
+        msg << "Invalid data type '" << dataRawType << "'. Supported type are: s(tring), d(ecimal), f(float), b(oolean), vec3(vec3f)" ;
         PyErr_SetString(PyExc_TypeError, msg.str().c_str());
         return NULL;
     }
