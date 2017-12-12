@@ -146,7 +146,7 @@ int FileMonitor::addFile(const std::string& filepath, FileEventListener* listene
                    FileSystem::stripDirectory(filepath), listener) ;
 }
 
-int FileMonitor::addFile(const std::string& pname,
+int FileMonitor::addFile(const std::string& parentname,
                          const std::string& filename,
                          FileEventListener* listener)
 {
