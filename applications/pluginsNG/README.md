@@ -1,6 +1,6 @@
 Simple experiment on how to modularize Sofa in an expressive & efficient way. 
 
-The factory can be extended to 
+From the user point of view we should  be able to write stuff like that:  
 ```cpp
 <Node name="root">
     <From plugin="Sofa.Loader.Mesh" import="*"/>
@@ -12,3 +12,13 @@ The factory can be extended to
 
 </Node>
 ```
+
+From the developper point of view we should  be able to write stuff like that in the CMakeLists.txt:  
+```
+find_package(Sofa.Loader) 
+or 
+find_package(Sofa.Loader.Mesh)
+```
+
+
+
