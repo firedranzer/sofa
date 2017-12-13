@@ -159,10 +159,12 @@ int FileMonitor::addFile(const std::string& parentname,
     path name(filename) ;
 
     path fullPath = prefix/name;
-    path absolutePath = canonical(fullPath) ;
 
     if(! exists(status(fullPath)) )
         return -1;
+
+    path absolutePath = canonical(fullPath) ;
+
 
     if(! exists(status(absolutePath)) )
         return -1;
