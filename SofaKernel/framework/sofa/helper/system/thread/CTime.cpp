@@ -38,7 +38,6 @@
 #if defined(__ia64__) && (defined(__EDG_VERSION) || defined(__ECC))
 #include <ia64intrin.h>
 #endif
-#include <iostream>
 
 
 /********************

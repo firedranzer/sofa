@@ -19,11 +19,12 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_HELPER_PARTICLEMASK_H
-#define SOFA_HELPER_PARTICLEMASK_H
+#ifndef SOFA_HELPER_STATEMASK_H
+#define SOFA_HELPER_STATEMASK_H
 
-#include <sofa/helper/vector.h>
-
+#include <cstddef>
+#include <sofa/helper/helper.h>
+#include <iostream>
 
 /**
  *  \brief Utility class to handle the mechanism of masks.
@@ -51,6 +52,7 @@
 
 
 #ifdef SOFA_USE_MASK
+#include <sofa/helper/vector.h>
 #include <sofa/defaulttype/Mat.h>
 #include <Eigen/SparseCore>
 

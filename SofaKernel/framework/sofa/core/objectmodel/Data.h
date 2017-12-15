@@ -26,9 +26,7 @@
 #include <sofa/core/objectmodel/BaseData.h>
 #include <sofa/helper/accessor.h>
 #include <sofa/helper/vector.h>
-#include <memory>
 #include <string>
-#include <sofa/helper/logging/Message.h>
 namespace sofa
 {
 
