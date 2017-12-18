@@ -1,13 +1,12 @@
 ###################################################################################################
-## RIEN DU TOUT du tout
-##
+## PYTHON COMMENT'S
 ###################################################################################################
-// MAIS CA MARCHE AUSSI !
+// C's COMMENTS
 Node : {
-    ## Commentaire ICI.
+    ## HERE
     name : "root"
 
-    Template : #A commentaire here Template.
+    Template : # and here
     {
         name : "MyTemplate"
         properties : {

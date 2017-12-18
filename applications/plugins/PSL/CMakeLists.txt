@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(PSL)
 
-if(SOFA_WITH_EXPERIMENTAL_FEATURES)
-    message("-- This is a 17.12 experimental feature.")
+message("-- Warning PSL is a 17.12 experimental feature, use it at your own risk.")
 
 set(HEADER_FILES
     config.h
@@ -96,6 +95,4 @@ install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
-else()
-    message("-- This is a 17.12 experimental feature. It is only activated if you compile with SOFA_WITH_EXPERIMENTAL_FEATURES ON")
-endif()
+

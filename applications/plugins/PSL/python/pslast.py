@@ -65,8 +65,6 @@ def nodeToAst(node):
 
     return ("Node", childList)
 
-#def getId(tp):
-#    return tp[0]
 
 def cmpf(a, b):
     if a[0] == b[0]:

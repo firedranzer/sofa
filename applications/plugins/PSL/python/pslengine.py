@@ -66,7 +66,7 @@ def srange(b, e):
 
 def flattenStackFrame(sf):
         """Return the stack frame content into a single "flat" dictionnary.
-           The most recent entries are overriden the oldest.
+           The most recent entries are overwriting the oldest.
            """
         res = {}
         for frame in sf:
