@@ -19,6 +19,11 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+/******************************************************************************
+* Contributors:                                                               *
+*    - damien.marchal@univ-lille1.fr Copyright (C) CNRS                       *
+*******************************************************************************/
+
 #include <PSL/config.h>
 
 #include <PSL/components/PSLVersion.h>

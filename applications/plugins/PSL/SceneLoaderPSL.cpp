@@ -19,6 +19,10 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+/******************************************************************************
+* Contributors:                                                               *
+*    - damien.marchal@univ-lille1.fr Copyright (C) CNRS                       *
+*******************************************************************************/
 #include <sstream>
 
 #include <sofa/simulation/Simulation.h>

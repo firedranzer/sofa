@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
 project(PSL)
 
+if(SOFA_WITH_EXPERIMENTAL_FEATURES)
+    message("-- This is a 17.12 experimental feature.")
+
 set(HEADER_FILES
     config.h
     SceneLoaderPSL.h
@@ -71,6 +74,8 @@ set(EXTRA_FILES
     TODO.md
 )
 
+
+
 # Config files and install rules for pythons scripts
 sofa_set_python_directory(${PROJECT_NAME} "python")
 
@@ -90,3 +95,7 @@ install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
+
+else()
+    message("-- This is a 17.12 experimental feature. It is only activated if you compile with SOFA_WITH_EXPERIMENTAL_FEATURES ON")
+endif()
