@@ -38,7 +38,7 @@
 #include <map>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-
+using namespace boost::filesystem;
 
 #include "FileSystem.h"
 using sofa::helper::system::FileSystem ;
@@ -97,15 +97,24 @@ int FileMonitor_init()
 }
 
 void FileMonitor::removeFileListener(const string& filename,
-                                     FileEventListener *listener){
+                                     FileEventListener *listener)
+{
+    path prefix(FileSystem::getParentDirectory(filename)) ;
+    path name(FileSystem::stripDirectory(filename)) ;
 
+    path fullPath = prefix/name;
+
+    if(! exists(status(fullPath)) )
+        return;
+
+    path absolutePath = canonical(fullPath) ;
     map<string, ListOfListeners>::iterator cur = file2listener.begin() ;
     map<string, ListOfListeners>::iterator end = file2listener.end() ;
 
     for(;cur!=end;++cur){
 
         if(std::find(cur->second.begin(),cur->second.end(), listener)
-                != cur->second.end() && cur->first ==  filename){
+                != cur->second.end() && cur->first ==  absolutePath){
             cur->second.erase(std::remove(cur->second.begin(),
                                           cur->second.end(), listener),
                               cur->second.end());
@@ -150,8 +159,6 @@ int FileMonitor::addFile(const std::string& parentname,
                          const std::string& filename,
                          FileEventListener* listener)
 {
-    using namespace boost::filesystem;
-
     if(listener == NULL)
         return -1 ;
 
