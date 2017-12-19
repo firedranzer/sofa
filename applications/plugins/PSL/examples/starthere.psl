@@ -11,7 +11,7 @@ Node : {
                 name : p"name"
                 Python : '''
                          for i in range(0,numchild):
-                            root2.createChild("lefile"+str(i))
+                            self.createChild("lefile"+str(i))
                          '''
             }
         }

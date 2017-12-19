@@ -44,7 +44,7 @@ namespace sofa
 namespace simulation
 {
 
-namespace _sceneloaderpyson_
+namespace _sceneloaderpsl_
 {
 
 bool SceneLoaderPSL::canLoadFileExtension(const char *extension)

@@ -45,6 +45,7 @@ set(EXTRA_FILES
     examples/livedemo1/sceneinit.psl
     examples/livedemo1/starthere.psl
     examples/livedemo1/shapes.psl
+    examples/starthere.psl
     examples/starthere.pslx
     examples/python01.psl
     examples/python02.psl

@@ -40,7 +40,7 @@ namespace sofa
 namespace simulation
 {
 
-namespace _sceneloaderpyson_
+namespace _sceneloaderpsl_
 {
 
 /// The scene loader/exporter for python scene files
@@ -60,17 +60,17 @@ public:
     virtual void write(Node* node, const char *filename) override ;
 
     /// get the file type description
-    virtual std::string getFileTypeDesc();
+    virtual std::string getFileTypeDesc() override ;
 
     /// get the list of file extensions
-    virtual void getExtensionList(ExtensionList* list);
+    virtual void getExtensionList(ExtensionList* list) override;
 };
 
 
 
 } // namespace _sceneloaderpyson_
 
-using _sceneloaderpyson_::SceneLoaderPSL ;
+using _sceneloaderpsl_::SceneLoaderPSL ;
 
 } // namespace simulation
 

@@ -197,6 +197,7 @@ static PyObject * Template_setTemplate(PyObject *self, PyObject * args)
 
 static PyObject * Template_getTemplate(PyObject *self, PyObject * args)
 {
+    SOFA_UNUSED(args);
     PythonEnvironment::gil lock();
 
     Template* obj= dynamic_cast<Template*>(((PySPtr<Base>*)self)->object.get()) ;
@@ -264,22 +265,18 @@ static PyObject * Template_createATrackedData(PyObject *self, PyObject *args ) {
     BaseData* bd = nullptr ;
     if(dataRawType[0] == 's'){
         Data<std::string>* t = new Data<std::string>() ;
-        //t = new(t) NotifyingData<std::string>(obj->initData(t, std::string(""), dataName, dataHelp)) ;
         bd = t;
     }
     else if(dataRawType[0] == 'b'){
         Data<bool>* t = new Data<bool>();
-        //t = new(t) NotifyingData<bool>(obj->initData(t, true, dataName, dataHelp)) ;
         bd = t;
     }
     else if(dataRawType[0] == 'd'){
         Data<int>* t = new Data<int>();
-        //t = new (t) NotifyingData<int> (obj->initData(t, 0, dataName, dataHelp)) ;
         bd = t;
     }
     else if(dataRawType[0] == 'f'){
         Data<float>* t = new Data<float>();
-        //t = new (t) NotifyingData<float>(obj->initData(t, 0.0f, dataName, dataHelp)) ;
         bd = t;
     }
     else{
