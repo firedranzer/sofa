@@ -469,9 +469,12 @@ def processTemplate(parent, key, kv, stack, frame):
         templates[str(name)] = o
         return o
 
-def processAlias(parent, key, kv, stack, frame):
+def processAlias(parent, key, token, stack, frame):
+        if not isAStringToken(token, ('p')):
+            Sofa.msg_error(parent, pslprefix+" Unable to set an alias because of invalid syntax.")
         global aliases
-        oldName, newName = kv.split('-')
+        value = token[1]
+        oldName, newName = value.split(' as ')
         aliases[newName]=oldName
 
 def reinstanciateTemplateOnSourceChange(templateSource):

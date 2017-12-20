@@ -1,6 +1,11 @@
 Node : {
     name : "root"
 
+    TestResult : {
+        name : "result"
+        result : "Success"
+    }
+
     OglModel: {
         name : "valid0"
     }
@@ -37,6 +42,11 @@ Node : {
         }
     }
 
+    OglModel: {
+        name : "valid5"
+        something : '''X'''
+    }
+
     OglModel : {
         name : "invalidDupliatedProperties1"
         properties : {
@@ -50,7 +60,6 @@ Node : {
             p5 : "prop2"
         }
     }
-
 
     OglModel : {
         name : "invalid"
@@ -67,18 +76,7 @@ Node : {
         fileMesh : []
     }
 
-
     ## Test when a non existing data field is used
-    OglModel: {
-        name : "invalid1"
-        something : '''X'''
-    }
-
-    OglModel: {
-        name : "invalid2"
-        something : "X"
-    }
-
     OglModel: {
         name : "invalid3"
         something : [1.0]
@@ -98,6 +96,26 @@ Node : {
         name : "invalid6"
         something : {}
     }
+
+    OglModel: {
+        name : "invalid6"
+        Node : {
+            name : "error"
+        }
+    }
+
+    OglModel: {
+        name : "invalid6"
+        Node : {
+            name : "error"
+        }
+    }
+
+    Python : '''
+             for node in root.getChildren():
+                if node.name.find("invalid"):
+                    root.getObject("result").result="Fail"
+             '''
 
 }
 

@@ -1,5 +1,11 @@
 Node : {
     name : "root"
+
+    TestResult : {
+        name : "result"
+        result : "Success"
+    }
+
     Node : {
         name : "valid"
         Python : '''print("PRINT-1")'''
@@ -35,6 +41,5 @@ Node : {
         name : "invalid5"
         Python : getFunction()
     }
-
 }
 

@@ -131,7 +131,8 @@ public:
 
 std::vector<std::vector<std::string>> testvalues = {
     {"test_emptyfile.psl", "Fail", "Error"},
-    {"test_syntax.psl", "Success", "NoError"},
+    {"test_syntax_object.psl", "Success", "Error"},
+    {"test_syntax_using.psl", "Success", "Error"},
     {"test_node.psl", "Success", "NoError"},
     {"test_node.pslx", "Success", "NoError"},
     {"test_node_fail.psl", "Fail", "NoError"},
