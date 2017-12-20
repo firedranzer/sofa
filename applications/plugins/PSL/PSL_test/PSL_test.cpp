@@ -23,8 +23,8 @@
  *****************************************************************************/
 
 #include <vector>
-#include <SofaTest/Sofa_test.h>
-using sofa::Sofa_test ;
+#include <sofa/helper/testing/BaseTest.h>
+using sofa::helper::testing::BaseTest ;
 
 #include <SofaTest/Python_test.h>
 using sofa::Python_test ;
@@ -79,7 +79,7 @@ void anInit(){
 }
 
 
-class PSL_test : public Sofa_test<>,
+class PSL_test : public BaseTest,
                  public ::testing::WithParamInterface<std::vector<std::string>>
 {
 public:
@@ -131,6 +131,7 @@ public:
 
 std::vector<std::vector<std::string>> testvalues = {
     {"test_emptyfile.psl", "Fail", "Error"},
+    {"test_syntax.psl", "Success", "NoError"},
     {"test_node.psl", "Success", "NoError"},
     {"test_node.pslx", "Success", "NoError"},
     {"test_node_fail.psl", "Fail", "NoError"},

@@ -139,13 +139,11 @@ class HJsonParser(hjson.HjsonDecoder):
         (self.scan_once, self.scan_object_once) = hjson.decoder.make_scanner(self)
 
     def parse_string(self, s, end):
-        print("==================================PARSER VALUE IS:"+str(r))
         r = self.oldparse_string(s, end)
         return (('s', r[0]), r[1])
 
     def parse_tfnns(self, s, end):
         r = self.oldparse_tfnns(self, s, end)
-        print("==================================PARSER VALUE IS:"+str(r))
         return (('p', r[0]), r[1])
 
 def parse(hjsoncontent):

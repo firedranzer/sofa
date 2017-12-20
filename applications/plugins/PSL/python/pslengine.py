@@ -37,6 +37,19 @@ import pprint
 import types
 import pslparserhjson
 
+def instanciate(parent, templateName, **kwargs):
+    params = []
+    for k in kwargs:
+        p = ""
+        if isinstance(kwargs[k], list):
+            for i in kwargs[k]:
+                p = p +  " " + str(i)
+        else:
+            p = str(kwargs[k])
+        params.append((k, p))
+    instanciateTemplate(parent, templateName, params, [], {})
+
+
 templates = {}
 aliases = {}
 sofaAliases = {}
@@ -109,11 +122,12 @@ def isAStringToken(token, values=("s","p","m")):
 
 def processPython(parent, key, token, stack, frame):
         """Process a python fragment of code with context provided by the content of the stack."""       
-        if not isAStringToken(token):
-            raise Exception("The function expect only string token instead of"+str(token))
-
         if not isAStringToken(token, ("s", "m")):
-            raise Exception("Only string or multiline string allowed: "+str(token))
+            Sofa.msg_error(parent, "Python expect string only argument instead of '"+str(token)+"'")
+            return None
+
+        #if not isAStringToken(token, ("s", "m")):
+        #    raise Exception("Only string or multiline string allowed: "+str(token))
 
         ## retrieve the value as a string.
         stringvalue = token[1]
@@ -252,7 +266,7 @@ def processObjectDict(obj, dic, stack, frame):
                         processParameter(obj, key, value, stack ,frame)
 
 def processObject(parent, key, kv, stack, frame):
-    try:
+    #try:
         global sofaComponents
         populateFrame(key, frame, stack)
         frame = {}
@@ -260,12 +274,27 @@ def processObject(parent, key, kv, stack, frame):
         if not isinstance(kv, list):
                 kv = [("name" , kv)]
 
+        properties = None
         for k,v in kv:
-                v = processString(v, stack, frame)
-                kwargs[k] = v
+                if k == "properties":
+                    properties = v
+                elif isAStringToken(v, ('s')):
+                    v = processString(v, stack, frame)
+                    kwargs[k] = v
+                elif isinstance(v, int):
+                    kwargs[k] = v
+                elif isinstance(v, float):
+                        kwargs[k] = v
+                else:
+                    c=parent.createChild("[XX"+key+"XX]")
+                    Sofa.msg_error(c, pslprefix+" unable to create an object because of invalid parameter "+str(v))
+                    return None
 
         stack.append(frame)
         frame["self"] = obj = createObject(parent, key, stack, frame, kwargs)
+
+        if properties:
+            processProperties(obj, obj.name, properties, stack, frame)
 
         ### Force all the data field into a non-persistant state.
         for datafield in obj.getListOfDataFields():
@@ -296,9 +325,9 @@ def processObject(parent, key, kv, stack, frame):
                 refreshComponentListFromFactory()
 
         return obj
-    except Exception, e:
-        c=parent.createChild("[XX"+key+"XX]")
-        Sofa.msg_error(c, pslprefix+" unable to create an object because: "+str(e))
+    #except Exception, e:
+    #    c=parent.createChild("[XX"+key+"XX]")
+    #    Sofa.msg_error(c, pslprefix+" unable to create an object because: "+str(e))
 
 # TODO add a warning to indicate that a template is loaded twice.
 def importTemplates(content):
@@ -633,21 +662,8 @@ def processProperties(self, key, kv, stack, frame):
 
     Sofa.msg_info(self, pslprefix+"Adding a user properties: \n"+msg)
 
-def instanciate(parent, templateName, **kwargs):
-    params = []
-    for k in kwargs:
-        p = ""
-        if isinstance(kwargs[k], list):
-            for i in kwargs[k]:
-                p = p +  " " + str(i)
-        else:
-            p = str(kwargs[k])
-        params.append((k, p))
-    instanciateTemplate(parent, templateName, params, [], {})
-
 def instanciateTemplate(parent, key, kv, stack, frame):
         global templates
-        #stack.append(frame)
         nframe={}
         parentstack = stack
         stack = [nframe]
@@ -682,8 +698,12 @@ def instanciateTemplate(parent, key, kv, stack, frame):
                         None
                     elif k == 'properties':
                             for kk,vv in v:
+                                    if isAStringToken(vv, ('s','p','m')):
+                                        vv=processString(vv, parentstack, frame)
+
                                     if not kk in frame:
                                             nframe[kk] = vv
+
                                     properties.append(kk)
                     else:
                             source.append((k,v))
@@ -703,41 +723,46 @@ def instanciateTemplate(parent, key, kv, stack, frame):
             else:
                 n = processNode(parent, "", source, stack, nframe, doCreate=False)
 
-        if isinstance(templates[key], Sofa.Template):
-            ## Add to the created node the different template properties.
-            for k,v in kv:
-                if not hasattr(n, k) and k in properties:
-                    data = None
-                    t = templates[key]
-                    if isinstance(v, int):
-                        data = t.createATrackedData(k, "Live.Properties", "Help", "d", v)
-                    elif isinstance(v, str) or isinstance(v,unicode):
-                        data = t.createATrackedData(k, "Live.Properties", "Help", "s", str(v))
-                    elif isinstance(v, float):
-                        data = t.createATrackedData(k, "Live.Properties", "Help", "f", v)
-                    elif isinstance(v, unicode):
-                        data = t.createATrackedData(k, "Live.Properties", "Help", "f", str(v))
+#        if isinstance(templates[key], Sofa.Template):
+#            ## Add to the created node the different template properties.
+#            for k,v in kv:
+#                if not hasattr(n, k) and k in properties:
+#                    data = None
+#                    t = templates[key]
+#                    if isAStringToken(v, ('s','p','m')):
+#                        v=processString(v, parentstack, frame)
 
-                    if data != None:
-                        n.addData(data)
-                        templates[key].trackData( data )
+#                    if isinstance(v, int):
+#                        data = t.createATrackedData(k, "Live.Properties", "Help", "d", v)
+#                    elif isinstance(v, str) or isinstance(v,unicode):
+#                        data = t.createATrackedData(k, "Live.Properties", "Help", "s", str(v))
+#                    elif isinstance(v, float):
+#                        data = t.createATrackedData(k, "Live.Properties", "Help", "f", v)
+#                    elif isinstance(v, unicode):
+#                        data = t.createATrackedData(k, "Live.Properties", "Help", "f", str(v))
 
-        else:
-            ## Add to the created node the different template properties.
-            for k,v in kv:
-                if not hasattr(n, k) and k in properties:
-                    if isinstance(v, int):
-                        n.addNewData(k, "Live.Properties", "Help", "d", v)
-                    elif isinstance(v, str) or isinstance(v,unicode):
-                        n.addNewData(k, "Live.Properties", "Help", "s", str(v))
-                    elif isinstance(v, float):
-                        n.addNewData(k, "Live.Properties", "Help", "f", v)
-                    elif isinstance(v, unicode):
-                        n.addNewData(k, "Live.Properties", "Help", "f", str(v))
+#                    if data != None:
+#                        n.addData(data)
+#                        templates[key].trackData( data )
 
-                ## Add the data tracker to the template instances (this is bad) :(
-                ##if isinstance(templates[key], Sofa.Template):
-                ##    templates[key].trackData( n.findData(k) )
+#        else:
+#            ## Add to the created node the different template properties.
+#            for k,v in kv:
+#                if not hasattr(n, k) and k in properties:
+#                    if isAStringToken(v, ('s','p','m')):
+#                        v=processString(v, parentstack, frame)
+#                    if isinstance(v, int):
+#                        n.addNewData(k, "Live.Properties", "Help", "d", v)
+#                    elif isinstance(v, str) or isinstance(v,unicode):
+#                        n.addNewData(k, "Live.Properties", "Help", "s", str(v))
+#                    elif isinstance(v, float):
+#                        n.addNewData(k, "Live.Properties", "Help", "f", v)
+#                    elif isinstance(v, unicode):
+#                        n.addNewData(k, "Live.Properties", "Help", "f", str(v))
+
+#                ## Add the data tracker to the template instances (this is bad) :(
+#                ##if isinstance(templates[key], Sofa.Template):
+#                ##    templates[key].trackData( n.findData(k) )
 
         ## Add the meta-type information.
         n.addNewData("psl_properties", "PSL", "Captured variables for template re-instantiation", "s", repr(kv))

@@ -11,6 +11,7 @@ set(SOURCE_FILES
         )
 
 set(PSL_FILES
+        pslfiles/test_syntax.psl
         pslfiles/test_emptyfile.psl
         pslfiles/test_emptyfile.pslx
         pslfiles/test_brokenfile.psl

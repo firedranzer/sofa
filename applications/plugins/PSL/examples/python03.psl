@@ -2,7 +2,7 @@ Node : {
     name : "root"
 
     MechanicalObject : {
-        name : p"'dynamicName'+str(3)"
-        position : p"range(0,100)"
+        name : 'dynamicName'+str(3)
+        position : range(0,100)
     }
 }

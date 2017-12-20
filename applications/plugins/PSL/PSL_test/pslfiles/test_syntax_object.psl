@@ -1,0 +1,52 @@
+Node : {
+    name : "root"
+
+    OglModel: {
+        name : "valid0"
+    }
+
+    OglModel: {
+        name : "valid1"
+        Python : '''print("PRINT-1")'''
+    }
+
+    OglModel: {
+        name : str("Valid filemes")
+    }
+
+
+
+
+    ## Test when a non existing data field is used
+    OglModel: {
+        name : "invalid1"
+        something : '''X'''
+    }
+
+    OglModel: {
+        name : "invalid2"
+        something : "X"
+    }
+
+    OglModel: {
+        name : "invalid3"
+        something : [1.0]
+    }
+
+    OglModel: {
+        name : "invalid3"
+        something : []
+    }
+
+    OglModel: {
+        name : "invalid3"
+        something : {"a":"b"}
+    }
+
+    OglModel: {
+        name : "invalid3"
+        something : {}
+    }
+
+}
+
