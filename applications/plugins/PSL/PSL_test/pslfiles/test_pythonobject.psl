@@ -1,15 +1,13 @@
 Node : {
     name : "root"
 
-    Python : '''result="Fail"'''
+    Python : '''result="Success"'''
 
     MechanicalObject : {
         name : "aMechanicalObject1"
-
-        Python : '''result="Sucess"'''
     }
 
-    TestResult : p"result"
+    TestResult : result
 }
 
 

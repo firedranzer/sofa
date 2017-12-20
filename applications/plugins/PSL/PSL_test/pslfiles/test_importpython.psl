@@ -1,6 +1,6 @@
 Node : {
     name : "root"
-    Import : importedpython
+    Import : "importedpython"
 
     importedpython.Template1 : {}
     importedpython.MyTemplate : {

@@ -20,12 +20,15 @@ set(PSL_FILES
         pslfiles/test_node_fail2.psl
         pslfiles/test_node.psl
         pslfiles/test_properties.psl
+        pslfiles/test_properties_raw.psl
         pslfiles/test_pslversion.psl
         pslfiles/test_pythonglobals.psl
         pslfiles/test_pythonlocals.psl
         pslfiles/test_template.psl
         pslfiles/test_template_dynamic.psl
         pslfiles/test_template_frame.psl
+        pslfiles/test_template_kwargs.psl
+        pslfiles/test_template_empty.psl
         pslfiles/test_node_fail.psl
         pslfiles/test_object.psl
         pslfiles/test_object_datafield.psl

@@ -32,7 +32,7 @@ Node : {
     InstanceOfTheScriptController : {
         anAttribute : 1
         properties : {
-            aProperty = 1
+            aProperty : 1
         }
     }
 }

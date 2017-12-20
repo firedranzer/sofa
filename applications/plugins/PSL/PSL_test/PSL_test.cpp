@@ -145,14 +145,18 @@ std::vector<std::vector<std::string>> testvalues = {
     {"test_pythonexcept.psl", "Success", "Error"},
     {"test_template.psl", "Success", "NoError"},
     {"test_template_frame.psl", "Success", "NoError"},
+    {"test_template_kwargs.psl", "Success", "NoError"},
+    {"test_template_empty.psl", "Success", "NoError"},
     {"test_import.psl", "Success", "NoError"},
     {"test_importpython.psl", "Success", "NoError"},
     {"test_properties.psl", "Success", "NoError"},
+    {"test_properties_raw.psl", "Success", "NoError"},
     {"test_pslversion.psl", "Success", "NoError"},
     {"test_pslversion_invalid.psl", "Fail", "Error"},
     {"test_objects_lightmanager.psl", "Success", "NoError"},
     {"test_objects_lightmanager.pslx", "Success", "NoError"}
 };
+
 
 TEST_P(PSL_test, checkTestFiles)
 {

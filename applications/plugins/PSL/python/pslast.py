@@ -29,6 +29,8 @@
 #******************************************************************************/
 import Sofa
 import pprint
+import pslengine
+from pslengine import isAStringToken
 
 def objectToAst(object):
     childList = []
@@ -128,6 +130,21 @@ def compareAst(ast1, ast2):
         if ast1 != ast2:
             return (False, "Ast mismatch at: \n"+pprint.pformat(ast1)+"\n"+pprint.pformat(ast2))
         return (True, "")
+
+    if isAStringToken(ast1):
+        if not isAStringToken(ast2):
+            return (False, "Ast mismatch at: \n"+pprint.pformat(ast1)+"\n"+pprint.pformat(ast2))
+        if ast1[0] != ast2[0] or ast1[1] != ast2[1]:
+            return (False, "Ast mismatch at: \n"+pprint.pformat(ast1)+"\n"+pprint.pformat(ast2))
+        return (True, "")
+
+    if isAStringToken(ast2):
+        if not isAStringToken(ast1):
+            return (False, "Ast mismatch at: \n"+pprint.pformat(ast1)+"\n"+pprint.pformat(ast2))
+        if ast1[0] != ast2[0] or ast1[1] != ast2[1]:
+            return (False, "Ast mismatch at: \n"+pprint.pformat(ast1)+"\n"+pprint.pformat(ast2))
+        return (True, "")
+
 
     for i in range(0, len(ast1)):
         if ast1[i][0] != ast2[i][0]:

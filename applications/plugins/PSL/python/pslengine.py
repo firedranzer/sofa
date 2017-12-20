@@ -37,7 +37,6 @@ import pprint
 import types
 import pslparserhjson
 
-# TODO(dmarchal 2017-06-17) Get rid of these ugly globals.
 templates = {}
 aliases = {}
 sofaAliases = {}
@@ -99,14 +98,32 @@ def findStackLevelFor(key, stack):
             return frame
     return None
 
-def processPython(parent, key, kv, stack, frame):
-        """Process a python fragment of code with context provided by the content of the stack."""
-        p=parent.createObject("Python", name='"'+kv[0:20]+'..."')
-        p.addNewData("psl_source","PSL", "This hold a python expression.", "s", str(kv))
+def isAStringToken(token, values=("s","p","m")):
+    if not isinstance(token, tuple):
+        return False
+    if not len(token) == 2:
+        return False
+    if not token[0] in values:
+        return False
+    return True
+
+def processPython(parent, key, token, stack, frame):
+        """Process a python fragment of code with context provided by the content of the stack."""       
+        if not isAStringToken(token):
+            raise Exception("The function expect only string token instead of"+str(token))
+
+        if not isAStringToken(token, ("s", "m")):
+            raise Exception("Only string or multiline string allowed: "+str(token))
+
+        ## retrieve the value as a string.
+        stringvalue = token[1]
+
+        p=parent.createObject("Python", name='"'+stringvalue[0:20]+'..."')
+        p.addNewData("psl_source","PSL", "This hold a python expression.", "s", str(stringvalue))
 
         context = flattenStackFrame(stack)
         local = {}
-        exec(kv, context, local)
+        exec(stringvalue, context, local)
 
         ## Transfer the local entries to the previously defined context or in the existing variable
         ## somewhere in the stack frame.
@@ -151,14 +168,36 @@ def whatis(name, n=5):
     res += "</ul>"
     return res
 
-def processString(object, name, value, stack, frame):
-    ## Python Hook to build an eval function.
-    if len(value) > 2 and value[0] == 'p' and value[1] == '"':
-            d = object.addNewData("psl_"+name, "PSL", "This hold a python expression.", "s", str(value))
-            object.findData("psl_"+name).setPersistant(True)
-            return evalPython(None, value[2:-1], stack, frame)
 
-    return value
+
+def processStringOld(object, name, value, stack, frame):
+    ## Python Hook to build an eval function.
+    if value[0] == 'p':
+        d = object.addNewData("psl_"+name, "PSL", "This hold a python expression.", "s", str(value[1]))
+        object.findData("psl_"+name).setPersistant(True)
+        return evalPython(None, value[1], stack, frame)
+    elif value[0] == 's':
+        return value
+    else:
+        raise Exception("Invlid string token")
+
+def processString(value, stack, frame):
+    if not isinstance(value, tuple) or len(value) != 2:
+        raise Exception("Invalid value to process: "+str(value))
+
+    ## Python Hook to build a single fragment
+    if value[0] == 'p':
+        return evalPython(None, value[1], stack, frame)
+    ## Python Hook to evaluate a multiline fragment
+    elif value[0] == 'm':
+        return evalPython(None, value[1], stack, frame)
+    ## This is an explicitely given real string.
+    elif value[0] == 's':
+        return str(value[1])
+
+
+    raise Exception("Invalid token "+str(value)+ " to process.")
+
 
 def processParameter(parent, name, value, stack, frame):
         try:
@@ -168,8 +207,7 @@ def processParameter(parent, name, value, stack, frame):
                     Sofa.msg_error(c, pslprefix+" unknow parameter or component [" + name + "] suggestions -> "+str(matches))
             elif not name in datafieldQuirks:
                     ## Python Hook to build an eval function.
-                    if len(value) > 2 and value[0] == 'p' and value[1] == '"':
-                            value = evalPython(None, value[2:-1], stack, frame)
+                    value = processString(value, stack, frame)
 
                     try:
                             field = getField(frame["self"], name)
@@ -223,9 +261,8 @@ def processObject(parent, key, kv, stack, frame):
                 kv = [("name" , kv)]
 
         for k,v in kv:
-                if len(v) != 0 and v[0] == 'p' and v[1] == '"':
-                        v = evalPython(None, v[2:-1], stack, frame)
-                kwargs[k] = str(v)
+                v = processString(v, stack, frame)
+                kwargs[k] = v
 
         stack.append(frame)
         frame["self"] = obj = createObject(parent, key, stack, frame, kwargs)
@@ -261,7 +298,7 @@ def processObject(parent, key, kv, stack, frame):
         return obj
     except Exception, e:
         c=parent.createChild("[XX"+key+"XX]")
-        Sofa.msg_error(c, pslprefix+" unable to create an object because: "+str(e.message))
+        Sofa.msg_error(c, pslprefix+" unable to create an object because: "+str(e))
 
 # TODO add a warning to indicate that a template is loaded twice.
 def importTemplates(content):
@@ -273,7 +310,10 @@ def importTemplates(content):
                         rvalue = []
                         for k,v in value:
                                 if k == "name":
-                                        name = str(v)
+                                    if isAStringToken(v, ('s')):
+                                        name = processString(v, None, None)
+                                    else:
+                                        Sofa.msg_warning(pslprefix, " Template names must be provided.")
                         templates[name] = value
                 else:
                         Sofa.msg_warning(pslprefix, " an imported file contains something that is not a Template.")
@@ -349,11 +389,11 @@ def processImport(parent, key, kv, stack, frame):
         """ This function "import" the file provided as parameter """
 
         ## Check that the kv value is in fact a string or an unicode
-        if not (isinstance(kv, str) or isinstance(kv, unicode)):
+        if not isAStringToken(kv):
                 Sofa.msg_error(parent, pslprefix+" to much parameter given in procesImport " + str(type(kv)))
                 return
 
-        importname=kv
+        importname=processString(kv, stack, frame)
         if isinstance(importname, unicode):
             importname=str(importname)
 
@@ -380,8 +420,8 @@ def processTemplate(parent, key, kv, stack, frame):
         properties = {}
         pattern = []
         for key,value in kv:
-                if key == "name":
-                        name = value
+                if key == "name" and isAStringToken(value, ('s')):
+                        name = value[1]
                 elif key == "properties":
                         properties = value
                 else:
@@ -576,11 +616,8 @@ def processProperties(self, key, kv, stack, frame):
             msg += " - cannot add a property named '"+k+"' as it already exists"
             continue
 
-        if isinstance(v, unicode):
-            v=str(v)
-
-        if isinstance(v, str):
-            v=processString(self, k, v, stack, frame)
+        if isAStringToken(v):
+            v=processString(v, stack, frame)
 
         if isinstance(v, int):
             self.addNewData(k, "Properties", "", "d", v)
@@ -612,6 +649,7 @@ def instanciateTemplate(parent, key, kv, stack, frame):
         global templates
         #stack.append(frame)
         nframe={}
+        parentstack = stack
         stack = [nframe]
         source = None
         properties=[]
@@ -623,6 +661,8 @@ def instanciateTemplate(parent, key, kv, stack, frame):
         if isinstance(templatesource, types.FunctionType):
             kwargs = {}
             for k,v in kv:
+                if isAStringToken(v):
+                    v = processString(v, stack,frame)
                 kwargs[k] = v
 
             n = parent.createChild(key)
@@ -630,6 +670,8 @@ def instanciateTemplate(parent, key, kv, stack, frame):
         elif isinstance(templatesource, psl.dsl.psltemplate):
             kwargs = {}
             for k,v in kv:
+                if isAStringToken(v):
+                    v = processString(v, stack,frame)
                 kwargs[k] = v
             n=templatesource(parent, **kwargs)
         else:
@@ -648,6 +690,9 @@ def instanciateTemplate(parent, key, kv, stack, frame):
 
             nframe["args"] = []
             for k,v in kv:
+                    if isAStringToken(v, ('s','p','m')):
+                        v=processString(v, parentstack, frame)
+
                     if k in nframe:
                         nframe[k] = v
                     else:

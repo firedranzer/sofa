@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 3.1)
 project(PSL)
 
-message("-- Warning PSL is a 17.12 experimental feature, use it at your own risk.")
+message("-- PSL is a 17.12 experimental feature, use it at your own risk.")
+
+### Plugin dependencies
+find_package(SofaFramework REQUIRED)
+find_package(SofaPython QUIET)
+if(!SofaPython_FOUND)
+    message(FATAL_ERROR "-- PSL requires the SofaPython plugin to be activated.")
+endif()
+
 
 set(HEADER_FILES
     config.h
@@ -26,9 +34,6 @@ set(SOURCE_FILES
     components/Template.cpp
     components/PythonBaseObject.cpp
 )
-
-find_package(SofaFramework REQUIRED)
-find_package(SofaPython REQUIRED)
 
 set(PYTHON_FILES
     python/psl/dsl.py

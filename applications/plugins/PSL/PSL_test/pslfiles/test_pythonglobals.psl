@@ -18,7 +18,7 @@ Node : {
              '''
 
 
-    TestResult : p"aGlobal"
+    TestResult : aGlobal
 }
 
 

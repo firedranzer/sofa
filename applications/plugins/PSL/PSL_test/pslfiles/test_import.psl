@@ -6,7 +6,7 @@ Node : {
     importedlib.MyTemplate : {}
     importedlib.MyTemplate : {}
 
-	 Template : {
+    Template : {
         name : "MyTemplate2"
         Node : {
             name : "MyTemplate2"
@@ -17,7 +17,7 @@ Node : {
         }
     }
 
-	MyTemplate2 : {}
+    MyTemplate2 : {}
 
     Python : '''
              cp=0

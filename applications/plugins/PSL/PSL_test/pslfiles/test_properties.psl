@@ -8,7 +8,7 @@ Node : {
         aStringProperty : "Success"
     }
 
-    TestResult : p"self.aStringProperty"
+    TestResult : self.aStringProperty
 }
 
 

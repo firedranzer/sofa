@@ -147,7 +147,7 @@ sofa::simulation::Node::SPtr SceneLoaderPSL::load(const char *filename)
             return rootNode ;
         }
 
-        msg_error("SceneLoaderPSL") << "The pslload function must return a Node object. It doesn't" ;
+        msg_error("SceneLoaderPSL") << "The loading does not returns a Node object while it should." ;
         Py_DECREF(res);
         return nullptr ;
     }

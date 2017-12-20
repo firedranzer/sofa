@@ -29,6 +29,7 @@
 #******************************************************************************/
 import os
 import hjson
+from hjson import decoder
 
 class MyObjectHook(object):
         def __call__(self, s):
@@ -114,7 +115,40 @@ def treeToString(node, space):
 def toText(rootNode):
         return treeToString(rootNode, "")
 
+def scanstring(s, end, encoding=None, strict=True):
+    r=decoder.scanstring(s,end,encoding,strict)
+    return (('s', str(r[0])), r[1])
+
+def scantfnns(context, s, end):
+    r=decoder.scantfnns(context, s,end)
+    return (('p', str(r[0])), r[1])
+
+def mlscanstring(s, end):
+    r=decoder.mlscanstring(s,end)
+    return (('m', str(r[0])), r[1])
+
+class HJsonParser(hjson.HjsonDecoder):
+    def __init__(self, encoding=None, object_hook=None, parse_float=None,
+                parse_int=None, strict=True, object_pairs_hook=None):
+        super(HJsonParser, self).__init__(encoding, object_hook, parse_float, parse_int, strict, object_pairs_hook)
+
+        self.parse_tfnns = scantfnns
+        self.parse_string = scanstring
+        self.parse_mlstring = mlscanstring
+
+        (self.scan_once, self.scan_object_once) = hjson.decoder.make_scanner(self)
+
+    def parse_string(self, s, end):
+        print("==================================PARSER VALUE IS:"+str(r))
+        r = self.oldparse_string(s, end)
+        return (('s', r[0]), r[1])
+
+    def parse_tfnns(self, s, end):
+        r = self.oldparse_tfnns(self, s, end)
+        print("==================================PARSER VALUE IS:"+str(r))
+        return (('p', r[0]), r[1])
+
 def parse(hjsoncontent):
     '''Takes a string containing a scene using HJSON syntax and convert it into the AST structured used by PSL Engine.'''
-    return hjson.loads(hjsoncontent, object_pairs_hook=MyObjectHook())
+    return HJsonParser(object_pairs_hook=MyObjectHook()).decode(hjsoncontent)
 

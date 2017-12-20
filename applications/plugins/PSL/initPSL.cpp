@@ -42,11 +42,6 @@ using sofa::simulation::PythonEnvironment ;
 #include <SofaPython/PythonFactory.h>
 using sofa::PythonFactory ;
 
-
-SP_DECLARE_CLASS_TYPE(Template)
-
-
-
 extern "C" {
     SOFA_PSL_API void initExternalModule();
     SOFA_PSL_API const char* getModuleName();
@@ -92,7 +87,7 @@ const char* getModuleLicense()
 const char* getModuleDescription()
 {
     return "This plugin contains a set of function to assist in the making of scenes by providing"
-            " prefabs and other tools.";
+           " prefabs and other tools.";
 }
 
 const char* getModuleComponentList()
@@ -101,6 +96,7 @@ const char* getModuleComponentList()
     return "";
 }
 
+SP_DECLARE_CLASS_TYPE(Template)
 SOFA_LINK_CLASS(Undefined)
 SOFA_LINK_CLASS(Import)
 SOFA_LINK_CLASS(Python)

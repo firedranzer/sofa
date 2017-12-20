@@ -70,10 +70,10 @@ def preProcess(ast):
     for cmd, value in ast:
         if cmd == "PSLVersion":
             if version == None:
-                if isinstance(value, str) or isinstance(value, unicode):
-                    version = str(value)
+                if pslengine.isAStringToken(value, ('s')):
+                    version = pslengine.processString(value, None, None)
                 else:
-                    raise Exception("PSLVersion must be a string in format '1.0'")
+                    raise Exception("PSLVersion must be a string. Found: "+str(value))
             else:
                 raise Exception("There is two PSLVersion directive in the same file.")
 

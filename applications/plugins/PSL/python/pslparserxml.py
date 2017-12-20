@@ -49,7 +49,11 @@ def toAst(xmlnode):
     '''Takes an XMLNode and convert it into the AST structured used by PSL Engine.'''
     childList = []
     for k in xmlnode.attrib:
-        childList.append( (k, xmlnode.attrib[k] ) )
+        v = xmlnode.attrib[k]
+        if len(v) > 2 and v[0] == "p" and v[1] == "'" and v[-1] == "'":
+            childList.append( (k, ('p', v[2:-1] ) ) )
+        else:
+            childList.append( (k, ('s', v ) ) )
     childList.reverse()
 
     for child in xmlnode:

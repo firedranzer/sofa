@@ -2,7 +2,7 @@ Node : {
         name : "root2"
 
         Template : {
-            name : "MyTemplate"
+            name : MyTemplate
             properties : {
                 name : "default"
                 numchild : 10
@@ -18,7 +18,7 @@ Node : {
 
         MyTemplate : {
             name : "Toto"
-            numchild : 5
+            numchild : 2
         }
 
         MyTemplate : {
@@ -27,7 +27,7 @@ Node : {
 
         OglModel : {
             properties : {
-                maProperties : 10
+                maProperties : "10"
             }
             filename : "mesh/ball.obj"
         }

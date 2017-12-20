@@ -27,7 +27,7 @@ Node : {
                 testresult = "Success"
              '''
 
-    TestResult : p"testresult"
+    TestResult : testresult
 }
 
 

@@ -19,8 +19,8 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFASCENEASSIST_CONFIG_H
-#define SOFASCENEASSIST_CONFIG_H
+#ifndef PSL_CONFIG_H
+#define PSL_CONFIG_H
 
 #include <sofa/helper/system/config.h>
 
