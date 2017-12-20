@@ -37,6 +37,19 @@ import pprint
 import types
 import pslparserhjson
 
+def whatis(name, n=5):
+    ret = difflib.get_close_matches(name, sofaComponents+templates.keys()+sofaAliases.keys(), n=n)
+    res = "Searching for <i>"+ name + "</i> returns: <br><ul>"
+    for i in ret:
+        if i in sofaComponents:
+            res += "<li>"+i+" (a component) <br> "+sofaHelp[i]+"</li>"
+        elif i in templates:
+            res += "<li>"+i+" (a template)</li>"
+        elif i in templates:
+            res += "<li>"+i+" (an alias)</li>"
+    res += "</ul>"
+    return res
+
 def instanciate(parent, templateName, **kwargs):
     params = []
     for k in kwargs:
@@ -49,7 +62,7 @@ def instanciate(parent, templateName, **kwargs):
         params.append((k, p))
     instanciateTemplate(parent, templateName, params, [], {})
 
-
+pslprefix = "PSL::engine: "
 templates = {}
 aliases = {}
 sofaAliases = {}
@@ -97,7 +110,6 @@ def getFromStack(name, stack):
         return None
 
 def populateFrame(cname, frame, stack):
-
         """Initialize a frame from the current attributes of the 'self' object
            This is needed to expose the data as first class object.
         """
@@ -120,8 +132,37 @@ def isAStringToken(token, values=("s","p","m")):
         return False
     return True
 
+def evalPython(key, kv, stack, frame):
+        """Process a python fragment of code with context provided by the content of the stack."""
+        r = flattenStackFrame(stack)
+        retval = eval(kv, r)
+        return retval
+
+def getField(object, name):
+    d = object.getLink(name)
+    if d != None:
+        return d
+
+    d = object.getData(name)
+    if d != None:
+        return d
+
+    return None
+
+
+def processStringOld(object, name, value, stack, frame):
+    ## Python Hook to build an eval function.
+    if value[0] == 'p':
+        d = object.addNewData("psl_"+name, "PSL", "This hold a python expression.", "s", str(value[1]))
+        object.findData("psl_"+name).setPersistant(True)
+        return evalPython(None, value[1], stack, frame)
+    elif value[0] == 's':
+        return value
+    else:
+        raise Exception("Invlid string token")
+
 def processPython(parent, key, token, stack, frame):
-        """Process a python fragment of code with context provided by the content of the stack."""       
+        """Process a python fragment of code with context provided by the content of the stack."""
         if not isAStringToken(token, ("s", "m")):
             Sofa.msg_error(parent, "Python expect string only argument instead of '"+str(token)+"'")
             return None
@@ -148,52 +189,6 @@ def processPython(parent, key, token, stack, frame):
                     lframe[k] = local[k]
                 else:
                     stack[-1][k] = local[k]
-
-
-def evalPython(key, kv, stack, frame):
-        """Process a python fragment of code with context provided by the content of the stack."""
-        r = flattenStackFrame(stack)
-        retval = eval(kv, r)
-        return retval
-
-def getField(object, name):
-    d = object.getLink(name)
-    if d != None:
-        return d
-
-    d = object.getData(name)
-    if d != None:
-        return d
-
-    return None
-
-pslprefix = "PSL::engine: "
-
-def whatis(name, n=5):
-    ret = difflib.get_close_matches(name, sofaComponents+templates.keys()+sofaAliases.keys(), n=n)
-    res = "Searching for <i>"+ name + "</i> returns: <br><ul>"
-    for i in ret:
-        if i in sofaComponents:
-            res += "<li>"+i+" (a component) <br> "+sofaHelp[i]+"</li>"
-        elif i in templates:
-            res += "<li>"+i+" (a template)</li>"
-        elif i in templates:
-            res += "<li>"+i+" (an alias)</li>"
-    res += "</ul>"
-    return res
-
-
-
-def processStringOld(object, name, value, stack, frame):
-    ## Python Hook to build an eval function.
-    if value[0] == 'p':
-        d = object.addNewData("psl_"+name, "PSL", "This hold a python expression.", "s", str(value[1]))
-        object.findData("psl_"+name).setPersistant(True)
-        return evalPython(None, value[1], stack, frame)
-    elif value[0] == 's':
-        return value
-    else:
-        raise Exception("Invlid string token")
 
 def processString(value, stack, frame):
     if not isinstance(value, tuple) or len(value) != 2:
@@ -266,7 +261,6 @@ def processObjectDict(obj, dic, stack, frame):
                         processParameter(obj, key, value, stack ,frame)
 
 def processObject(parent, key, kv, stack, frame):
-    #try:
         global sofaComponents
         populateFrame(key, frame, stack)
         frame = {}
@@ -330,9 +324,6 @@ def processObject(parent, key, kv, stack, frame):
                 refreshComponentListFromFactory()
 
         return obj
-    #except Exception, e:
-    #    c=parent.createChild("[XX"+key+"XX]")
-    #    Sofa.msg_error(c, pslprefix+" unable to create an object because: "+str(e))
 
 # TODO add a warning to indicate that a template is loaded twice.
 def importTemplates(content):
@@ -477,170 +468,169 @@ def processAlias(parent, key, token, stack, frame):
         oldName, newName = value.split(' as ')
         aliases[newName]=oldName
 
-def reinstanciateTemplateOnSourceChange(templateSource):
-    global templates
+#def reinstanciateTemplateOnSourceChange(templateSource):
+#    global templates
 
-    key = templateSource.name
-    frame = {}
-    frame["parent"]=templateSource
-    frame["self"]=templateSource
-    nframe = {}
-    instanceProperties = eval(templateInstance.psl_source)
+#    key = templateSource.name
+#    frame = {}
+#    frame["parent"]=templateSource
+#    frame["self"]=templateSource
+#    nframe = {}
+#    instanceProperties = eval(templateInstance.psl_source)
 
-    for c in templateInstance.getChildren():
-            templateInstance.removeChild(c)
+#    for c in templateInstance.getChildren():
+#            templateInstance.removeChild(c)
 
-    c = templateInstance.getObjects()
-    for o in c:
-            templateInstance.removeObject(o)
+#    c = templateInstance.getObjects()
+#    for o in c:
+#            templateInstance.removeObject(o)
 
-    ## Is there a template with this name, if this is the case
-    ## Retrieve the associated templates .
-    if isinstance(templates[key], Sofa.Template):
-            n = templates[key].getTemplate()
-            for k,v in n:
-                    if k == 'name':
-                            None
-                    elif k == 'properties':
-                            for kk,vv in v:
-                                    if not kk in frame:
-                                            nframe[kk] = vv
-                    else:
-                            source = v
-    else:
-            source = templates[key]["content"]
-            for k,v in templates[key]["properties"]:
-                    if not k in frame:
-                            nframe[k] = str(v)
+#    ## Is there a template with this name, if this is the case
+#    ## Retrieve the associated templates .
+#    if isinstance(templates[key], Sofa.Template):
+#            n = templates[key].getTemplate()
+#            for k,v in n:
+#                    if k == 'name':
+#                            None
+#                    elif k == 'properties':
+#                            for kk,vv in v:
+#                                    if not kk in frame:
+#                                            nframe[kk] = vv
+#                    else:
+#                            source = v
+#    else:
+#            source = templates[key]["content"]
+#            for k,v in templates[key]["properties"]:
+#                    if not k in frame:
+#                            nframe[k] = str(v)
 
-    for k,v in instanceProperties:
-            nframe[k] = templateInstance.findData(str(k)).getValue(0)
+#    for k,v in instanceProperties:
+#            nframe[k] = templateInstance.findData(str(k)).getValue(0)
 
-    stack = [globals(), frame]
-    n = processNode(templateInstance, "Node", source, stack, nframe, doCreate=False)
+#    stack = [globals(), frame]
+#    n = processNode(templateInstance, "Node", source, stack, nframe, doCreate=False)
 
-def gatherInstances(templatename, node):
-    r = []
-    for child in node.getChildren():
-        instanceof = child.getData("psl_instanceof")
-        if instanceof != None and str(instanceof) == templatename:
-            r.append(child)
-        else:
-            r = r + gatherInstances(templatename, child)
-    return r
+#def gatherInstances(templatename, node):
+#    r = []
+#    for child in node.getChildren():
+#        instanceof = child.getData("psl_instanceof")
+#        if instanceof != None and str(instanceof) == templatename:
+#            r.append(child)
+#        else:
+#            r = r + gatherInstances(templatename, child)
+#    return r
 
-def reinstanciateATemplateInstance(target, template):
-    print("RE-instiating "+target.name+" from "+template.name)
-    reinstanciateAnInstanceFromText(target, template.psl_source)
+#def reinstanciateATemplateInstance(target, template):
+#    print("RE-instiating "+target.name+" from "+template.name)
+#    reinstanciateAnInstanceFromText(target, template.psl_source)
 
-def reinstanciateAnInstanceFromText(node, source):
-    frame = {}
-    frame["parent"]=node.getParents()
-    frame["self"]=node
-    instanceProperties = eval(node.psl_properties)
+#def reinstanciateAnInstanceFromText(node, source):
+#    frame = {}
+#    frame["parent"]=node.getParents()
+#    frame["self"]=node
+#    instanceProperties = eval(node.psl_properties)
 
-    for c in node.getChildren():
-        node.removeChild(c)
+#    for c in node.getChildren():
+#        node.removeChild(c)
 
-    for o in node.getObjects():
-        node.removeObject(o)
+#    for o in node.getObjects():
+#        node.removeObject(o)
 
-    src = eval(source)
-    res = []
-    for k,v in src:
-        if k == "properties":
-            for kk, vv in v:
-                frame[kk] = vv
-        elif k == "name":
-            None
-        elif k == "Node":
-            res = v
-    src=res
-    for k,v in instanceProperties:
-        data = node.getData(k)
-        if data != None:
-            frame[k] = data.getValue(0)
-        else:
-            Sofa.msg_error(node, "This should not happen for "+k)
+#    src = eval(source)
+#    res = []
+#    for k,v in src:
+#        if k == "properties":
+#            for kk, vv in v:
+#                frame[kk] = vv
+#        elif k == "name":
+#            None
+#        elif k == "Node":
+#            res = v
+#    src=res
+#    for k,v in instanceProperties:
+#        data = node.getData(k)
+#        if data != None:
+#            frame[k] = data.getValue(0)
+#        else:
+#            Sofa.msg_error(node, "This should not happen for "+k)
 
-    n = processNode(node, "Node", src, [frame], frame, doCreate=False)
-
-
-def reinstanciateAllTemplates(template):
-    Sofa.msg_info(template, "Re-instanciating instance of: "+template.name)
-    root = template.getContext().getRoot()
-    g = gatherInstances(template.name, root)
-
-    for node in g:
-        frame = {}
-        frame["parent"]=node.getParents()
-        frame["self"]=node
-        instanceProperties = eval(node.psl_properties)
-
-        for c in node.getChildren():
-            node.removeChild(c)
-
-        for o in node.getObjects():
-            node.removeObject(o)
-
-        src = eval(template.psl_source)
-        res = []
-        for k,v in src:
-            if k == "properties":
-                for kk, vv in v:
-                    frame[kk] = vv
-            elif k == "name":
-                None
-            elif k == "Node":
-                res = v
-        src=res
-        for k,v in instanceProperties:
-            frame[k] = v
-
-        n = processNode(node, "Node", src, [frame], frame, doCreate=False)
+#    n = processNode(node, "Node", src, [frame], frame, doCreate=False)
 
 
-def reinstanciateTemplate(templateInstance):
-        global templates
+#def reinstanciateAllTemplates(template):
+#    Sofa.msg_info(template, "Re-instanciating instance of: "+template.name)
+#    root = template.getContext().getRoot()
+#    g = gatherInstances(template.name, root)
 
-        key = templateInstance.name
-        frame = {}
-        frame["parent"]=templateInstance
-        frame["self"]=templateInstance
-        nframe = {}
-        instanceProperties = eval(templateInstance.psl_source)
+#    for node in g:
+#        frame = {}
+#        frame["parent"]=node.getParents()
+#        frame["self"]=node
+#        instanceProperties = eval(node.psl_properties)
 
-        for c in templateInstance.getChildren():
-                templateInstance.removeChild(c)
+#        for c in node.getChildren():
+#            node.removeChild(c)
 
-        c = templateInstance.getObjects()
-        for o in c:
-                templateInstance.removeObject(o)
+#        for o in node.getObjects():
+#            node.removeObject(o)
 
-        ## Is there a template with this name, if this is the case
-        ## Retrieve the associated templates .
-        if isinstance(templates[key], Sofa.Template):
-                n = templates[key].getTemplate()
-                for k,v in n:
-                        if k == 'name':
-                                None
-                        elif k == 'properties':
-                                for kk,vv in v:
-                                        if not kk in frame:
-                                                nframe[kk] = vv
-                        else:
-                                source = v
-        else:
-                source = templates[key]["content"]
-                for k,v in templates[key]["properties"]:
-                        if not k in frame:
-                                nframe[k] = str(v)
+#        src = eval(template.psl_source)
+#        res = []
+#        for k,v in src:
+#            if k == "properties":
+#                for kk, vv in v:
+#                    frame[kk] = vv
+#            elif k == "name":
+#                None
+#            elif k == "Node":
+#                res = v
+#        src=res
+#        for k,v in instanceProperties:
+#            frame[k] = v
 
-        for k,v in instanceProperties:
-                nframe[k] = templateInstance.findData(str(k)).getValue(0)
+#        n = processNode(node, "Node", src, [frame], frame, doCreate=False)
 
-        stack = [globals(), frame]
-        n = processNode(templateInstance, "Node", source, stack, nframe, doCreate=False)
+#def reinstanciateTemplate(templateInstance):
+#        global templates
+
+#        key = templateInstance.name
+#        frame = {}
+#        frame["parent"]=templateInstance
+#        frame["self"]=templateInstance
+#        nframe = {}
+#        instanceProperties = eval(templateInstance.psl_source)
+
+#        for c in templateInstance.getChildren():
+#                templateInstance.removeChild(c)
+
+#        c = templateInstance.getObjects()
+#        for o in c:
+#                templateInstance.removeObject(o)
+
+#        ## Is there a template with this name, if this is the case
+#        ## Retrieve the associated templates .
+#        if isinstance(templates[key], Sofa.Template):
+#                n = templates[key].getTemplate()
+#                for k,v in n:
+#                        if k == 'name':
+#                                None
+#                        elif k == 'properties':
+#                                for kk,vv in v:
+#                                        if not kk in frame:
+#                                                nframe[kk] = vv
+#                        else:
+#                                source = v
+#        else:
+#                source = templates[key]["content"]
+#                for k,v in templates[key]["properties"]:
+#                        if not k in frame:
+#                                nframe[k] = str(v)
+
+#        for k,v in instanceProperties:
+#                nframe[k] = templateInstance.findData(str(k)).getValue(0)
+
+#        stack = [globals(), frame]
+#        n = processNode(templateInstance, "Node", source, stack, nframe, doCreate=False)
 
 def processProperties(self, key, kv, stack, frame):
     if not isinstance(kv, list):
