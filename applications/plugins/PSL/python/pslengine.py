@@ -277,8 +277,13 @@ def processObject(parent, key, kv, stack, frame):
         properties = None
         for k,v in kv:
                 if k == "properties":
-                    properties = v
-                elif isAStringToken(v, ('s')):
+                    if properties == None:
+                        properties = v
+                    else:
+                        c=parent.createChild("[XX"+key+"XX]")
+                        Sofa.msg_error(c, pslprefix+" Unable to create an object '"+key+"' because of duplicated properties keywords.")
+                        return None
+                elif isAStringToken(v, ('s', 'p')):
                     v = processString(v, stack, frame)
                     kwargs[k] = v
                 elif isinstance(v, int):
@@ -287,7 +292,7 @@ def processObject(parent, key, kv, stack, frame):
                         kwargs[k] = v
                 else:
                     c=parent.createChild("[XX"+key+"XX]")
-                    Sofa.msg_error(c, pslprefix+" unable to create an object because of invalid parameter "+str(v))
+                    Sofa.msg_error(c, pslprefix+" Unable to create an object '"+key+"' because of invalid parameter "+str(k)+"="+str(v))
                     return None
 
         stack.append(frame)
