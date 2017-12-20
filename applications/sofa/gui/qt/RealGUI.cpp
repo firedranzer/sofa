@@ -1687,6 +1687,9 @@ void RealGUI::parseOptions()
         m_enableInteraction = vm["enableInteraction"].as<bool>();
     if(vm.find("msaa") != vm.end())
         m_viewerMSAANbSampling = vm["msaa"].as<unsigned int>();
+
+    msg_warning("runSofa") << "you activated the interactive mode. This is currently an experimental feature "
+                              "that may change or be removed in the future. " ;
 }
 
 //------------------------------------

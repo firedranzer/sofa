@@ -369,10 +369,10 @@ static PyTypeObject DummyChild_PyTypeObject = {
 
 
 // get python exceptions and print their error message
-void printPythonExceptions();
+SOFA_SOFAPYTHON_API void printPythonExceptions();
 
 // deal with SystemExit before PyErr_Print does
-void handle_python_error(const char* message);
+SOFA_SOFAPYTHON_API void handle_python_error(const char* message);
 
 
 // =============================================================================
