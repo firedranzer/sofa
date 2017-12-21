@@ -1,4 +1,4 @@
-# CMake package configuration file for the Sofa.Core.Async feature
+# CMake package configuration file for the @PROJECT_NAME@ feature
 
 @PACKAGE_INIT@
 

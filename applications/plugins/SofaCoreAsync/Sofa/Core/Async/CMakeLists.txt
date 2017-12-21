@@ -9,10 +9,13 @@ find_package(SofaFramework REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(HEADER_FILES initPlugin.h
+set(HEADER_FILES
+        initPlugin.h
+        config.h
         ComponentTracker.h
     )
-set(SOURCE_FILES initPlugin.cpp
+set(SOURCE_FILES
+        initPlugin.cpp
         ComponentTracker.cpp
     )
 

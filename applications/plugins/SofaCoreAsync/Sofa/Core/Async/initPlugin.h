@@ -22,16 +22,9 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_CORE_ASYNC_H
-#define SOFA_CORE_ASYNC_H
+#ifndef SOFA_CORE_ASYNC_INITPLUGIN_H
+#define SOFA_CORE_ASYNC_INITPLUGIN_H
 
-#include <sofa/helper/system/config.h>
-
-#ifdef SOFA_BUILD_CORE_ASYNC
-#define SOFA_TARGET Sofa.Core.Async
-#define SOFA_CORE_ASYNC_API SOFA_EXPORT_DYNAMIC_LIBRARY
-#else
-#define SOFA_CORE_ASYNC_API SOFA_IMPORT_DYNAMIC_LIBRARY
-#endif
+#include "config.h"
 
 #endif
