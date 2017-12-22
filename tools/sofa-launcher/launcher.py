@@ -45,7 +45,7 @@ class SerialLauncher(Launcher):
                         logfile.write(astdout)
                         logfile.write("========= STDERR-LOG============\n")
                         logfile.write(astderr) 
-                        logfile.close()
+                        
                         results.append({
                                 "directory" : directory,
                                 "scene" : scene,
@@ -91,7 +91,7 @@ class ParallelLauncher(Launcher):
                         logfile.write(astdout)
                         logfile.write("========= STDERR-LOG============\n")
                         logfile.write(astderr) 
-                        logfile.close()
+                        
                         #logfile.write("========== MATCH-LOG ===========\n")
                         #logfile.write(str(filtering(astdout)))                        
                                                 
@@ -155,9 +155,9 @@ class SSHLauncher(Launcher):
                         logfile.write(astdout)
                         logfile.write("========= STDERR-LOG============\n")
                         logfile.write(astderr) 
-
+                        
                         logfile.write("========== MATCH-LOG ===========\n")
-                        logfile.close()
+                                                
                         self.pendingtask.task_done()
                         
                                 
@@ -204,7 +204,7 @@ def startSofa(parameters, filesandtemplates, launcher):
                         t = Template(template, searchList=param)
                         theFile.write(str(t))
                         i+=1
-                        theFile.close()
+                        
                 tasks.append((param["nbIterations"], tempdir, param["FILE0"], tempdir+"/output.log")) 
         
         return launcher.start(tasks)                        

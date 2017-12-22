@@ -107,7 +107,6 @@ GLSLShader::GLSLShader()
 #endif
     header = "";
     m_filelistener = std::shared_ptr<FileEventListener>(new GLSLFileListener(this)) ;
-    std::cout << "init glslshader" << std::endl;
 }
 
 GLSLShader::~GLSLShader()

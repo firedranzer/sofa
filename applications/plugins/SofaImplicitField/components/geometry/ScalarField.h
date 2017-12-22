@@ -72,28 +72,28 @@ public:
     virtual void getValueAndGradient(Vec3d& pos, double &value, Vec3d& grad, int& domain) ;
     inline void getValueAndGradient(Vec3d& pos, double &value, Vec3d& grad)
     {
-        int domain=-1;
-        return getValueAndGradient(pos,value,grad,domain);
+      int domain=-1;
+      return getValueAndGradient(pos,value,grad,domain);
     }
 
     virtual bool computeSegIntersection(Vec3d& posInside, Vec3d& posOutside, Vec3d& intersecPos, int domain=-1);
     bool computeSegIntersection(Vec3d& posInside, double valInside, Vec3d& gradInside,
-                                Vec3d& posOutside, double valOutside, Vec3d& gradOutside,
-                                Vec3d& intersecPos, int domain=-1)
+                    Vec3d& posOutside, double valOutside, Vec3d& gradOutside,
+                    Vec3d& intersecPos, int domain=-1)
     {
-        (void)valInside;
-        (void)gradInside;
-        (void)valOutside;
-        (void)gradOutside;
-        return computeSegIntersection(posInside, posOutside, intersecPos, domain);
+      (void)valInside;
+      (void)gradInside;
+      (void)valOutside;
+      (void)gradOutside;
+      return computeSegIntersection(posInside, posOutside, intersecPos, domain);
     }
 
     virtual void projectPointonSurface(Vec3d& point, int i=-1);
     void projectPointonSurface(Vec3d& point, double value, Vec3d& grad, int domain=-1)
     {
-        (void)value;
-        (void)grad;
-        projectPointonSurface(point, domain);
+      (void)value;
+      (void)grad;
+      projectPointonSurface(point, domain);
     }
 
     // TODO mettre les paramètres step=0.1 & countMax=30 en paramètre
@@ -111,6 +111,7 @@ public:
         double dist_out = 0.0;
         return projectPointOutOfSurface(point, domain, dir, dist_out);
     }
+
 
 protected:
     ScalarField( ) { }
