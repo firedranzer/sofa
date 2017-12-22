@@ -28,7 +28,6 @@
 #include <QTextBrowser>
 #include <QDesktopServices>
 #include <sofa/gui/qt/QTransformationWidget.h>
-#include <QTimer>
 #ifdef SOFA_HAVE_QWT
 #include <sofa/gui/qt/QEnergyStatWidget.h>
 #include <sofa/gui/qt/QMomentumStatWidget.h>
@@ -51,8 +50,7 @@ using sofa::helper::logging::Message ;
 
 
 // uncomment to show traces of GUI operations in this file
-//#define DEBUG_GUI
-
+// #define DEBUG_GUI
 
 namespace sofa
 {
@@ -130,8 +128,6 @@ void ModifyObject::createDialog(core::objectmodel::Base* base)
 
     connect(dialogTab, SIGNAL( currentChanged(int)), this, SLOT( updateTables()));
 
-
-
     //    bool isNode = (dynamic_cast< simulation::Node *>(node) != NULL);
 
     buttonUpdate = new QPushButton( this );
@@ -145,10 +141,6 @@ void ModifyObject::createDialog(core::objectmodel::Base* base)
     QPushButton *buttonCancel = new QPushButton( this );
     buttonCancel->setObjectName("buttonCancel");
     buttonCancel->setText( tr( "&Cancel" ) );
-
-    QPushButton *buttonRefresh = new QPushButton( this );
-    buttonRefresh->setObjectName("buttonRefresh");
-    buttonRefresh->setText( tr( "Refresh" ) );
 
     // displayWidget
     if (node)
@@ -225,11 +217,6 @@ void ModifyObject::createDialog(core::objectmodel::Base* base)
                 connect(buttonUpdate,   SIGNAL(clicked() ),          currentTab, SLOT( updateDataValue() ) );
                 connect(buttonOk,       SIGNAL(clicked() ),          currentTab, SLOT( updateDataValue() ) );
                 connect(this,           SIGNAL(updateDataWidgets()), currentTab, SLOT( updateWidgetValue()) );
-
-                QTimer *timer = new QTimer(this);
-                connect(timer, SIGNAL(timeout()), this, SLOT(updateTables()));
-                connect(timer, SIGNAL(timeout()), currentTab, SLOT(updateDataValue()));
-                 timer->start(10);
 
                 connect(currentTab, SIGNAL( TabDirty(bool) ), buttonUpdate, SLOT( setEnabled(bool) ) );
                 connect(currentTab, SIGNAL( TabDirty(bool) ), this, SIGNAL( componentDirty(bool) ) );
@@ -355,18 +342,11 @@ void ModifyObject::createDialog(core::objectmodel::Base* base)
         QSpacerItem *Horizontal_Spacing = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
         lineLayout->addItem( Horizontal_Spacing );
 
-
-
-
         lineLayout->addWidget(buttonOk);
         lineLayout->addWidget(buttonCancel);
-        lineLayout->addWidget(buttonRefresh);
         generalLayout->addLayout( lineLayout );
         //Signals and slots connections
         connect( buttonUpdate,   SIGNAL( clicked() ), this, SLOT( updateValues() ) );
-        connect(buttonRefresh,       SIGNAL(clicked() ),          this, SLOT( updateTables() ));
-
-
         connect( buttonOk,       SIGNAL( clicked() ), this, SLOT( accept() ) );
         connect( buttonCancel,   SIGNAL( clicked() ), this, SLOT( reject() ) );
         resize( QSize(450, 130).expandedTo(minimumSizeHint()) );

@@ -97,6 +97,7 @@ TEST_F(DistanceGrid_test, chekcInvalidConstructorsCube) {
     }
 }
 
+
 } // __distance_grid__
 } // container
 } // component

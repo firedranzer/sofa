@@ -267,8 +267,6 @@ void OglShader::drawVisual(const core::visual::VisualParams* )
 
 void OglShader::stop()
 {
-    glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
     if(turnOn.getValue() && shaderVector[indexActiveShader.getValue()]->IsReady())
     {
         if ( backfaceWriting.getValue() )
@@ -281,9 +279,6 @@ void OglShader::stop()
 
 void OglShader::start()
 {
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glEnable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
     if(turnOn.getValue() && shaderVector[indexActiveShader.getValue()]->IsReady())
     {
         shaderVector[indexActiveShader.getValue()]->TurnOn();
