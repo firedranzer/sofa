@@ -26,11 +26,6 @@
  *****************************************************************************/
 
 #include <fstream>
-#include <sofa/core/ObjectFactory.h>
-
-/// Misc
-#include <sofa/core/visual/VisualParams.h>
-#include <sofa/core/objectmodel/Link.h>
 
 /// Mesh Volume
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -49,15 +44,13 @@
 #include <CGAL/make_surface_mesh.h>
 #include <CGAL/Implicit_surface_3.h>
 
-
+/// Misc
+#include <sofa/core/ObjectFactory.h>
+#include <sofa/core/visual/VisualParams.h>
+#include <sofa/core/objectmodel/Link.h>
 #include <sofa/core/objectmodel/IdleEvent.h>
 
 #include "SurfaceMeshGenerationFromImplicit.h"
-
-#include <fstream>
-#include <future>
-#include <thread>
-#include <chrono>
 
 namespace sofa
 {
@@ -67,8 +60,6 @@ namespace engine
 {
 namespace _surfacemeshgenerationfromimplicit_
 {
-
-using sofa::core::objectmodel::CStatus ;
 
 using namespace CGAL::parameters;
 using namespace sofa::core;
@@ -82,9 +73,6 @@ using namespace CGAL::parameters;
 
 // default triangulation for Surface_mesher
 typedef CGAL::Surface_mesh_default_triangulation_3 SurfaceTriangulation;
-// c2t3
-//typedef CGAL::Simple_cartesian<double> Kernel ;
-//typedef Kernel::Point_3 KPoint_3;
 
 typedef CGAL::Complex_2_in_triangulation_3<SurfaceTriangulation> C2t3;
 typedef SurfaceTriangulation::Geom_traits GT;
@@ -100,13 +88,12 @@ FT sphere_function (Point_3 p) {
     return x2+y2+z2-2;
 }
 
-class ImplicitFunction  //: public std::unary_function<GT::Point_3, GT::FT> {
+class ImplicitFunction
 {
 private:
     ScalarField* m_shape;
 
 public:
-    //typedef result_type return_type;
     typedef GT::Point_3 Point;
     std::vector<Point_3> m_seeds;
 
@@ -118,7 +105,6 @@ public:
 
     GT::FT operator()(GT::Point_3 p) const
     {
-        //return sphere_function(p) ;
         Vec3d tmp(p.x(),p.y(),p.z());
         double x = m_shape->getValue(tmp) ;
         return x;
@@ -152,17 +138,13 @@ public:
 
 typedef CGAL::Implicit_surface_3<GT, ImplicitFunction> Surface_3;
 
+/// factory register
+int SurfaceMeshGenerationFromImplicitShapeClass = RegisterObject("This component mesh a domain defined from a scalar field."
+                                                                 "It is a good idea to read https://doc.cgal.org/latest/Mesh_3/index.html"
+                                                                 "As it contains precious details on the parameters and how to use them."
+                                                                 ).add< SurfaceMeshGenerationFromImplicitShape >();
 
-//typedef CGAL::Implicit_multi_domain_to_labeling_function_wrapper<ImplicitFunction> Function_wrapper;
-//typedef Function_wrapper::Function_vector Function_vector;
-//typedef CGAL::Labeled_mesh_domain_3<Function_wrapper, K> Mesh_domain;
-
-
-
-//factory register
-int SurfaceMeshGenerationFromImplicitShapeClass = RegisterObject("This component mesh a domain defined from a scalar field.").add< SurfaceMeshGenerationFromImplicitShape >();
-
-//create a bbox 3 for meshing in volume
+/// create a bbox 3 for meshing in volume
 CGAL::Bbox_3 SurfaceMeshGenerationFromImplicitShape::BoundingBox(double x_min, double y_min, double z_min, double x_max, double y_max, double z_max) {
 
     CGAL::Bbox_3 bbox(x_min,y_min,z_min,x_max,y_max,z_max);
@@ -170,11 +152,10 @@ CGAL::Bbox_3 SurfaceMeshGenerationFromImplicitShape::BoundingBox(double x_min, d
 }
 
 SurfaceMeshGenerationFromImplicitShape::SurfaceMeshGenerationFromImplicitShape()
-    : TrackedComponent(this)
-    , l_in_scalarfield(initLink("scalarfield", "The scalar field that defined the iso-function"))
+    :
+      d_box(initData(&d_box, sofa::defaulttype::BoundingBox(0,1,0,1,0,1), "box", "min - max coordinate of the grid where to sample the function. "))
     , d_out_points(initData(&d_out_points, "outputPoints", "position of the tiangles vertex"))
     , d_out_triangles(initData(&d_out_triangles, "outputTriangles", "list of triangles"))
-    , d_box(initData(&d_box, sofa::defaulttype::BoundingBox(0,1,0,1,0,1), "box", "min - max coordinate of the grid where to sample the function. "))
     , d_facetangle(initData(&d_facetangle,(double)30.0,"facet_angle",
                             "This parameter controls the shape of surface facets. Actually, "
                             "it is a lower bound for the angle (in degree) of surface facets.(Default 30.0)"))
@@ -187,37 +168,25 @@ SurfaceMeshGenerationFromImplicitShape::SurfaceMeshGenerationFromImplicitShape()
                                "Actually, it is either a constant or a spatially variable scalar field. It provides an "
                                "upper bound for the distance between the circumcenter of a surface facet and the center "
                                "of a surface Delaunay ball of this facet. (Default 1.0)"))
-    , d_center(initData(&d_center, Vec3d(0,0,0), "meshingzone_center", "The center of the sphere where the meshing is done. (Default = 0,0,0)"))
     , d_radius(initData(&d_radius, (double)2.0,  "meshingzone_radius", "The radius of the sphere where the meshing is done. (Default = 2)"))
+    , d_center(initData(&d_center, Vec3d(0,0,0), "meshingzone_center", "The center of the sphere where the meshing is done. (Default = 0,0,0)"))
     , d_visuCavity(initData(&d_visuCavity,true, "visuCavity","Allows to display the cavity surface"))
+    , l_in_scalarfield(initLink("scalarfield", "The scalar field that defined the iso-function"))
 {
     f_listening.setValue(true);
 }
 
+
 void SurfaceMeshGenerationFromImplicitShape::init()
 {
+    m_componentstate = ComponentState::Invalid ;
+
     if(l_in_scalarfield.empty())
     {
-        m_componentstate = ComponentState::Invalid ;
         msg_error() << "Component non linked" ;
-        return ;
     }
 
-    /// Start tracking the component
-    addComponent(l_in_scalarfield.get());
-
-    if(l_in_scalarfield->getStatus() != CStatus::Valid) {
-        m_componentstate = ComponentState::Invalid;
-        msg_warning() << "Lazy Init()";
-        return ;
-    }
-
-    /// future from an async()
-    m_com = std::async(std::launch::async, [this](){
-        unsigned int countervalue = this->l_in_scalarfield->getCounter() ;
-        this->generateSurfaceMesh();
-        return countervalue;
-    });
+    update(true) ;
 }
 
 void SurfaceMeshGenerationFromImplicitShape::reinit()
@@ -244,13 +213,13 @@ void SurfaceMeshGenerationFromImplicitShape::generateSurfaceMesh()
     if(l_in_scalarfield.empty())
         return ;
 
-    while(l_in_scalarfield->getComponentState() != ComponentState::Valid ) ;
-
+    if(!l_in_scalarfield->isComponentStateValid())
+        return ;
 
     SurfaceTriangulation tr;            // 3D-Delaunay triangulation
     C2t3 c2t3 (tr);                     // 2D-complex in 3D-Delaunay triangulation
 
-    std::cout << "GENERATE SURFACE MESH FROM IMPLICIT FIELD" << std::endl ;
+    msg_info() << "Generating surface mesh...please wait as it can take a long time..."  ;
 
     /// defining the surface
     ImplicitFunction function(l_in_scalarfield, {
@@ -264,7 +233,6 @@ void SurfaceMeshGenerationFromImplicitShape::generateSurfaceMesh()
     Surface_3 surface(function,             // pointer to function
                       Sphere_3(GT::Point_3(ctmp.x(), ctmp.y(), ctmp.z()), d_radius.getValue())); // bounding sphere
 
-    /// Note that "2." above is the *squared* radius of the bounding sphere!
     /// defining meshing criteria
     CGAL::Surface_mesh_default_criteria_3<SurfaceTriangulation> criteria(d_facetangle.getValue(),     // angular bound
                                                                          d_facetsize.getValue(),      // radius bound
@@ -322,46 +290,45 @@ void SurfaceMeshGenerationFromImplicitShape::generateSurfaceMesh()
 
         newTriangles.push_back(triangle);
     }
+
 }
+
 
 void SurfaceMeshGenerationFromImplicitShape::update(bool forceUpdate)
 {
-    /// The inputs have changed
-    if(  !m_com.valid() && hasChanged() || forceUpdate )
-    {
-        /// The inputs are not valid
-        if(l_in_scalarfield->getStatus() != CStatus::Valid)
-            return ;
+    if(m_componentstate != ComponentState::Valid)
+        forceUpdate = true ;
 
-        /// The inputs are valid & we should grab them.
+    if( m_datatracker.isDirty() || forceUpdate )
+    {
         m_componentstate = ComponentState::Invalid ;
 
-        m_com = std::async(std::launch::async, [this](){
-            unsigned int countervalue = this->l_in_scalarfield->getCounter() ;
-            this->generateSurfaceMesh();
-            return countervalue;
-        });
+        if(l_in_scalarfield.empty()) {
+            return ;
+        }
 
-    }
-    if( !m_com.valid() )
-        return ;
+        /// Check if the object indicates states changes to the other.
+        if(l_in_scalarfield->findData("state"))
+        {
+            /// If it does then we track that to be notified when we need to update our
+            /// own data.
+            m_datatracker.trackData(*l_in_scalarfield.get()->findData("state"));
+        }
 
-    if( m_com.wait_for(std::chrono::microseconds::zero()) == std::future_status::ready )
-    {
+        if(!l_in_scalarfield->isComponentStateValid()) {
+            return ;
+        }
+
+        this->generateSurfaceMesh();
+
+        m_datatracker.clean();
         m_componentstate = ComponentState::Valid ;
-        updateCounterAt(m_com.get());
-        dmsg_warning() << "Update component from source at " << m_com.get() ;
-        m_com = std::future<unsigned int>() ;
     }
 }
 
 void SurfaceMeshGenerationFromImplicitShape::draw(const sofa::core::visual::VisualParams* vparams)
 {
-    if(m_componentstate != ComponentState::Valid)
-    {
-        update();
-        return;
-    }
+    update() ;
 
     if(!d_visuCavity.getValue())
     {
@@ -370,6 +337,9 @@ void SurfaceMeshGenerationFromImplicitShape::draw(const sofa::core::visual::Visu
 
     auto& box = d_box.getValue();
     vparams->drawTool()->drawBoundingBox(box.minBBox(), box.maxBBox()) ;
+
+    if(!isComponentStateValid())
+        return ;
 
     sofa::helper::ReadAccessor< Data<VecCoord> > x = d_out_points;
     sofa::helper::ReadAccessor< Data<SeqTriangles> > triangles = d_out_triangles;

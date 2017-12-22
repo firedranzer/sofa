@@ -25,14 +25,10 @@
  *                                                                            *
  *****************************************************************************/
 
+/// System include
 #include <fstream>
-#include <sofa/core/ObjectFactory.h>
 
-/// Misc
-#include <sofa/core/visual/VisualParams.h>
-#include <sofa/core/objectmodel/Link.h>
-
-/// Mesh Volume
+/// CGAL
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Mesh_triangulation_3.h>
 #include <CGAL/Mesh_complex_3_in_triangulation_3.h>
@@ -42,13 +38,14 @@
 #include <CGAL/make_mesh_3.h>
 #include <CGAL/Bbox_3.h>
 
-#include "MeshGenerationFromImplicit.h"
+/// SOFA
+#include <sofa/core/ObjectFactory.h>
+#include <sofa/core/visual/VisualParams.h>
+#include <sofa/core/objectmodel/Link.h>
 #include <sofa/core/objectmodel/IdleEvent.h>
 
-#include <fstream>
-#include <future>
-#include <thread>
-#include <chrono>
+/// plugins
+#include "MeshGenerationFromImplicit.h"
 
 namespace sofa
 {
@@ -58,8 +55,6 @@ namespace engine
 {
 namespace _meshgenerationfromimplicit_
 {
-
-using sofa::core::objectmodel::CStatus ;
 
 using namespace CGAL::parameters;
 using namespace sofa::core;
@@ -116,7 +111,10 @@ struct Spherical_sizing_field
 
 
 //factory register
-int MeshGenerationFromImplicitShapeClass = RegisterObject("This component mesh a domain defined from a scalar field.").add< MeshGenerationFromImplicitShape >();
+int MeshGenerationFromImplicitShapeClass = RegisterObject("This component mesh a domain defined from a scalar field."
+                                                          "It is a good idea to read https://doc.cgal.org/latest/Mesh_3/index.html"
+                                                          "As it contains precious details on the parameters and how to use them."
+                                                          ).add< MeshGenerationFromImplicitShape >();
 
 //create a bbox 3 for meshing in volume
 CGAL::Bbox_3 MeshGenerationFromImplicitShape::BoundingBox(double x_min, double y_min, double z_min, double x_max, double y_max, double z_max) {
@@ -127,8 +125,7 @@ CGAL::Bbox_3 MeshGenerationFromImplicitShape::BoundingBox(double x_min, double y
 }
 
 MeshGenerationFromImplicitShape::MeshGenerationFromImplicitShape()
-    : TrackedComponent(this)
-    , d_facetangle(initData(&d_facetangle,(double)30.0,"facet_angle",
+    : d_facetangle(initData(&d_facetangle,(double)30.0,"facet_angle",
                             "This parameter controls the shape of surface facets. Actually, "
                             "it is a lower bound for the angle (in degree) of surface facets.(Default 30.0)"))
     , d_facetsize(initData(&d_facetsize,(double)1.0, "facet_size",
@@ -148,8 +145,8 @@ MeshGenerationFromImplicitShape::MeshGenerationFromImplicitShape()
                                        " Actually, it is an upper bound for the ratio between the circumradius of a mesh tetrahedron "
                                        "and its shortest edge. There is a theoretical bound for this parameter: the Delaunay refinement "
                                        "process is guaranteed to terminate for values of cell_radius_edge_ratio bigger than 2. (Default 2.1)"))
-    , d_center(initData(&d_center, Vec3d(0,0,0), "meshingzone_center", "The center of the sphere where the meshing is done. (Default = 0,0,0)"))
     , d_radius(initData(&d_radius, (double)2.0,  "meshingzone_radius", "The radius of the sphere where the meshing is done. (Default = 2)"))
+    , d_center(initData(&d_center, Vec3d(0,0,0), "meshingzone_center", "The center of the sphere where the meshing is done. (Default = 0,0,0)"))
     , d_drawtetras(initData(&d_drawtetras,false,"drawTetras","display generated tetra mesh"))
     , d_out_points(initData(&d_out_points, "outputPoints", "position coordinates from the tetrahedral generation"))
     , d_out_tetrahedra(initData(&d_out_tetrahedra, "outputTetras", "list of tetrahedra"))
@@ -160,34 +157,15 @@ MeshGenerationFromImplicitShape::MeshGenerationFromImplicitShape()
 
 void MeshGenerationFromImplicitShape::init()
 {
+    m_componentstate = ComponentState::Invalid ;
+
     if(l_scalarfield.empty())
     {
-        m_componentstate = ComponentState::Invalid ;
         msg_error() << "Component non linked" ;
         return ;
     }
 
-    /// Start tracking the component
-    addComponent(l_scalarfield.get());
-
-    if(l_scalarfield->getStatus() != CStatus::Valid) {
-        m_componentstate = ComponentState::Invalid;
-        msg_warning() << "Lazy Init()";
-        return ;
-    }
-
-    /// std::cout << "LINK STATE " << in_scalarfield->findData("state") << std::endl ;
-    /// volumeMeshGeneration(in_facetsize.getValue(),in_approximation.getValue(),in_cellsize.getValue());
-
-    /// future from an async()
-//    m_com = std::async(std::launch::async, [this](){
-        unsigned int countervalue = this->l_scalarfield->getCounter() ;
-        this->volumeMeshGeneration(this->d_facetangle.getValue(),
-                                   this->d_facetsize.getValue(),
-                                   this->d_facetdistance.getValue(),
-                                   this->d_cellsize.getValue(),
-                                   this->d_cell_radiusedge_ratio.getValue());
-//        return countervalue; });
+    update() ;
 }
 
 void MeshGenerationFromImplicitShape::reinit()
@@ -216,48 +194,44 @@ void MeshGenerationFromImplicitShape::handleEvent(sofa::core::objectmodel::Event
 
 void MeshGenerationFromImplicitShape::update(bool forceUpdate)
 {
-    /// The inputs have changed
-    if(  !m_com.valid() && hasChanged() || forceUpdate )
+    if( m_datatracker.isDirty() || forceUpdate || m_componentstate != ComponentState::Valid )
     {
-        /// The inputs are not valid
-        if(l_scalarfield->getStatus() != CStatus::Valid)
-            return ;
-
-        /// The inputs are valid & we should grab them.
         m_componentstate = ComponentState::Invalid ;
-//        m_com = std::async(std::launch::async, [this](){
-            unsigned int countervalue = this->l_scalarfield->getCounter() ;
-            this->volumeMeshGeneration(this->d_facetangle.getValue(),
-                                       this->d_facetsize.getValue(),
-                                       this->d_facetdistance.getValue(),
-                                       this->d_cellsize.getValue(),
-                                       this->d_cell_radiusedge_ratio.getValue());
-//            return countervalue; });
-    }
 
-    if( !m_com.valid() )
-        return ;
+        if(l_scalarfield.empty()) {
+            return ;
+        }
 
-    if( m_com.wait_for(std::chrono::microseconds::zero()) == std::future_status::ready )
-    {
+        /// Check if the object indicates states changes to the other.
+        if(l_scalarfield->findData("state"))
+        {
+            /// If it does then we track that to be notified when we need to update our
+            /// own data.
+            m_datatracker.trackData(*l_scalarfield.get()->findData("state"));
+        }
+
+        if(!l_scalarfield->isComponentStateValid()) {
+            return ;
+        }
+
+        this->volumeMeshGeneration(this->d_facetangle.getValue(),
+                                   this->d_facetsize.getValue(),
+                                   this->d_facetdistance.getValue(),
+                                   this->d_cellsize.getValue(),
+                                   this->d_cell_radiusedge_ratio.getValue());
+
+        m_datatracker.clean();
         m_componentstate = ComponentState::Valid ;
-        updateCounterAt(m_com.get());
-        dmsg_warning() << "Update component from source at " << m_com.get() ;
-        m_com = std::future<unsigned int>() ;
     }
 }
 
 
-//mesh the implicit domain
+/// mesh the implicit domain
 int MeshGenerationFromImplicitShape::volumeMeshGeneration(double facet_angleP, double facet_sizeP, double facet_distanceP,
                                                           double cell_sizeP, double cell_radius_edge_ratioP)
 {
-    //Domain
+    /// Domain
     Mesh_domain *domain = NULL;
-    if(l_scalarfield.empty())
-        return 0;
-
-    while(l_scalarfield->getComponentState() != ComponentState::Valid ) ;
 
     ImplicitFunction function(l_scalarfield);
     Function_vector v;
@@ -266,15 +240,11 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(double facet_angleP, d
     const Vec3d& ctmp = d_center.getValue() ;
     domain = new Mesh_domain(v, K::Sphere_3(K::Point_3(ctmp.x(), ctmp.y(), ctmp.z()), dtmp*dtmp), 1e-3);
 
-    //Criteria
-    Spherical_sizing_field fsize ;
-    //Facet_criteria facet_criteria(30, facet_size2, approximation); // angle, size, approximation
-    //Cell_criteria cell_criteria(2., cell_size=fsize); // radius-edge ratio, size
-    ///Mesh_criteria criteria(facet_criteria, cell_criteria);
+    /// Criteria
     Mesh_criteria criteria(facet_angle=facet_angleP, facet_size=facet_sizeP, facet_distance=facet_distanceP,
                            cell_radius_edge_ratio=cell_radius_edge_ratioP, cell_size=cell_sizeP);
 
-    //Mesh generation
+    /// Mesh generation
     C3t3 c3t3 = CGAL::make_mesh_3<C3t3>(*domain, criteria, no_exude(), no_perturb());
     delete domain;
 
@@ -335,13 +305,16 @@ int MeshGenerationFromImplicitShape::volumeMeshGeneration(double facet_angleP, d
 //visualisation of the shape before mesh
 void MeshGenerationFromImplicitShape::draw(const sofa::core::visual::VisualParams* vparams)
 {
+    update() ;
+
     auto& box = f_bbox.getValue();
     vparams->drawTool()->drawBoundingBox(box.minBBox(), box.maxBBox()) ;
 
-    if(m_componentstate != ComponentState::Valid)
-        return;
+    if(!isComponentStateValid())
+        return ;
 
-    if(d_drawtetras.getValue()) {
+    if(d_drawtetras.getValue())
+    {
         sofa::helper::ReadAccessor< Data<VecCoord> > x = d_out_points;
         sofa::helper::ReadAccessor< Data<SeqTetrahedra> > tetrahedra = d_out_tetrahedra;
         vparams->drawTool()->setLightingEnabled(false);

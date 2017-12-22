@@ -111,7 +111,6 @@ protected:
 
 private:
     DataTracker m_datatracker ;
-
 };
 
 } /// namespace _pointcloudimplicitfieldvisualization_

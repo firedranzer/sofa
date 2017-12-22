@@ -42,10 +42,6 @@ using std::max;
 using sofa::core::objectmodel::ComponentState ;
 
 #include "ScalarField.h"
-using sofa::core::objectmodel::CStatus ;
-
-#include <SofaBaseLinearSolver/FullMatrix.h>
-
 
 #include "CustomField.h"
 namespace sofa
@@ -89,8 +85,8 @@ void CustomField::handleEvent(sofa::core::objectmodel::Event *event)
 
 CustomField::CustomField() :
     d_function (initData(&d_function, (std::string)"", "function", "Use a python function to implement the implicit field.")),
-    d_gradient (initData(&d_gradient, (std::string)"", "gradient", "Use a python function to implement the gradient field. If not provided returns gradient using finite difference.")),
     d_glslFunction (initData(&d_glslFunction, (std::string)"", "glslFunction", "Use a python function to return glsl implicit field description.")),
+    d_gradient (initData(&d_gradient, (std::string)"", "gradient", "Use a python function to implement the gradient field. If not provided returns gradient using finite difference.")),
     d_state (initData(&d_state, 0, "state", "This is a number indicating change in this component."))
 {
     m_sourcefile = new MyFileListener(this) ;
@@ -258,7 +254,7 @@ const std::map<std::string, std::vector<GLSLCodeFragment> > &CustomField::getGLS
 
 void CustomField::init()
 {
-    setStatus(CStatus::Busy) ;
+
     PythonEnvironment::gil lock(__func__) ;
 
     m_evalFunction = getPythonFunction("function", d_function.getValue(), m_functionModule, true) ;
@@ -266,7 +262,6 @@ void CustomField::init()
     {
         msg_error() << "Unable to find a required callable object from attribute 'function=\""<< d_function.getValue() <<"\"'" ;
         m_componentstate = ComponentState::Invalid ;
-        setStatus(CStatus::Invalid) ;
         return ;
     }
 
@@ -308,7 +303,6 @@ void CustomField::init()
 
     m_componentstate = ComponentState::Valid ;
     d_state.setValue(d_state.getValue()+1);
-    setStatus(CStatus::Valid) ;
 }
 
 
@@ -346,8 +340,7 @@ double CustomField::getValue(Vec3d& pos, int& domain)
                 {
                     PyErr_Print() ;
                     m_componentstate = ComponentState::Invalid ;
-                    setStatus(CStatus::Invalid) ;
-                     return std::nan("") ;
+                    return std::nan("") ;
                 }
                 std::cout << "SETTING RIH" << PyString_AsString( PyObject_Str(res)) << std::endl ;
                 m_rawShape=res;

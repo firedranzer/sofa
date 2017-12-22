@@ -57,10 +57,9 @@ typedef sofa::helper::vector<Coord> VecCoord;
 using namespace sofa::core;
 using namespace sofa::core::visual;
 using namespace sofa::core::objectmodel;
+using sofa::core::DataTracker ;
 
-class SOFA_CGALPLUGIN_API MeshGenerationFromImplicitShape : public BaseObject,
-        public ComponentTracker,
-        public TrackedComponent
+class SOFA_CGALPLUGIN_API MeshGenerationFromImplicitShape : public BaseObject
 {
 public:
     SOFA_CLASS(MeshGenerationFromImplicitShape, BaseObject);
@@ -81,12 +80,13 @@ private:
     CGAL::Bbox_3 BoundingBox(double x_min, double y_min, double z_min,
                              double x_max, double y_max, double z_max);
 
-    /// Inputs and atritbutes
+    /// Meshing parameters
+    /// see details on the parameters at https://doc.cgal.org/latest/Mesh_3/index.html
     Data<double> d_facetangle;
     Data<double> d_facetsize;
     Data<double> d_facetdistance;
-    Data<double> d_cell_radiusedge_ratio;
     Data<double> d_cellsize;
+    Data<double> d_cell_radiusedge_ratio;
 
     Data<double> d_radius ;
     Data<Vec3d>  d_center ;
@@ -102,7 +102,7 @@ private:
     typedef SingleLink< MeshGenerationFromImplicitShape, ScalarField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> LinkGrid;
     LinkGrid l_scalarfield;
 
-    std::shared_future<unsigned int> m_com;
+    DataTracker m_datatracker ;
 };
 
 } /// namespace _meshgenerationfromimplicit_

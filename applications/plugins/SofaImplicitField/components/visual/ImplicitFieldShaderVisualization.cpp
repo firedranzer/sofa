@@ -75,8 +75,11 @@ ImplicitFieldShaderVisualization::~ImplicitFieldShaderVisualization()
 
 void ImplicitFieldShaderVisualization::init()
 {
-    m_datatracker.trackData(*l_field.get()->findData("state"));
-    shaderGenerationCodeHasChanged();
+    if(l_field.get()->findData("state"))
+    {
+        m_datatracker.trackData(*l_field.get()->findData("state"));
+        shaderGenerationCodeHasChanged();
+    }
 
     shader = new GLSLShader();
     shader->SetVertexShaderFileName(d_vertFilename.getFullPath());

@@ -44,6 +44,8 @@ namespace engine
 {
 namespace _surfacemeshgenerationfromimplicit_
 {
+using sofa::core::DataTracker ;
+
 using sofa::defaulttype::Vec4f ;
 using sofa::component::geometry::ScalarField ;
 typedef sofa::core::topology::BaseMeshTopology::SeqTriangles SeqTriangles;
@@ -56,9 +58,7 @@ using namespace sofa::core;
 using namespace sofa::core::visual;
 using namespace sofa::core::objectmodel;
 
-class SOFA_CGALPLUGIN_API SurfaceMeshGenerationFromImplicitShape : public BaseObject,
-        public ComponentTracker,
-        public TrackedComponent
+class SOFA_CGALPLUGIN_API SurfaceMeshGenerationFromImplicitShape : public BaseObject
 {
 public:
     SOFA_CLASS(SurfaceMeshGenerationFromImplicitShape, BaseObject);
@@ -76,18 +76,12 @@ public:
 
     Data<sofa::defaulttype::BoundingBox> d_box ;
 
-private:
-    CGAL::Bbox_3 BoundingBox(double x_min, double y_min, double z_min,
-                             double x_max, double y_max, double z_max);
-
-    /// Link
-    typedef SingleLink< SurfaceMeshGenerationFromImplicitShape, ScalarField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> LinkGrid;
-    LinkGrid l_in_scalarfield;
-
     /// Output
     Data<VecCoord>      d_out_points;
     Data<SeqTriangles>  d_out_triangles;
 
+    /// Meshing parameters
+    /// see details on the parameters at https://doc.cgal.org/latest/Mesh_3/index.html
     Data<double> d_facetangle;
     Data<double> d_facetsize;
     Data<double> d_facetdistance;
@@ -96,7 +90,15 @@ private:
     Data<sofa::defaulttype::Vec3d>  d_center ;
     Data<bool> d_visuCavity;
 
-    std::shared_future<unsigned int> m_com;
+    DataTracker m_datatracker ;
+
+private:
+    CGAL::Bbox_3 BoundingBox(double x_min, double y_min, double z_min,
+                             double x_max, double y_max, double z_max);
+
+    /// Link
+    typedef SingleLink< SurfaceMeshGenerationFromImplicitShape, ScalarField, BaseLink::FLAG_STOREPATH|BaseLink::FLAG_STRONGLINK> LinkGrid;
+    LinkGrid l_in_scalarfield;
 };
 
 } /// namespace _meshgenerationfromimplicit_

@@ -75,6 +75,7 @@ protected:
     virtual void init() override ;
     virtual void reinit() override ;
     virtual void draw(const core::visual::VisualParams*) override ;
+
 private:
     PointCloudImplicitFieldVisualization(const PointCloudImplicitFieldVisualization& n) ;
     PointCloudImplicitFieldVisualization& operator=(const PointCloudImplicitFieldVisualization& n) ;
@@ -90,22 +91,8 @@ private:
     std::vector<double> m_cfield ;
     std::vector<Vec3d> m_cnormals ;
 
-    std::thread m_asyncthread;
-    std::mutex m_datamutex ;
-    std::mutex m_cmdmutex ;
-    std::condition_variable m_cmdcond ;
-
     double m_minv = +1000;
     double m_maxv = 0.0;
-
-    enum Cmd {
-        CMD_IDLE,
-        CMD_RESET,
-        CMD_START,
-        CMD_PROCESS,
-        CMD_STOP,
-    }  ;
-    Cmd m_cmd {CMD_IDLE};
 
     DataTracker m_datatracker ;
 

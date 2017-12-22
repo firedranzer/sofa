@@ -58,27 +58,16 @@ endif()
 set(EXTRA_FILES
     README.md
     examples/README.md
-    examples/CustomField.scn
-    examples/CustomFieldVisualization.scn
-    examples/CustomShaderField.scn
-    examples/customfield.py
-    examples/customshape.py
-    examples/ShapeTreeDemo1.psl
+    examples/CustomFieldAllInOne.scn
+    examples/customfield_python.py
+    examples/CustomField_python.scn
+    examples/customfield_cython.py
+    examples/CustomField_cython.scn
+    examples/customfield_glsl.py
+    examples/CustomField_glsl.scn
     examples/dfgeom.psl
     examples/dfgeom.pyx
-    examples/cython/CustomField.scn
-    examples/cython/customfield.py
-    examples/cython/cythonfield.pyx
-    python/difigeometry/Makefile
-    python/difigeometry/__init__.py
-    python/difigeometry/expression.py
-    python/difigeometry/expression2D.py
-    python/difigeometry/expressionToString.py
-    python/difigeometry/generate_expression.py
-    python/difigeometry/pyxsrc/primitives.pxd
-    python/difigeometry/pyxsrc/primitives.pyx
-    python/difigeometry/pyxsrc/primitives2D.pxd
-    python/difigeometry/pyxsrc/primitives2D.pyx
+    examples/dfgeom.pyxbld
     )
 
 add_subdirectory(SofaImplicitField_test)

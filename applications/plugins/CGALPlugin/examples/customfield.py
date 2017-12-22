@@ -23,5 +23,3 @@ u = Difference(bx,d)
 def getCythonFunction():
     return dfgeom.getCythonRawFunction(u)
 
-def evalField(x,y,z):
-    return dfgeom.evalField(u, x, y, z)

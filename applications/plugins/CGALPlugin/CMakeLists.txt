@@ -50,6 +50,7 @@ endif()
 ## The following lines adds additional source file and header if the SofaImplicitFIeld is activated
 ## There is also the added linking option...see further in the source .
 find_package(SofaImplicitField QUIET)
+
 if(SofaImplicitField_FOUND)
     list(APPEND HEADER_FILES
         components/engine/MeshGenerationFromImplicit.h
@@ -64,14 +65,12 @@ if(SofaImplicitField_FOUND)
     list(APPEND README_FILES
                      examples/MeshGenerationFromImplicit.scn
                      examples/SurfaceMeshGenerationFromImplicit.scn
-                     examples/customfield2.py
+                     examples/customfield.py
                      examples/dfgeom.pyx
-                     examples/minipsl.py
                      )
-
     add_definitions("-DDO_SOFAIMPLICITFIELD_FEATURES=1")
 else()
-    message(STATUS "CGALPlugin: could not find SofaImplicitField, won't build the component(s): <MeshGenerationFromImplicit>.")
+    message(STATUS "CGALPlugin: could not find SofaImplicitField, won't build the component(s): <MeshGenerationFromImplicit> <SurfaceMeshGenerationFromImplicit>.")
     add_definitions("-DDO_SOFAIMPLICITFIELD_FEATURES=0")
 endif()
 

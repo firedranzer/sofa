@@ -2,7 +2,7 @@ from libc.math cimport cos, sin, sqrt, fmod
 from cpython.pycapsule cimport *
 # distutils: language = c++
 # distutils: sources = ./vector.cpp
-cdef extern from "//home/dmarchal/projects/2016/DEFROST/04-code/sofa-src/sofa/master/forkdefrost/sofa/applications/plugins/SofaImplicitField/examples/vector.h" namespace "":
+cdef extern from "//home/dmarchal/projects/2016/DEFROST/04-code/sofa-src/sofa/master/forkdefrost2/sofa/applications/plugins/SofaImplicitField/examples/vector.h" namespace "":
     cdef cppclass Vec3d:
             Vec3d()
             Vec3d(double x, double y, double z)

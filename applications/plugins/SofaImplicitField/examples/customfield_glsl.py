@@ -1,14 +1,9 @@
+### Import a cython implementation of the geometry.
+### The advantage of this representation is that it is super fast.
 import pyximport; pyximport.install()
-import sys
-import SofaPython
-from SofaPython import Tools
-#sys.path.append( "../../python" )
-import difigeometry
 import dfgeom
 
-import math
-from math import sqrt
-
+### Shape geometry.
 b = dfgeom.Box([1.0,0.5,1.0])
 u = dfgeom.Sphere([0.0,0.0,0.0], 1.05)
 
@@ -29,5 +24,6 @@ def glslFunction():
     function = shape.toGLSL(context)
     return (context.values(), function);
 
+### The function that is called by sofa to get the field value.
 def evalField(x,y,z):
     return dfgeom.evalField(shape, x,y,z)

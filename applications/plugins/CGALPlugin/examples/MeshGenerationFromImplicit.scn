@@ -12,14 +12,9 @@
         <EulerImplicitSolver name="cg_odesolver"  printLog="0" />
         <CGLinearSolver template="GraphScattered" name="linear solver"  iterations="25"  tolerance="1e-09"  threshold="1e-09" />
         		
-	<SphericalField name="sphere" />
+        <CustomField name="field1" function="customfield.evalField"/>
 
-        <CustomField name="field1" function="customfield2.evalField"/>
-
-	<!-- Mesh component -->
-
-
-<!--MeshGenerationFromImplicitShape name="mesh"
+        <!--MeshGenerationFromImplicitShape name="mesh"
                         facet_size="1.0"
 			approximation="10.0"
                         cell_size="1.0"
@@ -27,16 +22,6 @@
                         drawTetras="true"
                         meshingzone_center="0.0 0.0 0.0" meshingzone_radius="5.0"/-->
 
-
         <PointCloudImplicitFieldVisualization field="@field1" box="-5 -5 -1 5 5 10" color="1.0 1.0 1.0"/>
-
-        <!--
-        <Mesh position="@mesh.outputPoints" tetrahedra="@mesh.outputTetras" />
-        <MechanicalObject name="tetras" template="Vec3d" position="@mesh.outputPoints" showIndices="false" showIndicesScale="4e-5" rx="0" dz="0" 															       showObject="true" showObjectScale="1" />
-        <FixedConstraint template="Vec3d" name="FixedConstraint"  indices="0" />
-       	<UniformMass template="Vec3d" totalmass="5" />
-	<TetrahedronFEMForceField template="Vec3d" name="FEM"  method="large"  poissonRatio="0.4"  youngModulus="1000"
-												      computeGlobalMatrix="0"  gatherPt=" "  gatherBsize=" " />
-        -->
     </Node>
 </Node>
