@@ -65,7 +65,7 @@ public:
         static int i = 0;
         if(i%5 == 0){
             d_state.setState(sofa::core::async::State::Invalid) ;
-            d_state.setState(sofa::core::async::State::Valid) ;
+            d_state.setState(sofa::core::async::State::Ready) ;
             msg_info() << "Update to state " << d_state.getCounter()  ;
         }
         i++;
@@ -123,7 +123,7 @@ public:
 
         d_state.setState(sofa::core::async::State::Invalid) ;
         internalCalculus() ;
-        d_state.setState(sofa::core::async::State::Valid) ;
+        d_state.setState(sofa::core::async::State::Ready) ;
 
         updateComponentsTrackingCounters() ;
     }
@@ -194,7 +194,7 @@ public:
         }
         else{
             m_internalValue = 1 ;
-            d_state.setState(sofa::core::async::State::Valid) ;
+            d_state.setState(sofa::core::async::State::Ready) ;
         }
     }
 
@@ -242,7 +242,7 @@ public:
 
         d_state.setState(sofa::core::async::State::Invalid) ;
         internalCalculus() ;
-        d_state.setState(sofa::core::async::State::Valid) ;
+        d_state.setState(sofa::core::async::State::Ready) ;
 
         CircularComponent* source = l_source.get() ;
         msg_info() << "New value is {"<< m_internalValue <<", " << d_state.getCounter() << "} calculated from " << source->getName()

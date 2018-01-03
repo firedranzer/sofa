@@ -47,7 +47,7 @@ enum class State
 {
     Undefined,
     Invalid,
-    Valid,
+    Ready,
     Busy,
     Waiting,
 } ;
@@ -87,8 +87,8 @@ public:
         return getValue().m_state ;
     }
 
-    bool isValid(){
-        return getValue().m_state == State::Valid ;
+    bool isReady(){
+        return getValue().m_state == State::Ready ;
     }
     bool isBusy(){
         return getValue().m_state == State::Busy ;
@@ -146,7 +146,7 @@ public:
     {
         for(unsigned int i=0;i<m_datas.size();i++)
         {
-            if( m_datas[i]==nullptr || !m_datas[i]->isValid() )
+            if( m_datas[i]==nullptr || !m_datas[i]->isReady() )
                 return false;
         }
         return true;

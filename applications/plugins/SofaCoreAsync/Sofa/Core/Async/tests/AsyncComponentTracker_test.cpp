@@ -70,7 +70,7 @@ public:
             if( m_result.valid() &&
                     m_result.wait_for(std::chrono::microseconds::zero()) == std::future_status::ready )
             {
-                d_state.setState(sofa::core::async::State::Valid) ;
+                d_state.setState(sofa::core::async::State::Ready) ;
                 msg_info() << "Update to state valid at " << d_state.getCounter()  ;
             }
 
@@ -143,7 +143,7 @@ public:
             if( m_result.valid() &&
                     m_result.wait_for(std::chrono::microseconds::zero()) == std::future_status::ready )
             {
-                d_state.setState(sofa::core::async::State::Valid) ;
+                d_state.setState(sofa::core::async::State::Ready) ;
                 msg_info() << "Update to state valid at " << d_state.getCounter()  ;
             }
             else if( haveTheTrackedComponentsChanged() )
