@@ -169,7 +169,7 @@ cdef double distance_vect_right_square(primitives2D.Vector2D vect, primitives2D.
 
 cdef class box:
 
-    def __cinit__(self, primitives2D.Point2D box_bottom, primitives2D.Point2D box_top):
+    def __init__(self, primitives2D.Point2D box_bottom, primitives2D.Point2D box_top):
 
         self.box_bottom = box_bottom
         self.box_top = box_top
@@ -193,7 +193,7 @@ cdef double plateau(double Xmin, double Xmax, double Ymin, double Ymax, double t
 
 cdef class polygon_boosted_evaluation(primitives2D.Shape2D):
 
-    def __cinit__(self, list polygon, int nX = 10, int nY = 10, double thickness= 0.01):
+    def __init__(self, list polygon, int nX = 10, int nY = 10, double thickness= 0.01):
 
         if not (nX > 0 and nY > 0):
             raise ValueError, "I nedd a positive number of boxes"
@@ -334,31 +334,28 @@ cdef class polygon_boosted_evaluation(primitives2D.Shape2D):
         cdef int i = <int>((p.x - self.minX - self.thickness)/self.dx)
         cdef int j = <int>((p.y - self.minY - self.thickness)/self.dy)
 
+        cdef double distance = distance_point_vector(p, self.list_boxes[i][j].list_vects_distance[0])
+        cdef double d
+        for vect in self.list_boxes[i][j].list_vects_distance:
 
-        cdef box box_p = self.list_boxes[i][j]
-
-        cdef list list_temp = []
-
-        for vect in box_p.list_vects_distance:
-
-            list_temp.append(distance_point_vector(p, vect))
-
-        cdef double distance = min(list_temp)
+            d = distance_point_vector(p, vect)
+            if d < distance:
+                distance = d
 
         cdef int i_temp = 0
-        cdef primitives2D.Vector2D vect_temp = primitives2D.Vector2D(box_p.box_bottom, p)
+        cdef primitives2D.Vector2D vect_temp = primitives2D.Vector2D(self.list_boxes[i][j].box_bottom, p)
 
-        for vect in box_p.list_vects_sign:
+        for vect in self.list_boxes[i][j].list_vects_sign:
 
             if crossed_vectors(vect, vect_temp):
 
                 i_temp+=1
 
-        if (box_p.bottom_left_corner_in and i_temp > 0 and i_temp%2 == 0) or (not box_p.bottom_left_corner_in and i_temp%2 == 1):
+        if (self.list_boxes[i][j].bottom_left_corner_in and i_temp > 0 and i_temp%2 == 0) or (not self.list_boxes[i][j].bottom_left_corner_in and i_temp%2 == 1):
 
             return -1.0 * distance
 
         else:
-            return 1.0#distance * f + (1-f) * distance_point_right_square(p, box_p.box_bottom, box_p.box_top)
+            return distance * f + (1-f) * distance_point_right_square(p, self.list_boxes[i][j].box_bottom, self.list_boxes[i][j].box_top)
 
 

@@ -94,7 +94,7 @@ cdef class Point2D(object):
         print "("+str(self.x),str(self.y)+")"
         return
 
-def equal (p1, p2):
+cpdef bint  equal (Point2D p1, Point2D p2):
     return p1.x == p2.x and p1.y == p2.y
 
 cdef class Vector2D(object):
