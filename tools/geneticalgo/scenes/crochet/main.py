@@ -23,20 +23,45 @@ A = [0.0, 0.010, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
 A2 = [0.0, 0.009, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
 B = [0.0, 0.005, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
 C = [-0.0025, 0.00125, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
-D = [-0.0025, -0.00125, ["smooth", 0.0007, x], ["corner", 0.0015, x, 0.0007, 0.0007]]
+D = [-0.0025, -0.00125, ["smooth", 0.0007, x], ["corner", 0.0015, 0.0, 0.0007, 0.0007]]
 E = [0.0, -0.00250, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
 F = [0.0025, -0.0025, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
 G = [0.0035, -0.00125, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
 
-reference = [A, B, C, D, E, F, G]
+reference0 = [A, A2, B, C, D, E, F, G]
+
+
+AA = [0.0, 0.010, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
+AA2 = [0.0, 0.009, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
+AB = [0.0, 0.005, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
+AC = [0.0, 0.00125, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
+AD = [0.0, -0.00125, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
+AE = [0.00125, -0.00125, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
+AF = [0.0025, -0.00125, ["smooth", 0.0007, x], ["smooth", 0.0007, x]]
+AG = [0.0035, -0.00125, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0]]
+
+reference1 = [AA, AA2, AB, AC, AD, AE, AF, AG]
+
+AA = [0.0, 0.010, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0],[False]]
+
+AA2 = [0.0, 0.009, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0], [False]]
+
+AD = [0.0, -0.00125, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0], [True, 0.0003, 0.0001, 0.0]]
+
+AG = [0.0035, -0.00125, ["smooth", 0.0007, 0.0], ["smooth", 0.0007, 0.0], [False]]
+
+reference = [AA, AA2, AD, AG]
 
 individualId = 0
 mutationType="ON"
 mutationThickness="ON"
-mutationCoef="OFF"
-mutationWidth="OFF"
-mutationDepht="OFF"
+mutationCoef="ON"
+mutationWidth="ON"
+mutationDepht="ON"
 mutationPosition="ON"
+mutationEllipseONOFF = "ON"
+mutationEllipse = "ON"
+mutationAdd_Point = "ON"
 
 def getNextId():
     global individualId
@@ -85,25 +110,30 @@ def getShapeFromInd(ind):
 def mutation_Position(ind, side):
 
     length=len(ind.listOfDrawnPoints)
-    if length < 3:
-        raise ValueError, "don't touch the bottom and the top!"
+    if length < 4:
+        print "don't touch the bottom and the top!"
+        return
 
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
     index=random.randint(2,length-2)
-    ind.listOfDrawnPoints[index][0] = ind.listOfDrawnPoints[index][0]+random.uniform(-0.0005,0.0005)
-    ind.listOfDrawnPoints[index][1] = min(ind.listOfDrawnPoints[1][1], ind.listOfDrawnPoints[index][1]+random.uniform(-0.0005,0.0005))
-
+    epsilonX = random.uniform(-0.0001,0.0001)
+    epsilonY = random.uniform(-0.0001,0.0001)
+    ind.listOfDrawnPoints[index][0] = ind.listOfDrawnPoints[index][0] + epsilonX
+    ind.listOfDrawnPoints[index][1] = min(ind.listOfDrawnPoints[1][1], ind.listOfDrawnPoints[index][1] + epsilonY)
+    print "mutation_Position"
+    print "Deltax, Deltay= "+ str(epsilonX)+","+str(epsilonY)
 
 
 
 
 def mutation_Depht(ind, side):
+    print "mutation_Depht"
 
     length=len(ind.listOfDrawnPoints)
-    if length < 3:
-        raise ValueError, "don't touch the bottom and the top!"
-
+    if length < 4:
+        print "don't touch the bottom and the top!"
+        return
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
 
@@ -117,7 +147,7 @@ def mutation_Depht(ind, side):
         if param[0]=="corner":
             Depht=param[4]
             epsilon = random.uniform(0.8,1.2)
-            ind.listOfDrawnPoints[index][2][4]=min(ind.listOfDrawnPoints[index][2][4]*epsilon, param[1]/3.0)
+            ind.listOfDrawnPoints[index][2][4]=min(ind.listOfDrawnPoints[index][2][4]*epsilon, param[1]/1.5)
 #            ind.listOfDrawnPoints[index][2][2]*=1.0/epsilon
     else:
 
@@ -126,15 +156,16 @@ def mutation_Depht(ind, side):
         if param[0]=="corner":
             Depht=param[4]
             epsilon = random.uniform(0.8,1.2)
-            ind.listOfDrawnPoints[index][3][4]=min(ind.listOfDrawnPoints[index][2][4]*epsilon, param[1]/3.0)
+            ind.listOfDrawnPoints[index][3][4]=min(ind.listOfDrawnPoints[index][3][4]*epsilon, param[1]/1.5)
 #            ind.listOfDrawnPoints[index][3][2]*=1.0/epsilon
 
 def mutation_Width(ind, side):
+    print "mutation_Width"
 
     length=len(ind.listOfDrawnPoints)
-    if length < 3:
-        raise ValueError, "don't touch the bottom and the top!"
-
+    if length < 4:
+        print "don't touch the bottom and the top!"
+        return
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
 
@@ -160,11 +191,12 @@ def mutation_Width(ind, side):
             ind.listOfDrawnPoints[index][3][3]*=epsilon
 
 def mutation_Type(ind, side):
+    print "mutation_Type"
 
     length=len(ind.listOfDrawnPoints)
-    if length < 3:
-        raise ValueError, "don't touch the bottom and the top!"
-
+    if length < 4:
+        print "don't touch the bottom and the top!"
+        return
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
 
@@ -181,7 +213,7 @@ def mutation_Type(ind, side):
             ind.listOfDrawnPoints[index][2][0] = type
             ind.listOfDrawnPoints[index][2].append(param[1]/1.5)
             ind.listOfDrawnPoints[index][2].append(param[1]/1.5)
-            ind.listOfDrawnPoints[index][2][2]=0.1
+            ind.listOfDrawnPoints[index][2][2]=0.0
 
         else:
             type = "smooth"
@@ -200,7 +232,7 @@ def mutation_Type(ind, side):
             ind.listOfDrawnPoints[index][3][0] = type
             ind.listOfDrawnPoints[index][3].append(param[1]/1.5)
             ind.listOfDrawnPoints[index][3].append(param[1]/1.5)
-            ind.listOfDrawnPoints[index][3][2] = 0.1
+            ind.listOfDrawnPoints[index][3][2] = 0.0
         else:
             type = "smooth"
             ind.listOfDrawnPoints[index][3][0] = type
@@ -209,6 +241,7 @@ def mutation_Type(ind, side):
 
 
 def mutation_Thickness(ind, side):
+    print "mutation_Thickness"
 
     length=len(ind.listOfDrawnPoints)
 
@@ -223,22 +256,23 @@ def mutation_Thickness(ind, side):
         thickness=param[1]
         epsilon=random.uniform(0.6, 1.4)
         thickness*=epsilon
-        ind.listOfDrawnPoints[index][2][1] = thickness
+        ind.listOfDrawnPoints[index][2][1] = max(0.0003,thickness)
     else:
         param = ind.listOfDrawnPoints[index][3]
         thickness=param[1]
         epsilon=random.uniform(0.6, 1.4)
         thickness*=epsilon
-        ind.listOfDrawnPoints[index][3][1] = thickness
+        ind.listOfDrawnPoints[index][3][1] = max(0.0003,thickness)
 
 
 
 def mutation_Coef(ind, side):
+    print "mutation_Coef"
 
     length=len(ind.listOfDrawnPoints)
-    if length < 3:
-        raise ValueError, "don't touch the bottom and the top!"
-
+    if length < 4:
+        print "don't touch the bottom and the top!"
+        return
     if not side in ["left", "right"]:
         raise ValueError, "choose a side"
 
@@ -248,7 +282,7 @@ def mutation_Coef(ind, side):
         param = ind.listOfDrawnPoints[index][2]
         coef = param[2]
         epsilon=random.uniform(0.8,1.2)
-        coef=max(0.0, min(1.1, coef*epsilon))
+        coef=max(0.0, min(1.0, coef*epsilon+random.uniform(0.0,0.1)))
         ind.listOfDrawnPoints[index][2][2] = coef
 
     else:
@@ -256,10 +290,94 @@ def mutation_Coef(ind, side):
         param = ind.listOfDrawnPoints[index][3]
         coef = param[2]
         epsilon=random.uniform(0.8,1.2)
-        coef=max(0.0, min(1.1, coef*epsilon))
+        coef=max(0.0, min(1.0, coef*epsilon+random.uniform(0.0,0.1)))
         ind.listOfDrawnPoints[index][3][2] = coef
 
+
+def mutation_Ellipse_ONOFF(ind, side):
+    print "mutation_Ellipse_ONOFF"
+
+    length=len(ind.listOfDrawnPoints)
+    if length < 4:
+        print "don't touch the bottom and the top!"
+        return
+
+    if not side in ["left", "right"]:
+        raise ValueError, "choose a side"
+
+    index=random.randint(2,length-2)
+
+
+    if ind.listOfDrawnPoints[index][4][0]:
+        ind.listOfDrawnPoints[index][4][0] = False
+        del ind.listOfDrawnPoints[index][4][1:]
+    else:
+        ind.listOfDrawnPoints[index][4] = [True, min(ind.listOfDrawnPoints[index][2][1], ind.listOfDrawnPoints[index][3][1]), min(ind.listOfDrawnPoints[index][2][1], ind.listOfDrawnPoints[index][3][1])/2.0, 0.0]
+
+
+def mutation_Ellipse(ind, side):
+    print "mutation_Ellipse"
+    length=len(ind.listOfDrawnPoints)
+    if length < 4:
+        print "don't touch the bottom and the top!"
+        return
+    if not side in ["left", "right"]:
+        raise ValueError, "choose a side"
+
+    index=random.randint(2,length-2)
+
+
+    if ind.listOfDrawnPoints[index][4][0]:
+        if random.choice([True, False]):
+            ind.listOfDrawnPoints[index][4][1] = max(0.0001, min(ind.listOfDrawnPoints[index][4][1]+random.uniform(-0.0001, 0.0001), min(ind.listOfDrawnPoints[index][2][1], ind.listOfDrawnPoints[index][3][1])))
+
+
+        if random.choice([True, False]):
+            ind.listOfDrawnPoints[index][4][2] = max(0.0001, min(ind.listOfDrawnPoints[index][4][2]+random.uniform(-0.0001, 0.0001), min(ind.listOfDrawnPoints[index][2][1], ind.listOfDrawnPoints[index][3][1])/2.0))
+
+        if random.choice([True, False]):
+            ind.listOfDrawnPoints[index][4][3] += random.uniform(-0.1, 0.1)
+
+
+def mutation_AddPoint(ind, side):
+    print "mutation_AddPoint"
+    length=len(ind.listOfDrawnPoints)
+    if length < 3:
+        raise ValueError, "don't add between the two first points"
+
+    if not side in ["left", "right"]:
+        raise ValueError, "choose a side"
+
+    index=random.randint(1,length-2)
+
+    t = 0.5  #random.uniform(0.0, 1.0)
+
+    x = t * ind.listOfDrawnPoints[index][0] + (1.0-t) * ind.listOfDrawnPoints[index+1][0]
+    y = t * ind.listOfDrawnPoints[index][1] + (1.0-t) * ind.listOfDrawnPoints[index+1][1]
+
+    left_thickness = t * ind.listOfDrawnPoints[index][2][1] + (1.0-t) * ind.listOfDrawnPoints[index+1][2][1]
+    right_thickness = t * ind.listOfDrawnPoints[index][3][1] + (1.0-t) * ind.listOfDrawnPoints[index+1][3][1]
+
+    ind.listOfDrawnPoints.insert(index+1, [x, y, ["smooth", left_thickness, 1.0], ["smooth", right_thickness, 1.0], [False]])
+
+
 def mutation(ind):
+
+    if mutationAdd_Point=="ON":
+        if random.choice([True, False, False, False, False, False, False, False, False]):
+            side = random.choice(["left", "right"])
+            mutation_AddPoint(ind, side)
+
+
+    if mutationEllipse=="ON":
+        if random.choice([True, False]):
+            side = random.choice(["left", "right"])
+            mutation_Ellipse(ind, side)
+
+    if mutationEllipseONOFF=="ON":
+        if random.choice([True, False]):
+            side = random.choice(["left", "right"])
+            mutation_Ellipse_ONOFF(ind, side)
 
 
     if mutationType=="ON":
@@ -271,7 +389,6 @@ def mutation(ind):
         if random.choice([True, False]):
             side = random.choice(["left", "right"])
             mutation_Thickness(ind, side)
-
 
     if mutationCoef=="ON":
         if random.choice([True, False]):
@@ -292,7 +409,7 @@ def mutation(ind):
     if mutationPosition=="ON":
         if random.choice([True, False]):
             side = random.choice(["left", "right"])
-            mutation_Position=(ind, side)
+            mutation_Position(ind, side)
 
 
 def mutationFunc(pop, params):
@@ -384,29 +501,25 @@ def generateIndividual(reference):
     side = random.choice(["left", "right"])
     mutation_Type(individual, side)
 
-    for i in range(5):
+    if random.choice([True, False]):
         side = random.choice(["left", "right"])
-        mutation_Thickness(individual, side)
+        mutation_Ellipse(individual, side)
 
-
-#        for i in range(5):
-#            side = random.choice(["left", "right"])
-#            mutation_Coef(individual, side)
-
-#            if mutationWidth=="ON":
-#                if random.choice([True, False]):
-#                    side = random.choice(["left", "right"])
-#                    mutation_Width(individual, side)
-
-#            if mutationDepht=="ON":
-#                if random.choice([True, False]):
-#                    side = random.choice(["left", "right"])
-#                    mutation_Depht(individual, side)
-
-
-    for i in range(5):
+    if random.choice([True, False]):
         side = random.choice(["left", "right"])
-        mutation_Position=(individual, side)
+        mutation_Ellipse_ONOFF(individual, side)
+
+
+    if random.choice([True, False, False, False, False, False, False, False, False]):
+        side = random.choice(["left", "right"])
+        mutation_AddPoint(individual, side)
+
+
+    side = random.choice(["left", "right"])
+    mutation_Thickness(individual, side)
+
+    side = random.choice(["left", "right"])
+    mutation_Position(individual, side)
 
     return individual
 #        length = len(reference)
@@ -470,7 +583,7 @@ def evaluationFunc(pop):
         fend =  "def evalField(x,y,z):\n   return shape.eval(primitives.Point(x,y,z))"
         f1 = crochetInFile.toPythonString(ind) + fend
 
-        f1 +=show2Dshape.show2Dshape()
+#        f1 +=show2Dshape.show2Dshape()
         filename.append((f1, ind))
 
     #################### EXAMPLE USING THE SEQUENTIAL LAUNCHER #################################
@@ -524,7 +637,7 @@ def evaluationFunc(pop):
             if VerticalGap1 < 0.0 or VerticalGap2 > 0.0:
                 print "STRANGE BEHAVIOR, VerticalGap1 < 0.0 or VerticalGap2 > 0.0"
 
-            level = VerticalGap1 + 10.0*VerticalGap2
+            level = min(0.005**2, VerticalGap1**2) - 2.0*VerticalGap2**2
 
             if abs(level) > 10.0 or VerticalGap1 == 0.0 or VerticalGap2 == 0.0:
                 print "bad shape"

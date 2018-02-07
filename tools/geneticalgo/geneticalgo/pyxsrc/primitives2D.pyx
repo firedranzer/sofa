@@ -17,6 +17,8 @@
 import numpy
 import math
 
+from libc.math cimport sin, cos, sqrt
+
 
 cdef int i=0
 
@@ -109,6 +111,11 @@ cdef class Vector2D(object):
 
         return self.second.y-self.first.y
 
+cpdef double norm(Vector2D u):
+    return sqrt(u.firstCoord()**2 + u.secondCoord()**2)
+
+cpdef double norm2(Vector2D u):
+    return (u.firstCoord()**2 + u.secondCoord()**2)
 
 cpdef double Det(Vector2D u, Vector2D v):
     return u.firstCoord()*v.secondCoord()-u.secondCoord()*v.firstCoord()
@@ -138,7 +145,7 @@ cdef class Shape2D(object):
         self.index=self.subIndex
         self.type
 
-    cpdef double eval(self, Point2D point):
+    cdef double eval(self, Point2D point):
 
         cdef double eval = self.eval(point)
         return eval
@@ -165,9 +172,17 @@ cdef class All(Shape2D):
         Shape2D.__init__(self)
         self.type = "All"
 
-    cpdef double eval(self,Point2D point):
+    cdef double eval(self,Point2D point):
         return -1.0
 
+cdef class NoWhere(Shape2D):
+
+    def __init__(self):
+        Shape2D.__init__(self)
+        self.type = "NoWhere"
+
+    cdef double eval(self,Point2D point):
+        return 1.0
 
 cdef class Union(Shape2D):
 
@@ -177,7 +192,7 @@ cdef class Union(Shape2D):
         self.second=second
         self.type = "Union"
 
-    cpdef double eval(self,Point2D point):
+    cdef double eval(self,Point2D point):
 
         cdef double eval = min(self.first.eval(point),self.second.eval(point))
         return eval
@@ -242,7 +257,7 @@ cdef class Intersection(Shape2D):
         self.second=second
         self.type = "Intersection"
 
-    cpdef double eval(self,Point2D point):
+    cdef double eval(self,Point2D point):
 
         cdef double eval = max(self.first.eval(point),self.second.eval(point))
         return eval
@@ -304,7 +319,7 @@ cdef class Difference(Shape2D):
         self.second=second
         self.type = "Difference"
 
-    cpdef double eval(self,Point2D point):
+    cdef double eval(self,Point2D point):
 
         cdef double eval = max(self.first.eval(point),-self.second.eval(point))
         return eval
@@ -371,7 +386,7 @@ cdef class Primitives2D(Shape2D):
         self.type
         self.identifier
 
-    cpdef double eval (self, Point2D point):
+    cdef double eval (self, Point2D point):
         return self.eval(point)
 
 
@@ -433,7 +448,7 @@ cdef class Ellipse(Primitives2D):
         identifier=[self.type, self.axisX,self.axisY,self.theta,(self.center.x,self.center.y),self.coord,self.index, self.subIndex]
         self.identifier=identifier
 
-    cpdef double eval(self,Point2D point):
+    cdef double eval(self,Point2D point):
 
         cdef Point2D point_temp=translationRotation(self.sinTheta, self.cosTheta, self.center, point)
 
@@ -477,23 +492,28 @@ cdef class HalfPlaneGivenByAVector2D(Shape2D):
 
         Shape2D.__init__(self)
         self.type="Half-Plane"
-        self.vect=vect
-        self.identifier=[self.type, self.vect, self.index, self.subIndex]
+
+        self.vect = vect
+
+        cdef Point2D center = vect.first
+        self.center = center
+
+        cdef double l = sqrt(vect.firstCoord() * vect.firstCoord()\
+                     + vect.secondCoord() * vect.secondCoord())
+        if l==0.0:
+            raise ValueError, "the vector has length 0.0"
+
+        self.sinTheta = vect.secondCoord()/l
+        self.cosTheta = vect.secondCoord()/l
+
+        self.identifier = [self.type, self.vect, self.index, self.subIndex]
 
 
-    cpdef double eval(self,Point2D point):
+    cdef double eval(self,Point2D point):
 
-        cdef Point2D center=self.vect.first
+        cdef Point2D point_temp = translationRotation(self.sinTheta, self.cosTheta, self.center, point)
 
-        cdef double l=sqrt(self.vect.firstCoord()*self.vect.firstCoord()\
-                     +self.vect.secondCoord()*self.vect.secondCoord())
-
-        cdef double sinTheta=self.vect.secondCoord()/l
-        cdef double cosTheta=self.vect.firstCoord()/l
-
-        point=translationRotation(sinTheta, cosTheta, center, point)
-
-        return point.y
+        return point_temp.y
 
     cpdef tuple toString(self):
 

@@ -16,10 +16,11 @@
 
 
 cimport primitives2D
+cimport distance
 
 cdef class Tangency2D(object):
 
-    cdef public float firstCoord, secondCoord
+    cdef public double firstCoord, secondCoord
 
 cpdef Det(u , v)
 
@@ -35,4 +36,8 @@ cdef class Polynom(primitives2D.Shape2D):
     cdef public WeightedTangencedPoint2D X1
     cdef public WeightedTangencedPoint2D X2
     cdef public primitives2D.Vector2D vect
+    cdef double sinTheta, cosTheta
+    cdef primitives2D.Point2D p1_temp, p2_temp
+    cdef double alpha1, alpha2
+
     cdef public list identifier

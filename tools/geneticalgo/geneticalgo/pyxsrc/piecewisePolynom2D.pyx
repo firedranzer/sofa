@@ -19,7 +19,10 @@ import math
 import primitives2D
 import triangulation
 import copy
+import distance
 #cimport piecewisePolynom2D
+
+from libc.math cimport sin, cos, sqrt
 
 def clockwise(triangle):
 
@@ -30,7 +33,6 @@ def clockwise(triangle):
         return True
     else:
         return False
-
 
 def clockwise_triangle(triangle):
 
@@ -43,8 +45,6 @@ def clockwise_triangle(triangle):
     if triangulation.equation_droite(triangle[0], triangle[1], triangle[2]) > 0.0:
         new_triangle[1] = triangle[2]
         new_triangle[2] = triangle[1]
-        print "triangle   "+ str(triangle)
-        print "new_triangle   "+ str(new_triangle)
 
     return new_triangle
 
@@ -101,8 +101,8 @@ cdef class Polynom(primitives2D.Shape2D):
         self.type="Polynom"
         self.X1 = X
         self.X2 = Y
-        self.vect = primitives2D.Vector2D(self.X1.p,self.X2.p)
-
+        cdef primitives2D.Vector2D vect = primitives2D.Vector2D(self.X1.p,self.X2.p)
+        self.vect = vect
 
         if not orientation in [-1.0,1.0]:
             raise ValueError, "not orientation in [-1.0,1.0]"
@@ -112,31 +112,28 @@ cdef class Polynom(primitives2D.Shape2D):
             raise ValueError, "not side in ['up','down']"
 
         self.side = side
-        self.identifier=[self.type, self.X1, self.X2, self.vect, self.orientation, self.side]
 
-    cpdef double eval(self,primitives2D.Point2D point):
+        cdef double l = sqrt(self.vect.firstCoord()*self.vect.firstCoord() + self.vect.secondCoord()*self.vect.secondCoord())
 
-        cdef double l=math.sqrt(self.vect.firstCoord()*self.vect.firstCoord()\
-                     +self.vect.secondCoord()*self.vect.secondCoord())
         if l==0.0:
             raise ValueError, "both points are the same"
+        cdef double sinTheta = vect.secondCoord()/l
+        cdef double cosTheta = vect.firstCoord()/l
+        self.sinTheta = sinTheta
+        self.cosTheta = cosTheta
+        self.p1_temp = primitives2D.Point2D(0.0,0.0)
+        self.p2_temp = primitives2D.translationRotation(sinTheta, cosTheta, X.p, Y.p)
 
-        cdef double sinTheta=self.vect.secondCoord()/l
-        cdef double cosTheta=self.vect.firstCoord()/l
-
-        cdef primitives2D.Point2D p1_temp = primitives2D.Point2D(0.0,0.0)
-        cdef primitives2D.Point2D p2_temp = primitives2D.translationRotation(sinTheta, cosTheta, self.X1.p, self.X2.p)
-
-        cdef Tangency2D t1_temp = Tangency2D(cosTheta * self.X1.t.firstCoord + sinTheta * self.X1.t.secondCoord , -sinTheta * self.X1.t.firstCoord + cosTheta * self.X1.t.secondCoord)
-        cdef Tangency2D t2_temp = Tangency2D(cosTheta * self.X2.t.firstCoord + sinTheta * self.X2.t.secondCoord , -sinTheta * self.X2.t.firstCoord + cosTheta * self.X2.t.secondCoord)
+        cdef Tangency2D t1_temp = Tangency2D(cosTheta * X.t.firstCoord + sinTheta * X.t.secondCoord , -sinTheta * X.t.firstCoord + cosTheta * X.t.secondCoord)
+        cdef Tangency2D t2_temp = Tangency2D(cosTheta * Y.t.firstCoord + sinTheta * Y.t.secondCoord , -sinTheta * Y.t.firstCoord + cosTheta * Y.t.secondCoord)
 
         if t2_temp.firstCoord == 0.0:
-            print str(self.X1.p.x)
-            print str(self.X1.p.y)
-            print str(self.X2.p.x)
-            print str(self.X2.p.y)
-            print "self.X2.t.firstCoord " + str(self.X2.t.firstCoord)
-            print "self.X2.t.secondCoord " + str(self.X2.t.secondCoord)
+            print str(X.p.x)
+            print str(X.p.y)
+            print str(Y.p.x)
+            print str(Y.p.y)
+            print "self.X2.t.firstCoord " + str(Y.t.firstCoord)
+            print "self.X2.t.secondCoord " + str(Y.t.secondCoord)
             print "cosTheta "+str(cosTheta)
             print "sinTheta "+str(sinTheta)
 
@@ -146,38 +143,49 @@ cdef class Polynom(primitives2D.Shape2D):
             print "t2_temp.firstCoord  "+str(t2_temp.firstCoord)
             raise ValueError, "vertical tangent"
 
-        point=primitives2D.translationRotation(sinTheta, cosTheta, self.X1.p, point)
 
-        alpha1 = t1_temp.secondCoord/t1_temp.firstCoord
-        alpha2 = t2_temp.secondCoord/t2_temp.firstCoord
+        cdef double alpha1 = t1_temp.secondCoord/t1_temp.firstCoord
+        cdef double alpha2 = t2_temp.secondCoord/t2_temp.firstCoord
 
-        cdef double x = point.x
-        cdef double y = point.y
+        self.alpha1 = alpha1
+        self.alpha2 = alpha2
 
-        function = self.X2.wLeft * alpha2 * (x - p1_temp.x) * (x - p1_temp.x) * (x - p2_temp.x) /((p2_temp.x - p1_temp.x) * (p2_temp.x - p1_temp.x))\
-                 + self.X1.wRight * alpha1 * (x - p2_temp.x) * (x - p2_temp.x) * (x - p1_temp.x) /((p2_temp.x - p1_temp.x) * (p2_temp.x - p1_temp.x))
+
+
+        self.identifier=[self.type, X, self.X2, self.vect, self.orientation, self.side]
+
+
+    cdef double eval(self,primitives2D.Point2D point):
+
+        cdef primitives2D.Point2D point_temp = primitives2D.translationRotation(self.sinTheta, self.cosTheta, self.X1.p, point)
+
+        cdef double x = point_temp.x
+        cdef double y = point_temp.y
+
+        cdef double function = self.X2.wLeft * self.alpha2 * (x - self.p1_temp.x) * (x - self.p1_temp.x) * (x - self.p2_temp.x) /((self.p2_temp.x - self.p1_temp.x) * (self.p2_temp.x - self.p1_temp.x))\
+                 + self.X1.wRight * self.alpha1 * (x - self.p2_temp.x) * (x - self.p2_temp.x) * (x - self.p1_temp.x) /((self.p2_temp.x - self.p1_temp.x) * (self.p2_temp.x - self.p1_temp.x))
 
         if self.side == "up":
             if self.orientation == 1.0:
-                if x >= p1_temp.x and x <= p2_temp.x  and y >=0.0:
+                if x >= self.p1_temp.x and x <= self.p2_temp.x  and y >=0.0:
                     return (y - function)
                 else:
                     return 1.0
             else:
-                if x >= p1_temp.x and x <= p2_temp.x  and y <=0.0:
+                if x >= self.p1_temp.x and x <= self.p2_temp.x  and y <=0.0:
                     return -(y - function)
                 else:
                     return 1.0
 
         elif self.side == "down":
             if self.orientation == 1.0:
-                if x >= p1_temp.x and x <= p2_temp.x:
+                if x >= self.p1_temp.x and x <= self.p2_temp.x:
                     return (y - function)
 
                 else:
                     return y
             else:
-                if x >= p1_temp.x and x <= p2_temp.x:
+                if x >= self.p1_temp.x and x <= self.p2_temp.x:
                     return -(y - function)
                 else:
                     return -y
@@ -223,10 +231,10 @@ def createListTangentPoints(listOfCouplesxyWeight):
             tan1 = Tangency2D(p2.x - p1.x , p2.y - p1.y)
             tan2 = Tangency2D(p3.x - p2.x , p3.y - p2.y)
 
-#            if abs(Det(tan1, tan2))<0.01*math.sqrt(norm2(tan1)*norm2(tan2)) and scal(tan1, tan2) < 0.0:
+#            if abs(Det(tan1, tan2))<0.01*sqrt(norm2(tan1)*norm2(tan2)) and scal(tan1, tan2) < 0.0:
 #                raise ValueError, "the succesive points make a too sharp angle"
 
-            while scal(tan1,tan1 + tan2) <= 0.1*math.sqrt(norm2(tan1)*norm2(tan1 + tan2)):
+            while scal(tan1,tan1 + tan2) <= 0.1*sqrt(norm2(tan1)*norm2(tan1 + tan2)):
 
                 tan2 = tan2.prod(0.5)
 
@@ -286,46 +294,29 @@ def CLOSEDC1smoothPiecewisePolynomialChain(listPolynom):
     listShape = []
 
     for polynom in listPolynom:
+
         listVectors.append([(polynom.vect.first.x, polynom.vect.first.y), (polynom.vect.second.x, polynom.vect.second.y)])
         listVertices.append([polynom.X1.p.x, polynom.X1.p.y])
+
+#    if [listPolynom[-1].X2.p.x, listPolynom[-1].X2.p.y] in listVertices:
+#            raise ValueError, "already in the list"
 
     listVertices.append([listPolynom[-1].X2.p.x, listPolynom[-1].X2.p.y])
 
 #    if listVertices[0]!=listVertices[-1]:
 #        print "listVertices[0]!=listVertices[-1]"+str(listVertices[0])+str( listVertices[-1])
 #        raise ValueError, "the chain is not closed"
+    polygon = []
 
-    liste_triangles = triangulation.trianguler_polygone(listVertices)
-    list_shapes_triangle = []
+    for vertex in listVertices:
 
-    print "listVectors:   " + str(listVectors)
+        polygon.append(primitives2D.Point2D(vertex[0], vertex[1]))
 
-    for triangle in liste_triangles:
-        triangle = clockwise_triangle(triangle)
-        if not clockwise(triangle):
-            print str(triangle)
-            raise ValueError, "ill-oriented triangle"
+    if not (polygon[0].x == polygon[-1].x and polygon[0].y == polygon[-1].y):
 
-        vects = [primitives2D.Vector2D(primitives2D.Point2D(triangle[0][0],triangle[0][1]), primitives2D.Point2D(triangle[1][0],triangle[1][1])),\
-                 primitives2D.Vector2D(primitives2D.Point2D(triangle[1][0],triangle[1][1]), primitives2D.Point2D(triangle[2][0],triangle[2][1])),\
-                 primitives2D.Vector2D(primitives2D.Point2D(triangle[2][0],triangle[2][1]), primitives2D.Point2D(triangle[0][0],triangle[0][1]))\
-                 ]
-        localShapes = []
-        for i in range(3):
-            localShapes.append(primitives2D.HalfPlaneGivenByAVector2D(vects[i]))
+        raise ValueError, "non closed polygon"
 
-        shape_triangle = localShapes[0]
-
-        for i in [1,2]:
-            shape_triangle = primitives2D.Intersection(shape_triangle, localShapes[i])
-
-        list_shapes_triangle.append(shape_triangle)
-
-    ShapeInt = list_shapes_triangle[0]
-
-    if len(list_shapes_triangle)>1:
-        for i in range(1, len(list_shapes_triangle)):
-            ShapeInt = primitives2D.Union(ShapeInt, list_shapes_triangle[i])
+    ShapeInt = distance.polygon_boosted_evaluation(polygon)
 
     for polynom in listPolynom:
         ShapeInt = primitives2D.Union(ShapeInt, Polynom(polynom.X1, polynom.X2, -1.0*polynom.orientation, "up"))

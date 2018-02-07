@@ -863,7 +863,7 @@ cdef class ExtrusionOfShape2D(Shape):
 
             newpoint=self.translationRotation(point)
 
-            cdef double eval = max(fabs(newpoint.z-self.heigth/2.0)-self.heigth/2.0,self.shape2D.eval(newpoint.projectTo2D()))
+            cdef double eval = max(fabs(newpoint.z-self.heigth/2.0)-self.heigth/2.0, self.shape2D.eval(newpoint.projectTo2D()))
 
             return eval
 
