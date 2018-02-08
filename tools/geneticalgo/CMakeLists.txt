@@ -16,6 +16,8 @@ set(EXTRA_FILES
     geneticalgo/generate_expression.py
     geneticalgo/algorithm.py
 
+    geneticalgo/pyxsrc/distance.pyx
+    geneticalgo/pyxsrc/distance.pxd
     geneticalgo/pyxsrc/primitives.pyx
     geneticalgo/pyxsrc/primitives.pxd
     geneticalgo/pyxsrc/primitives2D.pyx
@@ -39,6 +41,15 @@ set(EXTRA_FILES
     scenes/crochet/customfield.py
     scenes/crochet/shape.py
     scenes/crochet/shapeinv.py
+
+    scenes/SOFIA/main.py
+    scenes/SOFIA/SOFIAutils.py
+    scenes/SOFIA/scene.pyscn
+    scenes/SOFIA/controller.py
+    scenes/SOFIA/customfield.py
+    scenes/SOFIA/SOFIA.py
+    scenes/SOFIA/shape.py
+    scenes/SOFIA/shapeinv.py
 
     utils/script.sh
     utils/script.py

@@ -193,7 +193,7 @@ cdef double plateau(double Xmin, double Xmax, double Ymin, double Ymax, double t
 
 cdef class polygon_boosted_evaluation(primitives2D.Shape2D):
 
-    def __init__(self, list polygon, int nX = 10, int nY = 10, double thickness= 0.01):
+    def __init__(self, list polygon, int nX = 10, int nY = 10, double thickness= 1.0):
 
         if not (nX > 0 and nY > 0):
             raise ValueError, "I nedd a positive number of boxes"

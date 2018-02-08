@@ -11,50 +11,16 @@
 ####################################################################################################
 
 
-import geneticAlgorithm
+import primitives2D
 
-#geneticAlgorithm.generate_initPop(1000)
+X = primitives2D.Point2D(1.0,2.0)
+Y = primitives2D.Point2D(2.0, 3.0)
 
-
-POPULATION=geneticAlgorithm.getPOPULATION()
-
-#geneticAlgorithm.popDisplay(POPULATION)
-#print str(individual.Level)
+vect = primitives2D.Vector2D(X, Y)
 
 
-individual1=geneticAlgorithm.getNewInd("frisbee")
+plane = primitives2D.HalfPlaneGivenByAVector2D(vect)
 
-#print individual1.display()
+point =  primitives2D.Point2D(1.0, 2.50)
 
-#geneticAlgorithm.mutation_axisX(individual1)
-#print individual1.display()
-
-#geneticAlgorithm.mutation_axisY(individual1)
-#print individual1.display()
-
-#geneticAlgorithm.mutation_axisZ(individual1)
-#print individual1.display()
-
-#geneticAlgorithm.mutation_type(individual1)
-#print individual1.display()
-
-individual2=geneticAlgorithm.getNewInd("ellipsoid")
-
-#ind1, ind2= geneticAlgorithm.crossing_ind(individual1,individual2)
-
-print "CROSSING"
-print "individual1"
-print individual1.display()
-print "individual2"
-print individual2.display()
-
-print "ind1"
-print ind1.display()
-print "ind2"
-print ind2.display()
-
-
-print "individual1"
-print individual1.display()
-print "individual2"
-print individual2.display()
+print "value= "+str(plane.evalPython(point))

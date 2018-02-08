@@ -55,15 +55,19 @@ cdef class Tangency2D(object):
         self.secondCoord = secondCoord
 
     def prod(self, x):
-        return Tangency2D(self.firstCoord * x, self.firstCoord * x)
+        self.firstCoord *= x
+        self.secondCoord *= x
 
     def __add__(self, u):
 
         return Tangency2D(self.firstCoord + u.firstCoord, self.secondCoord + u.secondCoord)
 
 
-def norm2(u):
+cpdef norm2(u):
     return u.firstCoord**2 + u.secondCoord**2
+
+cpdef norm(u):
+    return sqrt(norm2(u))
 
 
 cpdef Det(u , v):
@@ -215,6 +219,7 @@ def createListTangentPoints(listOfCouplesxyWeight):
 
     wLeft1 = listOfCouplesxyWeight[0][2]
     wRight1 = listOfCouplesxyWeight[0][3]
+
     newList.append(WeightedTangencedPoint2D(p1,t1,wLeft1, wRight1))
 
     if n>2:
@@ -225,18 +230,23 @@ def createListTangentPoints(listOfCouplesxyWeight):
             p3=primitives2D.Point2D(listOfCouplesxyWeight[i+2][0],listOfCouplesxyWeight[i+2][1])
 
             if primitives2D.equal(p1, p2) or primitives2D.equal(p2, p3) or primitives2D.equal(p1, p3):
+
+                print "points" + str(p1.x)+ "  " + str(p2.x)+ "  " + str(p3.x)+ " \n\n "
+                print "points" + str(p1.y)+ "  " + str(p2.y)+ "  " + str(p3.y)+ " \n\n "
                 raise ValueError, "two successive points are the same"
 
 
             tan1 = Tangency2D(p2.x - p1.x , p2.y - p1.y)
+            tan1.prod(1.0/norm(tan1))
             tan2 = Tangency2D(p3.x - p2.x , p3.y - p2.y)
+            tan2.prod(1.0/norm(tan2))
 
 #            if abs(Det(tan1, tan2))<0.01*sqrt(norm2(tan1)*norm2(tan2)) and scal(tan1, tan2) < 0.0:
 #                raise ValueError, "the succesive points make a too sharp angle"
 
-            while scal(tan1,tan1 + tan2) <= 0.1*sqrt(norm2(tan1)*norm2(tan1 + tan2)):
+#            while scal(tan1,tan1 + tan2) <= 0.1*sqrt(norm2(tan1)*norm2(tan1 + tan2)):
 
-                tan2 = tan2.prod(0.5)
+#                tan2 = tan2.prod(0.5)
 
             t2 = tan1 + tan2
 
@@ -312,9 +322,13 @@ def CLOSEDC1smoothPiecewisePolynomialChain(listPolynom):
 
         polygon.append(primitives2D.Point2D(vertex[0], vertex[1]))
 
+
+
     if not (polygon[0].x == polygon[-1].x and polygon[0].y == polygon[-1].y):
 
         raise ValueError, "non closed polygon"
+
+
 
     ShapeInt = distance.polygon_boosted_evaluation(polygon)
 
