@@ -20,7 +20,7 @@ import numpy as np
 import random
 import copy
 
-x = 0.0
+x = 1.0
 
 class Side(object):
 
@@ -262,7 +262,7 @@ class SOFIA(object):
 
                     list_temp .append([X, Y, x, x])
                     i+=1
-
+                newList.append(list_temp)
                 k=i
         print "newList ="+str(newList)
         return newList
@@ -316,8 +316,8 @@ class SOFIA(object):
 #                vOrtho = (vOrtho_temp[1]/norm, vOrtho_temp[0]/norm)
 
 #                print str(vOrtho)
-                X = self.listOfControlPoints[i].x - self.listOfControlPoints[i].leftSide.width_hole #* vOrtho[0]
-                Y = self.listOfControlPoints[i].y #- self.listOfControlPoints[i].leftSide.width_hole #* vOrtho[1]
+                X = self.listOfControlPoints[i].x - self.listOfControlPoints[i].rightSide.width_hole #* vOrtho[0]
+                Y = self.listOfControlPoints[i].y #- self.listOfControlPoints[i].right.width_hole #* vOrtho[1]
 
                 list_temp = [[self.listOfControlPoints[i-1].x, self.listOfControlPoints[i-1].y, x, x], [X, Y, x, x], [self.listOfControlPoints[i+1].x, self.listOfControlPoints[i+1].y, x, x]]
 
@@ -352,12 +352,12 @@ class SOFIA(object):
 #                    vOrtho = (-vOrtho_temp[1]/norm, vOrtho_temp[0]/norm)
 #                    print str(vOrtho)
 
-                    X = self.listOfControlPoints[i].x - self.listOfControlPoints[i].leftSide.width_hole #* vOrtho[0]
+                    X = self.listOfControlPoints[i].x - self.listOfControlPoints[i].rightSide.width_hole #* vOrtho[0]
                     Y = self.listOfControlPoints[i].y #- self.listOfControlPoints[i].leftSide.width_hole #* vOrtho[1]
 
                     list_temp .append([X, Y, x, x])
                     i+=1
-
+                newList.append(list_temp)
                 k=i
         print len(newList)
         return newList
@@ -383,10 +383,17 @@ class SOFIA(object):
         for i in range(len(Line)):
             if not node_equal(newLine[-1], Line[i]):
                 newLine.append(Line[i])
+        if not node_equal(newLine[-1], leftLine[0]):
+            newLine.append(leftLine[0])
+        else:
+            newLine[-1]=copy.deepcopy(leftLine[0])
+
+
+        newLine =piecewisePolynom2D.SharpenListTangentPoints(newLine, 0.1)
 
         Line = newLine
 
-        Line.append(leftLine[0])
+
 
         print str(Line)
 
@@ -395,7 +402,7 @@ class SOFIA(object):
 
         ListTangentPoints = piecewisePolynom2D.createListTangentPoints(Line)
 
-        ListPolynom = piecewisePolynom2D.createListPolynom(ListTangentPoints, -1.0)
+        ListPolynom = piecewisePolynom2D.createListPolynom(ListTangentPoints, 1.0)
 
         C1smoothPiecewisePolynomialChain = piecewisePolynom2D.CLOSEDC1smoothPiecewisePolynomialChain(ListPolynom)
 
@@ -445,7 +452,7 @@ class SOFIA(object):
 
             ListTangentPoints_hole = piecewisePolynom2D.createListTangentPoints(LocalHole)
 
-            ListPolynom_hole = piecewisePolynom2D.createListPolynom(ListTangentPoints_hole, -1.0)
+            ListPolynom_hole = piecewisePolynom2D.createListPolynom(ListTangentPoints_hole, 1.0)
 
             C1smoothPiecewisePolynomialChain_hole = piecewisePolynom2D.CLOSEDC1smoothPiecewisePolynomialChain(ListPolynom_hole)
 
@@ -514,12 +521,15 @@ if False:
     ################
 
 
-    listOfDrawnPoints = [[0.0, 0.1, [0.0, 0.05],[0.0, 0.05]],\
-                         [0.005, 0.075, [0.00, 0.05],[0.0, 0.05]],\
-                         [0.015, 0.05, [0.01, 0.075], [0.01, 0.075]],\
-                         [0.05, 0.025, [0.00, 0.075], [0.00, 0.075]],\
-                         [0.0, 0.0, [0.0, 0.025], [0.0, 0.025]],\
-                         [0.0, -0.1, [0.0, 0.025], [0.0, 0.025]]]
+    listOfDrawnPoints = [[0.00, 0.1, [0.0, 0.03],[0.0, 0.03]],\
+                        [0.0, 0.075, [0.00, 0.05],[0.0, 0.05]],\
+                        [0.0, 0.05, [0.01, 0.05], [0.01, 0.05]],\
+                        [0.00, 0.025, [0.01, 0.05], [0.01, 0.05]],\
+                        [0.00, 0.00, [0.00, 0.02], [0.00, 0.02]],\
+                        [0.00, -0.025, [0.00, 0.02], [0.00, 0.02]],\
+                        [0.00, -0.05, [0.02, 0.05], [0.02, 0.05]],\
+                        [0.00, -0.075, [0.00, 0.05], [0.00, 0.05]],\
+                        [0.00, -0.1, [0.00, 0.05], [0.00, 0.05]]]
 
     sofia = generateSOFIAManually(listOfDrawnPoints, 0.05)
 
@@ -528,7 +538,7 @@ if False:
     import numpy as np
     import random
     import matplotlib.pyplot as plt
-    (n,p)=(500,500)
+    (n,p)=(300,300)
     x , y = np.meshgrid(np.linspace(-0.15, 0.15,n),np.linspace(-0.15,0.12,p))
     z = np.zeros((n,p))
     for i in range(n):

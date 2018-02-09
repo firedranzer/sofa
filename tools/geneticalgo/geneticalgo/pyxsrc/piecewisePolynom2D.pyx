@@ -183,16 +183,16 @@ cdef class Polynom(primitives2D.Shape2D):
 
         elif self.side == "down":
             if self.orientation == 1.0:
-                if x >= self.p1_temp.x and x <= self.p2_temp.x:
+                if x >= self.p1_temp.x and x <= self.p2_temp.x and y <=0:
                     return (y - function)
 
                 else:
-                    return y
+                    return 1.0#y
             else:
-                if x >= self.p1_temp.x and x <= self.p2_temp.x:
+                if x >= self.p1_temp.x and x <= self.p2_temp.x and y >=0:
                     return -(y - function)
                 else:
-                    return -y
+                    return 1.0 #-y
         else:
 
             raise ValueError, "I need a 'up' or 'down'"
@@ -389,12 +389,12 @@ def CLOSEDC1smoothPiecewisePolynomialChain(listPolynom):
     ShapeInt = distance.polygon_boosted_evaluation(polygon)
 
     for polynom in listPolynom:
-        ShapeInt = primitives2D.Union(ShapeInt, Polynom(polynom.X1, polynom.X2, -1.0*polynom.orientation, "up"))
+        ShapeInt = primitives2D.Union(ShapeInt, Polynom(polynom.X1, polynom.X2, polynom.orientation, "up"))
 
     ShapeExt = primitives2D.Difference(primitives2D.All(), ShapeInt)
 
     for polynom in listPolynom:
-        ShapeExt = primitives2D.Union(ShapeExt, Polynom(polynom.X1, polynom.X2, polynom.orientation, "up"))
+        ShapeExt = primitives2D.Union(ShapeExt, Polynom(polynom.X1, polynom.X2, -polynom.orientation, "up"))
 
 
     return primitives2D.Difference(ShapeInt, ShapeExt)
