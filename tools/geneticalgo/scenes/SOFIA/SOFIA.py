@@ -18,8 +18,9 @@ import piecewisePolynom2D
 import math
 import numpy as np
 import random
+import copy
 
-x = 1.0
+x = 0.0
 
 class Side(object):
 
@@ -95,28 +96,28 @@ class SOFIA(object):
 
         for i in range(len(self.listOfControlPoints)-2):
 
-            vTangent1 = (self.listOfControlPoints[i+2].x - self.listOfControlPoints[i+1].x,\
-                         self.listOfControlPoints[i+2].y - self.listOfControlPoints[i+1].y)
-            norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
+#            vTangent1 = (self.listOfControlPoints[i+2].x - self.listOfControlPoints[i+1].x,\
+#                         self.listOfControlPoints[i+2].y - self.listOfControlPoints[i+1].y)
+#            norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
 
-            if not norm1 > 0.0:
-                raise ValueError, "bad angle"
+#            if not norm1 > 0.0:
+#                raise ValueError, "bad angle"
 
-            vTangent2 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
-            norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
+#            vTangent2 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
+#            norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
 
-            if not norm2 > 0.0:
-                raise ValueError, "bad angle"
+#            if not norm2 > 0.0:
+#                raise ValueError, "bad angle"
 
-            vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
+#            vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
 
-            norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
+#            norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
 
-            vOrtho = (-vOrtho_temp[1]/norm, vOrtho_temp[0]/norm)
-            print str(vOrtho)
+#            vOrtho = (-vOrtho_temp[1]/norm, vOrtho_temp[0]/norm)
+#            print str(vOrtho)
 
-            X = self.listOfControlPoints[i+1].x + (self.listOfControlPoints[i+1].leftSide.thickness + self.listOfControlPoints[i+1].leftSide.width_hole) * vOrtho[0]
-            Y = self.listOfControlPoints[i+1].y + (self.listOfControlPoints[i+1].leftSide.thickness + self.listOfControlPoints[i+1].leftSide.width_hole) * vOrtho[1]
+            X = self.listOfControlPoints[i+1].x + (self.listOfControlPoints[i+1].leftSide.thickness + self.listOfControlPoints[i+1].leftSide.width_hole)# * vOrtho[0]
+            Y = self.listOfControlPoints[i+1].y #+ (self.listOfControlPoints[i+1].leftSide.thickness + self.listOfControlPoints[i+1].leftSide.width_hole)# * vOrtho[1]
 
             newList.append([X, Y, x, x])
 
@@ -133,27 +134,27 @@ class SOFIA(object):
 
         for i in range(len(self.listOfControlPoints)-2):
 
-            vTangent1 = (self.listOfControlPoints[i+2].x - self.listOfControlPoints[i+1].x, self.listOfControlPoints[i+2].y - self.listOfControlPoints[i+1].y)
-            norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
+#            vTangent1 = (self.listOfControlPoints[i+2].x - self.listOfControlPoints[i+1].x, self.listOfControlPoints[i+2].y - self.listOfControlPoints[i+1].y)
+#            norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
 
-            if not norm1 > 0.0:
-                raise ValueError, "bad angle"
+#            if not norm1 > 0.0:
+#                raise ValueError, "bad angle"
 
-            vTangent2 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
-            norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
+#            vTangent2 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
+#            norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
 
-            if not norm2 > 0.0:
-                raise ValueError, "bad angle"
+#            if not norm2 > 0.0:
+#                raise ValueError, "bad angle"
 
-            vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
+#            vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
 
-            norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
+#            norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
 
-            vOrtho = (vOrtho_temp[1]/norm, -vOrtho_temp[0]/norm)
-            print str(vOrtho)
+#            vOrtho = (vOrtho_temp[1]/norm, -vOrtho_temp[0]/norm)
+#            print str(vOrtho)
 
-            X = self.listOfControlPoints[i+1].x + (self.listOfControlPoints[i+1].rightSide.width_hole + self.listOfControlPoints[i+1].rightSide.thickness) * vOrtho[0]
-            Y = self.listOfControlPoints[i+1].y + (self.listOfControlPoints[i+1].rightSide.width_hole + self.listOfControlPoints[i+1].rightSide.thickness) * vOrtho[1]
+            X = self.listOfControlPoints[i+1].x - (self.listOfControlPoints[i+1].rightSide.width_hole + self.listOfControlPoints[i+1].rightSide.thickness)# * vOrtho[0]
+            Y = self.listOfControlPoints[i+1].y #- (self.listOfControlPoints[i+1].rightSide.width_hole + self.listOfControlPoints[i+1].rightSide.thickness)# * vOrtho[1]
 
             newList.append([X, Y, x, x])
 
@@ -165,6 +166,7 @@ class SOFIA(object):
     def hole_LeftLine(self):
 
         newList=[]
+
         n = len(self.listOfControlPoints)
 
         if n < 3:
@@ -190,34 +192,39 @@ class SOFIA(object):
             if i == n:
                 return newList
 
+            print not(self.listOfControlPoints[i].leftSide.width_hole == 0.0 and self.listOfControlPoints[i].rightSide.width_hole == 0.0)
+
             if self.listOfControlPoints[i+1].leftSide.width_hole == 0.0 and self.listOfControlPoints[i+1].rightSide.width_hole == 0.0:
 
-                vTangent1 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
-                norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
+                print "here I am 1"
 
-                if not norm1 > 0.0:
-                    raise ValueError, "bad angle"
+#                vTangent1 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
+#                norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
 
-                vTangent2 = (self.listOfControlPoints[i].x - self.listOfControlPoints[i-1].x, self.listOfControlPoints[i].y - self.listOfControlPoints[i-1].y)
-                norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
+#                if not norm1 > 0.0:
+#                    raise ValueError, "bad angle"
 
-                if not norm2 > 0.0:
-                    raise ValueError, "bad angle"
+#                vTangent2 = (self.listOfControlPoints[i].x - self.listOfControlPoints[i-1].x, self.listOfControlPoints[i].y - self.listOfControlPoints[i-1].y)
+#                norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
 
-                vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
+#                if not norm2 > 0.0:
+#                    raise ValueError, "bad angle"
 
-                norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
+#                vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
 
-                Ortho = (-vOrtho_temp[1]/norm, vOrtho_temp[0]/norm)
+#                norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
 
-                print str(vOrtho)
+#                vOrtho = (-vOrtho_temp[1]/norm, vOrtho_temp[0]/norm)
 
-                X = self.listOfControlPoints[i].x + self.listOfControlPoints[i].leftSide.width_hole * vOrtho[0]
-                Y = self.listOfControlPoints[i].y + self.listOfControlPoints[i].leftSide.width_hole * vOrtho[1]
+#                print str(vOrtho)
+
+                X = self.listOfControlPoints[i].x + self.listOfControlPoints[i].leftSide.width_hole # * vOrtho[0]
+                Y = self.listOfControlPoints[i].y #+ self.listOfControlPoints[i].leftSide.width_hole # * vOrtho[1]
 
                 list_temp = [[self.listOfControlPoints[i-1].x, self.listOfControlPoints[i-1].y, x, x], [X, Y, x, x], [self.listOfControlPoints[i+1].x, self.listOfControlPoints[i+1].y, x, x]]
 
                 newList.append(list_temp)
+                print "newList ="+str(newList)
 
                 i+=1
 
@@ -227,36 +234,37 @@ class SOFIA(object):
             else:
 
                 list_temp = []
+                print "here I am 2"
 
                 while i < n-1 and (self.listOfControlPoints[i].leftSide.width_hole > 0.0 or self.listOfControlPoints[i].rightSide.width_hole > 0.0):
 
-                    vTangent1 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
-                    norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
+#                    vTangent1 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
+#                    norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
 
-                    if not norm1 > 0.0:
-                        raise ValueError, "bad angle"
+#                    if not norm1 > 0.0:
+#                        raise ValueError, "bad angle"
 
-                    vTangent2 = (self.listOfControlPoints[i].x - self.listOfControlPoints[i-1].x, self.listOfControlPoints[i].y - self.listOfControlPoints[i-1].y)
-                    norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
+#                    vTangent2 = (self.listOfControlPoints[i].x - self.listOfControlPoints[i-1].x, self.listOfControlPoints[i].y - self.listOfControlPoints[i-1].y)
+#                    norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
 
-                    if not norm2 > 0.0:
-                        raise ValueError, "bad angle"
+#                    if not norm2 > 0.0:
+#                        raise ValueError, "bad angle"
 
-                    vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
+#                    vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
 
-                    norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
+#                    norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
 
-                    vOrtho = (-vOrtho_temp[0]/norm, vOrtho_temp[1]/norm)
+#                    vOrtho = (-vOrtho_temp[0]/norm, vOrtho_temp[1]/norm)
 
-                    print str(vOrtho)
-                    X = self.listOfControlPoints[i].x + self.listOfControlPoints[i].leftSide.width_hole * vOrtho[0]
-                    Y = self.listOfControlPoints[i].y + self.listOfControlPoints[i].leftSide.width_hole * vOrtho[1]
+#                    print str(vOrtho)
+                    X = self.listOfControlPoints[i].x + self.listOfControlPoints[i].leftSide.width_hole #* vOrtho[0]
+                    Y = self.listOfControlPoints[i].y #+ self.listOfControlPoints[i].leftSide.width_hole #* vOrtho[1]
 
                     list_temp .append([X, Y, x, x])
                     i+=1
 
                 k=i
-
+        print "newList ="+str(newList)
         return newList
 
 
@@ -289,27 +297,27 @@ class SOFIA(object):
 
             if self.listOfControlPoints[i+1].leftSide.width_hole == 0.0 and self.listOfControlPoints[i+1].rightSide.width_hole == 0.0:
 
-                vTangent1 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
-                norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
+#                vTangent1 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
+#                norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
 
-                if not norm1 > 0.0:
-                    raise ValueError, "bad angle"
+#                if not norm1 > 0.0:
+#                    raise ValueError, "bad angle"
 
-                vTangent2 = (self.listOfControlPoints[i].x - self.listOfControlPoints[i-1].x, self.listOfControlPoints[i].y - self.listOfControlPoints[i-1].y)
-                norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
+#                vTangent2 = (self.listOfControlPoints[i].x - self.listOfControlPoints[i-1].x, self.listOfControlPoints[i].y - self.listOfControlPoints[i-1].y)
+#                norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
 
-                if not norm2 > 0.0:
-                    raise ValueError, "bad angle"
+#                if not norm2 > 0.0:
+#                    raise ValueError, "bad angle"
 
-                vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
+#                vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
 
-                norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
+#                norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
 
-                vOrtho = (vOrtho_temp[1]/norm, vOrtho_temp[0]/norm)
+#                vOrtho = (vOrtho_temp[1]/norm, vOrtho_temp[0]/norm)
 
-                print str(vOrtho)
-                X = self.listOfControlPoints[i].x + self.listOfControlPoints[i].leftSide.width_hole * vOrtho[0]
-                Y = self.listOfControlPoints[i].y + self.listOfControlPoints[i].leftSide.width_hole * vOrtho[1]
+#                print str(vOrtho)
+                X = self.listOfControlPoints[i].x - self.listOfControlPoints[i].leftSide.width_hole #* vOrtho[0]
+                Y = self.listOfControlPoints[i].y #- self.listOfControlPoints[i].leftSide.width_hole #* vOrtho[1]
 
                 list_temp = [[self.listOfControlPoints[i-1].x, self.listOfControlPoints[i-1].y, x, x], [X, Y, x, x], [self.listOfControlPoints[i+1].x, self.listOfControlPoints[i+1].y, x, x]]
 
@@ -325,27 +333,27 @@ class SOFIA(object):
                 while i < n-1 and (self.listOfControlPoints[i].leftSide.width_hole > 0.0 or self.listOfControlPoints[i].rightSide.width_hole > 0.0):
                     print(i)
 
-                    vTangent1 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
-                    norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
+#                    vTangent1 = (self.listOfControlPoints[i+1].x - self.listOfControlPoints[i].x, self.listOfControlPoints[i+1].y - self.listOfControlPoints[i].y)
+#                    norm1 = math.sqrt(vTangent1[0]**2 + vTangent1[1]**2)
 
-                    if not norm1 > 0.0:
-                        raise ValueError, "bad angle"
+#                    if not norm1 > 0.0:
+#                        raise ValueError, "bad angle"
 
-                    vTangent2 = (self.listOfControlPoints[i].x - self.listOfControlPoints[i-1].x, self.listOfControlPoints[i].y - self.listOfControlPoints[i-1].y)
-                    norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
+#                    vTangent2 = (self.listOfControlPoints[i].x - self.listOfControlPoints[i-1].x, self.listOfControlPoints[i].y - self.listOfControlPoints[i-1].y)
+#                    norm2 = math.sqrt(vTangent2[0]**2 + vTangent2[1]**2)
 
-                    if not norm2 > 0.0:
-                        raise ValueError, "bad angle"
+#                    if not norm2 > 0.0:
+#                        raise ValueError, "bad angle"
 
-                    vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
+#                    vOrtho_temp = ((vTangent1[0]/norm1 + vTangent2[0]/norm2),(vTangent1[1]/norm1 + vTangent2[1]/norm2))
 
-                    norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
+#                    norm = math.sqrt(vOrtho_temp[0]**2 + vOrtho_temp[1]**2)
 
-                    vOrtho = (-vOrtho_temp[1]/norm, vOrtho_temp[0]/norm)
-                    print str(vOrtho)
+#                    vOrtho = (-vOrtho_temp[1]/norm, vOrtho_temp[0]/norm)
+#                    print str(vOrtho)
 
-                    X = self.listOfControlPoints[i].x + self.listOfControlPoints[i].leftSide.width_hole * vOrtho[0]
-                    Y = self.listOfControlPoints[i].y + self.listOfControlPoints[i].leftSide.width_hole * vOrtho[1]
+                    X = self.listOfControlPoints[i].x - self.listOfControlPoints[i].leftSide.width_hole #* vOrtho[0]
+                    Y = self.listOfControlPoints[i].y #- self.listOfControlPoints[i].leftSide.width_hole #* vOrtho[1]
 
                     list_temp .append([X, Y, x, x])
                     i+=1
@@ -401,7 +409,7 @@ class SOFIA(object):
 
         n = len(hole_Left)
 
-        print n
+        print "number of hole = " + str(n)
 
         for i in range(n):
 
@@ -417,12 +425,23 @@ class SOFIA(object):
 
             for i in range(len(LocalHole)):
                 if not node_equal(newHole[-1], LocalHole[i]):
-                    newLine.append(LocalHole[i])
+                    newHole.append(LocalHole[i])
 
+
+            if not node_equal(newHole[-1], newLeftHole[0]):
+
+                newHole.append(newLeftHole[0])
+
+            else:
+
+                newHole[-1]=copy.deepcopy(newLeftHole[0])
+
+            newHole = piecewisePolynom2D.SharpenListTangentPoints(newHole, 0.1)
             LocalHole = newHole
 
-            LocalHole.append(newLeftHole[0])
 
+
+            print "LocalHole=" + str(LocalHole)
 
             ListTangentPoints_hole = piecewisePolynom2D.createListTangentPoints(LocalHole)
 
@@ -430,7 +449,7 @@ class SOFIA(object):
 
             C1smoothPiecewisePolynomialChain_hole = piecewisePolynom2D.CLOSEDC1smoothPiecewisePolynomialChain(ListPolynom_hole)
 
-            shape2D = primtives2D.Difference(shape2D, C1smoothPiecewisePolynomialChain_hole)
+            shape2D = primitives2D.Difference(shape2D, C1smoothPiecewisePolynomialChain_hole)
 
 
         shape=primitives.ExtrusionOfShape2D(shape2D, self.thickness,0.0,0.0, primitives.Point(0.0,0.0,0.0))
@@ -486,7 +505,7 @@ def generateSOFIAManually(listOfDrawnPoints, thickness):
     return SOFIA(listofControlPoints, thickness)
 
 
-if True:
+if False:
 
     ################
     ###
@@ -496,10 +515,11 @@ if True:
 
 
     listOfDrawnPoints = [[0.0, 0.1, [0.0, 0.05],[0.0, 0.05]],\
-                         [0.0, 0.075, [0.001, 0.05],[0.001, 0.05]],\
-                         [0.00, 0.05, [0.002, 0.075], [0.002, 0.075]],\
-                         [0.00, 0.025, [0.0015, 0.075], [0.0015, 0.075]],\
-                         [0.0, 0.0, [0.0, 0.025], [0.0, 0.025]]]
+                         [0.005, 0.075, [0.00, 0.05],[0.0, 0.05]],\
+                         [0.015, 0.05, [0.01, 0.075], [0.01, 0.075]],\
+                         [0.05, 0.025, [0.00, 0.075], [0.00, 0.075]],\
+                         [0.0, 0.0, [0.0, 0.025], [0.0, 0.025]],\
+                         [0.0, -0.1, [0.0, 0.025], [0.0, 0.025]]]
 
     sofia = generateSOFIAManually(listOfDrawnPoints, 0.05)
 
@@ -508,8 +528,8 @@ if True:
     import numpy as np
     import random
     import matplotlib.pyplot as plt
-    (n,p)=(100,100)
-    x , y = np.meshgrid(np.linspace(-0.15, 0.15,n),np.linspace(-0.01,0.12,p))
+    (n,p)=(500,500)
+    x , y = np.meshgrid(np.linspace(-0.15, 0.15,n),np.linspace(-0.15,0.12,p))
     z = np.zeros((n,p))
     for i in range(n):
         for j in range(p):

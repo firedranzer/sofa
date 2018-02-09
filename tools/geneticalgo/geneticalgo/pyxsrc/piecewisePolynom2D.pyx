@@ -197,6 +197,47 @@ cdef class Polynom(primitives2D.Shape2D):
 
             raise ValueError, "I need a 'up' or 'down'"
 
+def SharpenListTangentPoints(listOfCouplesxyWeight, t):
+
+    n = len(listOfCouplesxyWeight)
+    if n <= 3:
+        raise ValueError, "flat polygon"
+
+    if not listOfCouplesxyWeight[0][0:2] == listOfCouplesxyWeight[-1][0:2]:
+        raise ValueError, "not closed polygon"
+    if not 0.0 <= t <0.5:
+        raise ValueError, "bad coefficient"
+
+    newList=[]
+
+    p_minus_1 = (listOfCouplesxyWeight[-2][0], listOfCouplesxyWeight[-2][1])
+    p0 = (listOfCouplesxyWeight[0][0], listOfCouplesxyWeight[0][1])
+    p1 = (listOfCouplesxyWeight[1][0], listOfCouplesxyWeight[1][1])
+
+    P_new1 = (p0[0] - t * (p0[0] - p_minus_1[0]), p0[1] - t * (p0[1] - p_minus_1[1]))
+    P_new2 = (p0[0] + t * (p1[0] - p0[0]), p0[1] + t * (p1[1] - p0[1]))
+
+    newList.append([P_new1[0], P_new1[1], listOfCouplesxyWeight[0][2], listOfCouplesxyWeight[0][3]])
+    newList.append([P_new2[0], P_new2[1], listOfCouplesxyWeight[0][2], listOfCouplesxyWeight[0][3]])
+    n = len(listOfCouplesxyWeight)
+
+    for i in range(n-2):
+        p_minus_1 = (listOfCouplesxyWeight[i][0], listOfCouplesxyWeight[i][1])
+        p0 = (listOfCouplesxyWeight[i+1][0], listOfCouplesxyWeight[i+1][1])
+        p1 = (listOfCouplesxyWeight[i+2][0], listOfCouplesxyWeight[i+2][1])
+
+        p_new1 = (p0[0] - t * (p0[0] - p_minus_1[0]), p0[1] - t * (p0[1] - p_minus_1[1]))
+        p_new2 = (p0[0] + t * (p1[0] - p0[0]), p0[1] + t * (p1[1] - p0[1]))
+
+        newList.append([p_new1[0], p_new1[1], listOfCouplesxyWeight[i+1][2], listOfCouplesxyWeight[i+1][3]])
+        newList.append([p_new2[0], p_new2[1], listOfCouplesxyWeight[i+1][2], listOfCouplesxyWeight[i+1][3]])
+
+    newList.append([P_new1[0], P_new1[1], listOfCouplesxyWeight[0][2], listOfCouplesxyWeight[0][3]])
+    print "ecorned liste=" + str(newList)
+    print "begin=" + str(newList[0])
+    print "end=" + str(newList[-1])
+    return newList
+
 
 def createListTangentPoints(listOfCouplesxyWeight):
 
@@ -209,18 +250,33 @@ def createListTangentPoints(listOfCouplesxyWeight):
     newList=[]
 
 
+    p_minus_1=primitives2D.Point2D(listOfCouplesxyWeight[-2][0],listOfCouplesxyWeight[-2][1])
+    p0=primitives2D.Point2D(listOfCouplesxyWeight[-1][0],listOfCouplesxyWeight[-1][1])
     p1=primitives2D.Point2D(listOfCouplesxyWeight[0][0],listOfCouplesxyWeight[0][1])
     p2=primitives2D.Point2D(listOfCouplesxyWeight[1][0],listOfCouplesxyWeight[1][1])
 
-    if primitives2D.equal(p1, p2):
-        raise ValueError, "two successive given points are the same"
+    if not primitives2D.equal(p0, p1):
 
-    t1 = Tangency2D(p2.x - p1.x, p2.y - p1.y)
+        raise ValueError, "not closed poygon!!"
 
-    wLeft1 = listOfCouplesxyWeight[0][2]
-    wRight1 = listOfCouplesxyWeight[0][3]
 
-    newList.append(WeightedTangencedPoint2D(p1,t1,wLeft1, wRight1))
+    if primitives2D.equal(p_minus_1, p1) or primitives2D.equal(p1, p2) or primitives2D.equal(p_minus_1, p2):
+
+        print "points" + str(p_minus_1.x)+ "  " + str(p1.x)+ "  " + str(p2.x)+ " \n\n "
+        print "points" + str(p_minus_1.y)+ "  " + str(p1.y)+ "  " + str(p2.y)+ " \n\n "
+        raise ValueError, "two successive points are the same"
+
+
+    tan1 = Tangency2D(p1.x - p_minus_1.x , p1.y - p_minus_1.y)
+    tan1.prod(1.0/norm(tan1))
+    tan2 = Tangency2D(p2.x - p1.x , p2.y - p1.y)
+    tan2.prod(1.0/norm(tan2))
+
+    T1 = tan1 + tan2
+    WLeft1 = listOfCouplesxyWeight[0][2]
+    WRight1 = listOfCouplesxyWeight[0][3]
+
+    newList.append(WeightedTangencedPoint2D(p1,T1,WLeft1, WRight1))
 
     if n>2:
         for i in range(0,n-2):
@@ -258,15 +314,15 @@ def createListTangentPoints(listOfCouplesxyWeight):
     p1=primitives2D.Point2D(listOfCouplesxyWeight[-2][0],listOfCouplesxyWeight[-2][1])
     p2=primitives2D.Point2D(listOfCouplesxyWeight[-1][0],listOfCouplesxyWeight[-1][1])
 
-    if primitives2D.equal(p1, p2):
-        raise ValueError, "two successive points are the same"
+#    if primitives2D.equal(p1, p2):
+#        raise ValueError, "two successive points are the same"
 
-    t2 = Tangency2D(p2.x - p1.x, p2.y - p1.y)
+#    t2 = Tangency2D(p2.x - p1.x, p2.y - p1.y)
 
-    wLeft2 = listOfCouplesxyWeight[-1][2]
-    wRight2 = listOfCouplesxyWeight[-1][3]
+#    wLeft2 = listOfCouplesxyWeight[-1][2]
+#    wRight2 = listOfCouplesxyWeight[-1][3]
 
-    newList.append(WeightedTangencedPoint2D(p2,t2,wLeft2, wRight2))
+    newList.append(WeightedTangencedPoint2D(p2,T1,WLeft1, WRight1))
 
     return newList
 
