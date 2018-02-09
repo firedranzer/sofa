@@ -360,7 +360,7 @@ class SOFIA(object):
 
                     list_temp .append([X, Y, x, x])
                     i+=1
-                list_temp.append([self.listOfControlPoints[i+1].x, self.listOfControlPoints[i+1].y, x, x])
+                list_temp.append([self.listOfControlPoints[i-1].x, self.listOfControlPoints[i-1].y, x, x])
                 newList.append(list_temp)
                 k=i
         print len(newList)
