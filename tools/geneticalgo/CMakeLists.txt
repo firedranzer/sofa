@@ -44,11 +44,11 @@ set(EXTRA_FILES
 
 #    scenes/SOFIA/main.py
 #    scenes/SOFIA/SOFIAutils.py
-    scenes/SOFIA/scene2.pyscn
+    scenes/SOFIA/scene.pyscn
     scenes/SOFIA/controller.py
     scenes/SOFIA/customfield.py
     scenes/SOFIA/SOFIA.py
-    scenes/SOFIA/shape2.py
+    scenes/SOFIA/shape.py
 #    scenes/SOFIA/shapeinv.py
 
 #    scenes/SOFIA_SECOND_VERSION/main.py
