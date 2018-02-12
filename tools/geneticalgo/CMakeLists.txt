@@ -51,6 +51,15 @@ set(EXTRA_FILES
     scenes/SOFIA/shape.py
     scenes/SOFIA/shapeinv.py
 
+    scenes/SOFIA_SECOND_VERSION/main.py
+    scenes/SOFIA_SECOND_VERSION/SOFIAutils.py
+    scenes/SOFIA_SECOND_VERSION/scene.pyscn
+    scenes/SOFIA_SECOND_VERSION/controller.py
+    scenes/SOFIA_SECOND_VERSION/customfield.py
+    scenes/SOFIA_SECOND_VERSION/SOFIA.py
+    scenes/SOFIA_SECOND_VERSION/shape.py
+    scenes/SOFIA_SECOND_VERSION/shapeinv.py
+
     utils/script.sh
     utils/script.py
     )

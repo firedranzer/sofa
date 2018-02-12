@@ -1,0 +1,60 @@
+import Sofa
+import os
+
+def createScene(rootNode):
+                rootNode.createObject('RequiredPlugin', pluginName='SoftRobots')
+                rootNode.createObject('VisualStyle', displayFlags='showVisualModels hideBehaviorModels showCollisionModels hideBoundingCollisionModels hideForceFields showInteractionForceFields hideWireframe')
+                rootNode.createObject('BackgroundSetting', color="1 1 1")
+                rootNode.createObject('FreeMotionAnimationLoop')
+                rootNode.createObject('GenericConstraintSolver', maxIterations='250', printLog='1', tolerance = '0.0000001')
+                rootNode.findData('gravity').value='0 -9.810 0'
+                
+
+                shape = rootNode.createChild("Shape")
+                #shape.createObject("EulerImplicitSolver", name="cg_odesolver",  printLog="0", rayleighMass="0.1", rayleighStiffness="0.1")
+                #shape.createObject("CGLinearSolver", template="GraphScattered", name="linear solver",  iterations="25",  tolerance="1e-09", threshold="1e-09")
+
+                shape.createObject("CustomField", name="shape", function="shape2.evalField")
+
+                #Mesh component
+                mesh=shape.createObject("MeshGenerationFromImplicitShape", meshingzone_center="0.0 0.0 0.025", meshingzone_radius="0.2", name="mesh", facet_size="0.007", cell_size="0.07", scalarfield="@shape", drawTetras="true")
+
+
+
+                #leg"
+                leg = rootNode.createChild('leg')
+                leg.createObject('EulerImplicit', name='odesolver', rayleighMass="0.1", rayleighStiffness="0.1")
+                leg.createObject('ShewchukPCGLinearSolver', iterations='15', name='linearsolver', tolerance='1e-5', preconditioners='preconditioner', use_precond='true', update_step='1')
+                leg.createObject('TetrahedronSetTopologyContainer', position='@../Shape/mesh.outputPoints', tetrahedra='@../Shape/mesh.outputTetras', name='container')
+                leg.createObject('TetrahedronSetTopologyModifier')
+                leg.createObject('TetrahedronSetTopologyAlgorithms', template='Vec3d')
+                leg.createObject('TetrahedronSetGeometryAlgorithms', template='Vec3d')
+
+
+                leg.createObject('MechanicalObject', name='tetras', src="@container", template='Vec3d', showIndices='false', showIndicesScale='4e-5', rx='0', dz='0')
+                leg.createObject('UniformMass', totalmass='.005')
+                leg.createObject('TetrahedronFEMForceField', template='Vec3d', name='FEM', method='large', poissonRatio='0.3',  youngModulus='130000000')
+                leg.createObject('BoxROI', name='boxROI', box='-0.0005 0.008  -0.005  0.005 0.010 0.0010', drawBoxes='true', position="@tetras.rest_position",tetrahedra="@container.tetrahedra")
+                leg.createObject('FixedConstraint', indices='@boxROI.indices')
+                leg.createObject('RestShapeSpringsForceField', points='@boxROI.indices', stiffness='1e12')
+                
+
+                leg.createObject('SparseLDLSolver', name='preconditioner')
+                leg.createObject('LinearSolverConstraintCorrection', solverName='preconditioner')
+
+    #                leg/legVisu
+                legVisu = leg.createChild('visu')
+                legVisu.createObject('TriangleSetTopologyContainer', name='container')
+                legVisu.createObject('TriangleSetTopologyModifier')
+                legVisu.createObject('TriangleSetTopologyAlgorithms', template='Vec3d')
+                legVisu.createObject('TriangleSetGeometryAlgorithms', template='Vec3d')
+                legVisu.createObject('Tetra2TriangleTopologicalMapping', name='Mapping', input="@../container", output="@container")
+
+                legVisu.createObject('OglModel', template='ExtVec3f', color='0.3 0.2 0.2 0.6')
+                legVisu.createObject('IdentityMapping')
+
+
+
+                return rootNode
+
+
