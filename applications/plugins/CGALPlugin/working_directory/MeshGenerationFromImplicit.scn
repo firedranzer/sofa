@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<Node name="Root"  dt="0.02" >
+    <RequiredPlugin pluginName="CGALPlugin"/>
+    <RequiredPlugin pluginName="SofaImplicitField"/>
+
+    <VisualStyle name="visualStyle1"  displayFlags="showVisual showBehaviorModels showForceFields" />
+    <DefaultPipeline name="CollisionPipeline"  verbose="0" />
+    <BruteForceDetection name="N2" />
+    <DefaultContactManager name="collision response"  response="default" />
+    <DiscreteIntersection name="discreteIntersection1" />   
+    <Node name="Shape" >
+        <EulerImplicitSolver name="cg_odesolver"  printLog="0" />
+        <CGLinearSolver template="GraphScattered" name="linear solver"  iterations="25"  tolerance="1e-09"  threshold="1e-09" />
+        		
+	<SphericalField name="sphere" />
+
+        <CustomField name="field1" function="customfield.evalField"/>
+
+	<!-- Mesh component -->
+
+
+<MeshGenerationFromImplicitShape name="mesh"
+                        facet_size="1.0"
+                        cell_size="1.0"
+                        scalarfield="@field1"
+                        drawTetras="true"
+                        />
+
+<!--
+        <PointCloudImplicitFieldVisualization field="@field1" box="-5 -5 -1 5 5 10" color="1.0 1.0 1.0"/>
+-->
+        <!--
+        <Mesh position="@mesh.outputPoints" tetrahedra="@mesh.outputTetras" />
+        <MechanicalObject name="tetras" template="Vec3d" position="@mesh.outputPoints" showIndices="false" showIndicesScale="4e-5" rx="0" dz="0" 															       showObject="true" showObjectScale="1" />
+        <FixedConstraint template="Vec3d" name="FixedConstraint"  indices="0" />
+       	<UniformMass template="Vec3d" totalmass="5" />
+	<TetrahedronFEMForceField template="Vec3d" name="FEM"  method="large"  poissonRatio="0.4"  youngModulus="1000"
+												      computeGlobalMatrix="0"  gatherPt=" "  gatherBsize=" " />
+        -->
+    </Node>
+</Node>
