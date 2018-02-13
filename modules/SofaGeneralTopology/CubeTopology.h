@@ -46,7 +46,7 @@ protected:
 public:
     void setSize(int nx, int ny, int nz);
 
-    void parse(core::objectmodel::BaseObjectDescription* arg);
+    void parse(core::objectmodel::BaseObjectDescription* arg) override;
 
     int getNx() const { return nx.getValue(); }
     int getNy() const { return ny.getValue(); }
@@ -56,12 +56,8 @@ public:
     void setNy(int n) { ny.setValue(n); setSize(); }
     void setNz(int n) { nz.setValue(n); setSize(); }
 
-    virtual void init();
-    virtual void reinit();
-
-    //int getNbQuads();
-    //Quad getQuad(int i);
-    //Quad getQuad(int x, int y, int z);
+    virtual void init() override;
+    virtual void reinit() override;
 
     enum Plane { PLANE_UNKNOWN=0,
             PLANE_X0,
@@ -72,7 +68,7 @@ public:
             PLANE_Z1
                };
 
-    int point(int x, int y, int z, Plane p = PLANE_UNKNOWN) const; // { return x+nx.getValue()*(y+ny.getValue()*z); }
+    int point(int x, int y, int z, Plane p = PLANE_UNKNOWN) const;
 
     void setP0(const Vector3& val) { p0 = val; }
     void setDx(const Vector3& val) { dx = val; inv_dx2 = 1/(dx*dx); }
@@ -91,10 +87,10 @@ public:
 
     Vector3 getPoint(int i) const;
     virtual Vector3 getPoint(int x, int y, int z) const;
-    bool hasPos()  const { return true; }
-    SReal getPX(int i)  const { return getPoint(i)[0]; }
-    SReal getPY(int i) const { return getPoint(i)[1]; }
-    SReal getPZ(int i) const { return getPoint(i)[2]; }
+    bool hasPos()  const override { return true; }
+    SReal getPX(int i)  const override { return getPoint(i)[0]; }
+    SReal getPY(int i) const override { return getPoint(i)[1]; }
+    SReal getPZ(int i) const override { return getPoint(i)[2]; }
 
     void setSplitNormals(bool b) {splitNormals.setValue(b);}
 
@@ -113,9 +109,9 @@ protected:
     SReal inv_dx2, inv_dy2, inv_dz2;
 
     virtual void setSize();
+    void updatePoints();
     void updateEdges();
     void updateQuads();
-    //void updateHexahedra();
 };
 
 } // namespace topology

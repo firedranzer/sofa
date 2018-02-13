@@ -30,17 +30,12 @@
 #include <iostream>
 #include <algorithm>
 
-
-
-
 #include <SofaMeshCollision/PointModel.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <SofaMeshCollision/PointLocalMinDistanceFilter.h>
 #include <SofaBaseCollision/CubeModel.h>
 #include <sofa/core/ObjectFactory.h>
 #include <vector>
-#include <sofa/helper/system/gl.h>
-#include <sofa/helper/gl/template.h>
 
 #include <sofa/core/topology/BaseMeshTopology.h>
 
@@ -503,7 +498,7 @@ void TPointModel<DataTypes>::computeBBox(const core::ExecParams* params, bool on
     if( !onlyVisible ) return;
 
     static const Real max_real = std::numeric_limits<Real>::max();
-    static const Real min_real = std::numeric_limits<Real>::min();
+    static const Real min_real = std::numeric_limits<Real>::lowest();
     Real maxBBox[3] = {min_real,min_real,min_real};
     Real minBBox[3] = {max_real,max_real,max_real};
 

@@ -45,7 +45,6 @@
 #include <sofa/helper/gl/glText.inl>
 #include <sofa/helper/gl/Axis.h>
 #include <sofa/helper/gl/RAII.h>
-#include <sofa/helper/io/ImageBMP.h>
 
 #include <sofa/defaulttype/RigidTypes.h>
 
@@ -1161,13 +1160,13 @@ void QtGLViewer::setView(const Vec3d& pos, const Quat &ori)
 void QtGLViewer::setSizeW( int size )
 {
     resizeGL( size, _H );
-    updateGL();
+    update();
 }
 
 void QtGLViewer::setSizeH( int size )
 {
     resizeGL( _W, size );
-    updateGL();
+    update();
 
 }
 
