@@ -39,9 +39,8 @@ namespace simulation
 {
 
 
-CheckAndUpdateVisitor::CheckAndUpdateVisitor(const core::ExecParams* params, sofa::core::objectmodel::Event* e)
+CheckAndUpdateVisitor::CheckAndUpdateVisitor(const core::ExecParams* params)
     : sofa::simulation::Visitor(params)
-    , m_event(e)
 {}
 
 
@@ -52,16 +51,13 @@ Visitor::Result CheckAndUpdateVisitor::processNodeTopDown(simulation::Node* node
 {
     for_each(this, node, node->object, &CheckAndUpdateVisitor::processObject);
 
-    if( m_event->isHandled() )
-        return Visitor::RESULT_PRUNE;
-    else
-        return Visitor::RESULT_CONTINUE;
+    return RESULT_CONTINUE;
 }
 
 void CheckAndUpdateVisitor::processObject(simulation::Node*, core::objectmodel::BaseObject* obj)
 {
-    //if( obj-
-    //    obj->handleEvent( m_event );
+    if( obj->isReInitRequested() )
+        obj->reinit() ;
 }
 
 

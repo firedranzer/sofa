@@ -26,6 +26,7 @@
 using sofa::helper::logging::MessageDispatcher ;
 using sofa::helper::logging::Message ;
 
+#include <sofa/core/DataTracker.h>
 #include <map>
 #include <typeinfo>
 #include <string.h>
@@ -45,16 +46,21 @@ namespace objectmodel
 using std::string;
 static const std::string unnamed_label=std::string("unnamed");
 
+class Base::PrivateMember
+{
+public:
+    DataTracker datatracker ;
+};
 
-
-Base::Base()
-    : ref_counter(0)
+Base::Base() :
+      ref_counter(0)
     , serr(_serr)
     , sout(_sout)
     , name(initData(&name,unnamed_label,"name","object name"))
     , f_printLog(initData(&f_printLog, false, "printLog", "if true, emits extra messages at runtime."))
     , f_tags(initData( &f_tags, "tags", "list of the subsets the objet belongs to"))
     , f_bbox(initData( &f_bbox, "bbox", "this object bounding box"))
+    , m_base(new Base::PrivateMember())
 {
     name.setOwnerClass("Base");
     name.setAutoLink(false);
@@ -75,6 +81,11 @@ Base::Base()
 
 Base::~Base()
 {
+    if(m_base)
+    {
+        delete m_base ;
+        m_base=nullptr;
+    }
 }
 
 void Base::addRef()
@@ -179,6 +190,19 @@ void Base::addAlias( BaseLink* link, const char* alias)
 {
     m_aliasLink.insert(std::make_pair(std::string(alias),link));
 }
+
+void Base::addDataToTracker(const BaseData& data)
+{
+    m_base->datatracker.trackData(data) ;
+}
+
+bool Base::isReInitRequested()
+{
+    return m_base->datatracker.isDirty() ;
+}
+
+void Base::reinit(){}
+
 
 /// Copy the source aspect to the destination aspect for each Data in the component.
 void Base::copyAspect(int destAspect, int srcAspect)

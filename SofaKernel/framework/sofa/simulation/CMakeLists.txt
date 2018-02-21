@@ -9,6 +9,7 @@ set(HEADER_FILES
     CactusStackStorage.h
     ClassSystem.h
     CleanupVisitor.h
+    CheckAndUpdateVisitor.h
     CollisionAnimationLoop.h
     CollisionBeginEvent.h
     CollisionEndEvent.h
@@ -71,6 +72,7 @@ set(SOURCE_FILES
     BehaviorUpdatePositionVisitor.cpp
     CactusStackStorage.cpp
     CleanupVisitor.cpp
+    CheckAndUpdateVisitor.cpp
     CollisionAnimationLoop.cpp
     CollisionBeginEvent.cpp
     CollisionEndEvent.cpp

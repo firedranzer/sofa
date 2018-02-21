@@ -41,7 +41,6 @@
 #include <string>
 #include <map>
 
-
 // forward declaration of castable classes
 // @author Matthieu Nesme, 2015
 // it is not super elegant, but it is way more efficient than dynamic_cast
@@ -131,7 +130,6 @@ namespace objectmodel
 class SOFA_CORE_API Base
 {
 public:
-
     typedef Base* Ptr;
 
     using SPtr = sptr<Base>;
@@ -303,6 +301,10 @@ public:
     /// Accessor to the map containing all the aliases of this object
     const MapLink& getLinkAliases() const { return m_aliasLink; }
 
+    virtual void addDataToTracker(const BaseData& d) ;
+    virtual bool isReInitRequested() ;
+    virtual void reinit() ;
+
     virtual bool findDataLinkDest(BaseData*& ptr, const std::string& path, const BaseLink* link);
     virtual void* findLinkDestClass(const BaseClass* destType, const std::string& path, const BaseLink* link);
     template<class T>
@@ -467,6 +469,12 @@ public:
     Data< sofa::core::objectmodel::TagSet > f_tags; ///< list of the subsets the objet belongs to
 
     Data< sofa::defaulttype::BoundingBox > f_bbox; ///< this object bounding box
+
+private:
+    /// Forward definition of a private class that will hold anything base wants to be private
+    class PrivateMember ;
+    PrivateMember* m_base ;
+
 
     /// @name casting
     ///   trivial cast to a few base components

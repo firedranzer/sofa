@@ -48,7 +48,7 @@ namespace simulation
 class SOFA_SIMULATION_CORE_API CheckAndUpdateVisitor : public sofa::simulation::Visitor
 {
 public:
-    CheckAndUpdateVisitor(const core::ExecParams* params, sofa::core::objectmodel::Event* e);
+    CheckAndUpdateVisitor(const core::ExecParams* params);
 
     ~CheckAndUpdateVisitor();
 
@@ -56,9 +56,6 @@ public:
     void processObject(simulation::Node*, core::objectmodel::BaseObject* obj);
 
     virtual const char* getClassName() const { return "CheckAndUpdateVisitor"; }
-    virtual std::string getInfos() const { return std::string(m_event->getClassName());  }
-protected:
-    sofa::core::objectmodel::Event* m_event;
 };
 
 

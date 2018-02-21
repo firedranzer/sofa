@@ -110,6 +110,9 @@ using sofa::helper::system::FileMonitor ;
 #include <SofaGraphComponent/SceneCheckerVisitor.h>
 using sofa::simulation::SceneCheckerVisitor ;
 
+#include <sofa/simulation/CheckAndUpdateVisitor.h>
+using sofa::simulation::CheckAndUpdateVisitor ;
+
 #include <SofaGraphComponent/SceneCheckAPIChanges.h>
 using sofa::simulation::scenecheckers::SceneCheckAPIChange ;
 
@@ -789,11 +792,15 @@ void RealGUI::emitIdle()
     // Update all the registered monitor.
     FileMonitor::updates(0) ;
 
-    IdleEvent hb;
     Node* groot = mViewer->getScene();
     if (groot)
     {
-        groot->propagateEvent(core::ExecParams::defaultInstance(), &hb);
+        IdleEvent hb;
+        groot->propagateEvent(ExecParams::defaultInstance(), &hb);
+
+        /// Trigger the check & update at each idle event.
+        CheckAndUpdateVisitor v(ExecParams::defaultInstance()) ;
+        v.execute(groot) ;
     }
 
     if(isEmbeddedViewer())
