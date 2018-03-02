@@ -19,9 +19,12 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include "MyProjectiveConstraintSet.inl"
+#include "PluginExample/MyProjectiveConstraintSet.inl"
 
+#include <sofa/core/Mapping.inl>
 #include <sofa/core/ObjectFactory.h>
+#include <sofa/defaulttype/Vec3Types.h>
+#include <sofa/defaulttype/VecTypes.h>
 
 
 namespace sofa
@@ -30,38 +33,35 @@ namespace sofa
 namespace component
 {
 
-namespace projectiveconstraintset
+namespace mapping
 {
 
 using namespace sofa::defaulttype;
 
 
-SOFA_DECL_CLASS(MyProjectiveConstraintSet)
+SOFA_DECL_CLASS(MyMappingPendulumInPlane)
 
-int MyProjectiveConstraintSetClass = core::RegisterObject("just an example of templated component")
+int MyMappingPendulumInPlaneClass = core::RegisterObject("Mapping from an angle to a point in 2D")
 #ifndef SOFA_FLOAT
-    .add< MyProjectiveConstraintSet<Vec3dTypes> >()
-    .add< MyProjectiveConstraintSet<Vec1dTypes> >()
-    .add< MyProjectiveConstraintSet<Rigid3dTypes> >()
+    .add< MyMappingPendulumInPlane<Vec1dTypes, Vec3dTypes> >()
+    .add< MyMappingPendulumInPlane<Vec1dTypes, Vec2dTypes> >()
 #endif
 #ifndef SOFA_DOUBLE
-    .add< MyProjectiveConstraintSet<Vec3fTypes> >()
-    .add< MyProjectiveConstraintSet<Rigid3fTypes> >()
+    .add< MyMappingPendulumInPlane<Vec1fTypes, Vec3fTypes> >()
 #endif
     ;
 
 #ifndef SOFA_FLOAT
-template class MyProjectiveConstraintSet<Rigid3dTypes>;
-template class MyProjectiveConstraintSet<Vec3dTypes>;
+template class MyMappingPendulumInPlane<Vec1dTypes, Vec3dTypes>;
+template class MyMappingPendulumInPlane<Vec1dTypes, Vec2dTypes>;
 #endif
 #ifndef SOFA_DOUBLE
-template class MyProjectiveConstraintSet<Rigid3fTypes>;
-template class MyProjectiveConstraintSet<Vec3fTypes>;
+template class MyMappingPendulumInPlane<Vec1fTypes, Vec3fTypes>;
 #endif
 
 
-} // namespace projectiveconstraintset
+}	//mapping
 
-} // namespace component
+}	//component
 
-} // namespace sofa
+}	//sofa

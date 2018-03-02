@@ -19,8 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include "MyBehaviorModel.h"
-
+#include "PluginExample/MyProjectiveConstraintSet.inl"
 #include <sofa/core/ObjectFactory.h>
 
 
@@ -30,40 +29,37 @@ namespace sofa
 namespace component
 {
 
-namespace behaviormodel
+namespace projectiveconstraintset
 {
 
-
-MyBehaviorModel::MyBehaviorModel():
-    customUnsignedData(initData(&customUnsignedData, (unsigned)1,"Custom Unsigned Data","Example of unsigned data with custom widget")),
-    regularUnsignedData(initData(&regularUnsignedData, (unsigned)1,"Unsigned Data","Example of unsigned data with standard widget"))
-{
-    customUnsignedData.setWidget("widget_myData");
-}
+using namespace sofa::defaulttype;
 
 
-MyBehaviorModel::~MyBehaviorModel()
-{
-}
+SOFA_DECL_CLASS(MyProjectiveConstraintSet)
 
-void MyBehaviorModel::init()
-{
-}
+int MyProjectiveConstraintSetClass = core::RegisterObject("just an example of templated component")
+#ifndef SOFA_FLOAT
+    .add< MyProjectiveConstraintSet<Vec3dTypes> >()
+    .add< MyProjectiveConstraintSet<Vec1dTypes> >()
+    .add< MyProjectiveConstraintSet<Rigid3dTypes> >()
+#endif
+#ifndef SOFA_DOUBLE
+    .add< MyProjectiveConstraintSet<Vec3fTypes> >()
+    .add< MyProjectiveConstraintSet<Rigid3fTypes> >()
+#endif
+    ;
 
-void MyBehaviorModel::reinit()
-{
-}
-
-void MyBehaviorModel::updatePosition(double /*dt*/)
-{
-}
-
-SOFA_DECL_CLASS(MyBehaviorModel)
-
-int MyBehaviorModelClass = core::RegisterObject("Dummy component with a custom widget.").add< MyBehaviorModel >();
+#ifndef SOFA_FLOAT
+template class MyProjectiveConstraintSet<Rigid3dTypes>;
+template class MyProjectiveConstraintSet<Vec3dTypes>;
+#endif
+#ifndef SOFA_DOUBLE
+template class MyProjectiveConstraintSet<Rigid3fTypes>;
+template class MyProjectiveConstraintSet<Vec3fTypes>;
+#endif
 
 
-} // namespace behaviormodel
+} // namespace projectiveconstraintset
 
 } // namespace component
 

@@ -19,12 +19,9 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include "MyMappingPendulumInPlane.inl"
+#include "PluginExample/MyProjectiveConstraintSet.inl"
 
-#include <sofa/core/Mapping.inl>
 #include <sofa/core/ObjectFactory.h>
-#include <sofa/defaulttype/Vec3Types.h>
-#include <sofa/defaulttype/VecTypes.h>
 
 
 namespace sofa
@@ -33,35 +30,41 @@ namespace sofa
 namespace component
 {
 
-namespace mapping
+namespace behaviormodel
 {
 
-using namespace sofa::defaulttype;
+
+MyBehaviorModel::MyBehaviorModel():
+    customUnsignedData(initData(&customUnsignedData, (unsigned)1,"Custom Unsigned Data","Example of unsigned data with custom widget")),
+    regularUnsignedData(initData(&regularUnsignedData, (unsigned)1,"Unsigned Data","Example of unsigned data with standard widget"))
+{
+    customUnsignedData.setWidget("widget_myData");
+}
 
 
-SOFA_DECL_CLASS(MyMappingPendulumInPlane)
+MyBehaviorModel::~MyBehaviorModel()
+{
+}
 
-int MyMappingPendulumInPlaneClass = core::RegisterObject("Mapping from an angle to a point in 2D")
-#ifndef SOFA_FLOAT
-    .add< MyMappingPendulumInPlane<Vec1dTypes, Vec3dTypes> >()
-    .add< MyMappingPendulumInPlane<Vec1dTypes, Vec2dTypes> >()
-#endif
-#ifndef SOFA_DOUBLE
-    .add< MyMappingPendulumInPlane<Vec1fTypes, Vec3fTypes> >()
-#endif
-    ;
+void MyBehaviorModel::init()
+{
+}
 
-#ifndef SOFA_FLOAT
-template class MyMappingPendulumInPlane<Vec1dTypes, Vec3dTypes>;
-template class MyMappingPendulumInPlane<Vec1dTypes, Vec2dTypes>;
-#endif
-#ifndef SOFA_DOUBLE
-template class MyMappingPendulumInPlane<Vec1fTypes, Vec3fTypes>;
-#endif
+void MyBehaviorModel::reinit()
+{
+}
+
+void MyBehaviorModel::updatePosition(double /*dt*/)
+{
+}
+
+SOFA_DECL_CLASS(MyBehaviorModel)
+
+int MyBehaviorModelClass = core::RegisterObject("Dummy component with a custom widget.").add< MyBehaviorModel >();
 
 
-}	//mapping
+} // namespace behaviormodel
 
-}	//component
+} // namespace component
 
-}	//sofa
+} // namespace sofa
