@@ -23,7 +23,7 @@ set(SOURCE_FILES
 )
 
 set(README_FILES PluginExample.txt)
-set(EXAMPLES_FILES examples/PluginExampleTest.scn)
+set(EXAMPLE_FILES examples/PluginExampleTest.scn)
 
 find_package(SofaGui REQUIRED)
 
@@ -32,6 +32,10 @@ if(Qt5Core_FOUND)
     qt5_wrap_cpp(MOCCED_HEADER_FILES ${HEADER_FILES_TO_MOC})
 else()
     message(ERROR "Qt5 not found.s")
+endif()
+
+if(SOFA_BUILD_TESTS)
+    add_subdirectory(tests)
 endif()
 
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES_TO_MOC} ${MOCCED_HEADER_FILES} ${HEADER_FILES} ${SOURCE_FILES} ${README_FILES} ${EXAMPLE_FILES})
