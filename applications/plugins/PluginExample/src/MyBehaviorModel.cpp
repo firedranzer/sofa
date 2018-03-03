@@ -19,8 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include "PluginExample/MyProjectiveConstraintSet.inl"
-
+#include <PluginExample/MyBehaviorModel.h>
 #include <sofa/core/ObjectFactory.h>
 
 

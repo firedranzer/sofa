@@ -19,8 +19,8 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include "PluginExample/MyProjectiveConstraintSet.inl"
-
+#include <PluginExample/MyDataWidgetUnsigned.h>
+#include <sofa/gui/qt/DataWidget.h>
 #include <sofa/helper/Factory.h>
 
 

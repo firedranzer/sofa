@@ -20,6 +20,7 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 #include "PluginExample/MyProjectiveConstraintSet.inl"
+#include <PluginExample/MyMappingPendulumInPlane.inl>
 
 #include <sofa/core/Mapping.inl>
 #include <sofa/core/ObjectFactory.h>
