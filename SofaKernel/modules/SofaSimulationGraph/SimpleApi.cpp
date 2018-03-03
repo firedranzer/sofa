@@ -73,7 +73,6 @@ Node::SPtr createRootNode(Simulation::SPtr s, const std::string& name,
     return root ;
 }
 
-
 BaseObject::SPtr createObject(Node::SPtr parent, const std::string& type, const std::map<std::string, std::string>& params)
 {
     /// temporarily, the name is set to the type name.

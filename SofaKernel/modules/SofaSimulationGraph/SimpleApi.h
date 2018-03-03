@@ -34,6 +34,7 @@
 #include <sofa/simulation/Node.h>
 #include <sofa/simulation/Simulation.h>
 #include <sofa/core/objectmodel/BaseObject.h>
+#include <sofa/core/objectmodel/SPtr.h>
 
 namespace sofa
 {
@@ -43,6 +44,7 @@ namespace simpleapi
 using sofa::core::objectmodel::BaseObject ;
 using sofa::simulation::Simulation ;
 using sofa::simulation::Node ;
+using sofa::core::objectmodel::SPtr_dynamic_cast ;
 
 void SOFA_SIMULATION_GRAPH_API importPlugin(const std::string& name) ;
 
@@ -53,6 +55,15 @@ Node::SPtr SOFA_SIMULATION_GRAPH_API createRootNode( Simulation::SPtr, const std
 
 BaseObject::SPtr SOFA_SIMULATION_GRAPH_API createObject( Node::SPtr parent, const std::string& type,
     const std::map<std::string, std::string>& params = std::map<std::string, std::string>{} );
+
+template<class T>
+typename T::SPtr SOFA_SIMULATION_GRAPH_API createObject( Node::SPtr parent,
+                                                         const std::map<std::string,
+                                                         std::string>& params = std::map<std::string, std::string>{} )
+{
+    BaseObject::SPtr tmp = createObject(parent, BaseObject::className<T>() , params) ;
+    return SPtr_dynamic_cast<T>(tmp) ;
+}
 
 Node::SPtr SOFA_SIMULATION_GRAPH_API createChild( Node::SPtr& node, const std::string& name,
     const std::map<std::string, std::string>& params = std::map<std::string, std::string>{} );
