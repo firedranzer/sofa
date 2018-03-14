@@ -1,0 +1,28 @@
+{
+  "commands" : [
+    ["branch", "Sofa.Helper.Types"],
+    ["spm", "package", "Sofa.Helper.Types", "init"],
+    ["mkdir", "Sofa/Helper/Types/src/sofa/helper/types/"],
+    ["move", "../../SofaKernel/framework/sofa/helper/OptionsGroup.h", "Sofa/Helper/Types/src/sofa/helper/types/OptionsGroup.h"],
+    ["move", "../../SofaKernel/framework/sofa/helper/OptionsGroup.cpp", "Sofa/Helper/Types/src/sofa/helper/types/OptionsGroup.cpp"],
+    ["commit"],
+    ["spm", "package", "Sofa.Helper.Types", "property", "source_files", "add-to", "Sofa/Helper/Types/src/sofa/helper/types/OptionsGroup.cpp"],
+    ["spm", "package", "Sofa.Helper.Types", "property", "header_files", "add-to", "Sofa/Helper/Types/src/sofa/helper/types/OptionsGroup.h"],
+    ["commit"],
+    ["move", "../../SofaKernel/framework/sofa/helper/types/RGBAColor.h", "Sofa/Helper/Types/src/sofa/helper/types/RGBAColor.h"],
+    ["move", "../../SofaKernel/framework/sofa/helper/types/RGBAColor.cpp", "Sofa/Helper/Types/src/sofa/helper/types/RGBAColor.cpp"],
+    ["spm", "package", "Sofa.Helper.Types", "property", "source_files", "add-to", "Sofa/Helper/Types/src/sofa/helper/types/RGBAColor.h"],
+    ["spm", "package", "Sofa.Helper.Types", "property", "header_files", "add-to", "Sofa/Helper/Types/src/sofa/helper/types/RGBAColor.cpp"],
+    ["commit", "Done with file..."],
+    ["rename", "Sofa/Helper/Types", "#include <sofa/helper/OptionsGroup.h>", "#include <sofa/helper/types/OptionsGroup.h>"],
+    ["fixheader", "Sofa/Helper/Types/src/sofa/helper/types/OptionsGroup.h", "SOFA_HELPER_TYPES_OPTIONSGROUP_H"],
+    ["rename", "Sofa/Helper/Types", "#include <sofa/helper/RGBAColor.h>", "#include <sofa/helper/types/RGBAColor.h>"],
+    ["fixheader", "Sofa/Helper/Types/src/sofa/helper/types/OptionsGroup.h", "SOFA_HELPER_TYPES_RGBACOLOR_H"],
+    ["commit", "Things are OK"],
+    ["spm", "package", "Sofa.Helper.Types", "generate-cmakelists"],
+    ["commit"]
+   ]
+}
+   
+
+

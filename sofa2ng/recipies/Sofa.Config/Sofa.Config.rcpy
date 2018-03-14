@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import json, os
+import mc
+from Cheetah.Template import Template
+from mc import moveCodeAndPatch, makeATestContextFrom, reorder
+
+#### Let's define some context related to the package to avoid repeating 
+#### these values all the time
+context = {
+    "package_name" : "Sofa.Config",
+    "package_dir" : rootdstdir+"/Sofa.Config",
+    "rootdstdir" : rootdstdir,
+    "rootsrcdir" : rootsrcdir,
+    "dstdir" : rootdstdir+"/Sofa.Config/src",
+    "templatedestdir" : rootdstdir+"/Sofa.Config/templates",
+    "templatelocaldir" : "templates",
+    "srclocaldir" : "src/",
+    "recipedir" : os.path.dirname(__file__),
+    "cmake_template" : os.path.dirname(__file__)+"/CMakeLists.txt.tpl"
+}
+
+
+def moveTask(filename):
+    """In this project we need to move special files from 'templates' so we make a special function to avoid repeating the same
+       actions.
+    """
+    return [["move",  "${rootsrcdir}/SofaKernel/SofaFramework/"+filename+".in", "${templatedestdir}/config/"+filename+".in", context],
+            ["spm", "add-to-property", "build_options_templates", "config/"+filename, context]] 
+     
+#### Here is our receipe to make the package     
+tasks = []
+tasks += [["spm", "init", context]]
+
+tasks += [["spm", "add-property", "build_options_templates", [], context]]
+tasks += [["mkdir", "${package_dir}/templates/config", context]]
+tasks += [["mkdir", "${package_dir}/src/sofa/config", context]]
+
+tasks += [["move",  "${rootsrcdir}/SofaKernel/framework/sofa/helper/system/config.h", "${dstdir}/sofa/config/basemacros.h", context]]
+tasks += [["spm", "add-to-property", "header_files", "src/sofa/config/basemacros.h", context]]
+tasks += [["move",  "${recipedir}/basemacro.cpp", "${dstdir}/sofa/config/basemacros.cpp", context]]
+tasks += [["spm", "add-to-property", "source_files", "src/sofa/config/basemacros.cpp", context]]
+
+tasks += [["move",  "${rootsrcdir}/SofaKernel/SofaFramework/config.h.in", "${templatedestdir}/config.h.in", context]]
+
+ff = ["sharedlibrary_defines.h",
+      "build_option_componentset.h",
+      "build_option_dump_visitor.h",
+      "build_option_experimental_features.h",
+      "build_option_opengl.h",
+      "build_option_threading.h"]
+for filename in ff:
+    tasks += moveTask(filename)
+
+tasks += [["replacetext", "${dstdir}", "include <sofa/helper/system/config.h>", "include <sofa/config/basemacros.h>", context]]
+tasks += [["replacetext", "${dstdir}", "include <sofa/config.h>", "include <sofa/config/config.h>", context]]
+tasks += [["replacetext", "${dstdir}", "include <sofa/helper/helper.h>", "include <sofa/config.h>", context]]
+tasks += [["replacetext", "${dstdir}/sofa/config/basemacros.h", " SOFA_HELPER_SYSTEM_CONFIG_H", " SOFA_CONFIG_BASEMACRO_H", context]]
+
+tasks += [["spm", "generate-cmakelists", context]]
+
+
+#### Create the tests part, they are create out of tree
+testcontext = makeATestContextFrom(context)
+
+tasks += [["mkdir", "${package_dir}", testcontext]]
+tasks += [["mkdir", "${package_dir}/src", testcontext]]
+tasks += [["move",  "${recipedir}/tests/main.cpp", "${dstdir}/main.cpp", testcontext]]
+tasks += [["spm", "init", testcontext]]
+tasks += [["spm", "add-to-property", "dependencies", "Sofa.Config", testcontext]]
+tasks += [["spm", "add-to-property", "source_files", "src/main.cpp", testcontext]]
+
+tasks += [["spm", "generate-cmakelists", testcontext]]
+
+command = {"commands" : reorder(tasks)}
+
+
+

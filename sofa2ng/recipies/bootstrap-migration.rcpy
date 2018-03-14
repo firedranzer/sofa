@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import json, os
+from Cheetah.Template import Template
+import mc
+from mc import moveCodeAndPatch, reorder, nameMap
+
+context = {
+    "dstdir" : rootdstdir,
+    "recipedir" : os.path.dirname(__file__)
+}
+
+tasks = []
+
+tasks += [["mkdir", "${dstdir}/extlibs", context]]
+tasks += [["mkdir", "${dstdir}/kernel", context]]
+tasks += [["mkdir", "${dstdir}/framework", context]]
+tasks += [["mkdir", "${dstdir}/plugins", context]]
+tasks += [["mkdir", "${dstdir}/applications", context]]
+
+command = {"commands" : tasks}
+   
+
+

@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import json, os
+from Cheetah.Template import Template
+import mc
+from mc import moveCodeAndPatch, reorder, nameMap
+
+context = {
+    "package_name" : "Mc.Test",
+    "package_type" : "executable", 
+    "package_dir" : rootdstdir+"/Mc.Test.Tests",
+    "dstdir" : rootdstdir+"/Mc.Test.Tests/src/tests",
+    "recipedir" : os.path.dirname(__file__)
+}
+
+tasks = []
+
+tasks += [["spm", "init", context]]
+#tasks += [["spm", "add-to-property", "dependencies", ["Sofa.Config", "Sofa.Messaging"], context]]
+tasks += [["mkdir", "${package_dir}/src/mc/test", context]]
+tasks += moveCodeAndPatch(["mytest1.cpp", "mytest1.h"], nameMap, **context)  
+tasks += moveCodeAndPatch(["mytest2.cpp", "mytest2.h"], nameMap, **context)  
+
+tasks += [["spm", "generate-cmakelists", context]]
+command = {"commands" : tasks}
+ 
+

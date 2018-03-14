@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import json, os
+import mc
+from Cheetah.Template import Template
+from mc import moveCodeAndPatch, makeATestContextFrom, reorder
+
+#### Let's define some context related to the package to avoid repeating 
+#### these values all the time
+package_name = "Sofa.Component.Utils"
+context = {
+    "package_name" : package_name,
+    "package_dir" : rootdstdir+"/"+package_name,
+    "rootdstdir" : rootdstdir,
+    "rootsrcdir" : rootsrcdir,
+    "SofaComponentBase" : rootsrcdir+"/SofaKernel/modules/SofaComponentBase",
+    "dstdir" : rootdstdir+"/"+package_name+"/src",
+    "srclocaldir" : "src/",
+    "recipedir" : os.path.dirname(__file__),
+}
+
+def nameMap(file, context):
+    return (context["SofaComponentBase"]+"/"+file, context["dstdir"]+"/"+file)
+
+     
+#### Here is our receipe to make the package     
+tasks = []
+tasks += [["spm", "init", context]]
+tasks += [["spm", "add-to-property", "dependencies", "Sofa.Core", context]]
+tasks += [["mkdir", "${package_dir}/src/sofa/component/", context]]
+tasks += moveCodeAndPatch( ["InfoComponent.cpp", "InfoComponent.h",
+                            "MakeAliasComponent.cpp", "MakeAliasComponent.h",
+                            "MakeDataAliasComponent.cpp", "MakeDataAliasComponent.h",
+                            "messageHandlerComponent.cpp", "messageHandlerComponent.h"], nameMap, **context) 
+
+### dirty patch to correct file name that does not follow conventions. 
+tasks += [["move", "${dstdir}/messageHandlerComponent.cpp", "${dstdir}/MessageHandlerComponent.cpp", context]]
+tasks += [["move", "${dstdir}/messageHandlerComponent.h", "${dstdir}/MessageHandlerComponent.h", context]]
+tasks += [["replacetext", "${package_dir}", "messageHandlerComponent", "MessageHandlerComponent", context]]
+
+tasks += [["post", "spm", "generate-cmakelists", context]]
+
+command = {"commands" : reorder(tasks)}
+
+
+
