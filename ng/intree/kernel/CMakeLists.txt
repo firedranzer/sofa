@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.5)
+set(CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}/cmake")
+add_subdirectory(Sofa.Config)
+add_subdirectory(Sofa.Config/tests)

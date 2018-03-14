@@ -1,0 +1,1 @@
+{"package_cname": "SOFA_CONFIG_TESTS", "package_name": "Sofa.Config_tests", "package_type": "library", "header_files": [], "dependencies": ["Sofa.Config"], "source_files": ["src/main.cpp"], "extra_files": []}
