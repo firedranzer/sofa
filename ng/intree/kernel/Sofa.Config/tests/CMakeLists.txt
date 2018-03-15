@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(Sofa.Config_tests)
 
-find_package(Sofa.Config REQUIRED)
+find_package(Sofa.Config)
 
 set(HEADER_FILES
 )
