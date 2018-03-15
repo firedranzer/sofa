@@ -110,4 +110,4 @@ if __name__ == "__main__":
     
     l=runpy.run_path(sys.argv[1], context)
     sr.replayRefactoring(l["command"])
-
+    print("")

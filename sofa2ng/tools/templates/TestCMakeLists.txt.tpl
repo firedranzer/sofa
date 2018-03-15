@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.1)
 project(autopack::package_name)
 
 #for depend in autopack::dependencies
-find_package(autopack::depend REQUIRED)
+find_package(autopack::depend)
 #end for
 
 set(HEADER_FILES
